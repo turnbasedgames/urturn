@@ -18,6 +18,7 @@ rl.on('line', (line) => {
     rl.prompt();
   }
 }).on('close', () => {
+  ws.close();
   logger.info('bye');
   process.exit(0);
 });

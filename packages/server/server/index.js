@@ -10,5 +10,9 @@ wss.on('connection', (ws) => {
     logger.info(`message received from player:\n${msg}`);
   });
 
+  ws.on('close', (code, reason) => {
+    logger.info(`player disconnected, code: ${code} reason: ${reason}`);
+  });
+
   clients.push(ws);
 });
