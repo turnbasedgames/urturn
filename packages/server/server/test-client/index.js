@@ -24,7 +24,7 @@ ws.on('message', (data) => {
       logger.info(`player ${parsed.plr.id} disconnected`);
       break;
     case 'game.end':
-      logger.info(`game ended, ${parsed.winner.id} won!`);
+      logger.info(`game ended, ${parsed.winner} won!`);
       break;
     case 'game.start':
       logger.info('game start');

@@ -72,7 +72,11 @@ class Game {
   }
 
   endGame() {
-    const winner = this.getWinner();
+    this.state = GAME_STATE.ENDED;
+    let winner = this.getWinner();
+    if (winner) {
+      winner = this.players[winner === SPOT_STATE.X ? 0 : 1];
+    }
     this.players.forEach((plr) => {
       plr.ws.send(JSON.stringify({
         type: 'game.end',
@@ -85,10 +89,6 @@ class Game {
     this.players.push(plr);
   }
 
-  removePlayer(plr) {
-
-  }
-
   isAbleToStart() {
     return this.state === GAME_STATE.NOT_STARTED
       && this.players
@@ -96,6 +96,18 @@ class Game {
   }
 
   isEndGame() {
+    if (this.getWinner()) {
+      return true;
+    }
+
+    for (let i = 0; i < this.board.length; i += 1) {
+      for (let j = 0; j < this.board[i].length; j += 1) {
+        if (this.board[i][j] === SPOT_STATE.EMPTY) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   getPlayerPosition(plr) {
@@ -103,7 +115,29 @@ class Game {
   }
 
   getWinner() {
-
+    for (let i = 0; i < 3; i += 1) {
+      if (this.board[i][0] !== SPOT_STATE.EMPTY
+        && this.board[i][0] === this.board[i][1]
+        && this.board[i][1] === this.board[i][2]) {
+        return this.board[i][0];
+      }
+      if (this.board[0][i] !== SPOT_STATE.EMPTY
+        && this.board[0][i] === this.board[1][i]
+        && this.board[1][i] === this.board[2][i]) {
+        return this.board[0][i];
+      }
+    }
+    if (this.board[0][0] !== SPOT_STATE.EMPTY
+      && this.board[0][0] === this.board[1][1]
+      && this.board[1][1] === this.board[2][2]) {
+      return this.board[0][0];
+    }
+    if (this.board[2][0] !== SPOT_STATE.EMPTY
+      && this.board[2][0] === this.board[1][1]
+      && this.board[1][1] === this.board[0][2]) {
+      return this.board[2][0];
+    }
+    return null;
   }
 }
 
