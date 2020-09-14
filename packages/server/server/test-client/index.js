@@ -15,7 +15,8 @@ ws.on('message', (data) => {
   const parsed = JSON.parse(data);
   switch (parsed.type) {
     case 'plr.move':
-      logger.info(`next made move ${parsed.move}`);
+      logger.info('plr moved.');
+      logger.info(JSON.stringify(parsed.board));
       break;
     case 'plr.join':
       logger.info(`player ${parsed.plr.id} joined`);

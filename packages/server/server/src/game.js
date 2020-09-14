@@ -40,6 +40,7 @@ class Game {
       p.ws.send(JSON.stringify({
         type: 'plr.move',
         move,
+        board: this.board,
       }));
     });
 
