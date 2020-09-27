@@ -1,11 +1,13 @@
 module.exports = {
-  joinGame: (plr, msg) => {
+  joinGame: (plr, msg, logger) => {
+    logger.info(plr, msg);
     // TODO: general validation on input
     // TODO: validate client can join the game
     // TODO: subscribe to redis pub/sub
     // TODO: emit room message that player has joined room
   },
-  msgRoom: (plr, msg) => {
+  msgRoom: (plr, msg, logger) => {
+    logger.info(plr, msg);
     /**
      * TODO: Dev code evaluated here
      * - validate move
