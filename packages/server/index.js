@@ -1,4 +1,6 @@
 const WebSocket = require('ws');
+require('app-module-path').addPath(__dirname);
+
 const Player = require('./src/player');
 const Game = require('./src/game');
 const logger = require('./src/logger');

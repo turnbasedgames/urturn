@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "app-module-path": "^2.2.0",
     "uuid": "^8.3.0",
     "winston": "^3.3.3",
     "ws": "^7.3.1"
