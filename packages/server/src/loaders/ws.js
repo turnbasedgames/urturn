@@ -3,8 +3,8 @@ const WebSocket = require('ws');
 const handlers = require('src/handlers');
 const Player = require('src/player.js');
 
-function setup(port, logger) {
-  const wss = new WebSocket.Server({ port });
+function setup(server, logger) {
+  const wss = new WebSocket.Server({ server });
 
   wss.on('connection', (ws) => {
     const plr = new Player(ws);

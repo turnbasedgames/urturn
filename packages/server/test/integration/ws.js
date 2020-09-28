@@ -15,6 +15,7 @@ function createConnection(wss) {
 }
 
 function getNextMsg(ws) {
+  // TODO: use .once instead of remove event listener
   return new Promise((res) => {
     const eventName = 'message';
     const onMessage = (msg) => {
