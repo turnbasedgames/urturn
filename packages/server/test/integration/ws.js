@@ -15,14 +15,12 @@ function createConnection(wss) {
 }
 
 function getNextMsg(ws) {
-  // TODO: use .once instead of remove event listener
   return new Promise((res) => {
     const eventName = 'message';
     const onMessage = (msg) => {
-      ws.removeEventListener(eventName, onMessage);
       res(JSON.parse(msg));
     };
-    ws.on(eventName, onMessage);
+    ws.once(eventName, onMessage);
   });
 }
 
