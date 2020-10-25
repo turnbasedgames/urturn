@@ -9,8 +9,8 @@ const options = {
   useUnifiedTopology: true,
 };
 
-async function setupDB(logger) {
-  await mongoose.connect(process.env.MONGODB_CONNECTION_URL, options);
+async function setupDB(logger, mongoUri) {
+  await mongoose.connect(mongoUri, options);
   logger.info(`Connected to DB (user: ${mongoose.connection.user}, host: ${mongoose.connection.host}:${mongoose.connection.port}/${mongoose.connection.name})`);
 }
 

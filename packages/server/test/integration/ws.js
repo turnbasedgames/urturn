@@ -2,7 +2,7 @@ const { serial: test } = require('ava');
 const WebSocket = require('ws');
 
 require('../util/absolutePath');
-const setupTestApp = require('test/util/app');
+const TestApp = require('test/util/app');
 
 function createConnection(wss) {
   const ws = new WebSocket(`ws://localhost:${wss.address().port}`);
@@ -25,18 +25,19 @@ function getNextMsg(ws) {
 }
 
 test.beforeEach(async (t) => {
-  const app = setupTestApp();
+  const app = new TestApp();
+  await app.setup();
 
   // eslint-disable-next-line no-param-reassign
   t.context = { app };
 });
 
 test.afterEach(async (t) => {
-  t.context.app.cleanup();
+  await t.context.app.cleanup();
 });
 
 test('Should receive error message if client sends non json message', async (t) => {
-  const { wss } = t.context.app;
+  const { wss } = t.context.app.loaders;
   const ws = await createConnection(wss);
   const invalidMsg = 'InvalidMsg';
   const errorMsg = 'SyntaxError: Unexpected token I in JSON at position 0';
