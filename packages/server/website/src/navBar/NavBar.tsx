@@ -13,8 +13,8 @@ type Props = {
 
 const NavBar = ({ classes }: Props) => (
   <div>
-    <AppBar className={classes.appBar} position="static">
-      <Toolbar className={classes.bar}>
+    <AppBar className={classes.appBar} position="fixed">
+      <Toolbar variant="dense" className={classes.bar}>
         <div className={classes.subBarLeft}>
           <Typography variant="h6">Platform</Typography>
         </div>

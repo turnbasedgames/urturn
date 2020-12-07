@@ -1,17 +1,33 @@
 import React from 'react';
-import { ThemeProvider } from '@material-ui/core/styles';
+import {
+  ThemeProvider, withStyles,
+} from '@material-ui/core/styles';
 
 import theme from './theme';
 import NavBar from './navBar';
+import GameView from './gameView';
 
-function App() {
+type Props = {
+  classes: any
+};
+
+function App({ classes }: Props) {
   return (
     <ThemeProvider theme={theme}>
-      <div>
+      <div className={classes.root}>
         <NavBar />
+        <GameView />
       </div>
     </ThemeProvider>
   );
 }
 
-export default App;
+const styles = {
+  root: {
+    display: 'flex',
+    flexDirection: 'column' as 'column',
+    height: '100vh',
+  },
+};
+
+export default withStyles(styles)(App);
