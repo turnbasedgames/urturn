@@ -1,17 +1,16 @@
 import React from 'react';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
+import { ThemeProvider } from '@material-ui/core/styles';
+
+import theme from './theme';
+import NavBar from './navBar';
 
 function App() {
   return (
-    <div>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography>Hello</Typography>
-        </Toolbar>
-      </AppBar>
-    </div>
+    <ThemeProvider theme={theme}>
+      <div>
+        <NavBar />
+      </div>
+    </ThemeProvider>
   );
 }
 
