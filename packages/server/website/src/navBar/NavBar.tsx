@@ -6,6 +6,9 @@ import {
   fade, withStyles, createStyles, Theme,
 } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
+import {
+  Link,
+} from 'react-router-dom';
 
 type Props = {
   classes: any
@@ -16,7 +19,9 @@ const NavBar = ({ classes }: Props) => (
     <AppBar className={classes.appBar} position="fixed">
       <Toolbar variant="dense" className={classes.bar}>
         <div className={classes.subBarLeft}>
-          <Typography variant="h6">Platform</Typography>
+          <Link to="/about">
+            <Typography variant="h6">Platform</Typography>
+          </Link>
         </div>
         <div className={classes.search}>
           <div className={classes.searchIcon}>
