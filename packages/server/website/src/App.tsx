@@ -24,6 +24,7 @@ function App({ classes }: Props) {
       <div className={classes.root}>
         <Router>
           <NavBar />
+          <Toolbar />
           <Switch>
             <Route exact path="/">
               <Redirect to="/games" />
@@ -33,7 +34,6 @@ function App({ classes }: Props) {
             </Route>
             <Route path="/about">
               <div>
-                <Toolbar />
                 Hello this is about the Platform
               </div>
             </Route>

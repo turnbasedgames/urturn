@@ -1,8 +1,16 @@
 import React from 'react';
 import {
-  GridList, GridListTile, GridListTileBar, IconButton, Theme, withStyles, createStyles, Toolbar,
+  GridList, GridListTile, GridListTileBar, IconButton, Theme, withStyles, createStyles,
 } from '@material-ui/core';
 import { Info as InfoIcon } from '@material-ui/icons';
+import {
+  Switch,
+  Route,
+  useRouteMatch,
+  useHistory,
+} from 'react-router-dom';
+
+import GamePlayer from './gamePlayer';
 
 type Game = {
   id: string,
@@ -22,32 +30,41 @@ const GameView = ({ classes }: Props) => {
     title: 'title',
     author: 'author',
   } as Game);
+  const match = useRouteMatch();
+  const history = useHistory();
 
   return (
-    <div className={classes.root}>
-      <Toolbar />
-      <GridList cols={0} spacing={20} cellHeight={250} className={classes.gridList}>
-        {gamesList.map((game) => (
-          <GridListTile key={game.id} className={classes.tile}>
-            <img src={game.img} alt={game.title} />
-            <GridListTileBar
-              title={game.title}
-              subtitle={(
-                <span>
-                  by:
-                  {game.author}
-                </span>
-              )}
-              actionIcon={(
-                <IconButton aria-label={`info about ${game.title}`} className={classes.icon}>
-                  <InfoIcon />
-                </IconButton>
-              )}
-            />
-          </GridListTile>
-        ))}
-      </GridList>
-    </div>
+    <Switch>
+      <Route exact path={`${match.path}`}>
+        <div className={classes.root}>
+          <GridList cols={0} spacing={20} cellHeight={250} className={classes.gridList}>
+            {gamesList.map((game) => (
+              <GridListTile onClick={() => history.push(`/games/${game.id}`)} key={game.id} className={classes.tile}>
+                <img src={game.img} alt={game.title} />
+                <GridListTileBar
+                  title={game.title}
+                  subtitle={(
+                    <span>
+                      by:
+                      {game.author}
+                    </span>
+                  )}
+                  actionIcon={(
+                    <IconButton aria-label={`info about ${game.title}`} className={classes.icon}>
+                      <InfoIcon />
+                    </IconButton>
+                  )}
+                />
+              </GridListTile>
+            ))}
+          </GridList>
+        </div>
+      </Route>
+      <Route path={`${match.path}/:gameId`}>
+        <GamePlayer />
+      </Route>
+    </Switch>
+
   );
 };
 
