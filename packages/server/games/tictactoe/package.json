@@ -1,0 +1,37 @@
+{
+  "name": "tictactoe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon -r dotenv/config index.js",
+    "pretest": "eslint --ignore-path .gitignore .",
+    "test": "ava --verbose",
+    "test:coverage": "nyc npm run test",
+    "test:check-coverage": "npm run test:coverage && nyc check-coverage --lines 90 --branches 90 --statements 90 --functions 90"
+  },
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=10.0.0",
+    "npm": ">=6.0.0"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^5.11.18",
+    "morgan": "^1.10.0",
+    "socket.io": "^3.1.2",
+    "winston": "^3.3.3"
+  },
+  "devDependencies": {
+    "ava": "^3.15.0",
+    "dotenv": "^8.2.0",
+    "eslint": "^7.20.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "mongodb-memory-server": "^6.9.3",
+    "nodemon": "^2.0.7",
+    "nyc": "^15.1.0"
+  }
+}
