@@ -9,6 +9,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import {
   Link,
 } from 'react-router-dom';
+import axios from 'axios';
 
 type Props = {
   classes: any
@@ -37,11 +38,17 @@ const NavBar = ({ classes }: Props) => (
           />
         </div>
         <div className={classes.subBarRight}>
-          <Button variant="contained" disableElevation className={classes.button}>
-            Login
-          </Button>
-          <Button variant="contained" color="primary" disableElevation className={classes.button}>
-            Signup
+          <Button
+            variant="contained"
+            color="primary"
+            disableElevation
+            className={classes.button}
+            onClick={async (ev) => {
+              ev.preventDefault();
+              window.open('http://localhost:8080/user/auth/google', '_self');
+            }}
+          >
+            login with google
           </Button>
         </div>
       </Toolbar>
