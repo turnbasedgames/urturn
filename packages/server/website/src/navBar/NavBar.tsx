@@ -1,4 +1,6 @@
 import React from 'react';
+import firebase from 'firebase/app';
+import 'firebase/auth';
 import {
   AppBar, Toolbar, Typography, InputBase, Button,
 } from '@material-ui/core';
@@ -9,7 +11,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import {
   Link,
 } from 'react-router-dom';
-import axios from 'axios';
+import { getUser, UserContext } from '../user';
 
 type Props = {
   classes: any
@@ -37,20 +39,41 @@ const NavBar = ({ classes }: Props) => (
             inputProps={{ 'aria-label': 'search' }}
           />
         </div>
-        <div className={classes.subBarRight}>
-          <Button
-            variant="contained"
-            color="primary"
-            disableElevation
-            className={classes.button}
-            onClick={async (ev) => {
-              ev.preventDefault();
-              window.open('http://localhost:8080/user/auth/google', '_self');
-            }}
-          >
-            login with google
-          </Button>
-        </div>
+        <UserContext.Consumer>
+          {({ user, setUser }) => {
+            const firebaseUser = firebase.auth().currentUser;
+            const showLogin = firebaseUser === null || firebaseUser.isAnonymous;
+            return (
+              <div className={classes.subBarRight}>
+                {showLogin && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  disableElevation
+                  className={classes.button}
+                  onClick={(ev) => {
+                    ev.preventDefault();
+                    const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
+                    firebase.auth().signInWithPopup(googleAuthProvider);
+                  }}
+                >
+                  sign in with google
+                </Button>
+                )}
+                {!showLogin && (
+                <Button
+                  onClick={() => {
+                    firebase.auth().signOut();
+                    setUser(null);
+                  }}
+                >
+                  sign out
+                </Button>
+                )}
+              </div>
+            );
+          }}
+        </UserContext.Consumer>
       </Toolbar>
     </AppBar>
   </div>

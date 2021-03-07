@@ -12,6 +12,7 @@ const consoleOptions = {
   ),
 };
 
+// TODO: add logger support for metadata
 const logger = createLogger({
   level: process.env.LOG_LEVEL,
   defaultMeta: { service: 'backend' },
