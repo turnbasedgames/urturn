@@ -9,7 +9,7 @@ const UserSchema = new Schema({
     type: String,
     required: true,
     max: 128,
-    unique: true, // not enforced?
+    unique: true,
     index: true,
   },
   signInProvider: {
@@ -20,5 +20,12 @@ const UserSchema = new Schema({
 
 UserSchema.plugin(uniqueValidator);
 UserSchema.methods.getFirebaseUser = () => admin.auth().getUser(this.firebaseId);
+UserSchema.method('toJSON', function toJSON() {
+  return {
+    id: this.id,
+    firebaseId: this.firebaseId,
+    signInProvider: this.signInProvider,
+  };
+});
 
 module.exports = mongoose.model('User', UserSchema);

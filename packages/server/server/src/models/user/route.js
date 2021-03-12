@@ -1,13 +1,10 @@
 const express = require('express');
-const axios = require('axios');
 const { StatusCodes } = require('http-status-codes');
 const asyncHandler = require('express-async-handler');
 
 const logger = require('../../logger');
-const auth = require('./auth');
+const auth = require('../../middleware/auth');
 const User = require('./user');
-
-// const User = require('./user');
 
 const PATH = '/user';
 const router = express.Router();
@@ -40,11 +37,6 @@ router.post('/', asyncHandler(async (req, res) => {
     res.sendStatus(StatusCodes.CONFLICT);
   }
 }));
-
-router.delete('/', (req, res) => {
-  logger.info('attempting to delete account for:', req.decodedToken);
-  res.sendStatus(StatusCodes.OK);
-});
 
 module.exports = {
   router,

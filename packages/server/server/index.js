@@ -1,31 +1,34 @@
 const express = require('express');
 const expressSession = require('express-session');
-const { StatusCodes } = require('http-status-codes');
 const cors = require('cors');
+const http = require('http');
 
+const { errors } = require('celebrate');
 const httpLogger = require('./src/middleware/httpLogger');
 const logger = require('./src/logger');
 const setupDB = require('./src/setupDB');
+const setupSocketio = require('./src/setupSocketio');
 const userRouter = require('./src/models/user/route');
+const gameRouter = require('./src/models/game/route');
 const errorHandler = require('./src/middleware/errorHandler');
 
 const PORT = process.env.PORT || 8080;
-const setupDBPromise = setupDB();
 const app = express();
+const httpServer = http.createServer(app);
+setupDB();
+setupSocketio(httpServer);
 
 app.use(cors());
+app.use(express.json());
 app.use(httpLogger);
 app.use(expressSession({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
 
 app.use(userRouter.PATH, userRouter.router);
+app.use(gameRouter.PATH, gameRouter.router);
 
-app.get('/readiness', async (req, res) => {
-  await setupDBPromise;
-  res.sendStatus(StatusCodes.OK);
-});
-
+app.use(errors());
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   logger.info(`Listening on Port ${PORT}`);
 });

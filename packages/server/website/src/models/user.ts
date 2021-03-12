@@ -11,15 +11,13 @@ export interface User {
 }
 
 export const getUser = async (firebaseUser: firebase.User, upsert: boolean): Promise<User> => {
-  const token = await firebaseUser.getIdToken();
-  const authHeaders = { authorization: token };
   let user;
   try {
-    const getResult = await axios.get('/user', { headers: authHeaders });
+    const getResult = await axios.get('/user');
     user = getResult.data.user;
   } catch (err) {
     if (err.response.status === StatusCodes.NOT_FOUND && upsert) {
-      const postResult = await axios.post('/user', {}, { headers: authHeaders });
+      const postResult = await axios.post('/user', {});
       user = postResult.data.user;
     } else {
       throw err;

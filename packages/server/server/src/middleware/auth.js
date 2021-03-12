@@ -2,8 +2,8 @@ const admin = require('firebase-admin');
 const asyncHandler = require('express-async-handler');
 const { StatusCodes } = require('http-status-codes');
 
-const logger = require('../../logger');
-const User = require('./user');
+const logger = require('../logger');
+const User = require('../models/user/user');
 
 admin.initializeApp({
   credential: admin.credential.applicationDefault(),

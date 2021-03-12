@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Theme, withStyles, createStyles,
+  Theme, withStyles, createStyles, Typography,
 } from '@material-ui/core';
 import {
   useParams,
 } from 'react-router-dom';
+import { Game, getGame } from '../../models/game';
 
 type Props = {
   classes: any
@@ -16,11 +17,28 @@ type GamesURLParams = {
 
 const GamePlayer = ({ classes }: Props) => {
   const { gameId } = useParams<GamesURLParams>();
+  const [game, setGame] = useState<null | Game>(null);
+  useEffect(() => {
+    async function setupGame() {
+      const gameRaw = await getGame(gameId);
+      setGame(gameRaw);
+    }
+    setupGame();
+  }, []);
+
+  if (game) {
+    return (
+      <div className={classes.root}>
+        <Typography variant="h3">
+          {game.name}
+        </Typography>
+        <Typography variant="body1">{game.description}</Typography>
+      </div>
+    );
+  }
   return (
-    <div>
-      hello this is game
-      {' '}
-      {gameId}
+    <div className={classes.root}>
+      <h1>Loading...</h1>
     </div>
   );
 };
@@ -28,21 +46,10 @@ const GamePlayer = ({ classes }: Props) => {
 const styles = (theme: Theme) => createStyles({
   root: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexDirection: 'column',
     justifyContent: 'space-around',
     backgroundColor: theme.palette.background.paper,
-    height: '100%',
-    margin: '20px',
-  },
-  icon: {
-    color: 'rgba(255, 255, 255, 0.54)',
-  },
-  gridList: {
-    justifyContent: 'center',
-    transform: 'translateZ(0)',
-  },
-  tile: {
-    width: '250px',
+    margin: '0 auto 0 auto',
   },
 });
 
