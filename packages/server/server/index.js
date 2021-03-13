@@ -26,5 +26,5 @@ app.use(errors());
 app.use(errorHandler);
 
 httpServer.listen(PORT, () => {
-  logger.info(`Listening on Port ${PORT}`);
+  logger.info(`listening on Port ${PORT}`);
 });
