@@ -23,8 +23,6 @@ const GameList = ({ classes }: Props) => {
   useEffect(() => {
     async function getGames() {
       const res = await axios.get('/game?skip=0&limit=10');
-      console.log('made request for games');
-      console.log(JSON.stringify(res.data.games, null, 2));
       setGames(res.data.games);
     }
     getGames();
