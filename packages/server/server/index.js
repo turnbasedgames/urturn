@@ -1,5 +1,4 @@
 const express = require('express');
-const expressSession = require('express-session');
 const cors = require('cors');
 const http = require('http');
 
@@ -19,7 +18,6 @@ setupDB();
 app.use(cors());
 app.use(express.json());
 app.use(httpLogger);
-app.use(expressSession({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
 
 app.use(userRouter.PATH, userRouter.router);
 app.use(gameRouter.PATH, gameRouter.router);
