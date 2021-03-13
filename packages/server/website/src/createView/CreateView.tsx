@@ -31,14 +31,12 @@ const CreateView = ({ classes }: Props) => {
         <TextField required id="standard-required" label="Name" defaultValue={name} onChange={(e) => { setName(e.target.value); }} />
         <TextField label="Description" defaultValue={desc} onChange={(e) => { setDesc(e.target.value); }} />
       </div>
-
       <Button
         type="submit"
         variant="contained"
         color="primary"
       >
         Create Game
-
       </Button>
     </form>
   );
