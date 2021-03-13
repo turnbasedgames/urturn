@@ -7,7 +7,6 @@ const { errors } = require('celebrate');
 const httpLogger = require('./src/middleware/httpLogger');
 const logger = require('./src/logger');
 const setupDB = require('./src/setupDB');
-const setupSocketio = require('./src/setupSocketio');
 const userRouter = require('./src/models/user/route');
 const gameRouter = require('./src/models/game/route');
 const errorHandler = require('./src/middleware/errorHandler');
@@ -16,7 +15,6 @@ const PORT = process.env.PORT || 8080;
 const app = express();
 const httpServer = http.createServer(app);
 setupDB();
-setupSocketio(httpServer);
 
 app.use(cors());
 app.use(express.json());
