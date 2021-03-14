@@ -22,7 +22,7 @@ const GameList = ({ classes }: Props) => {
   const [games, setGames] = useState<Game[]>([]);
   useEffect(() => {
     async function getGames() {
-      const res = await axios.get('/game?skip=0&limit=10');
+      const res = await axios.get('/api/game?skip=0&limit=10');
       setGames(res.data.games);
     }
     getGames();
