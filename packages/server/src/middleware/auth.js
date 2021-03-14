@@ -6,6 +6,7 @@ const logger = require('../logger');
 const User = require('../models/user/user');
 
 console.log(`start${process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64}end`);
+console.log(Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64, 'base64').toString('ascii'));
 
 admin.initializeApp({
   credential: process.env.GOOGLE_APPLICATION_CREDENTIALS
