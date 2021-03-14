@@ -5,6 +5,8 @@ const { StatusCodes } = require('http-status-codes');
 const logger = require('../logger');
 const User = require('../models/user/user');
 
+console.log(`start${process.env.GOOGLE_APPLICATION_CREDENTIALS}end`);
+
 admin.initializeApp({
   credential: process.env.GOOGLE_APPLICATION_CREDENTIALS
     ? admin.credential.applicationDefault()
