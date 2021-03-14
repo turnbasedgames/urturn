@@ -16,11 +16,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - name: lint-frontend
-        run: |
-          cd website
-          npm ci
-          npm run lint
       - name: lint-backend
         run: |
           cd server
