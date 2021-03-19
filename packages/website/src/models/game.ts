@@ -10,6 +10,8 @@ export interface Game{
 export interface GameReqBody{
   name: string,
   description: string,
+  githubURL: string,
+  commitSHA: string
 }
 
 export const createGame = async (game: GameReqBody): Promise<Game> => {
