@@ -22,6 +22,16 @@ const GameSchema = new Schema({
     required: true,
     ref: 'User',
   },
+  githubURL: {
+    type: String,
+    match: new RegExp('^https://(www.)?github.com/.*.git$'),
+    required: true,
+  },
+  commitSHA: {
+    type: String,
+    minLength: 1,
+    required: true,
+  },
 }, { timestamps: true });
 
 GameSchema.index({ name: 'text' });
