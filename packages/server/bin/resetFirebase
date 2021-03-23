@@ -1,15 +1,9 @@
 #!/usr/bin/env node
+const { deleteAllUsers } = require('../test/util/firebase');
 
-const admin = require('firebase-admin');
-
-admin.initializeApp({
-  credential: admin.credential.applicationDefault(),
-});
-
-async function clearUsers() {
-  const { users } = await admin.auth().listUsers();
-  await Promise.all(users.map((user) => admin.auth().deleteUser(user.uid)));
+async function main() {
+  await deleteAllUsers();
   process.exit();
 }
 
-clearUsers();
+main();

@@ -13,8 +13,9 @@ const router = express.Router();
 router.get('/',
   celebrate({
     [Segments.QUERY]: Joi.object().keys({
-      limit: Joi.number().integer().max(100).min(0),
-      skip: Joi.number().integer().min(0),
+      limit: Joi.number().integer().max(100).min(0)
+        .default(25),
+      skip: Joi.number().integer().min(0).default(0),
     }),
   }),
   asyncHandler(async (req, res) => {
@@ -31,7 +32,7 @@ router.get('/:id',
     }),
   }), asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const game = await Game.findById(id);
+    const game = await Game.findById(id).populate('creator');
     res.status(StatusCodes.OK).json({ game });
   }));
 
@@ -40,7 +41,8 @@ router.post('/', auth, asyncHandler(async (req, res) => {
   gameRaw.creator = req.user.id;
   const game = new Game(gameRaw);
   await game.save();
-  res.status(StatusCodes.OK).json({ game });
+  await game.populate('creator').execPopulate();
+  res.status(StatusCodes.CREATED).json({ game });
 }));
 
 module.exports = {
