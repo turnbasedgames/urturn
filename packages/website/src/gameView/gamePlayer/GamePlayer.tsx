@@ -6,6 +6,7 @@ import {
   useParams,
 } from 'react-router-dom';
 import { Game, getGame } from '../../models/game';
+import IFrame from './IFrame/IFrame';
 
 type Props = {
   classes: any
@@ -18,6 +19,7 @@ type GamesURLParams = {
 const GamePlayer = ({ classes }: Props) => {
   const { gameId } = useParams<GamesURLParams>();
   const [game, setGame] = useState<null | Game>(null);
+
   useEffect(() => {
     async function setupGame() {
       const gameRaw = await getGame(gameId);
@@ -33,6 +35,7 @@ const GamePlayer = ({ classes }: Props) => {
           {game.name}
         </Typography>
         <Typography variant="body1">{game.description}</Typography>
+        <IFrame src={game.githubURL} commitSHA={game.commitSHA} />
       </div>
     );
   }
