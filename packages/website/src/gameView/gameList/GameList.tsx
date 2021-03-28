@@ -4,15 +4,8 @@ import {
 } from '@material-ui/core';
 import { Info as InfoIcon } from '@material-ui/icons';
 import { useHistory } from 'react-router-dom';
-import axios from 'axios';
-import { User } from '../../models/user';
 
-type Game = {
-  id: string,
-  name: string,
-  description: string,
-  creator: User
-};
+import { Game, getGames } from '../../models/game';
 
 type Props = {
   classes: any
@@ -21,11 +14,11 @@ type Props = {
 const GameList = ({ classes }: Props) => {
   const [games, setGames] = useState<Game[]>([]);
   useEffect(() => {
-    async function getGames() {
-      const res = await axios.get('/api/game?skip=0&limit=10');
-      setGames(res.data.games);
+    async function setupGames() {
+      const gamesRaw = await getGames();
+      setGames(gamesRaw);
     }
-    getGames();
+    setupGames();
   }, []);
   const history = useHistory();
 

@@ -27,10 +27,6 @@ export const getUser = async (firebaseUser: firebase.User, upsert: boolean): Pro
   return user as User;
 };
 
-export const createUser = async () => {
-
-};
-
 interface UserContextProps {
   user: User | null,
   setUser: React.Dispatch<React.SetStateAction<User | null>>
