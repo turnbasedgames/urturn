@@ -11,6 +11,9 @@ async function createGameAndAssert(t, api, userCred, user) {
   const { data: { game }, status } = await api.post('/game', gameRaw, { headers: { authorization: authToken } });
   t.is(status, StatusCodes.CREATED);
   t.deepEqual(game.creator, user);
+  Object.keys(gameRaw).forEach((key) => {
+    t.is(gameRaw[key], game[key]);
+  });
   return game;
 }
 

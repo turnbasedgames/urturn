@@ -42,6 +42,8 @@ GameSchema.method('toJSON', function toJSON() {
     name: this.name,
     description: this.description,
     creator: this.creator,
+    githubURL: this.githubURL,
+    commitSHA: this.commitSHA,
   };
 });
 
