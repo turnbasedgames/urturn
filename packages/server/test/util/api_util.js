@@ -25,4 +25,13 @@ async function createUserAndAssert(t, api, userCred) {
   return user;
 }
 
-module.exports = { createGameAndAssert, createUserAndAssert };
+async function createRoomAndAssert(t, api, userCred, game, leader) {
+  const authToken = await userCred.user.getIdToken();
+  const { data: { room }, status } = await api.post('/room', { game: game.id }, { headers: { authorization: authToken } });
+  t.is(status, StatusCodes.CREATED);
+  t.deepEqual(room.leader, leader);
+  t.deepEqual(room.game, game);
+  return room;
+}
+
+module.exports = { createGameAndAssert, createRoomAndAssert, createUserAndAssert };

@@ -10,7 +10,7 @@
     "posttest": "npm run reset:firebase",
     "test": "ava --timeout=1m --verbose",
     "test:coverage": "nyc npm run test",
-    "test:check-coverage": "npm run test:coverage && nyc check-coverage --lines 70 --branches 70 --statements 70 --functions 70",
+    "test:check-coverage": "npm run test:coverage && nyc check-coverage --lines 50 --branches 50 --statements 50 --functions 50",
     "reset": "npm run reset:db && npm run reset:firebase",
     "reset:db": "node -r dotenv/config ./bin/resetDB",
     "reset:firebase": "node -r dotenv/config ./bin/resetFirebase"

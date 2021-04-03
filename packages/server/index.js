@@ -9,6 +9,7 @@ const logger = require('./src/logger');
 const setupDB = require('./src/setupDB');
 const userRouter = require('./src/models/user/route');
 const gameRouter = require('./src/models/game/route');
+const roomRouter = require('./src/models/room/route');
 const errorHandler = require('./src/middleware/errorHandler');
 
 const PORT = process.env.PORT || 8080;
@@ -22,6 +23,7 @@ app.use(httpLogger);
 
 app.use(userRouter.PATH, userRouter.router);
 app.use(gameRouter.PATH, gameRouter.router);
+app.use(roomRouter.PATH, roomRouter.router);
 
 app.get('/readiness', async (req, res) => {
   await db;
