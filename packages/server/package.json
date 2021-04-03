@@ -42,7 +42,6 @@
     "eslint-plugin-import": "^2.22.1",
     "firebase": "^8.3.1",
     "get-port": "^5.1.1",
-    "mongodb-memory-server": "^6.9.3",
     "nodemon": "^2.0.7",
     "nyc": "^15.1.0"
   },
