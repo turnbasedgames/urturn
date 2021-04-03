@@ -1,3 +1,3 @@
-import GamePlayer from './GamePlayer';
+import GameRouter from './GameRouter';
 
-export default GamePlayer;
+export default GameRouter;
