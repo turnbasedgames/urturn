@@ -35,7 +35,7 @@ const GamePlayer = ({ classes }: Props) => {
           {game.name}
         </Typography>
         <Typography variant="body1">{game.description}</Typography>
-        <IFrame src={game.githubURL} commitSHA={game.commitSHA} />
+        <IFrame githubURL={game.githubURL} commitSHA={game.commitSHA} />
       </div>
     );
   }
