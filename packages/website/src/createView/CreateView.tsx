@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { createGame, GameReqBody } from '../models/game';
 
-const githubURLRegExp = new RegExp('^https://(www.)?github.com/.*.git$');
+const githubURLRegExp = new RegExp('^https://(www.)?github.com/.*/.*$');
 
 type Props = {
   classes: any
