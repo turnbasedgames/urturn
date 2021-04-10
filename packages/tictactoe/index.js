@@ -133,5 +133,7 @@ function onPlayerMove(lib, plr, move, boardgame){
 }
 
 module.exports = {
-  makeMove
+  onPlayerJoin,
+  onPlayerMove,
+  onRoomStart,
 }
