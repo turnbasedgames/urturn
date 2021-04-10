@@ -24,7 +24,7 @@ const GameSchema = new Schema({
   },
   githubURL: {
     type: String,
-    match: new RegExp('^https://(www.)?github.com/.*.git$'),
+    match: new RegExp('^https://(www.)?github.com/.*/.*$'),
     required: true,
   },
   commitSHA: {
