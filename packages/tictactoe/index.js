@@ -14,6 +14,8 @@ function onRoomStart(lib, options){
 }
 
 function onPlayerJoin(lib, plr, boardgame){
+  console.log(boardgame)
+  console.log(boardgame.state)
   // VALIDATIONS
   // check if game has started
   if(boardgame.state !== "NOT_STARTED"){
