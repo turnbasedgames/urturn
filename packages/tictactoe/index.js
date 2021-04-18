@@ -22,7 +22,7 @@ function onPlayerJoin(lib, plr, boardgame){
 
   // TRANSFORMATIONS
   // determine if we should start the game
-  boardgame.plrs.push(lib, plr)
+  boardgame.plrs.push(plr)
   if (boardgame.plrs.length === 2){
     // start game
     boardgame.state = "IN_GAME"
