@@ -129,9 +129,8 @@ function onPlayerMove(lib, plr, move, boardgame){
   if(isEnd){
     boardgame.state = "END"
     boardgame.winner = winner
-  }else{
-    return boardgame
   }
+  return boardgame
 }
 
 module.exports = {
