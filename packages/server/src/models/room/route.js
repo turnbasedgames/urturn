@@ -3,7 +3,6 @@ const { StatusCodes } = require('http-status-codes');
 const asyncHandler = require('express-async-handler');
 const { celebrate, Segments } = require('celebrate');
 const mongoose = require('mongoose');
-const assert = require('assert').strict;
 
 const Joi = require('../../middleware/joi');
 const auth = require('../../middleware/auth');
@@ -35,9 +34,15 @@ router.post('/', auth, asyncHandler(async (req, res) => {
   const roomRaw = req.body;
   const room = new Room({ ...roomRaw, leader: userId });
   const roomUser = new RoomUser({ room: room.id, user: userId });
+  await room.validate();
+  await roomUser.validate();
   await mongoose.connection.transaction(async (session) => {
     const gameCount = await Game.countDocuments({ _id: room.game });
-    assert(gameCount === 1, 'room.game must exist!');
+    if (gameCount !== 1) {
+      const err = new Error('room.game must exist!');
+      err.status = StatusCodes.BAD_REQUEST;
+      throw err;
+    }
     await room.save({ session });
     await roomUser.save({ session });
   });
