@@ -2,31 +2,22 @@ import React, { useEffect, useState } from 'react';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import {
-  ThemeProvider, withStyles,
-} from '@material-ui/core/styles';
-import {
   BrowserRouter as Router,
   Switch,
   Route,
   Redirect,
 } from 'react-router-dom';
-import { Toolbar } from '@material-ui/core';
-
 import axios from 'axios';
-import theme from './theme';
 import NavBar from './navBar';
 import GameView from './gameView';
 import CreateView from './createView';
 import { getUser, User, UserContext } from './models/user';
 import firebaseConfig from './firebaseConfig';
+import classes from './App.module.css';
 
 firebase.initializeApp(firebaseConfig);
 
-type Props = {
-  classes: any
-};
-
-function App({ classes }: Props) {
+function App() {
   const [user, setUser] = useState<User | null>(null);
   useEffect(() => {
     const authInterceptor = axios.interceptors.request.use(async (config) => {
@@ -54,36 +45,25 @@ function App({ classes }: Props) {
   }, []);
 
   return (
-    <ThemeProvider theme={theme}>
+    <div className={classes.container}>
       <UserContext.Provider value={{ user, setUser }}>
-        <div className={classes.root}>
-          <Router>
-            <NavBar setUser={setUser} />
-            <Toolbar />
-            <Switch>
-              <Route exact path="/">
-                <Redirect to="/games" />
-              </Route>
-              <Route path="/games">
-                <GameView />
-              </Route>
-              <Route path="/create">
-                <CreateView />
-              </Route>
-            </Switch>
-          </Router>
-        </div>
+        <Router>
+          <NavBar setUser={setUser} />
+          <Switch>
+            <Route exact path="/">
+              <Redirect to="/games" />
+            </Route>
+            <Route path="/games">
+              <GameView />
+            </Route>
+            <Route path="/create">
+              <CreateView />
+            </Route>
+          </Switch>
+        </Router>
       </UserContext.Provider>
-    </ThemeProvider>
+    </div>
   );
 }
 
-const styles = {
-  root: {
-    display: 'flex',
-    flexDirection: 'column' as 'column',
-    height: '100vh',
-  },
-};
-
-export default withStyles(styles)(App);
+export default App;

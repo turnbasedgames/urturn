@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import {
-  GridList, GridListTile, GridListTileBar, IconButton, Theme, withStyles, createStyles,
-} from '@material-ui/core';
-import { Info as InfoIcon } from '@material-ui/icons';
+  Container,
+  Card,
+  Col,
+  Row,
+} from 'react-bootstrap';
 import { useHistory } from 'react-router-dom';
-
 import { Game, getGames } from '../../models/game';
+import classes from './GameList.module.css';
 
-type Props = {
-  classes: any
-};
-
-const GameList = ({ classes }: Props) => {
+const GameList = () => {
   const [games, setGames] = useState<Game[]>([]);
   useEffect(() => {
     async function setupGames() {
@@ -24,50 +22,51 @@ const GameList = ({ classes }: Props) => {
 
   return (
     <div className={classes.root}>
-      <GridList cols={0} spacing={20} cellHeight={250} className={classes.gridList}>
-        {games.map((game) => (
-          <GridListTile onClick={() => history.push(`/games/${game.id}`)} key={game.id} className={classes.tile}>
-            <img src="https://miro.medium.com/max/700/1*Quh2GlRDeXuzdD4IoJu93g.jpeg" alt={game.name} />
-            <GridListTileBar
-              title={game.name}
-              subtitle={(
-                <span>
-                  by:
-                  {game.creator.id}
-                </span>
-                  )}
-              actionIcon={(
-                <IconButton aria-label={`info about ${game.name}`} className={classes.icon}>
-                  <InfoIcon />
-                </IconButton>
-                  )}
-            />
-          </GridListTile>
-        ))}
-      </GridList>
+      <Container style={{ marginTop: '100px' }}>
+        <Row style={{ paddingBottom: '70px' }}>
+          <Col xs={6} md={4} lg={3}>
+            <Card
+              onClick={(ev: React.ChangeEvent<any>) => {
+                ev.preventDefault();
+                history.push('/create');
+              }}
+              className={classes.card}
+              style={{ backgroundColor: 'transparent', border: 'none' }}
+            >
+              <div className={classes.createButton}>
+                +
+              </div>
+            </Card>
+          </Col>
+          {games.map((game) => (
+            <Col xs={6} md={4} lg={3}>
+              <Card
+                onClick={() => history.push(`/games/${game.id}`)}
+                key={game.id}
+                className={classes.card}
+                style={{ backgroundColor: 'transparent', border: 'none' }}
+              >
+                <div className={classes.imgContainer}>
+                  <Card.Img
+                    style={{ borderRadius: '10%' }}
+                    className={classes.cardImg}
+                    src="https://images.unsplash.com/photo-1570989614585-581ee5f7e165?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80"
+                    alt={game.name}
+                  />
+                </div>
+                <Card.Body>
+                  <Card.Title>{game.name}</Card.Title>
+                  <Card.Text>
+                    {`by: ${game.creator.id}`}
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </Container>
     </div>
   );
 };
 
-const styles = (theme: Theme) => createStyles({
-  root: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    backgroundColor: theme.palette.background.paper,
-    height: '100%',
-    margin: '20px',
-  },
-  icon: {
-    color: 'rgba(255, 255, 255, 0.54)',
-  },
-  gridList: {
-    justifyContent: 'center',
-    transform: 'translateZ(0)',
-  },
-  tile: {
-    width: '250px',
-  },
-});
-
-export default withStyles(styles)(GameList);
+export default GameList;
