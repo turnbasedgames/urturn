@@ -9,6 +9,7 @@ const auth = require('../../middleware/auth');
 const Game = require('../game/game');
 const Room = require('./room');
 const RoomUser = require('./roomUser');
+const { getUserCode } = require('./runner');
 
 const PATH = '/room';
 const router = express.Router();
@@ -34,19 +35,27 @@ router.post('/', auth, asyncHandler(async (req, res) => {
   const roomRaw = req.body;
   const room = new Room({ ...roomRaw, leader: userId });
   const roomUser = new RoomUser({ room: room.id, user: userId });
-  await room.validate();
   await roomUser.validate();
+  await room.validate();
+
+  const gameCount = await Game.countDocuments({ _id: room.game });
+  if (gameCount !== 1) {
+    const err = new Error('room.game must exist!');
+    err.status = StatusCodes.BAD_REQUEST;
+    throw err;
+  }
+
+  await room.populate('leader').populate('game').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
+  const userCode = await getUserCode(room.game);
+  let boardGameState = userCode.startRoom();
+  boardGameState = userCode.joinPlayer(userId, boardGameState);
+  room.state = boardGameState;
+
   await mongoose.connection.transaction(async (session) => {
-    const gameCount = await Game.countDocuments({ _id: room.game });
-    if (gameCount !== 1) {
-      const err = new Error('room.game must exist!');
-      err.status = StatusCodes.BAD_REQUEST;
-      throw err;
-    }
     await room.save({ session });
     await roomUser.save({ session });
   });
-  await room.populate('leader').populate('game').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
+
   res.status(StatusCodes.CREATED).json({ room });
 }));
 
@@ -57,11 +66,50 @@ router.post('/:id/join', celebrate({
 }), auth, asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const { id } = req.params;
-  const room = await Room.findById(id);
+
+  let room = await Room.findById(id).populate('game');
+  const userCode = await getUserCode(room.game);
   const roomUser = new RoomUser({ room: room.id, user: userId });
-  await roomUser.save();
-  await room.populate('leader').populate('game').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
+  await roomUser.validate();
+
+  await mongoose.connection.transaction(async (session) => {
+    await roomUser.save({ session });
+    room = await Room.findById(id).session(session);
+    room.state = userCode.joinPlayer(userId, room.state);
+    room.markModified('state');
+    await room.save({ session });
+  });
+
+  await room.populate('leader').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
   res.status(StatusCodes.CREATED).json({ room });
+}));
+
+router.post('/:id/move', celebrate({
+  [Segments.PARAMS]: Joi.object().keys({
+    id: Joi.objectId(),
+  }),
+}), auth, asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const { id } = req.params;
+  const move = req.body;
+
+  if (!(await RoomUser.isUserInRoom(id, userId))) {
+    const err = new Error('user is not in room!');
+    err.status = StatusCodes.BAD_REQUEST;
+    throw err;
+  }
+
+  let room = await Room.findById(id).populate('game');
+  const userCode = await getUserCode(room.game);
+
+  await mongoose.connection.transaction(async (session) => {
+    room = await Room.findById(id).session(session);
+    room.state = userCode.playerMove(userId, move, room.state);
+    room.markModified('state');
+    await room.save({ session });
+  });
+
+  res.sendStatus(StatusCodes.OK);
 }));
 
 router.get('/:id',

@@ -27,5 +27,9 @@ RoomUserSchema.method('toJSON', function toJSON() {
   };
 });
 RoomUserSchema.plugin(uniqueValidator);
+RoomUserSchema.static('isUserInRoom', async function isUserInRoom(roomId, userId) {
+  const count = await this.countDocuments({ room: roomId, user: userId });
+  return count === 1;
+});
 
 module.exports = mongoose.model('RoomUser', RoomUserSchema);
