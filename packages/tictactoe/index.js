@@ -28,12 +28,6 @@ function onPlayerJoin(lib, plr, boardgame){
   if (boardgame.plrs.length === 2){
     // start game
     boardgame.state = "IN_GAME"
-
-    // randomize player order
-    if(Math.random() < 0.5){
-      const plrs = [boardgame.plrs[1], boardgame.plrs[0]]
-      boardgame.plrs = plrs
-    }
   }
 
   return boardgame
