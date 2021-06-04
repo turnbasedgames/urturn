@@ -27,7 +27,7 @@ const IFrame = ({ githubURL, commitSHA }: Props) => {
         .replace('raw.githubusercontent', 'rawcdn.githack')
         .replace('master', commitSHA)}
       id="gameFrame"
-      style={{ height: '500px' }}
+      style={{ height: 'calc(100vh - 50px)', width: '100%', border: 'none' }}
     />
   );
 };

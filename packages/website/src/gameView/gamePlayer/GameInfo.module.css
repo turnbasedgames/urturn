@@ -1,0 +1,30 @@
+.gameContainer {
+    margin: 100px auto 0px auto;
+    color: white;
+}
+
+.createButton {
+    margin: 10px auto 0px auto;
+    justify-content: flex-end; 
+    padding-right: 120px;
+}
+
+.gameImg {
+    margin: 80px 40px 0px auto;
+    padding: 1px;
+    width: 300px;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.roomsList {
+    height: 300px;
+    background-color: #dedede;
+    overflow: scroll;
+    min-width: 400px;
+}
+
+.roomUser {
+    font-size: 10px;
+}

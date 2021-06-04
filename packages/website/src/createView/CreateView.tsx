@@ -1,75 +1,88 @@
-import {
-  Button,
-  createStyles, TextField, Theme, withStyles,
-} from '@material-ui/core';
 import React, { useState } from 'react';
+import { Form, Button } from 'react-bootstrap';
 import { useHistory } from 'react-router-dom';
 import { createGame, GameReqBody } from '../models/game';
+import classes from './CreateView.module.css';
 
 const githubURLRegExp = new RegExp('^https://(www.)?github.com/.*/.*$');
 
-type Props = {
-  classes: any
-};
-
-const CreateView = ({ classes }: Props) => {
-  const [name, setName] = useState('Playground');
-  const [desc, setDesc] = useState('This is a cool game.');
-  const [githubURL, setGithubURL] = useState('');
-  const [commitSHA, setCommitSHA] = useState('');
+const CreateView = () => {
+  const [form, setForm] = useState({
+    name: '',
+    description: '',
+    githubURL: '',
+    commitSHA: '',
+  });
+  const [errors, setErrors] = useState({ githubURL: '' });
   const history = useHistory();
-  const isGitHubURLValid = githubURLRegExp.test(githubURL);
+
+  const setField = (field: string, value: string) => {
+    setForm({
+      ...form,
+      [field]: value,
+    });
+  };
 
   return (
-    <form
-      className={classes.root}
-      onSubmit={async (event: any) => {
-        event.preventDefault();
-        const gameObj: GameReqBody = {
-          name,
-          description: desc,
-          githubURL,
-          commitSHA,
-        };
-        const game = await createGame(gameObj);
-        history.push(`/games/${game.id}`);
-      }}
-    >
-      <div>
-        <TextField required id="standard-required" label="Name" defaultValue={name} onChange={(e) => { setName(e.target.value); }} />
-        <TextField label="Description" defaultValue={desc} onChange={(e) => { setDesc(e.target.value); }} />
-      </div>
-      <div>
-        <TextField
-          required
-          error={!isGitHubURLValid && githubURL !== ''}
-          helperText={(isGitHubURLValid || githubURL === '') ? undefined : 'Must be a valid github URL'}
-          id="standard-required"
-          label="Github Repository URL"
-          onChange={(e) => { setGithubURL(e.target.value); }}
-        />
-        <TextField required label="commit SHA" defaultValue={commitSHA} onChange={(e) => { setCommitSHA(e.target.value); }} />
-      </div>
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
+    <div className={classes.form}>
+      <h1>Create Game</h1>
+      <Form
+        onSubmit={async (event: any) => {
+          event.preventDefault();
+
+          if (githubURLRegExp.test(form.githubURL)) {
+            const gameObj: GameReqBody = form;
+            const game = await createGame(gameObj);
+            history.push(`/games/${game.id}`);
+          } else setErrors({ githubURL: 'Please enter a valid GitHub URL.' });
+        }}
       >
-        Create Game
-      </Button>
-    </form>
+        <Form.Group controlId="name">
+          <Form.Label>Name</Form.Label>
+          <Form.Control
+            type="text"
+            onChange={(e) => setField('name', e.target.value)}
+            placeholder="Enter name"
+            required
+          />
+        </Form.Group>
+        <Form.Group controlId="description">
+          <Form.Label>Description</Form.Label>
+          <Form.Control
+            type="text"
+            onChange={(e) => setField('description', e.target.value)}
+            placeholder="Enter description"
+            required
+          />
+        </Form.Group>
+        <Form.Group controlId="github">
+          <Form.Label>GitHub Repository URL</Form.Label>
+          <Form.Control
+            type="text"
+            onChange={(e) => setField('githubURL', e.target.value)}
+            placeholder="Enter GitHub repository URL"
+            required
+            isInvalid={!!errors.githubURL}
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.githubURL}
+          </Form.Control.Feedback>
+        </Form.Group>
+        <Form.Group controlId="commit">
+          <Form.Label>Commit SHA</Form.Label>
+          <Form.Control
+            type="text"
+            onChange={(e) => setField('commitSHA', e.target.value)}
+            placeholder="Enter commit SHA"
+            required
+          />
+        </Form.Group>
+        <Button variant="primary" type="submit">
+          Submit
+        </Button>
+      </Form>
+    </div>
   );
 };
 
-const styles = (theme: Theme) => createStyles({
-  root: {
-    '& .MuiTextField-root': {
-      margin: theme.spacing(1),
-      width: '25ch',
-    },
-    margin: '0 auto 0 auto',
-    justifyContent: 'center',
-  },
-});
-
-export default withStyles(styles)(CreateView);
+export default CreateView;

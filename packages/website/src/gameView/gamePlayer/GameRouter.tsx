@@ -1,7 +1,5 @@
 import React from 'react';
 import {
-} from '@material-ui/core';
-import {
   Route,
   Switch,
   useRouteMatch,

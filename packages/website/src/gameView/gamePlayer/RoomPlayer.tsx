@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Theme, withStyles, createStyles, Typography, List, ListItem,
-} from '@material-ui/core';
-import {
   useParams,
 } from 'react-router-dom';
 
@@ -11,16 +8,13 @@ import {
   getRoom, getRoomUsers, Room,
 } from '../../models/room';
 import { User } from '../../models/user';
-
-type Props = {
-  classes: any
-};
+import classes from './RoomPlayer.module.css';
 
 type RoomURLParams = {
   roomId: string
 };
 
-const RoomPlayer = ({ classes }: Props) => {
+const RoomPlayer = () => {
   const { roomId } = useParams<RoomURLParams>();
   const [room, setRoom] = useState<null | Room>(null);
   const [users, setUsers] = useState<User[]>([]);
@@ -41,42 +35,29 @@ const RoomPlayer = ({ classes }: Props) => {
 
   if (room) {
     return (
-      <div className={classes.root}>
-        <Typography variant="h4">{`Room: ${room.id}`}</Typography>
+      <div className={classes.container}>
+        <h3>{room.game.name}</h3>
+        <h5 style={{ color: 'white' }}>{`Room: ${room.id}`}</h5>
         <IFrame githubURL={room.game.githubURL} commitSHA={room.game.commitSHA} />
-        <List>
-          <Typography variant="h4">
-            {`${users.length} Users in Room`}
-          </Typography>
-          {users.map((user: User) => (
-            <ListItem
-              key={user.id}
-            >
-              {`User-${user.id}`}
-            </ListItem>
-          ))}
-        </List>
+        <h5 style={{ color: 'white' }}>
+          {`${users.length} Users in Room`}
+        </h5>
+        {users.map((user: User) => (
+          <p
+            key={user.id}
+          >
+            {`User-${user.id}`}
+          </p>
+        ))}
       </div>
     );
   }
+
   return (
-    <div className={classes.root}>
+    <div>
       <h1>Loading...</h1>
     </div>
   );
 };
 
-const styles = (theme: Theme) => createStyles({
-  root: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-around',
-    backgroundColor: theme.palette.background.paper,
-    margin: '0 auto 0 auto',
-  },
-  button: {
-    margin: '5px',
-  },
-});
-
-export default withStyles(styles)(RoomPlayer);
+export default RoomPlayer;
