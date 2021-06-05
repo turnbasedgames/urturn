@@ -12,10 +12,10 @@ import NavBar from './navBar';
 import GameView from './gameView';
 import CreateView from './createView';
 import { getUser, User, UserContext } from './models/user';
-import firebaseConfig from './firebaseConfig';
 import classes from './App.module.css';
 
-firebase.initializeApp(firebaseConfig);
+const firebaseConfig = process.env.REACT_APP_FIREBASE_CONFIG as string;
+firebase.initializeApp(JSON.parse(Buffer.from(firebaseConfig, 'base64').toString('ascii')));
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
