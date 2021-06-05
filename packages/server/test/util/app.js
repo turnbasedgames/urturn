@@ -3,22 +3,11 @@ const { spawn } = require('child_process');
 const axios = require('axios');
 const getPort = require('get-port');
 
+const { waitFor } = require('./util');
+
 function waitUntilRunning(api, timeout = 10000, buffer = 200) {
-  const timeoutThreshold = Date.now() + timeout;
-  return new Promise((res, rej) => {
-    const interval = setInterval(async () => {
-      try {
-        await api.get('/readiness');
-        clearInterval(interval);
-        res();
-      } catch (err) {
-        if (Date.now() > timeoutThreshold) {
-          clearInterval(interval);
-          rej(new Error(`Server was not reachable after ${timeout}ms`));
-        }
-      }
-    }, buffer);
-  });
+  return waitFor(async () => { await api.get('/readiness'); },
+    timeout, buffer, 'Server was not ready');
 }
 
 async function spawnServer(env, api) {
@@ -43,6 +32,7 @@ async function spawnApp() {
     MONGODB_CONNECTION_URL: process.env.MONGODB_CONNECTION_URL || 'mongodb://localhost:27017/test?replicaSet=testrs',
     PATH: process.env.PATH,
     PORT: await getPort(),
+    REDIS_CONNECTION_URL: process.env.REDIS_CONNECTION_URL,
   };
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     env.GOOGLE_APPLICATION_CREDENTIALS = process.env.GOOGLE_APPLICATION_CREDENTIALS;

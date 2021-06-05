@@ -15,10 +15,10 @@ const RoomSchema = new Schema({
     ref: 'User',
     index: true,
   },
-  state: {
-    type: Schema.Types.Mixed,
+  latestState: {
+    type: Schema.Types.ObjectId,
     required: true,
-    default: {},
+    ref: 'RoomState',
   },
 }, { timestamps: true });
 
@@ -27,7 +27,7 @@ RoomSchema.method('toJSON', function toJSON() {
     id: this.id,
     game: this.game,
     leader: this.leader,
-    state: this.state,
+    latestState: this.latestState,
   };
 });
 

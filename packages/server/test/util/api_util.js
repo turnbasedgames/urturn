@@ -4,7 +4,7 @@ async function createGameAndAssert(t, api, userCred, user) {
   const gameRaw = {
     name: 'test name',
     description: 'test description',
-    commitSHA: '7d1a6069988cdf799946ed40a1f9adeb0cb471ff',
+    commitSHA: 'bffd86aa1496df2492a775a4e67ee44941747d3d',
     githubURL: 'https://github.com/turnbasedgames/tictactoe',
   };
   const authToken = await userCred.user.getIdToken();
@@ -31,7 +31,7 @@ async function createRoomAndAssert(t, api, userCred, game, leader) {
   t.is(status, StatusCodes.CREATED);
   t.deepEqual(room.leader, leader);
   t.deepEqual(room.game, game);
-  t.deepEqual(room.state, {
+  t.deepEqual(room.latestState.state, {
     board: [
       [
         null,

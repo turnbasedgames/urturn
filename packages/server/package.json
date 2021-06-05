@@ -32,6 +32,7 @@
     "mongoose": "^5.11.18",
     "mongoose-unique-validator": "^2.0.3",
     "morgan": "^1.10.0",
+    "redis": "^3.1.2",
     "vm2": "^3.9.2",
     "winston": "^3.3.3"
   },
