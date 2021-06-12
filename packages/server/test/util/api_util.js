@@ -1,8 +1,11 @@
 const { StatusCodes } = require('http-status-codes');
+const { v4: uuidv4 } = require('uuid');
+
+const { createUserCred } = require('./firebase');
 
 async function createGameAndAssert(t, api, userCred, user) {
   const gameRaw = {
-    name: 'test name',
+    name: `integration-tests-${uuidv4()}`,
     description: 'test description',
     commitSHA: 'bffd86aa1496df2492a775a4e67ee44941747d3d',
     githubURL: 'https://github.com/turnbasedgames/tictactoe',
@@ -58,4 +61,47 @@ async function createRoomAndAssert(t, api, userCred, game, leader) {
   return room;
 }
 
-module.exports = { createGameAndAssert, createRoomAndAssert, createUserAndAssert };
+async function startTicTacToeRoom(t) {
+  const { api } = t.context.app;
+  const userCredOne = await createUserCred();
+  const userCredTwo = await createUserCred();
+  const userOne = await createUserAndAssert(t, api, userCredOne);
+  const userTwo = await createUserAndAssert(t, api, userCredTwo);
+  const authTokenTwo = await userCredTwo.user.getIdToken();
+  const game = await createGameAndAssert(t, api, userCredOne, userOne);
+  const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
+  const { data: { room: resRoom }, status } = await api.post(`/room/${room.id}/join`, {},
+    { headers: { authorization: authTokenTwo } });
+  t.is(status, StatusCodes.CREATED);
+  t.deepEqual(resRoom.leader, userOne);
+  t.deepEqual(resRoom.game, game);
+  t.deepEqual(resRoom.latestState.state, {
+    board: [
+      [
+        null,
+        null,
+        null,
+      ],
+      [
+        null,
+        null,
+        null,
+      ],
+      [
+        null,
+        null,
+        null,
+      ],
+    ],
+    plrs: [userOne.id, userTwo.id],
+    state: 'IN_GAME',
+    winner: null,
+  });
+  return {
+    userOne, userTwo, userCredOne, userCredTwo, game, room: resRoom,
+  };
+}
+
+module.exports = {
+  createGameAndAssert, createRoomAndAssert, createUserAndAssert, startTicTacToeRoom,
+};

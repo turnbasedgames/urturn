@@ -40,9 +40,10 @@ async function spawnApp() {
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64) {
     env.GOOGLE_APPLICATION_CREDENTIALS_BASE64 = process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64;
   }
-  const api = axios.create({ baseURL: `http://localhost:${env.PORT}` });
+  const baseURL = `http://localhost:${env.PORT}`;
+  const api = axios.create({ baseURL });
   const server = await spawnServer(env, api);
-  return { api, server };
+  return { api, server, baseURL };
 }
 
 async function killApp(app) {
