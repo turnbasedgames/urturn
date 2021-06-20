@@ -44,7 +44,7 @@ router.post('/', auth, asyncHandler(async (req, res) => {
 
   await mongoose.connection.transaction(async (session) => {
     await game.save({ session });
-    await game.addGameTemplateFiles();
+    await game.addGameTemplateFiles(user.firebaseId);
   });
   await game.populate('creator').execPopulate();
   res.status(StatusCodes.CREATED).json({ game });

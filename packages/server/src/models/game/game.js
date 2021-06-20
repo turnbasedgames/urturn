@@ -40,11 +40,10 @@ const GameSchema = new Schema({
 
 GameSchema.index({ name: 'text' });
 GameSchema.plugin(uniqueValidator);
-GameSchema.method('addGameTemplateFiles', async function addGameTemplateFiles() {
-  const userId = this.populated('creator') ? this.creator.id : this.creator;
+GameSchema.method('addGameTemplateFiles', async function addGameTemplateFiles(firebaseId) {
   const [templateFiles] = await bucket.getFiles({ prefix: GAME_TEMPLATE_PREFIX });
   return Promise.all(templateFiles.map((file) => {
-    const newFilePrefix = `users/${userId}/games/${this.id}/code/`;
+    const newFilePrefix = `users/${firebaseId}/games/${this.id}/code/`;
     const newFileName = newFilePrefix + file.name.substring(GAME_TEMPLATE_PREFIX.length);
     return file.copy(bucket.file(newFileName));
   }));

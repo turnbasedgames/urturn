@@ -22,7 +22,7 @@ async function createGameAndAssert(t, api, userCred, user) {
   });
 
   // assert that game has template files created
-  const gameCodePrefix = `users/${user.id}/games/${game.id}/code/`;
+  const gameCodePrefix = `users/${user.firebaseId}/games/${game.id}/code/`;
   const [gameCodeFiles] = await bucket.getFiles({ prefix: gameCodePrefix });
   t.true(gameCodeFiles.length > 0);
   return game;
