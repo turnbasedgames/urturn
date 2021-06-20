@@ -1,12 +1,7 @@
-const redis = require('redis');
 const redisAdapter = require('@socket.io/redis-adapter');
 
+const { pubClient, subClient } = require('./setupRedis');
 const logger = require('./logger');
-
-const pubClient = redis.createClient({
-  url: process.env.REDIS_CONNECTION_URL,
-});
-const subClient = pubClient.duplicate();
 
 function setupSocketio(io) {
   io.adapter(redisAdapter(pubClient, subClient));
@@ -14,14 +9,26 @@ function setupSocketio(io) {
   io.on('connection', (socket) => {
     logger.info('new socket connection', { id: socket.id });
 
-    socket.on('watchRoom', ({ roomId }) => {
+    socket.on('watchRoom', async ({ roomId }, cb) => {
       logger.info('watching room', { id: socket.id, roomId });
-      socket.join(roomId);
+      try {
+        await socket.join(roomId);
+        cb();
+      } catch (error) {
+        logger.error('error when watching room', { error });
+        cb({ error: error.toString() });
+      }
     });
 
-    socket.on('unwatchRoom', ({ roomId }) => {
+    socket.on('unwatchRoom', async ({ roomId }, cb) => {
       logger.info('unwatching room', { id: socket.id, roomId });
-      socket.leave(roomId);
+      try {
+        await socket.leave(roomId);
+        cb(null);
+      } catch (error) {
+        logger.error('error when unwatching room', { error });
+        cb({ error: error.toString() });
+      }
     });
   });
 }

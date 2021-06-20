@@ -1,4 +1,5 @@
 const test = require('ava');
+const { promisify } = require('util');
 const { StatusCodes } = require('http-status-codes');
 const io = require('socket.io-client');
 
@@ -9,9 +10,10 @@ const {
 } = require('../util/api_util');
 const { waitFor } = require('../util/util');
 
-function createSocketAndWatchRoom(baseURL, room) {
+async function createSocketAndWatchRoom(baseURL, room) {
   const socket = io(baseURL);
-  socket.emit('watchRoom', { roomId: room.id });
+  const emitAsync = promisify(socket.emit).bind(socket);
+  await emitAsync('watchRoom', { roomId: room.id });
   socket.messageHistory = [];
   socket.on('room:latestState', (message) => socket.messageHistory.push(message));
   return socket;
@@ -60,7 +62,9 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
   const userTwo = await createUserAndAssert(t, api, userCredTwo);
   const game = await createGameAndAssert(t, api, userCredOne, userOne);
   const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
-  const sockets = [...Array(10).keys()].map(() => createSocketAndWatchRoom(baseURL, room));
+  const sockets = await Promise.all(
+    [...Array(10).keys()].map(() => createSocketAndWatchRoom(baseURL, room)),
+  );
 
   const { data: { room: resRoom }, status } = await api.post(`/room/${room.id}/join`, {},
     { headers: { authorization: await userCredTwo.user.getIdToken() } });
@@ -145,8 +149,8 @@ test('sockets can unwatch a room to no longer receive room:latestState events wh
   const {
     userOne, userTwo, userCredOne, userCredTwo, room,
   } = await startTicTacToeRoom(t);
-  const socket1 = createSocketAndWatchRoom(baseURL, room);
-  const socket2 = createSocketAndWatchRoom(baseURL, room);
+  const socket1 = await createSocketAndWatchRoom(baseURL, room);
+  const socket2 = await createSocketAndWatchRoom(baseURL, room);
 
   const { status: statusMove1 } = await api.post(`/room/${room.id}/move`, { x: 0, y: 0 },
     { headers: { authorization: await userCredOne.user.getIdToken() } });
