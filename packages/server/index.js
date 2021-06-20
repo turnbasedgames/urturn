@@ -5,6 +5,7 @@ const { errors } = require('celebrate');
 const { StatusCodes } = require('http-status-codes');
 const socketio = require('socket.io');
 
+require('./src/setupFirebase');
 const httpLogger = require('./src/middleware/httpLogger');
 const logger = require('./src/logger');
 const setupDB = require('./src/setupDB');

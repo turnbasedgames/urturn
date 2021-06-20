@@ -29,6 +29,7 @@ function killServer(server) {
 
 async function spawnApp() {
   const env = {
+    GOOGLE_STORAGE_BUCKET_URL: process.env.GOOGLE_STORAGE_BUCKET_URL,
     MONGODB_CONNECTION_URL: process.env.MONGODB_CONNECTION_URL || 'mongodb://localhost:27017/test?replicaSet=testrs',
     PATH: process.env.PATH,
     PORT: await getPort(),

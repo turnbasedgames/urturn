@@ -7,7 +7,6 @@
     "start": "node index.js",
     "dev": "nodemon -r dotenv/config index.js",
     "lint": "eslint --ignore-path .gitignore .",
-    "posttest": "npm run reset:firebase",
     "test": "ava --timeout=1m --verbose",
     "test:coverage": "nyc npm run test",
     "test:check-coverage": "npm run test:coverage && nyc check-coverage --lines 80 --branches 80 --statements 80 --functions 80",
