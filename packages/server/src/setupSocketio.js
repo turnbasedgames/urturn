@@ -15,7 +15,7 @@ function setupSocketio(io) {
         await socket.join(roomId);
         cb();
       } catch (error) {
-        logger.error('error when watching room', { error });
+        logger.error('error when watching room', { error: error.toString() });
         cb({ error: error.toString() });
       }
     });
@@ -26,7 +26,7 @@ function setupSocketio(io) {
         await socket.leave(roomId);
         cb(null);
       } catch (error) {
-        logger.error('error when unwatching room', { error });
+        logger.error('error when unwatching room', { error: error.toString() });
         cb({ error: error.toString() });
       }
     });
