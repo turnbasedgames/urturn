@@ -1,0 +1,22 @@
+{
+  "name": "@turnbasedgames/client",
+  "version": "0.0.2",
+  "description": "client used for a turnbasedgame",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/turnbasedgames/tbg-client.git"
+  },
+  "author": "kevo1ution",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/turnbasedgames/tbg-client/issues"
+  },
+  "homepage": "https://github.com/turnbasedgames/tbg-client#readme",
+  "dependencies": {
+    "penpal": "^5.3.0"
+  }
+}
