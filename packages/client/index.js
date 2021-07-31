@@ -1,6 +1,7 @@
 const {connectToParent} = require('penpal')
 
-// TODO: event emitter is not defined in html5, figure how to expose this
+const EventEmitter = require('./src/util/eventEmitter')
+
 const eventEmitter = new EventEmitter();
 
 const connection = connectToParent({
