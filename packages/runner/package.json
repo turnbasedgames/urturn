@@ -1,0 +1,25 @@
+{
+  "name": "@sarahannali/localrunner",
+  "version": "1.0.8",
+  "main": "bin/index.js",
+  "bin": {
+    "local-runner": "bin/index.js"
+  },
+  "scripts": {
+    "local-runner": "node bin/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/turnbasedgames/localrunner.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/turnbasedgames/localrunner/issues"
+  },
+  "homepage": "https://github.com/turnbasedgames/localrunner#readme",
+  "description": "",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
