@@ -71,8 +71,8 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
   t.is(status, StatusCodes.CREATED);
   t.deepEqual(resRoom, {
     id: room.id,
-    leader: userOne,
     game,
+    joinable: false,
     latestState: {
       id: resRoom.latestState.id,
       version: 1,
@@ -100,6 +100,7 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
         winner: null,
       },
     },
+    users: [userOne, userTwo],
   });
 
   await assertNextSocketLatestState(t, sockets, {

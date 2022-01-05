@@ -9,23 +9,27 @@ class UserCode {
   }
 
   startRoom() {
-    const newState = this.userCodeRaw.onRoomStart({}, null);
-    logger.info('usercode start room result', { state: newState });
-    return newState;
+    const newRoomState = this.userCodeRaw.onRoomStart({});
+    logger.info('user code start room result', newRoomState);
+    return newRoomState;
   }
 
-  joinPlayer(plrId, curState) {
-    logger.info('usercode join player', { state: curState });
-    const newState = this.userCodeRaw.onPlayerJoin({}, plrId, curState);
-    logger.info('usercode join player result', { state: newState });
-    return newState;
+  // TODO: roomState doesn't include joinable value or other keys in Room
+  //       we should apply those previous values to the roomState
+  joinPlayer(plrId, roomState) {
+    const roomStateJSON = roomState.toJSON();
+    logger.info('user code join player', roomStateJSON);
+    const newRoomState = this.userCodeRaw.onPlayerJoin({}, plrId, roomStateJSON);
+    logger.info('user code join player result', newRoomState);
+    return newRoomState;
   }
 
-  playerMove(plrId, move, curState) {
-    logger.info('usercode player move', { state: curState });
-    const newState = this.userCodeRaw.onPlayerMove({}, plrId, move, curState);
-    logger.info('usercode player move result', { state: newState });
-    return newState;
+  playerMove(plrId, move, roomState) {
+    const roomStateJSON = roomState.toJSON();
+    logger.info('user code player move', roomStateJSON);
+    const newRoomState = this.userCodeRaw.onPlayerMove({}, plrId, move, roomStateJSON);
+    logger.info('user code player move result', newRoomState);
+    return newRoomState;
   }
 }
 
@@ -38,7 +42,7 @@ async function getUserCode(game) {
 
   const vm = new NodeVM({});
   vm.on('console.log', (data) => {
-    logger.info('usercode:', { data });
+    logger.info('user code:', { data });
   });
   const userCodeRaw = vm.run(userCodeRawStr);
   const userCode = new UserCode(userCodeRaw);

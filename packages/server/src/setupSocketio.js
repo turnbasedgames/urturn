@@ -3,13 +3,15 @@ const redisAdapter = require('@socket.io/redis-adapter');
 const { pubClient, subClient } = require('./setupRedis');
 const logger = require('./logger');
 
+const defaultCb = (...args) => logger.info('callback did not exist, so was not called with args:', args);
+
 function setupSocketio(io) {
   io.adapter(redisAdapter(pubClient, subClient));
 
   io.on('connection', (socket) => {
     logger.info('new socket connection', { id: socket.id });
 
-    socket.on('watchRoom', async ({ roomId }, cb) => {
+    socket.on('watchRoom', async ({ roomId }, cb = defaultCb) => {
       logger.info('watching room', { id: socket.id, roomId });
       try {
         await socket.join(roomId);
@@ -20,7 +22,7 @@ function setupSocketio(io) {
       }
     });
 
-    socket.on('unwatchRoom', async ({ roomId }, cb) => {
+    socket.on('unwatchRoom', async ({ roomId }, cb = defaultCb) => {
       logger.info('unwatching room', { id: socket.id, roomId });
       try {
         await socket.leave(roomId);

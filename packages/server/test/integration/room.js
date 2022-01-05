@@ -31,6 +31,29 @@ test('GET /room returns list of rooms', async (t) => {
   t.assert(rooms.length > 0);
 });
 
+test('GET /room supports query by "joinable", "containsUser", and "omitUser"', async (t) => {
+  const { api } = t.context.app;
+  const userCredOne = await createUserCred();
+  const userCredTwo = await createUserCred();
+  const authTokenTwo = await userCredTwo.user.getIdToken();
+  const userOne = await createUserAndAssert(t, api, userCredOne);
+  const userTwo = await createUserAndAssert(t, api, userCredTwo);
+  const game = await createGameAndAssert(t, api, userCredOne, userOne);
+  const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
+  const roomOmitted = await createRoomAndAssert(t, api, userCredOne, game, userOne);
+  await api.post(`/room/${roomOmitted.id}/join`, {}, { headers: { authorization: authTokenTwo } });
+  const { data: { rooms }, status } = await api.get(
+    '/room', {
+      params: {
+        gameId: game.id, joinable: true, containsUser: userOne.id, omitUser: userTwo.id,
+      },
+    },
+  );
+  t.is(status, StatusCodes.OK);
+  t.assert(rooms.length === 1);
+  t.assert(rooms[0].id === room.id);
+});
+
 test('POST /room creates a room', async (t) => {
   const { api } = t.context.app;
   const userCred = await createUserCred();
@@ -42,12 +65,11 @@ test('POST /room creates a room', async (t) => {
 test('POST /room returns \'room.game must exist\' if no room', async (t) => {
   const { api } = t.context.app;
   const userCred = await createUserCred();
-  const user = await createUserAndAssert(t, api, userCred);
+  await createUserAndAssert(t, api, userCred);
   const authToken = await userCred.user.getIdToken();
   const { response: { status } } = await t.throwsAsync(
     api.post('/room', {
       game: Types.ObjectId(),
-      leader: user,
     }, { headers: { authorization: authToken } }),
   );
   t.is(status, StatusCodes.BAD_REQUEST);
@@ -55,6 +77,19 @@ test('POST /room returns \'room.game must exist\' if no room', async (t) => {
 
 test('POST /room/:id/join joins a game', async (t) => {
   await startTicTacToeRoom(t);
+});
+
+test('POST /room/:id/join on a non joinable room provides a 400', async (t) => {
+  const { room } = await startTicTacToeRoom(t);
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  await createUserAndAssert(t, api, userCred);
+  const authToken = await userCred.user.getIdToken();
+
+  const { response: { status, data: { message, name } } } = await t.throwsAsync(api.post(`/room/${room.id}/join`, undefined, { headers: { authorization: authToken } }));
+  t.is(status, StatusCodes.BAD_REQUEST);
+  t.is(name, 'RoomNotJoinableError');
+  t.is(message, `${room.id} is not joinable!`);
 });
 
 test('POST /room/:id/move invokes creator backend to modify the game state', async (t) => {
@@ -67,10 +102,12 @@ test('POST /room/:id/move invokes creator backend to modify the game state', asy
     { headers: { authorization: authToken } });
   t.is(status, StatusCodes.OK);
   const {
-    data: { room: { latestState: { state: { board } } } },
+    data: { room: { latestState: { state: { board } }, joinable, users } },
     status: getStatus,
   } = await api.get(`/room/${room.id}`);
   t.is(getStatus, StatusCodes.OK);
+  t.is(joinable, room.joinable);
+  t.deepEqual(users, room.users);
   t.deepEqual([
     ['X', null, null],
     [null, null, null],
@@ -116,58 +153,4 @@ test('GET /room/:id returns a room', async (t) => {
   );
   t.is(status, StatusCodes.OK);
   t.deepEqual(data.room, room);
-});
-
-test('GET /room/:id/user returns a list of users', async (t) => {
-  const { api } = t.context.app;
-  const userCred = await createUserCred();
-  const user = await createUserAndAssert(t, api, userCred);
-  const game = await createGameAndAssert(t, api, userCred, user);
-  const room = await createRoomAndAssert(t, api, userCred, game, user);
-  const { data: { users }, status } = await api.get(
-    `/room/${room.id}/user`,
-  );
-  t.is(status, StatusCodes.OK);
-  t.assert(users.length > 0);
-});
-
-test('GET /:roomId/user/:userId returns true if a user is in a room', async (t) => {
-  const { api } = t.context.app;
-  const userCred = await createUserCred();
-  const user = await createUserAndAssert(t, api, userCred);
-  const game = await createGameAndAssert(t, api, userCred, user);
-  const room = await createRoomAndAssert(t, api, userCred, game, user);
-  const { status } = await api.get(
-    `/room/${room.id}/user/${user.id}`,
-  );
-  t.is(status, StatusCodes.OK);
-});
-
-test('GET /:roomId/user/:userId returns false if a user is not in a room', async (t) => {
-  const { api } = t.context.app;
-  const userCredOne = await createUserCred();
-  const userOne = await createUserAndAssert(t, api, userCredOne);
-  const game = await createGameAndAssert(t, api, userCredOne, userOne);
-  const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
-  const userCredTwo = await createUserCred();
-  const userTwo = await createUserAndAssert(t, api, userCredTwo);
-  const { response: { status } } = await t.throwsAsync(api.get(
-    `/room/${room.id}/user/${userTwo.id}`,
-  ));
-
-  t.is(status, StatusCodes.NOT_FOUND);
-});
-
-test('GET /room/user/:id returns all rooms a user is in', async (t) => {
-  const { api } = t.context.app;
-  const userCred = await createUserCred();
-  const user = await createUserAndAssert(t, api, userCred);
-  const game = await createGameAndAssert(t, api, userCred, user);
-  const room = await createRoomAndAssert(t, api, userCred, game, user);
-  const { data: { rooms }, status } = await api.get(
-    `/room/user/${user.id}`,
-  );
-  t.is(status, StatusCodes.OK);
-  t.assert(rooms.length === 1);
-  t.assert(rooms[0].id === room.id);
 });

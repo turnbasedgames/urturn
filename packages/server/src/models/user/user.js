@@ -4,6 +4,7 @@ const uniqueValidator = require('mongoose-unique-validator');
 
 const { Schema } = mongoose;
 
+// TODO: Add usernames
 const UserSchema = new Schema({
   firebaseId: {
     type: String,
