@@ -9,8 +9,9 @@ const IFrame = ({ githubURL, commitSHA }: Props) => {
   useEffect(() => {
     const handler = (event: MessageEvent<any>) => {
       if (event.origin === 'null') {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const data = JSON.parse(event.data);
+        // TODO: figure out what to do with penpal
+        console.log(event.data);
+        console.log(JSON.parse(event.data));
       }
     };
 
@@ -23,9 +24,7 @@ const IFrame = ({ githubURL, commitSHA }: Props) => {
     <iframe
       title="gameFrame"
       sandbox="allow-scripts"
-      src={githubURL
-        .replace('raw.githubusercontent', 'rawcdn.githack')
-        .replace('master', commitSHA)}
+      src={`${githubURL.replace('github.com', 'raw.githack.com')}/${commitSHA}/frontend/dist/index.html`}
       id="gameFrame"
       style={{ height: 'calc(100vh - 50px)', width: '100%', border: 'none' }}
     />

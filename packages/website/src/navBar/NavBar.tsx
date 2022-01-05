@@ -1,15 +1,14 @@
 import React from 'react';
+import {
+  AppBar, Button, Toolbar, Typography, IconButton, Stack,
+} from '@mui/material';
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import {
-  Navbar,
-  Nav,
-  Button,
-  Form,
-  FormControl,
-} from 'react-bootstrap';
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import { useHistory } from 'react-router-dom';
 
 import { User } from '../models/user';
+import Search from './search';
 
 type Props = {
   setUser: React.Dispatch<React.SetStateAction<User | null>>
@@ -17,45 +16,75 @@ type Props = {
 
 const NavBar = ({ setUser }: Props) => {
   const firebaseUser = firebase.auth().currentUser;
-  const showLogin = firebaseUser === null || firebaseUser.isAnonymous;
+  const userLoggedIn = !(firebaseUser === null || firebaseUser.isAnonymous);
+  const history = useHistory();
 
   return (
-    <Navbar fixed="top" style={{ backgroundColor: 'rgb(21, 21, 21)' }}>
-      <Navbar.Brand href="/" style={{ color: 'white' }}>Turn-Based-Games</Navbar.Brand>
-      <Navbar.Toggle aria-controls="basic-navbar-nav" />
-      <Navbar.Collapse id="basic-navbar-nav">
-        <Nav className="ml-auto">
-          <Form inline style={{ margin: 'auto 30px' }}>
-            <FormControl type="text" placeholder="Search" style={{ marginRight: '10px' }} />
-            <Button variant="dark" type="submit"><i className="fas fa-search" /></Button>
-          </Form>
-          {showLogin
-            ? (
-              <Button
-                variant="dark"
-                onClick={(ev) => {
-                  ev.preventDefault();
-                  const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
-                  firebase.auth().signInWithPopup(googleAuthProvider);
-                }}
-              >
-                Sign In
-              </Button>
-            )
-            : (
-              <Button
-                variant="dark"
-                onClick={() => {
-                  setUser(null);
-                  firebase.auth().signOut();
-                }}
-              >
-                Sign Out
-              </Button>
-            )}
-        </Nav>
-      </Navbar.Collapse>
-    </Navbar>
+    <AppBar position="sticky">
+      <Toolbar>
+        <Stack
+          flexGrow="1"
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Stack
+            flexGrow="1"
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="center"
+          >
+            <Typography onClick={() => {
+              history.push('/');
+            }}
+            >
+              Turn-Based-Games
+            </Typography>
+          </Stack>
+          <Search />
+          <Stack
+            direction="row"
+            justifyContent="flex-end"
+            alignItems="center"
+            flexGrow="1"
+          >
+            {userLoggedIn
+              ? (
+                <>
+                  <IconButton
+                    onClick={() => {
+                      history.push('/develop');
+                    }}
+                  >
+                    <AddBoxIcon />
+                  </IconButton>
+                  <Button
+                    onClick={() => {
+                      setUser(null);
+                      firebase.auth().signOut();
+                    }}
+                    variant="outlined"
+                  >
+                    Sign Out
+                  </Button>
+                </>
+              )
+              : (
+                <Button
+                  onClick={(ev) => {
+                    ev.preventDefault();
+                    const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
+                    firebase.auth().signInWithPopup(googleAuthProvider);
+                  }}
+                  variant="contained"
+                >
+                  Sign In
+                </Button>
+              )}
+          </Stack>
+        </Stack>
+      </Toolbar>
+    </AppBar>
   );
 };
 

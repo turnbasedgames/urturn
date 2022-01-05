@@ -16,7 +16,7 @@ export const getUser = async (firebaseUser: firebase.User, upsert: boolean): Pro
     const getResult = await axios.get('/api/user');
     user = getResult.data.user;
   } catch (err) {
-    if (err.response.status === StatusCodes.NOT_FOUND && upsert) {
+    if (axios.isAxiosError(err) && err.response?.status === StatusCodes.NOT_FOUND && upsert) {
       const postResult = await axios.post('/api/user', {});
       user = postResult.data.user;
     } else {

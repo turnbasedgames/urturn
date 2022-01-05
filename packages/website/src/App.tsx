@@ -8,11 +8,14 @@ import {
   Redirect,
 } from 'react-router-dom';
 import axios from 'axios';
+import { ThemeProvider } from '@mui/material/styles';
+
+import { Stack } from '@mui/material';
+import theme from './theme';
 import NavBar from './navBar';
 import GameView from './gameView';
-import CreateView from './createView';
 import { getUser, User, UserContext } from './models/user';
-import classes from './App.module.css';
+import CreatorView from './creatorView';
 
 const firebaseConfig = process.env.REACT_APP_FIREBASE_CONFIG as string;
 firebase.initializeApp(JSON.parse(Buffer.from(firebaseConfig, 'base64').toString('ascii')));
@@ -45,24 +48,30 @@ function App() {
   }, []);
 
   return (
-    <div className={classes.container}>
-      <UserContext.Provider value={{ user, setUser }}>
-        <Router>
-          <NavBar setUser={setUser} />
-          <Switch>
-            <Route exact path="/">
-              <Redirect to="/games" />
-            </Route>
-            <Route path="/games">
-              <GameView />
-            </Route>
-            <Route path="/create">
-              <CreateView />
-            </Route>
-          </Switch>
-        </Router>
-      </UserContext.Provider>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Stack
+        height="100vh"
+        overflow="auto"
+        direction="column"
+      >
+        <UserContext.Provider value={{ user, setUser }}>
+          <Router>
+            <NavBar setUser={setUser} />
+            <Switch>
+              <Route exact path="/">
+                <Redirect to="/games" />
+              </Route>
+              <Route path="/games">
+                <GameView />
+              </Route>
+              <Route path="/develop">
+                {user && (user.firebaseUser.isAnonymous ? <Redirect to="/games" /> : <CreatorView user={user} />)}
+              </Route>
+            </Switch>
+          </Router>
+        </UserContext.Provider>
+      </Stack>
+    </ThemeProvider>
   );
 }
 
