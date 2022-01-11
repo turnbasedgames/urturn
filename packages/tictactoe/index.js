@@ -1,34 +1,51 @@
 // TicTacToe Example
 
-function onRoomStart(lib, options){
+/**
+ * onRoomStart
+ * @param {*} lib contains all of the library functions that a user can have access to
+ * @returns JSON object that will be applied to the current room state
+ * {
+ *  state: a general state that is controlled by the creator
+ *  joinable: boolean, whether or not the room can have new players added to it
+ * }
+ */
+function onRoomStart(lib){
   return {
-    state: "NOT_STARTED", // NOT_STARTED, IN_GAME, END
-    board: [
-      [null, null, null],
-      [null, null, null],
-      [null, null, null],
-    ],
-    plrs: [], // first player is X, second player is O
-    winner: null, // null means tie if state is END, otherwise set to the plr that won
+    state: {
+      state: "NOT_STARTED", // NOT_STARTED, IN_GAME, END
+      board: [
+        [null, null, null],
+        [null, null, null],
+        [null, null, null],
+      ],
+      plrs: [], // first player is X, second player is O
+      winner: null, // null means tie if state is END, otherwise set to the plr that won
+    },
+    joinable: true
   }
 }
 
-function onPlayerJoin(lib, plr, boardgame){
+function onPlayerJoin(lib, plr, {state}){
   // VALIDATIONS
   // check if game has started
-  if(boardgame.state !== "NOT_STARTED"){
+  if(state.state !== "NOT_STARTED"){
     throw new Error("game has already started, can't join the game!")
   }
 
   // TRANSFORMATIONS
   // determine if we should start the game
-  boardgame.plrs.push(plr)
-  if (boardgame.plrs.length === 2){
+  state.plrs.push(plr)
+  if (state.plrs.length === 2){
     // start game
-    boardgame.state = "IN_GAME"
+    state.state = "IN_GAME"
+    
+    return {
+      state,
+      joinable: false
+    }
+  }else{
+    return {state, joinable: true}
   }
-
-  return boardgame
 }
 
 function getPlrToMove(board, plrs){
@@ -97,13 +114,13 @@ function isEndGame(board, plrs){
   }
 }
 
-function onPlayerMove(lib, plr, move, boardgame){
-  const {board, plrs} = boardgame
+function onPlayerMove(lib, plr, move, { state, joinable }){
+  const {board, plrs} = state
 
   // VALIDATIONS
   // boardgame must be in the game
   const {x, y} = move
-  if(boardgame.state !== "IN_GAME"){
+  if(state.state !== "IN_GAME"){
     throw new Error("game is not in progress, can't make move!")
   }
   if(getPlrToMove(board, plrs) !== plr){
@@ -119,10 +136,10 @@ function onPlayerMove(lib, plr, move, boardgame){
   // Check if game is over
   const [isEnd, winner] = isEndGame(board, plrs)
   if(isEnd){
-    boardgame.state = "END"
-    boardgame.winner = winner
+    state.state = "END"
+    state.winner = winner
   }
-  return boardgame
+  return { state, joinable }
 }
 
 module.exports = {

@@ -1,0 +1,24 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "dependencies": {
+    "@turnbasedgames/client": "^0.0.4"
+  },
+  "devDependencies": {
+    "@turnbasedgames/localrunner": "^0.0.6",
+    "html-webpack-plugin": "^5.3.2",
+    "serve": "^12.0.0",
+    "webpack": "^5.42.1",
+    "webpack-cli": "^4.7.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "start": "local-runner",
+    "serve": "serve dist"
+  },
+  "author": "",
+  "license": "ISC"
+}
