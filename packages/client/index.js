@@ -27,4 +27,4 @@ async function makeMove(move){
   return parent.makeMove(move)
 }
 
-module.exports = {getStates, getLatestState, makeMove, on: eventEmitter.on.bind(eventEmitter), off: eventEmitter.off.bind(eventEmitter)}
+module.exports = {getStates, getLatestState, makeMove, events: eventEmitter}

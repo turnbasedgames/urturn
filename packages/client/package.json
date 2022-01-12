@@ -1,6 +1,6 @@
 {
   "name": "@turnbasedgames/client",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "client used for a turnbasedgame",
   "main": "index.js",
   "scripts": {
