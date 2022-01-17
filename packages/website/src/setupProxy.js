@@ -8,4 +8,10 @@ module.exports = function setupProxy(app) {
       pathRewrite: { '^/api': '' },
     }),
   );
+  app.use(
+    '/socket.io',
+    createProxyMiddleware({
+      target: 'http://localhost:8080',
+    }),
+  );
 };

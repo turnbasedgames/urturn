@@ -110,7 +110,6 @@ const GameInfo = () => {
                         try {
                           setLoadingRoom(true);
                           const room = await joinOrCreateRoom(game.id, user.id);
-                          console.log('resulting room', room);
                           setLoadingRoom(false);
                           history.push(`${location.pathname}/room/${room.id}`);
                         } catch (error) {

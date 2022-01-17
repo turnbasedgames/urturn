@@ -1,11 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import {
-  useParams,
-} from 'react-router-dom';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 
 import {
-  LinearProgress,
-  Modal, Paper, Typography,
+  LinearProgress, Modal, Paper, Typography,
 } from '@mui/material';
 import IFrame from './IFrame/IFrame';
 import {
@@ -26,9 +23,17 @@ const RoomPlayer = () => {
       const roomRaw = await getRoom(roomId);
       setRoom(roomRaw);
     }
-
     setupRoom();
   }, []);
+
+  const iframeMemo = useMemo(() => (
+    room
+    && (
+    <IFrame
+      room={room}
+    />
+    )
+  ), [room]);
 
   if (room) {
     // TODO: information header? and the Iframe takes entire screen?
@@ -50,27 +55,12 @@ const RoomPlayer = () => {
             </Typography>
           </Paper>
         </Modal>
-        <IFrame githubURL={room.game.githubURL} commitSHA={room.game.commitSHA} />
+        {iframeMemo}
       </>
     );
   }
 
   return (<LinearProgress />);
 };
-
-// <Stack direction="column">
-// <h3>{room.game.name}</h3>
-// <h5 style={{ color: 'white' }}>{`Room: ${room.id}`}</h5>
-// <h5 style={{ color: 'white' }}>
-//   {`${room.users.length} Users in Room`}
-// </h5>
-// {room.users.map((user: User) => (
-//   <p
-//     key={user.id}
-//   >
-//     {`User-${user.id}`}
-//   </p>
-// ))}
-// </Stack>
 
 export default RoomPlayer;
