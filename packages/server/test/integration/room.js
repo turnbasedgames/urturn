@@ -88,7 +88,7 @@ test('POST /room/:id/join on a non joinable room provides a 400', async (t) => {
 
   const { response: { status, data: { message, name } } } = await t.throwsAsync(api.post(`/room/${room.id}/join`, undefined, { headers: { authorization: authToken } }));
   t.is(status, StatusCodes.BAD_REQUEST);
-  t.is(name, 'RoomNotJoinableError');
+  t.is(name, 'RoomNotJoinable');
   t.is(message, `${room.id} is not joinable!`);
 });
 
@@ -124,7 +124,7 @@ test('POST /room/:id/move provides error if user code throws an error', async (t
   const { response: { status } } = await t.throwsAsync(api.post(`/room/${room.id}/move`,
     { x: 0, y: 0 },
     { headers: { authorization: authToken } }));
-  t.is(status, StatusCodes.INTERNAL_SERVER_ERROR);
+  t.is(status, StatusCodes.BAD_REQUEST);
 });
 
 test('POST /room/:id/move provides error if user tries to make move when not in the room', async (t) => {

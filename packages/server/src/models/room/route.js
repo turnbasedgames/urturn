@@ -10,7 +10,7 @@ const Game = require('../game/game');
 const Room = require('./room');
 const RoomState = require('./roomState');
 const { getUserCode } = require('./runner');
-const { RoomNotJoinableError } = require('./util');
+const { RoomNotJoinable, CreatorInvalidMove } = require('./errors');
 
 const PATH = '/room';
 const router = express.Router();
@@ -110,7 +110,7 @@ function setupRouter({ io }) {
       await mongoose.connection.transaction(async (session) => {
         room = await Room.findById(id).populate('latestState').session(session);
         if (!room.joinable) {
-          throw new RoomNotJoinableError(room);
+          throw new RoomNotJoinable(room);
         }
         room.users.push(req.user);
 
@@ -134,7 +134,7 @@ function setupRouter({ io }) {
       await room.populate('users').populate('latestState').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
       res.status(StatusCodes.CREATED).json({ room });
     } catch (err) {
-      if (err instanceof RoomNotJoinableError) {
+      if (err instanceof RoomNotJoinable) {
         res.status(StatusCodes.BAD_REQUEST).json(err.toJSON());
       } else {
         throw err;
@@ -160,25 +160,33 @@ function setupRouter({ io }) {
     const userCode = await getUserCode(room.game);
 
     let newRoomState;
-    await mongoose.connection.transaction(async (session) => {
-      room = await Room.findById(id).populate('latestState').session(session);
-      const prevRoomState = room.latestState;
-      const creatorMoveRoomState = userCode.playerMove(userId, move, prevRoomState);
-      newRoomState = new RoomState({
-        room: room.id,
-        version: prevRoomState.version + 1,
+    try {
+      await mongoose.connection.transaction(async (session) => {
+        room = await Room.findById(id).populate('latestState').session(session);
+        const prevRoomState = room.latestState;
+        const creatorMoveRoomState = userCode.playerMove(userId, move, prevRoomState);
+        newRoomState = new RoomState({
+          room: room.id,
+          version: prevRoomState.version + 1,
+        });
+        newRoomState.applyCreatorData(creatorMoveRoomState);
+        room.latestState = newRoomState.id;
+        room.markModified('latestState');
+        await newRoomState.save({ session });
+        await room.save({ session });
+        // publishing message is not part of the transaction because subscribers can
+        // receive the message before mongodb updates the database
+        io.to(room.id).emit('room:latestState', newRoomState.toJSON());
+        res.sendStatus(StatusCodes.OK);
       });
-      newRoomState.applyCreatorData(creatorMoveRoomState);
-      room.latestState = newRoomState.id;
-      room.markModified('latestState');
-      await newRoomState.save({ session });
-      await room.save({ session });
-    });
-
-    // publishing message is not part of the transaction because subscribers can
-    // receive the message before mongodb updates the database
-    io.to(room.id).emit('room:latestState', newRoomState);
-    res.sendStatus(StatusCodes.OK);
+    } catch (err) {
+      if (err instanceof CreatorInvalidMove) {
+        console.log(err);
+        res.status(StatusCodes.BAD_REQUEST).json(err.toJSON());
+      } else {
+        throw err;
+      }
+    }
   }));
 
   router.get('/:id',

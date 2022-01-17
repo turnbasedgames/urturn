@@ -85,6 +85,8 @@ router.put('/:id', auth,
     }
   }));
 
+// TODO: soft delete
+// TODO: how do we want to handle deleting all game rooms?
 router.delete('/:id', auth,
   celebrate({
     [Segments.PARAMS]: Joi.object().keys({

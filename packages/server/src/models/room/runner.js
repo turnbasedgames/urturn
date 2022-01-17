@@ -2,6 +2,7 @@ const { NodeVM } = require('vm2');
 const axios = require('axios');
 
 const logger = require('../../logger');
+const { CreatorInvalidMove } = require('./errors');
 
 class UserCode {
   constructor(userCodeRaw) {
@@ -27,9 +28,16 @@ class UserCode {
   playerMove(plrId, move, roomState) {
     const roomStateJSON = roomState.toJSON();
     logger.info('user code player move', roomStateJSON);
-    const newRoomState = this.userCodeRaw.onPlayerMove({}, plrId, move, roomStateJSON);
-    logger.info('user code player move result', newRoomState);
-    return newRoomState;
+    try {
+      const newRoomState = this.userCodeRaw.onPlayerMove({}, plrId, move, roomStateJSON);
+      logger.info('user code player move result', newRoomState);
+      return newRoomState;
+    } catch (error) {
+      if (error.name) {
+        throw new CreatorInvalidMove(error.name, error.message);
+      }
+      throw error;
+    }
   }
 }
 
