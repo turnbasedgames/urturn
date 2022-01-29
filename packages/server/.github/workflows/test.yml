@@ -8,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x]
+        node-version: [16.x]
         mongodb-version: [4.2]
         redis-version: [6]
 
@@ -35,5 +35,5 @@ jobs:
         env:
           FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
           GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
-          GOOGLE_STORAGE_BUCKET_URL: ${{ secrets.GOOGLE_STORAGE_BUCKET_URL }}
           REDIS_CONNECTION_URL: redis://localhost:6379
+          MONGODB_CONNECTION_URL: mongodb://localhost:27017/test?replicaSet=testrs

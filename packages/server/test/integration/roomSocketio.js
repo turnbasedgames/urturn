@@ -3,7 +3,7 @@ const { promisify } = require('util');
 const { StatusCodes } = require('http-status-codes');
 const io = require('socket.io-client');
 
-const { spawnApp, killApp } = require('../util/app');
+const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
 const {
   createUserAndAssert, createGameAndAssert, createRoomAndAssert, startTicTacToeRoom,
@@ -41,16 +41,15 @@ function assertNextSocketLatestState(t, sockets, expectedState) {
 }
 
 test.before(async (t) => {
-  const app = await spawnApp();
   // eslint-disable-next-line no-param-reassign
-  t.context.app = app;
+  t.context.app = await spawnApp();
 });
 
 test.after.always(async (t) => {
   const { app, sideApps } = t.context;
-  await killApp(app);
+  await app.cleanup();
   if (sideApps) {
-    await Promise.all(sideApps.map((a) => killApp(a)));
+    await Promise.all(sideApps.map((a) => a.cleanup()));
   }
 });
 
@@ -198,8 +197,9 @@ test('sockets can unwatch a room to no longer receive room:latestState events wh
 });
 
 test('sockets can be connected to different nodejs instances and receive events for room:latestState', async (t) => {
-  const sideApps = await Promise.all([...Array(3).keys()].map(() => spawnApp()));
   const { app } = t.context;
+  const sideApps = await Promise.all([...Array(3).keys()]
+    .map(() => spawnApp(app.envWithMongo, app.envWithRedis)));
   const { api } = app;
   const {
     userOne, userTwo, userCredOne, userCredTwo, room,

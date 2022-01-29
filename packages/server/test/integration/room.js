@@ -2,7 +2,7 @@ const test = require('ava');
 const { StatusCodes } = require('http-status-codes');
 const { Types } = require('mongoose');
 
-const { spawnApp, killApp } = require('../util/app');
+const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
 const {
   createUserAndAssert, createGameAndAssert, createRoomAndAssert, startTicTacToeRoom,
@@ -15,7 +15,7 @@ test.before(async (t) => {
 });
 
 test.after.always(async (t) => {
-  await killApp(t.context.app);
+  await t.context.app.cleanup();
 });
 
 test('GET /room returns list of rooms', async (t) => {

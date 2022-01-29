@@ -1,3 +1,8 @@
+const { MongoMemoryReplSet } = require('mongodb-memory-server');
+const { RedisMemoryServer } = require('redis-memory-server');
+
+const logger = require('../../src/logger');
+
 function waitFor(testAsyncFunc, timeoutMs = 10000, bufferMs = 200, errorMsg = 'Test Function did not pass') {
   const timeoutThreshold = Date.now() + timeoutMs;
   return new Promise((res, rej) => {
@@ -16,4 +21,42 @@ function waitFor(testAsyncFunc, timeoutMs = 10000, bufferMs = 200, errorMsg = 'T
   });
 }
 
-module.exports = { waitFor };
+function makePersistentDependencyFn(name, envField, setupFunc) {
+  return async (defaultEnv) => {
+    if (defaultEnv) {
+      logger.info(`skipping starting local ${name} (using provided default)...`);
+      return [defaultEnv,
+        () => { logger.info(`skipping killing local ${name} instance.`); }];
+    }
+    if (process.env[envField]) {
+      logger.info(`skipping starting local ${name} (using uri specified in .env)...`);
+      return [{ [envField]: process.env[envField] },
+        () => { logger.info(`skipping killing local ${name} instance.`); }];
+    }
+    const [uri, cleanupFunc] = await setupFunc();
+    logger.info(`started local ${name} instance at URI:`, { uri });
+    return [{ [envField]: uri }, async () => {
+      logger.info(`killing local ${name} instance...`);
+      await cleanupFunc();
+    }];
+  };
+}
+
+const setupMongoDB = makePersistentDependencyFn('MongoDB', 'MONGODB_CONNECTION_URL',
+  async () => {
+    // use MongoMemoryReplSet instead of MongoMemoryServer because the app requires transactions
+    const mongod = await MongoMemoryReplSet.create({ replSet: { count: 4 } });
+    const uri = mongod.getUri();
+    return [uri, async () => { await mongod.stop(); }];
+  });
+
+const setupRedis = makePersistentDependencyFn('Redis', 'REDIS_CONNECTION_URL',
+  async () => {
+    const redisServer = new RedisMemoryServer();
+    const host = await redisServer.getHost();
+    const port = await redisServer.getPort();
+    const uri = `redis://${host}:${port}`;
+    return [uri, async () => { await redisServer.stop(); }];
+  });
+
+module.exports = { waitFor, setupMongoDB, setupRedis };

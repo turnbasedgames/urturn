@@ -1,7 +1,7 @@
 const test = require('ava');
 const { StatusCodes } = require('http-status-codes');
 
-const { spawnApp, killApp } = require('../util/app');
+const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
 const { createUserAndAssert } = require('../util/api_util');
 
@@ -12,7 +12,7 @@ test.before(async (t) => {
 });
 
 test.after.always(async (t) => {
-  await killApp(t.context.app);
+  await t.context.app.cleanup();
 });
 
 test('GET /user returns 401 if user is not authenticated', async (t) => {

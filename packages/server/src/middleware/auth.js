@@ -20,6 +20,7 @@ module.exports = asyncHandler(async (req, res, next) => {
     const user = await User.findOne({ firebaseId: decodedToken.uid });
     logger.info(`user found: ${user && user.id}`);
 
+    // TODO: what to do if user is null?
     req.user = user;
     req.decodedToken = decodedToken;
     next();

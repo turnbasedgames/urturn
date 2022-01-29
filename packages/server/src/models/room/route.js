@@ -181,7 +181,6 @@ function setupRouter({ io }) {
       });
     } catch (err) {
       if (err instanceof CreatorInvalidMove) {
-        console.log(err);
         res.status(StatusCodes.BAD_REQUEST).json(err.toJSON());
       } else {
         throw err;

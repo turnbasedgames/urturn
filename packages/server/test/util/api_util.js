@@ -1,10 +1,7 @@
 const { StatusCodes } = require('http-status-codes');
 const { v4: uuidv4 } = require('uuid');
-const admin = require('firebase-admin');
 
 const { createUserCred } = require('./firebase');
-
-const bucket = admin.storage().bucket();
 
 async function createGameAndAssert(t, api, userCred, user) {
   const gameRaw = {
@@ -20,11 +17,6 @@ async function createGameAndAssert(t, api, userCred, user) {
   Object.keys(gameRaw).forEach((key) => {
     t.is(gameRaw[key], game[key]);
   });
-
-  // assert that game has template files created
-  const gameCodePrefix = `users/${user.firebaseId}/games/${game.id}/code/`;
-  const [gameCodeFiles] = await bucket.getFiles({ prefix: gameCodePrefix });
-  t.true(gameCodeFiles.length > 0);
   return game;
 }
 

@@ -2,7 +2,6 @@ const express = require('express');
 const { StatusCodes } = require('http-status-codes');
 const asyncHandler = require('express-async-handler');
 const { celebrate, Segments } = require('celebrate');
-const mongoose = require('mongoose');
 
 const Joi = require('../../middleware/joi');
 const auth = require('../../middleware/auth');
@@ -47,11 +46,7 @@ router.post('/', auth, asyncHandler(async (req, res) => {
   const { body: gameRaw, user } = req;
   gameRaw.creator = user.id;
   const game = new Game(gameRaw);
-
-  await mongoose.connection.transaction(async (session) => {
-    await game.save({ session });
-    await game.addGameTemplateFiles(user.firebaseId);
-  });
+  await game.save();
   await game.populate('creator').execPopulate();
   res.status(StatusCodes.CREATED).json({ game });
 }));

@@ -3,7 +3,7 @@ const { StatusCodes } = require('http-status-codes');
 const { v4: uuidv4 } = require('uuid');
 const { Types } = require('mongoose');
 
-const { spawnApp, killApp } = require('../util/app');
+const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
 const { createGameAndAssert, createUserAndAssert } = require('../util/api_util');
 
@@ -14,7 +14,7 @@ test.before(async (t) => {
 });
 
 test.after.always(async (t) => {
-  await killApp(t.context.app);
+  await t.context.app.cleanup();
 });
 
 test('GET /game returns list of games', async (t) => {
