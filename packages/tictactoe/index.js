@@ -1,53 +1,5 @@
 // TicTacToe Example
 
-/**
- * onRoomStart
- * @param {*} lib contains all of the library functions that a user can have access to
- * @returns JSON object that will be applied to the current room state
- * {
- *  state: a general state that is controlled by the creator
- *  joinable: boolean, whether or not the room can have new players added to it
- * }
- */
-function onRoomStart(lib){
-  return {
-    state: {
-      state: "NOT_STARTED", // NOT_STARTED, IN_GAME, END
-      board: [
-        [null, null, null],
-        [null, null, null],
-        [null, null, null],
-      ],
-      plrs: [], // first player is X, second player is O
-      winner: null, // null means tie if state is END, otherwise set to the plr that won
-    },
-    joinable: true
-  }
-}
-
-function onPlayerJoin(lib, plr, {state}){
-  // VALIDATIONS
-  // check if game has started
-  if(state.state !== "NOT_STARTED"){
-    throw new Error("game has already started, can't join the game!")
-  }
-
-  // TRANSFORMATIONS
-  // determine if we should start the game
-  state.plrs.push(plr)
-  if (state.plrs.length === 2){
-    // start game
-    state.state = "IN_GAME"
-    
-    return {
-      state,
-      joinable: false
-    }
-  }else{
-    return {state, joinable: true}
-  }
-}
-
 function getPlrToMove(board, plrs){
   let xCount = 0;
   let oCount = 0;
@@ -114,8 +66,85 @@ function isEndGame(board, plrs){
   }
 }
 
-function onPlayerMove(lib, plr, move, { state, joinable }){
-  const {board, plrs} = state
+/**
+ * Generic board game types
+ * @type BoardGame: json object, in the format of
+ * {
+ *  // creator read write fields
+ *  state: json object, which represents any board game state
+ *  joinable: boolean (default=true), whether or not the room can have new players added to it
+ *  finished: boolean (default=false), when true there will be no new board game state changes
+ * 
+ *  // creator read only
+ *  players: [string], array of unique playerIds
+ *  version: Number, an integer value that increases by 1 with each state change
+ * }
+ * @type BoardGameResult: json object, in the format of
+ * {
+ *  // fields that creator wants to overwrite
+ *  state?: json object, which represents any board game state
+ *  joinable?: boolean, whether or not the room can have new players added to it
+ *  finished?: boolean, when true there will be no new board game state changes
+ * }
+ */
+
+/**
+ * onRoomStart
+ * @returns {BoardGameResult}
+ */
+ function onRoomStart(){
+  return {
+    state: {
+      state: "NOT_STARTED", // NOT_STARTED, IN_GAME
+      board: [
+        [null, null, null],
+        [null, null, null],
+        [null, null, null],
+      ],
+      winner: null, // null means tie if game is finished, otherwise set to the plr that won
+    },
+  }
+}
+
+/**
+ * onPlayerJoin
+ * @param {string} plr string, which represents the player id
+ * @param {BoardGame} currentGame
+ * @returns {BoardGameResult}
+ */
+function onPlayerJoin(plr, {players, state}){
+  // VALIDATIONS
+  // check if game has started
+  if(state.state !== "NOT_STARTED"){
+    throw new Error("game has already started, can't join the game!")
+  }
+
+  // TRANSFORMATIONS
+  // determine if we should start the game
+  if (players.length === 2){
+    // start game
+    state.state = "IN_GAME"
+    return {
+      state,
+      joinable: false
+    }
+  } else {
+    return {
+      state,
+      joinable: true
+    }
+  }
+}
+
+/**
+ * onPlayerMove
+ * @param {string} plr string, which represents the player id
+ * @param {*} move json object, controlled the creator that represents the player's move
+ * @param {BoardGame} currentGame
+ * @returns {BoardGameResult}
+ */
+function onPlayerMove(plr, move, { state, players, joinable }){
+  const {board} = state
 
   // VALIDATIONS
   // boardgame must be in the game
@@ -123,27 +152,43 @@ function onPlayerMove(lib, plr, move, { state, joinable }){
   if(state.state !== "IN_GAME"){
     throw new Error("game is not in progress, can't make move!")
   }
-  if(getPlrToMove(board, plrs) !== plr){
+  if(getPlrToMove(board, players) !== plr){
     throw new Error("Its not this player's turn: " + plr)
   }
   if(board[x][y] !== null){
     throw new Error("Invalid move, someone already marked here: " + x + "," + y)
   }
   
-  const plrMark = getPlrMark(plr, plrs)
+  const plrMark = getPlrMark(plr, players)
   board[x][y] = plrMark
 
   // Check if game is over
-  const [isEnd, winner] = isEndGame(board, plrs)
+  const [isEnd, winner] = isEndGame(board, players)
   if(isEnd){
-    state.state = "END"
     state.winner = winner
+    return {state, finished: true}
   }
-  return { state, joinable }
+  return { state }
+}
+
+/**
+ * onPlayerQuit
+ * @param {string} plr string, which represents the player id
+ * @param {BoardGame} currentGame
+ * @returns {BoardGameResult}
+ */
+function onPlayerQuit(plr, {state, players}){
+  if (players.length === 1) {
+    state.winner = players.filter(playerId => playerId !== plr)[0]
+    return {state, joinable: false, finished: true}
+  } else {
+    return {joinable: false, finished: true}
+  }
 }
 
 module.exports = {
+  onRoomStart,
   onPlayerJoin,
   onPlayerMove,
-  onRoomStart,
+  onPlayerQuit,
 }
