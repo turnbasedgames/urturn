@@ -9,51 +9,73 @@ const auth = require('../../middleware/auth');
 const Game = require('../game/game');
 const Room = require('./room');
 const RoomState = require('./roomState');
-const { getUserCode } = require('./runner');
-const { RoomNotJoinable, CreatorInvalidMove } = require('./errors');
+const UserCode = require('./runner');
+const {
+  RoomNotJoinableError, RoomFinishedError, UserNotInRoomError, CreatorInvalidMoveError,
+} = require('./errors');
 
 const PATH = '/room';
 const router = express.Router();
 
-// TODO: can a user leave the room?
-//       example in poker where maybe nothing happens
-//       example in tictactoe where leaving the game is an instant loss
-//       how to differentiate between user leaving due to network issue, or user ghosting
-//       also how to support long running games between players
+function guardFinishedRoom(room) {
+  if (room.finished) {
+    throw new RoomFinishedError(room);
+  }
+}
+
+async function applyCreatorResult(prevRoomState, room, creatorRoomState, session) {
+  const newRoomState = prevRoomState;
+  // eslint-disable-next-line no-underscore-dangle
+  newRoomState._id = mongoose.Types.ObjectId();
+  newRoomState.isNew = true;
+  newRoomState.version += 1;
+  newRoomState.applyCreatorData(creatorRoomState);
+  room.applyCreatorRoomState(creatorRoomState, newRoomState.id);
+  room.markModified('latestState');
+  await newRoomState.save({ session });
+  await room.save({ session });
+  return newRoomState;
+}
+
 // TODO: what happens when a game makes a backwards incompatible change to existing rooms?
+// TODO: determine what to do is usercode errors during quitting and/or joining,
+//       moves erroring just returns to userfrontend
+// TODO: on game state change, send creator the actual viewable state
 function setupRouter({ io }) {
   router.get('/',
     celebrate({
       [Segments.QUERY]: Joi.object().keys({
-        gameId: Joi.objectId().required(),
+        gameId: Joi.objectId(),
         joinable: Joi.boolean(),
         limit: Joi.number().integer().max(100).min(0)
           .default(25),
-        containsUser: Joi.objectId(),
-        omitUser: Joi.objectId(),
+        containsPlayer: Joi.objectId(),
+        containsInactivePlayer: Joi.objectId(),
+        omitPlayer: Joi.objectId(),
         skip: Joi.number().integer().min(0).default(0),
       }),
     }),
     asyncHandler(async (req, res) => {
       const {
         query: {
-          containsUser, omitUser, gameId, joinable, limit, skip,
+          containsPlayer, containsInactivePlayer, omitPlayer, gameId, joinable, limit, skip,
         },
       } = req;
-      const userQuery = { users: {} };
-      const userQueried = (containsUser !== undefined) || (omitUser !== undefined);
-      if (containsUser !== undefined) {
-        userQuery.users.$eq = containsUser;
+      const userQuery = { players: {} };
+      const userQueried = Boolean(containsPlayer || omitPlayer);
+      if (containsPlayer) {
+        userQuery.players.$eq = containsPlayer;
       }
-      if (omitUser !== undefined) {
-        userQuery.users.$ne = omitUser;
+      if (omitPlayer) {
+        userQuery.players.$ne = omitPlayer;
       }
       const rooms = await Room.find({
-        game: gameId,
+        ...(gameId && { game: gameId }),
         ...(joinable !== undefined && { joinable }),
+        ...(containsInactivePlayer && { inactivePlayers: { $eq: containsInactivePlayer } }),
         ...(userQueried && userQuery),
       }).populate('game')
-        .populate('users')
+        .populate('players')
         .skip(skip)
         .limit(limit);
       res.status(StatusCodes.OK).json({ rooms });
@@ -63,26 +85,26 @@ function setupRouter({ io }) {
     const userId = req.user.id;
     const roomRaw = req.body;
     const room = new Room(roomRaw);
-    room.users = [req.user];
+    room.players = [req.user];
 
     const gameCount = await Game.countDocuments({ _id: room.game });
-    if (gameCount !== 1) {
+    if (gameCount === 0) {
       const err = new Error('room.game must exist!');
       err.status = StatusCodes.BAD_REQUEST;
       throw err;
     }
 
-    await room.populate('users').populate('game').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
-    const userCode = await getUserCode(room.game);
+    await room.populate('players').populate('game').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
+    const userCode = await UserCode.fromGame(room.game);
     const creatorInitRoomState = userCode.startRoom();
     const roomState = new RoomState({
       room: room.id,
       version: 0,
     });
     roomState.applyCreatorData(creatorInitRoomState);
-    const creatorJoinRoomState = userCode.joinPlayer(userId, roomState);
+    const creatorJoinRoomState = userCode.playerJoin(userId, room, roomState);
     roomState.applyCreatorData(creatorJoinRoomState);
-    room.applyCreatorData(creatorJoinRoomState);
+    room.applyCreatorRoomState(creatorJoinRoomState);
     room.latestState = roomState.id;
     await mongoose.connection.transaction(async (session) => {
       await room.save({ session });
@@ -103,42 +125,36 @@ function setupRouter({ io }) {
     const { id } = req.params;
 
     let room = await Room.findById(id).populate('game');
-    const userCode = await getUserCode(room.game);
+    const userCode = await UserCode.fromGame(room.game);
 
     let newRoomState;
     try {
       await mongoose.connection.transaction(async (session) => {
         room = await Room.findById(id).populate('latestState').session(session);
+        guardFinishedRoom(room);
         if (!room.joinable) {
-          throw new RoomNotJoinable(room);
+          throw new RoomNotJoinableError(room);
         }
-        room.users.push(req.user);
-
+        room.players.push(req.user);
         const prevRoomState = room.latestState;
-        const creatorJoinRoomState = userCode.joinPlayer(userId, prevRoomState);
-        newRoomState = new RoomState({
-          room: room.id,
-          version: prevRoomState.version + 1,
-        });
-        newRoomState.applyCreatorData(creatorJoinRoomState);
-        room.applyCreatorData(creatorJoinRoomState);
-        room.latestState = newRoomState.id;
-        room.markModified('latestState');
-        await newRoomState.save({ session });
-        await room.save({ session });
+        const creatorJoinRoomState = userCode.playerJoin(userId, room, prevRoomState);
+        newRoomState = await applyCreatorResult(prevRoomState, room, creatorJoinRoomState, session);
       });
 
       // publishing message is not part of the transaction because subscribers can
       // receive the message before mongodb updates the database
       io.to(room.id).emit('room:latestState', newRoomState);
-      await room.populate('users').populate('latestState').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
-      res.status(StatusCodes.CREATED).json({ room });
+      await room.populate('players').populate('latestState').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
+
+      // TODO: how do we standardized the creatorRoomState
+      res.status(StatusCodes.OK).json({ room });
     } catch (err) {
-      if (err instanceof RoomNotJoinable) {
-        res.status(StatusCodes.BAD_REQUEST).json(err.toJSON());
-      } else {
-        throw err;
+      if (err instanceof RoomFinishedError) {
+        err.status = StatusCodes.BAD_REQUEST;
+      } else if (err instanceof RoomNotJoinableError) {
+        err.status = StatusCodes.BAD_REQUEST;
       }
+      throw err;
     }
   }));
 
@@ -151,40 +167,72 @@ function setupRouter({ io }) {
     const { id } = req.params;
     const move = req.body;
 
-    let room = await Room.findById(id).populate('game').populate('users');
-    if (!room.users.some((user) => user.id === userId)) {
-      const err = new Error('user is not in room!');
-      err.status = StatusCodes.BAD_REQUEST;
-      throw err;
-    }
-    const userCode = await getUserCode(room.game);
-
-    let newRoomState;
     try {
+      let room = await Room.findById(id).populate('game');
+      guardFinishedRoom(room);
+      if (!room.containsPlayer(userId)) {
+        throw new UserNotInRoomError(userId, room);
+      }
+      const userCode = await UserCode.fromGame(room.game);
+      let newRoomState;
       await mongoose.connection.transaction(async (session) => {
         room = await Room.findById(id).populate('latestState').session(session);
         const prevRoomState = room.latestState;
-        const creatorMoveRoomState = userCode.playerMove(userId, move, prevRoomState);
-        newRoomState = new RoomState({
-          room: room.id,
-          version: prevRoomState.version + 1,
-        });
-        newRoomState.applyCreatorData(creatorMoveRoomState);
-        room.latestState = newRoomState.id;
-        room.markModified('latestState');
-        await newRoomState.save({ session });
-        await room.save({ session });
-        // publishing message is not part of the transaction because subscribers can
-        // receive the message before mongodb updates the database
-        io.to(room.id).emit('room:latestState', newRoomState.toJSON());
-        res.sendStatus(StatusCodes.OK);
+        const creatorMoveRoomState = userCode.playerMove(userId, move, room, prevRoomState);
+        newRoomState = await applyCreatorResult(prevRoomState, room, creatorMoveRoomState, session);
       });
+      // publishing message is not part of the transaction because subscribers can
+      // receive the message before mongodb updates the database
+      io.to(room.id).emit('room:latestState', newRoomState.toJSON());
+      await room.populate('players').populate('latestState').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
+      res.status(StatusCodes.OK).json({ room });
     } catch (err) {
-      if (err instanceof CreatorInvalidMove) {
-        res.status(StatusCodes.BAD_REQUEST).json(err.toJSON());
-      } else {
-        throw err;
+      if (err instanceof RoomFinishedError) {
+        err.status = StatusCodes.BAD_REQUEST;
+      } else if (err instanceof CreatorInvalidMoveError) {
+        err.status = StatusCodes.BAD_REQUEST;
+      } else if (err instanceof UserNotInRoomError) {
+        err.status = StatusCodes.BAD_REQUEST;
       }
+      throw err;
+    }
+  }));
+
+  router.post('/:id/quit', celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+      id: Joi.objectId(),
+    }),
+  }), auth, asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    try {
+      let room = await Room.findById(id).populate('game');
+      guardFinishedRoom(room);
+      if (!room.containsPlayer(userId)) {
+        throw new UserNotInRoomError(userId, room);
+      }
+      const userCode = await UserCode.fromGame(room.game);
+      let newRoomState;
+      await mongoose.connection.transaction(async (session) => {
+        room = await Room.findById(id).populate('latestState').session(session);
+        room.playerQuit(userId);
+        const prevRoomState = room.latestState;
+        const creatorQuitRoomState = userCode.playerQuit(userId, room, prevRoomState);
+        newRoomState = await applyCreatorResult(prevRoomState, room, creatorQuitRoomState, session);
+      });
+      // publishing message is not part of the transaction because subscribers can
+      // receive the message before mongodb updates the database
+      io.to(room.id).emit('room:latestState', newRoomState.toJSON());
+      await room.populate('players').populate('latestState').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
+      res.status(StatusCodes.OK).json({ room });
+    } catch (err) {
+      if (err instanceof RoomFinishedError) {
+        err.status = StatusCodes.BAD_REQUEST;
+      } else if (err instanceof UserNotInRoomError) {
+        err.status = StatusCodes.BAD_REQUEST;
+      }
+      throw err;
     }
   }));
 
@@ -195,7 +243,11 @@ function setupRouter({ io }) {
       }),
     }), asyncHandler(async (req, res) => {
       const { id } = req.params;
-      const room = await Room.findById(id).populate('latestState').populate('users').populate('game')
+      const room = await Room.findById(id)
+        .populate('latestState')
+        .populate('players')
+        .populate('inactivePlayers')
+        .populate('game')
         .populate({ path: 'game', populate: { path: 'creator' } });
       res.status(StatusCodes.OK).json({ room });
     }));

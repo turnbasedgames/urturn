@@ -13,5 +13,6 @@ module.exports = (err, req, res, next) => {
   } else {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR);
   }
+  // TOOD: this is a potential security vulnerability where clients can see full error message
   res.json(err);
 };

@@ -23,10 +23,12 @@ async function spawnServer(env, api) {
   return server;
 }
 
-async function spawnApp(defaultMongoEnv, defaultRedisEnv) {
+async function spawnApp(defaultMongoEnv, defaultRedisEnv, ignoreProcessEnv) {
   const env = {
     PATH: process.env.PATH,
     PORT: await getPort(),
+    // testing behavior during db failures will surface faster with a lower timeout
+    MONGODB_SERVER_SELECTION_TIMEOUT_MS: 1000,
   };
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     env.GOOGLE_APPLICATION_CREDENTIALS = process.env.GOOGLE_APPLICATION_CREDENTIALS;
@@ -35,8 +37,8 @@ async function spawnApp(defaultMongoEnv, defaultRedisEnv) {
     env.GOOGLE_APPLICATION_CREDENTIALS_BASE64 = process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64;
   }
 
-  const [envWithMongo, cleanupMongoDB] = await setupMongoDB(defaultMongoEnv);
-  const [envWithRedis, cleanupRedis] = await setupRedis(defaultRedisEnv);
+  const [envWithMongo, cleanupMongoDB] = await setupMongoDB(defaultMongoEnv, ignoreProcessEnv);
+  const [envWithRedis, cleanupRedis] = await setupRedis(defaultRedisEnv, ignoreProcessEnv);
 
   const baseURL = `http://localhost:${env.PORT}`;
   const api = axios.create({ baseURL });
@@ -47,7 +49,10 @@ async function spawnApp(defaultMongoEnv, defaultRedisEnv) {
     baseURL,
     envWithMongo,
     envWithRedis,
+    cleanupRedis,
+    cleanupMongoDB,
     cleanup: async () => {
+      // TODO: cleanup users created in firebase
       server.kill();
       await cleanupMongoDB();
       await cleanupRedis();

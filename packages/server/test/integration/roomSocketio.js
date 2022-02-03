@@ -8,7 +8,7 @@ const { createUserCred } = require('../util/firebase');
 const {
   createUserAndAssert, createGameAndAssert, createRoomAndAssert, startTicTacToeRoom,
 } = require('../util/api_util');
-const { waitFor } = require('../util/util');
+const { waitFor, createOrUpdateSideApps } = require('../util/util');
 
 async function createSocketAndWatchRoom(baseURL, room) {
   const socket = io(baseURL);
@@ -49,7 +49,7 @@ test.after.always(async (t) => {
   const { app, sideApps } = t.context;
   await app.cleanup();
   if (sideApps) {
-    await Promise.all(sideApps.map((a) => a.cleanup()));
+    await sideApps.cleanup();
   }
 });
 
@@ -67,11 +67,12 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
 
   const { data: { room: resRoom }, status } = await api.post(`/room/${room.id}/join`, {},
     { headers: { authorization: await userCredTwo.user.getIdToken() } });
-  t.is(status, StatusCodes.CREATED);
+  t.is(status, StatusCodes.OK);
   t.deepEqual(resRoom, {
     id: room.id,
     game,
     joinable: false,
+    finished: false,
     latestState: {
       id: resRoom.latestState.id,
       version: 1,
@@ -94,12 +95,12 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
             null,
           ],
         ],
-        plrs: [userOne.id, userTwo.id],
         state: 'IN_GAME',
         winner: null,
       },
     },
-    users: [userOne, userTwo],
+    players: [userOne, userTwo],
+    inactivePlayers: [],
   });
 
   await assertNextSocketLatestState(t, sockets, {
@@ -107,7 +108,6 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
     version: 1,
     state: {
       board: [[null, null, null], [null, null, null], [null, null, null]],
-      plrs: [userOne.id, userTwo.id],
       state: 'IN_GAME',
       winner: null,
     },
@@ -122,7 +122,6 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
     version: 2,
     state: {
       board: [['X', null, null], [null, null, null], [null, null, null]],
-      plrs: [userOne.id, userTwo.id],
       state: 'IN_GAME',
       winner: null,
     },
@@ -137,7 +136,6 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
     version: 3,
     state: {
       board: [['X', 'O', null], [null, null, null], [null, null, null]],
-      plrs: [userOne.id, userTwo.id],
       state: 'IN_GAME',
       winner: null,
     },
@@ -147,7 +145,7 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
 test('sockets can unwatch a room to no longer receive room:latestState events when state changes', async (t) => {
   const { api, baseURL } = t.context.app;
   const {
-    userOne, userTwo, userCredOne, userCredTwo, room,
+    userCredOne, userCredTwo, room,
   } = await startTicTacToeRoom(t);
   const socket1 = await createSocketAndWatchRoom(baseURL, room);
   const socket2 = await createSocketAndWatchRoom(baseURL, room);
@@ -161,7 +159,6 @@ test('sockets can unwatch a room to no longer receive room:latestState events wh
     version: 2,
     state: {
       board: [['X', null, null], [null, null, null], [null, null, null]],
-      plrs: [userOne.id, userTwo.id],
       state: 'IN_GAME',
       winner: null,
     },
@@ -178,7 +175,6 @@ test('sockets can unwatch a room to no longer receive room:latestState events wh
     version: 3,
     state: {
       board: [['X', 'O', null], [null, null, null], [null, null, null]],
-      plrs: [userOne.id, userTwo.id],
       state: 'IN_GAME',
       winner: null,
     },
@@ -189,7 +185,6 @@ test('sockets can unwatch a room to no longer receive room:latestState events wh
     version: 3,
     state: {
       board: [['X', 'O', null], [null, null, null], [null, null, null]],
-      plrs: [userOne.id, userTwo.id],
       state: 'IN_GAME',
       winner: null,
     },
@@ -200,9 +195,11 @@ test('sockets can be connected to different nodejs instances and receive events 
   const { app } = t.context;
   const sideApps = await Promise.all([...Array(3).keys()]
     .map(() => spawnApp(app.envWithMongo, app.envWithRedis)));
+  createOrUpdateSideApps(t, sideApps);
+
   const { api } = app;
   const {
-    userOne, userTwo, userCredOne, userCredTwo, room,
+    userCredOne, userCredTwo, room,
   } = await startTicTacToeRoom(t);
   const sockets = await Promise.all([...Array(10).keys()].map((_, index) => {
     const apps = [app, ...sideApps];
@@ -218,7 +215,6 @@ test('sockets can be connected to different nodejs instances and receive events 
     version: 2,
     state: {
       board: [['X', null, null], [null, null, null], [null, null, null]],
-      plrs: [userOne.id, userTwo.id],
       state: 'IN_GAME',
       winner: null,
     },
@@ -233,7 +229,6 @@ test('sockets can be connected to different nodejs instances and receive events 
     version: 3,
     state: {
       board: [['X', 'O', null], [null, null, null], [null, null, null]],
-      plrs: [userOne.id, userTwo.id],
       state: 'IN_GAME',
       winner: null,
     },

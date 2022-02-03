@@ -1,4 +1,4 @@
-class RoomNotJoinable extends Error {
+class RoomNotJoinableError extends Error {
   constructor(room) {
     super(`${room.id} is not joinable!`);
     this.name = 'RoomNotJoinable';
@@ -12,4 +12,4 @@ class RoomNotJoinable extends Error {
   }
 }
 
-module.exports = RoomNotJoinable;
+module.exports = RoomNotJoinableError;

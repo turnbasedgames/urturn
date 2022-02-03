@@ -22,13 +22,13 @@ function waitFor(testAsyncFunc, timeoutMs = 10000, bufferMs = 200, errorMsg = 'T
 }
 
 function makePersistentDependencyFn(name, envField, setupFunc) {
-  return async (defaultEnv) => {
+  return async (defaultEnv, ignoreProcessEnv) => {
     if (defaultEnv) {
       logger.info(`skipping starting local ${name} (using provided default)...`);
       return [defaultEnv,
         () => { logger.info(`skipping killing local ${name} instance.`); }];
     }
-    if (process.env[envField]) {
+    if (!ignoreProcessEnv && process.env[envField]) {
       logger.info(`skipping starting local ${name} (using uri specified in .env)...`);
       return [{ [envField]: process.env[envField] },
         () => { logger.info(`skipping killing local ${name} instance.`); }];
@@ -40,6 +40,19 @@ function makePersistentDependencyFn(name, envField, setupFunc) {
       await cleanupFunc();
     }];
   };
+}
+
+function createOrUpdateSideApps(t, newApps) {
+  /* eslint-disable no-param-reassign */
+  if (t.context.sideApps) {
+    t.context.sideApps.apps = [...t.context.sideApps.apps, ...newApps];
+  } else {
+    t.context.sideApps = {
+      apps: newApps,
+      cleanup: async () => Promise.all(t.context.sideApps.map((a) => a.cleanup())),
+    };
+  }
+  /* eslint-enable no-param-reassign */
 }
 
 const setupMongoDB = makePersistentDependencyFn('MongoDB', 'MONGODB_CONNECTION_URL',
@@ -59,4 +72,6 @@ const setupRedis = makePersistentDependencyFn('Redis', 'REDIS_CONNECTION_URL',
     return [uri, async () => { await redisServer.stop(); }];
   });
 
-module.exports = { waitFor, setupMongoDB, setupRedis };
+module.exports = {
+  waitFor, setupMongoDB, setupRedis, createOrUpdateSideApps,
+};

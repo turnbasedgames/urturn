@@ -1,5 +1,5 @@
 function addKVToObjectFactoryFn(filteredKeys) {
-  return function addKVTobjectFn(obj) {
+  return function addKVToObjectFn(obj) {
     const curObj = this;
     filteredKeys.forEach((key) => {
       if (key in obj) {
@@ -9,6 +9,18 @@ function addKVToObjectFactoryFn(filteredKeys) {
   };
 }
 
+function getKVToObjectFactoryFn(filteredKeys) {
+  return function getKVT() {
+    return filteredKeys.reduce((curObj, key) => {
+      if (key in this) {
+        return { ...curObj, [key]: this[key] };
+      }
+      return curObj;
+    }, {});
+  };
+}
+
 module.exports = {
   addKVToObjectFactoryFn,
+  getKVToObjectFactoryFn,
 };

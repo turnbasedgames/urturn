@@ -2,11 +2,35 @@ const { NodeVM } = require('vm2');
 const axios = require('axios');
 
 const logger = require('../../logger');
-const { CreatorInvalidMove } = require('./errors');
+const { CreatorInvalidMoveError } = require('./errors');
 
 class UserCode {
   constructor(userCodeRaw) {
     this.userCodeRaw = userCodeRaw;
+  }
+
+  static async fromGame(game) {
+    logger.info('getting game code', { url: game.githubURL, id: game.id });
+    const githubURL = new URL(game.githubURL);
+    const [owner, repo] = githubURL.pathname.match(/[^/]+/g);
+    const url = `https://raw.githubusercontent.com/${owner}/${repo}/${game.commitSHA}/index.js`;
+    const { data: userCodeRawStr } = await axios.get(url);
+    const vm = new NodeVM({});
+    vm.on('console.log', (data) => {
+      logger.info('user code:', { data });
+    });
+    const userCodeRaw = vm.run(userCodeRawStr);
+    const userCode = new UserCode(userCodeRaw);
+    return userCode;
+  }
+
+  static getCreatorRoomState(room, roomState) {
+    // there is some type data loss (https://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-deep-clone-an-object-in-javascript),
+    // but converts types into standardized JSON for creator code
+    return JSON.parse(JSON.stringify({
+      ...room.getCreatorDataView(),
+      ...roomState.getCreatorDataView(),
+    }));
   }
 
   startRoom() {
@@ -15,46 +39,46 @@ class UserCode {
     return newRoomState;
   }
 
-  // TODO: roomState doesn't include joinable value or other keys in Room
-  //       we should apply those previous values to the roomState
-  joinPlayer(plrId, roomState) {
-    const roomStateJSON = roomState.toJSON();
-    logger.info('user code join player', roomStateJSON);
-    const newRoomState = this.userCodeRaw.onPlayerJoin({}, plrId, roomStateJSON);
+  playerJoin(plrId, room, roomState) {
+    const creatorRoomState = UserCode.getCreatorRoomState(room, roomState);
+    logger.info('user code join player', creatorRoomState);
+    const newRoomState = this.userCodeRaw.onPlayerJoin(
+      plrId,
+      creatorRoomState,
+    );
     logger.info('user code join player result', newRoomState);
     return newRoomState;
   }
 
-  playerMove(plrId, move, roomState) {
-    const roomStateJSON = roomState.toJSON();
-    logger.info('user code player move', roomStateJSON);
+  playerQuit(plrId, room, roomState) {
+    const creatorRoomState = UserCode.getCreatorRoomState(room, roomState);
+    logger.info('user code player quit', creatorRoomState);
+    const newRoomState = this.userCodeRaw.onPlayerQuit(
+      plrId,
+      creatorRoomState,
+    );
+    logger.info('user code player quit result', newRoomState);
+    return newRoomState;
+  }
+
+  playerMove(plrId, move, room, roomState) {
+    const creatorRoomState = UserCode.getCreatorRoomState(room, roomState);
+    logger.info('user code player move', creatorRoomState);
     try {
-      const newRoomState = this.userCodeRaw.onPlayerMove({}, plrId, move, roomStateJSON);
+      const newRoomState = this.userCodeRaw.onPlayerMove(
+        plrId,
+        move,
+        creatorRoomState,
+      );
       logger.info('user code player move result', newRoomState);
       return newRoomState;
     } catch (error) {
       if (error.name) {
-        throw new CreatorInvalidMove(error.name, error.message);
+        throw new CreatorInvalidMoveError(error.name, error.message);
       }
       throw error;
     }
   }
 }
 
-async function getUserCode(game) {
-  logger.info('getting game code', { url: game.githubURL, id: game.id });
-  const githubURL = new URL(game.githubURL);
-  const [owner, repo] = githubURL.pathname.match(/[^/]+/g);
-  const url = `https://raw.githubusercontent.com/${owner}/${repo}/${game.commitSHA}/index.js`;
-  const { data: userCodeRawStr } = await axios.get(url);
-
-  const vm = new NodeVM({});
-  vm.on('console.log', (data) => {
-    logger.info('user code:', { data });
-  });
-  const userCodeRaw = vm.run(userCodeRawStr);
-  const userCode = new UserCode(userCodeRaw);
-  return userCode;
-}
-
-module.exports = { getUserCode };
+module.exports = UserCode;

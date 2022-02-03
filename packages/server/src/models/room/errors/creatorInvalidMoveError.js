@@ -1,4 +1,4 @@
-class CreatorInvalidMove extends Error {
+class CreatorInvalidMoveError extends Error {
   constructor(name, message) {
     super('Creator code threw an InvalidMove error');
     this.name = 'CreatorInvalidMove';
@@ -15,4 +15,4 @@ class CreatorInvalidMove extends Error {
   }
 }
 
-module.exports = CreatorInvalidMove;
+module.exports = CreatorInvalidMoveError;

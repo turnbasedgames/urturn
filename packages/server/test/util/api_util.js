@@ -7,7 +7,7 @@ async function createGameAndAssert(t, api, userCred, user) {
   const gameRaw = {
     name: `integration-tests-${uuidv4()}`,
     description: 'test description',
-    commitSHA: 'c122fa0c061f4833865cd6bfe9b9d97b0255c754',
+    commitSHA: '0f768bc1d74e804b73d81f290f14c86721c9cc90',
     githubURL: 'https://github.com/turnbasedgames/tictactoe',
   };
   const authToken = await userCred.user.getIdToken();
@@ -34,7 +34,7 @@ async function createRoomAndAssert(t, api, userCred, game, user) {
   t.is(status, StatusCodes.CREATED);
   t.deepEqual(room.game, game);
   t.is(room.joinable, true);
-  t.deepEqual(room.users, [user]);
+  t.deepEqual(room.players, [user]);
   t.deepEqual(room.latestState.state, {
     board: [
       [
@@ -53,7 +53,6 @@ async function createRoomAndAssert(t, api, userCred, game, user) {
         null,
       ],
     ],
-    plrs: [user.id],
     state: 'NOT_STARTED',
     winner: null,
   });
@@ -71,10 +70,10 @@ async function startTicTacToeRoom(t) {
   const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
   const { data: { room: resRoom }, status } = await api.post(`/room/${room.id}/join`, {},
     { headers: { authorization: authTokenTwo } });
-  t.is(status, StatusCodes.CREATED);
+  t.is(status, StatusCodes.OK);
   t.deepEqual(resRoom.game, game);
   t.is(resRoom.joinable, false);
-  t.deepEqual(resRoom.users, [userOne, userTwo]);
+  t.deepEqual(resRoom.players, [userOne, userTwo]);
   t.deepEqual(resRoom.latestState.state, {
     board: [
       [
@@ -93,7 +92,6 @@ async function startTicTacToeRoom(t) {
         null,
       ],
     ],
-    plrs: [userOne.id, userTwo.id],
     state: 'IN_GAME',
     winner: null,
   });

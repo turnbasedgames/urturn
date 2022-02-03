@@ -2,9 +2,10 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-const { addKVToObjectFactoryFn } = require('./util');
+const { addKVToObjectFactoryFn, getKVToObjectFactoryFn } = require('./util');
 
-const USER_EDITABLE_KEYS = new Set(['state']);
+const CREATOR_EDITABLE_KEYS = ['state'];
+const CREATOR_VIEWABLE_KEYS = [...CREATOR_EDITABLE_KEYS, 'version'];
 const RoomStateSchema = new Schema({
   room: {
     type: Schema.Types.ObjectId,
@@ -33,6 +34,7 @@ RoomStateSchema.method('toJSON', function toJSON() {
     version: this.version,
   };
 });
-RoomStateSchema.method('applyCreatorData', addKVToObjectFactoryFn(USER_EDITABLE_KEYS));
+RoomStateSchema.method('applyCreatorData', addKVToObjectFactoryFn(CREATOR_EDITABLE_KEYS));
+RoomStateSchema.method('getCreatorDataView', getKVToObjectFactoryFn(CREATOR_VIEWABLE_KEYS));
 
 module.exports = mongoose.model('RoomState', RoomStateSchema);

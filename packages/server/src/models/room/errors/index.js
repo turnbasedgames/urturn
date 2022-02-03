@@ -1,4 +1,8 @@
-const CreatorInvalidMove = require('./creatorInvalidMove');
-const RoomNotJoinable = require('./roomNotJoinable');
+const CreatorInvalidMoveError = require('./creatorInvalidMoveError');
+const RoomNotJoinableError = require('./roomNotJoinableError');
+const RoomFinishedError = require('./roomFinishedError');
+const UserNotInRoomError = require('./userNotInRoomError');
 
-module.exports = { CreatorInvalidMove, RoomNotJoinable };
+module.exports = {
+  CreatorInvalidMoveError, UserNotInRoomError, RoomFinishedError, RoomNotJoinableError,
+};

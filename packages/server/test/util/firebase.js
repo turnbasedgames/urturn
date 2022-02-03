@@ -14,7 +14,14 @@ async function createUserCred() {
 
 async function deleteAllUsers() {
   const { users } = await admin.auth().listUsers();
-  await Promise.all(users.map((user) => admin.auth().deleteUser(user.uid)));
+  // limit the concurrency used for user deletion to prevent rate limits
+  const maxDeleteConcurrency = 5;
+  /* eslint-disable no-await-in-loop */
+  for (let i = 0; i < users.length; i += maxDeleteConcurrency) {
+    await Promise.all(users.slice(i, i + maxDeleteConcurrency)
+      .map((user) => admin.auth().deleteUser(user.uid)));
+  }
+  /* eslint-enabled no-await-in-loop */
 }
 
 module.exports = {

@@ -11,6 +11,7 @@ pubClient.on('ready', () => {
   logger.info('redis client is ready');
 });
 
+// TODO: fix the error message "missing 'error' handler on this Redis client"
 pubClient.on('error', (error) => {
   logger.error('redis error', { error });
 });
