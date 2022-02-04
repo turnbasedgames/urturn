@@ -23,7 +23,6 @@ interface Props {
 const IFrame = ({
   room,
 }: Props) => {
-  console.log('rerender');
   const roomId = room.id;
   const { game: { githubURL, commitSHA } } = room;
   const parsedGithubURL = new URL(githubURL);

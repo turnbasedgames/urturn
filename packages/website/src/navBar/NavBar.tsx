@@ -5,19 +5,20 @@ import {
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import PersonIcon from '@mui/icons-material/Person';
 import { useHistory } from 'react-router-dom';
 
-import { User } from '../models/user';
 import Search from './search';
+import withUser from '../withUser';
+import { User } from '../models/user';
 
 type Props = {
-  setUser: React.Dispatch<React.SetStateAction<User | null>>
+  user: User | null,
 };
 
-const NavBar = ({ setUser }: Props) => {
-  const firebaseUser = firebase.auth().currentUser;
-  const userLoggedIn = !(firebaseUser === null || firebaseUser.isAnonymous);
+const NavBar = ({ user }: Props) => {
   const history = useHistory();
+  const signedIn = user && !user.firebaseUser.isAnonymous;
 
   return (
     <AppBar position="sticky">
@@ -48,7 +49,7 @@ const NavBar = ({ setUser }: Props) => {
             alignItems="center"
             flexGrow="1"
           >
-            {userLoggedIn
+            {signedIn
               ? (
                 <>
                   <IconButton
@@ -58,15 +59,13 @@ const NavBar = ({ setUser }: Props) => {
                   >
                     <AddBoxIcon />
                   </IconButton>
-                  <Button
+                  <IconButton
                     onClick={() => {
-                      setUser(null);
-                      firebase.auth().signOut();
+                      history.push('/profile');
                     }}
-                    variant="outlined"
                   >
-                    Sign Out
-                  </Button>
+                    <PersonIcon />
+                  </IconButton>
                 </>
               )
               : (
@@ -88,4 +87,4 @@ const NavBar = ({ setUser }: Props) => {
   );
 };
 
-export default NavBar;
+export default withUser(NavBar);

@@ -17,7 +17,7 @@ export interface RoomState {
 export interface Room {
   id: string
   game: Game,
-  users: User[],
+  players: User[],
   joinable: Boolean
   latestState: RoomState,
 }
@@ -27,9 +27,14 @@ export const joinRoom = async (roomId: String): Promise<Room> => {
   return res.data.room;
 };
 
+export const quitRoom = async (roomId: String): Promise<Room> => {
+  const res = await axios.post(`/api/room/${roomId}/quit`);
+  return res.data.room;
+};
+
 export const makeMove = async (roomId: String, move: any) => {
   const res = await axios.post(`/api/room/${roomId}/move`, move);
-  return res;
+  return res.data.room;
 };
 
 export const createRoom = async (gameId: String): Promise<Room> => {
@@ -37,12 +42,16 @@ export const createRoom = async (gameId: String): Promise<Room> => {
   return res.data.room;
 };
 
-export const getRooms = async (
-  gameId: String,
-  joinable: Boolean = true,
-  omitUser?: String,
-): Promise<Room[]> => {
-  const res = await axios.get('/api/room', { params: { gameId, joinable, omitUser } });
+export type RoomsQuery = {
+  gameId?: String,
+  joinable?: Boolean,
+  omitPlayer?: String,
+  containsPlayer?: String,
+  containsInactivePlayer?: String,
+};
+
+export const getRooms = async (query: RoomsQuery): Promise<Room[]> => {
+  const res = await axios.get('/api/room', { params: { ...query } });
   return res.data.rooms;
 };
 
@@ -60,7 +69,7 @@ export const joinOrCreateRoom = async (gameId: String, userId: String): Promise<
   /* eslint-disable no-await-in-loop */
   while (tries < maxRetries) {
     try {
-      const roomsRaw = await getRooms(gameId, true, userId);
+      const roomsRaw = await getRooms({ gameId, joinable: true, omitPlayer: userId });
       if (roomsRaw && roomsRaw.length === 0) {
         const newRoom = await createRoom(gameId);
         return newRoom;

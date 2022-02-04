@@ -22,6 +22,7 @@ const GameCardActions = ({ game, onDelete, onUpdate }: Props) => {
   const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
   const open = Boolean(anchorEl);
   const handleClick = (event: any) => {
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
@@ -84,6 +85,8 @@ const GameCardActions = ({ game, onDelete, onUpdate }: Props) => {
                 aria-label="github"
                 rel="noreferrer"
                 target="_blank"
+                onMouseDown={(event) => event.stopPropagation()}
+                onClick={(event) => event.stopPropagation()}
               >
                 <GitHubIcon />
               </IconButton>
@@ -93,6 +96,7 @@ const GameCardActions = ({ game, onDelete, onUpdate }: Props) => {
                   aria-haspopup="true"
                   aria-expanded={open ? 'true' : undefined}
                   aria-label="settings"
+                  onMouseDown={(event) => event.stopPropagation()}
                   onClick={handleClick}
                 >
                   <MoreVertIcon />
@@ -111,7 +115,6 @@ const GameCardActions = ({ game, onDelete, onUpdate }: Props) => {
                   vertical: 'top',
                   horizontal: 'right',
                 }}
-                elevation={0}
               >
                 <MenuItem
                   dense

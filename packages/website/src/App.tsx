@@ -16,6 +16,7 @@ import NavBar from './navBar';
 import GameView from './gameView';
 import { getUser, User, UserContext } from './models/user';
 import CreatorView from './creatorView';
+import ProfileView from './profileView';
 
 const firebaseConfig = process.env.REACT_APP_FIREBASE_CONFIG as string;
 firebase.initializeApp(JSON.parse(Buffer.from(firebaseConfig, 'base64').toString('ascii')));
@@ -56,7 +57,7 @@ function App() {
       >
         <UserContext.Provider value={{ user, setUser }}>
           <Router>
-            <NavBar setUser={setUser} />
+            <NavBar />
             <Switch>
               <Route exact path="/">
                 <Redirect to="/games" />
@@ -65,7 +66,10 @@ function App() {
                 <GameView />
               </Route>
               <Route path="/develop">
-                {user && (user.firebaseUser.isAnonymous ? <Redirect to="/games" /> : <CreatorView user={user} />)}
+                <CreatorView />
+              </Route>
+              <Route path="/profile">
+                <ProfileView />
               </Route>
             </Switch>
           </Router>

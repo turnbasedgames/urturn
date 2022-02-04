@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Card, CardContent, CardMedia, List, ListItem, Paper, Typography,
+  Card, CardActionArea, CardContent, CardMedia, List, ListItem, Stack, Typography,
 } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { Game, getGames } from '../../models/game';
@@ -17,19 +17,16 @@ const GameList = () => {
   const history = useHistory();
 
   return (
-    <Paper
-      square
-      sx={{
-        height: '100%',
-        padding: 2,
-        overflow: 'hidden',
-      }}
+    <Stack
+      direction="column"
+      padding={2}
     >
-      <Typography>
+      <Typography color="text.primary">
         All Games
       </Typography>
       <List
         sx={{
+          width: '100%',
           overflow: 'auto',
           display: 'flex',
           flexDirection: 'row',
@@ -42,27 +39,29 @@ const GameList = () => {
             key={`GameListItem-${game.id}`}
           >
             <Card // TODO: separate component
-              onClick={() => history.push(`/games/${game.id}`)}
               key={`GameCard-${game.id}`}
-              style={{ backgroundColor: 'transparent', border: 'none' }}
             >
-              <CardMedia
-                component="img"
-                height="140"
-                image="https://images.unsplash.com/photo-1570989614585-581ee5f7e165?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80"
-                alt={game.name}
-              />
-              <CardContent>
-                <Typography noWrap>{game.name}</Typography>
-                <Typography noWrap>
-                  {`by: ${game.creator.id}`}
-                </Typography>
-              </CardContent>
+              <CardActionArea
+                onClick={() => history.push(`/games/${game.id}`)}
+              >
+                <CardMedia
+                  component="img"
+                  height="140"
+                  image="https://images.unsplash.com/photo-1570989614585-581ee5f7e165?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80"
+                  alt={game.name}
+                />
+                <CardContent>
+                  <Typography noWrap>{game.name}</Typography>
+                  <Typography noWrap>
+                    {`by: ${game.creator.id}`}
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
             </Card>
           </ListItem>
         ))}
       </List>
-    </Paper>
+    </Stack>
   );
 };
 

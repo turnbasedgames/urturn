@@ -1,5 +1,5 @@
 import {
-  Button, LinearProgress, Paper, Stack, Typography,
+  Button, LinearProgress, Stack, Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -8,6 +8,7 @@ import GameEditor from '../gameEditor';
 import DevGameCard from './DevGameCard';
 import { Game, getGames } from '../models/game';
 import { User } from '../models/user';
+import withUser from '../withUser';
 
 type Props = {
   user: User,
@@ -27,7 +28,7 @@ const CreatorView = ({ user } : Props) => {
   }, []);
 
   return (
-    <Paper square sx={{ height: '100%', width: '100%' }}>
+    <Stack direction="column">
       <LinearProgress sx={{
         position: 'relative',
         visibility: gamesLoading ? 'visible' : 'hidden',
@@ -86,8 +87,8 @@ const CreatorView = ({ user } : Props) => {
           ))}
         </Stack>
       </Stack>
-    </Paper>
+    </Stack>
   );
 };
 
-export default CreatorView;
+export default withUser(CreatorView, { redirectOnAnonymous: true });
