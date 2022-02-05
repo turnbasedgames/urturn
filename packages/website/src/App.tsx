@@ -40,8 +40,12 @@ function App() {
       if (!firebaseUser) {
         firebase.auth().signInAnonymously();
       } else {
-        const currentUser = await getUser(firebaseUser, true);
-        setUser(currentUser);
+        try {
+          const currentUser = await getUser(firebaseUser, true);
+          setUser(currentUser);
+        } catch (err) {
+          // TODO: snackbar error with link to our discord?
+        }
       }
     });
 

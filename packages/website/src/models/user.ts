@@ -3,8 +3,13 @@ import firebase from 'firebase/app';
 import { createContext } from 'react';
 import { StatusCodes } from 'http-status-codes';
 
+export enum Errors {
+  UserNotFound = 'UserNotFound',
+}
+
 export interface User {
   id: string,
+  username: string,
   firebaseID: string,
   firebaseUser: firebase.User
   signInProvider: string,

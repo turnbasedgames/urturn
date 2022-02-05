@@ -19,18 +19,67 @@ type Props = {
 const NavBar = ({ user }: Props) => {
   const history = useHistory();
   const signedIn = user && !user.firebaseUser.isAnonymous;
+  const firebaseUserDetermined = Boolean(firebase.auth().currentUser);
+
+  let userPanel;
+  if (signedIn) {
+    userPanel = (
+      <>
+        <IconButton
+          onClick={() => {
+            history.push('/develop');
+          }}
+        >
+          <AddBoxIcon />
+        </IconButton>
+        <IconButton
+          onClick={() => {
+            history.push('/profile');
+          }}
+        >
+          <PersonIcon />
+        </IconButton>
+      </>
+    );
+  } else if (firebaseUserDetermined) {
+    userPanel = (
+      <>
+        <Button
+          onClick={(ev) => {
+            ev.preventDefault();
+            const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(googleAuthProvider);
+          }}
+          variant="outlined"
+        >
+          Sign In
+        </Button>
+        <Button
+          onClick={(ev) => {
+            ev.preventDefault();
+            const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(googleAuthProvider);
+          }}
+          variant="contained"
+        >
+          Sign Up
+        </Button>
+      </>
+    );
+  } else {
+    userPanel = <div />;
+  }
 
   return (
     <AppBar position="sticky">
       <Toolbar>
         <Stack
-          flexGrow="1"
+          width="100%"
           direction="row"
-          justifyContent="space-between"
           alignItems="center"
         >
           <Stack
-            flexGrow="1"
+            flex="1"
             direction="row"
             justifyContent="flex-start"
             alignItems="center"
@@ -44,42 +93,13 @@ const NavBar = ({ user }: Props) => {
           </Stack>
           <Search />
           <Stack
+            flex="1"
             direction="row"
             justifyContent="flex-end"
             alignItems="center"
-            flexGrow="1"
+            spacing={1}
           >
-            {signedIn
-              ? (
-                <>
-                  <IconButton
-                    onClick={() => {
-                      history.push('/develop');
-                    }}
-                  >
-                    <AddBoxIcon />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => {
-                      history.push('/profile');
-                    }}
-                  >
-                    <PersonIcon />
-                  </IconButton>
-                </>
-              )
-              : (
-                <Button
-                  onClick={(ev) => {
-                    ev.preventDefault();
-                    const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
-                    firebase.auth().signInWithPopup(googleAuthProvider);
-                  }}
-                  variant="contained"
-                >
-                  Sign In
-                </Button>
-              )}
+            {userPanel}
           </Stack>
         </Stack>
       </Toolbar>

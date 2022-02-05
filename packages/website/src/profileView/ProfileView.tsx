@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Button, Card, CardActionArea, CardHeader, LinearProgress, Paper, Stack, Tab, Tabs,
 } from '@mui/material';
@@ -20,6 +19,19 @@ enum ProfileTab {
   Active = 0,
   Inactive,
 }
+
+const capitalizeUsername = (username: string): string => {
+  let newUsername = username[0].toLocaleUpperCase();
+  for (let index = 1; index < username.length; index += 1) {
+    const curChar = username[index];
+    if (username[index - 1] === '_') {
+      newUsername += curChar.toLocaleUpperCase();
+    } else {
+      newUsername += curChar;
+    }
+  }
+  return newUsername;
+};
 
 const ProfileView = ({ user, setUser }: Props) => {
   const history = useHistory();
@@ -62,7 +74,9 @@ const ProfileView = ({ user, setUser }: Props) => {
       >
         <Card>
           <CardHeader
-            title={`UserId: ${user.id}`}
+            // TODO: handle updating username
+            title={capitalizeUsername(user.username)}
+            subheader={`id: ${user.id}`}
             action={(
               <Button
                 onClick={() => {
