@@ -194,7 +194,7 @@ test('sockets can unwatch a room to no longer receive room:latestState events wh
 test('sockets can be connected to different nodejs instances and receive events for room:latestState', async (t) => {
   const { app } = t.context;
   const sideApps = await Promise.all([...Array(3).keys()]
-    .map(() => spawnApp(app.envWithMongo, app.envWithRedis)));
+    .map(() => spawnApp({ defaultMongoEnv: app.envWithMongo, defaultRedisEnv: app.envWithRedis })));
   createOrUpdateSideApps(t, sideApps);
 
   const { api } = app;

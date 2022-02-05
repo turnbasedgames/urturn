@@ -22,16 +22,18 @@ function waitFor(testAsyncFunc, timeoutMs = 10000, bufferMs = 200, errorMsg = 'T
 }
 
 function makePersistentDependencyFn(name, envField, setupFunc) {
-  return async (defaultEnv, ignoreProcessEnv) => {
-    if (defaultEnv) {
-      logger.info(`skipping starting local ${name} (using provided default)...`);
-      return [defaultEnv,
-        () => { logger.info(`skipping killing local ${name} instance.`); }];
-    }
-    if (!ignoreProcessEnv && process.env[envField]) {
-      logger.info(`skipping starting local ${name} (using uri specified in .env)...`);
-      return [{ [envField]: process.env[envField] },
-        () => { logger.info(`skipping killing local ${name} instance.`); }];
+  return async (defaultEnv, forceCreate) => {
+    if (!forceCreate) {
+      if (defaultEnv) {
+        logger.info(`skipping starting local ${name} (using provided default)...`);
+        return [defaultEnv,
+          () => { logger.info(`skipping killing local ${name} instance.`); }];
+      }
+      if (process.env[envField]) {
+        logger.info(`skipping starting local ${name} (using uri specified in .env)...`);
+        return [{ [envField]: process.env[envField] },
+          () => { logger.info(`skipping killing local ${name} instance.`); }];
+      }
     }
     const [uri, cleanupFunc] = await setupFunc();
     logger.info(`started local ${name} instance at URI:`, { uri });

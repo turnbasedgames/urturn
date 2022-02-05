@@ -23,7 +23,14 @@ async function spawnServer(env, api) {
   return server;
 }
 
-async function spawnApp(defaultMongoEnv, defaultRedisEnv, ignoreProcessEnv) {
+async function spawnApp(options = {}) {
+  const {
+    defaultMongoEnv,
+    defaultRedisEnv,
+    forceCreatePersistentDependencies,
+    nameDictionary,
+    nameIterations,
+  } = options;
   const env = {
     PATH: process.env.PATH,
     PORT: await getPort(),
@@ -36,9 +43,18 @@ async function spawnApp(defaultMongoEnv, defaultRedisEnv, ignoreProcessEnv) {
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64) {
     env.GOOGLE_APPLICATION_CREDENTIALS_BASE64 = process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64;
   }
-
-  const [envWithMongo, cleanupMongoDB] = await setupMongoDB(defaultMongoEnv, ignoreProcessEnv);
-  const [envWithRedis, cleanupRedis] = await setupRedis(defaultRedisEnv, ignoreProcessEnv);
+  if (nameDictionary !== undefined) {
+    env.NAMES_GENERATOR_DICTIONARY = nameDictionary;
+  }
+  if (nameIterations !== undefined) {
+    env.NAMES_GENERATOR_MAX_ITERATIONS = nameIterations;
+  }
+  const [envWithMongo, cleanupMongoDB] = await setupMongoDB(
+    defaultMongoEnv, forceCreatePersistentDependencies,
+  );
+  const [envWithRedis, cleanupRedis] = await setupRedis(
+    defaultRedisEnv, forceCreatePersistentDependencies,
+  );
 
   const baseURL = `http://localhost:${env.PORT}`;
   const api = axios.create({ baseURL });

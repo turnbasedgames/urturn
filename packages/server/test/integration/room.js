@@ -203,7 +203,7 @@ test('POST /room/:id/move provides error if user tries to make move when not in 
 
 test('POST /room/:id/move provides error if database fails', async (t) => {
   // create a separate app
-  const customApp = await spawnApp(undefined, undefined, true);
+  const customApp = await spawnApp({ forceCreatePersistentDependencies: true });
   createOrUpdateSideApps(t, [customApp]);
   const { api, cleanupMongoDB } = customApp;
   const { userCredOne, room } = await startTicTacToeRoom({

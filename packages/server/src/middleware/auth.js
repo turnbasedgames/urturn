@@ -16,11 +16,9 @@ module.exports = asyncHandler(async (req, res, next) => {
   if (!decodedToken) {
     res.sendStatus(StatusCodes.UNAUTHORIZED);
   } else {
-    logger.info(`firebase id: ${decodedToken.uid}`);
+    logger.info('firebase decodedToken', decodedToken);
     const user = await User.findOne({ firebaseId: decodedToken.uid });
     logger.info(`user found: ${user && user.id}`);
-
-    // TODO: what to do if user is null?
     req.user = user;
     req.decodedToken = decodedToken;
     next();
