@@ -56,9 +56,20 @@ const CreatorView = ({ user } : Props) => {
           >
             Developer Resources
           </Typography>
-          <Button variant="outlined">API Reference</Button>
-          <Button variant="outlined">Forum</Button>
-          <Button variant="outlined">Talk With Us On Discord</Button>
+          <Button
+            href="https://turnbasedgames.github.io/"
+            variant="outlined"
+            target="_blank"
+          >
+            API Reference
+          </Button>
+          <Button
+            variant="outlined"
+            href="https://discord.gg/myWacjdb5S"
+            target="_blank"
+          >
+            Discord
+          </Button>
         </Stack>
         <Stack
           direction="column"
