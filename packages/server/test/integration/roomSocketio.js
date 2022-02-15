@@ -33,7 +33,7 @@ function waitForNextEvent({ messageHistory }) {
 
 async function assertNextLatestState(t, socket, expectedState) {
   const state = await waitForNextEvent(socket);
-  t.deepEqual(state, { id: state.id, ...expectedState });
+  t.deepEqual(state, expectedState);
 }
 
 function assertNextSocketLatestState(t, sockets, expectedState) {
@@ -104,7 +104,9 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
   });
 
   await assertNextSocketLatestState(t, sockets, {
-    room: room.id,
+    finished: false,
+    joinable: false,
+    players: [userOne.id, userTwo.id],
     version: 1,
     state: {
       board: [[null, null, null], [null, null, null], [null, null, null]],
@@ -118,7 +120,9 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
   t.is(statusMove1, StatusCodes.OK);
 
   await assertNextSocketLatestState(t, sockets, {
-    room: room.id,
+    finished: false,
+    joinable: false,
+    players: [userOne.id, userTwo.id],
     version: 2,
     state: {
       board: [['X', null, null], [null, null, null], [null, null, null]],
@@ -132,7 +136,9 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
   t.is(statusMove2, StatusCodes.OK);
 
   await assertNextSocketLatestState(t, sockets, {
-    room: room.id,
+    finished: false,
+    joinable: false,
+    players: [userOne.id, userTwo.id],
     version: 3,
     state: {
       board: [['X', 'O', null], [null, null, null], [null, null, null]],
@@ -145,7 +151,7 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
 test('sockets can unwatch a room to no longer receive room:latestState events when state changes', async (t) => {
   const { api, baseURL } = t.context.app;
   const {
-    userCredOne, userCredTwo, room,
+    userOne, userTwo, userCredOne, userCredTwo, room,
   } = await startTicTacToeRoom(t);
   const socket1 = await createSocketAndWatchRoom(baseURL, room);
   const socket2 = await createSocketAndWatchRoom(baseURL, room);
@@ -155,7 +161,9 @@ test('sockets can unwatch a room to no longer receive room:latestState events wh
   t.is(statusMove1, StatusCodes.OK);
 
   await assertNextSocketLatestState(t, [socket1, socket2], {
-    room: room.id,
+    finished: false,
+    joinable: false,
+    players: [userOne.id, userTwo.id],
     version: 2,
     state: {
       board: [['X', null, null], [null, null, null], [null, null, null]],
@@ -171,7 +179,9 @@ test('sockets can unwatch a room to no longer receive room:latestState events wh
   t.is(statusMove2, StatusCodes.OK);
 
   await assertNextLatestState(t, socket1, {
-    room: room.id,
+    finished: false,
+    joinable: false,
+    players: [userOne.id, userTwo.id],
     version: 3,
     state: {
       board: [['X', 'O', null], [null, null, null], [null, null, null]],
@@ -199,7 +209,7 @@ test('sockets can be connected to different nodejs instances and receive events 
 
   const { api } = app;
   const {
-    userCredOne, userCredTwo, room,
+    userOne, userTwo, userCredOne, userCredTwo, room,
   } = await startTicTacToeRoom(t);
   const sockets = await Promise.all([...Array(10).keys()].map((_, index) => {
     const apps = [app, ...sideApps];
@@ -211,7 +221,9 @@ test('sockets can be connected to different nodejs instances and receive events 
   t.is(statusMove1, StatusCodes.OK);
 
   await assertNextSocketLatestState(t, sockets, {
-    room: room.id,
+    finished: false,
+    joinable: false,
+    players: [userOne.id, userTwo.id],
     version: 2,
     state: {
       board: [['X', null, null], [null, null, null], [null, null, null]],
@@ -225,7 +237,9 @@ test('sockets can be connected to different nodejs instances and receive events 
   t.is(statusMove2, StatusCodes.OK);
 
   await assertNextSocketLatestState(t, sockets, {
-    room: room.id,
+    finished: false,
+    joinable: false,
+    players: [userOne.id, userTwo.id],
     version: 3,
     state: {
       board: [['X', 'O', null], [null, null, null], [null, null, null]],

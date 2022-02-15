@@ -40,7 +40,7 @@ async function applyCreatorResult(prevRoomState, room, creatorRoomState, session
 // TODO: what happens when a game makes a backwards incompatible change to existing rooms?
 // TODO: determine what to do is usercode errors during quitting and/or joining,
 //       moves erroring just returns to userfrontend
-// TODO: on game state change, send creator the actual viewable state
+// TODO: include what caused latest state change in event? e.g. onPlayerMove, or onPlayerJoin
 function setupRouter({ io }) {
   router.get('/',
     celebrate({
@@ -111,7 +111,7 @@ function setupRouter({ io }) {
       await roomState.save({ session });
     });
 
-    io.to(room.id).emit('room:latestState', roomState);
+    io.to(room.id).emit('room:latestState', UserCode.getCreatorRoomState(room, roomState));
     await room.populate('latestState').execPopulate();
     res.status(StatusCodes.CREATED).json({ room });
   }));
@@ -143,7 +143,7 @@ function setupRouter({ io }) {
 
       // publishing message is not part of the transaction because subscribers can
       // receive the message before mongodb updates the database
-      io.to(room.id).emit('room:latestState', newRoomState);
+      io.to(room.id).emit('room:latestState', UserCode.getCreatorRoomState(room, newRoomState));
       await room.populate('players').populate('latestState').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
 
       // TODO: how do we standardized the creatorRoomState
@@ -183,7 +183,7 @@ function setupRouter({ io }) {
       });
       // publishing message is not part of the transaction because subscribers can
       // receive the message before mongodb updates the database
-      io.to(room.id).emit('room:latestState', newRoomState.toJSON());
+      io.to(room.id).emit('room:latestState', UserCode.getCreatorRoomState(room, newRoomState));
       await room.populate('players').populate('latestState').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
       res.status(StatusCodes.OK).json({ room });
     } catch (err) {
@@ -223,7 +223,7 @@ function setupRouter({ io }) {
       });
       // publishing message is not part of the transaction because subscribers can
       // receive the message before mongodb updates the database
-      io.to(room.id).emit('room:latestState', newRoomState.toJSON());
+      io.to(room.id).emit('room:latestState', UserCode.getCreatorRoomState(room, newRoomState));
       await room.populate('players').populate('latestState').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
       res.status(StatusCodes.OK).json({ room });
     } catch (err) {
