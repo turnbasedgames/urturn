@@ -58,7 +58,7 @@ test('POST /user returns 409 if one already exists', async (t) => {
 
 test('POST /user returns 500 if username generation fails', async (t) => {
   // create a separate app to force the only possible username to be "test"
-  const customApp = await spawnApp({ nameDictionary: 'test', nameIterations: 0 });
+  const customApp = await spawnApp({ nameDictionary: 'test', nameIterations: 0, forceCreatePersistentDependencies: true });
   createOrUpdateSideApps(t, [customApp]);
   const { api } = customApp;
 
