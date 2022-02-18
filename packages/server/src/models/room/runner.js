@@ -2,7 +2,7 @@ const { NodeVM } = require('vm2');
 const axios = require('axios');
 
 const logger = require('../../logger');
-const { CreatorInvalidMoveError } = require('./errors');
+const { CreatorError } = require('./errors');
 
 class UserCode {
   constructor(userCodeRaw) {
@@ -33,51 +33,53 @@ class UserCode {
     }));
   }
 
-  startRoom() {
-    const newRoomState = this.userCodeRaw.onRoomStart({});
-    logger.info('user code start room result', newRoomState);
-    return newRoomState;
-  }
-
-  playerJoin(plrId, room, roomState) {
-    const creatorRoomState = UserCode.getCreatorRoomState(room, roomState);
-    logger.info('user code join player', creatorRoomState);
-    const newRoomState = this.userCodeRaw.onPlayerJoin(
-      plrId,
-      creatorRoomState,
-    );
-    logger.info('user code join player result', newRoomState);
-    return newRoomState;
-  }
-
-  playerQuit(plrId, room, roomState) {
-    const creatorRoomState = UserCode.getCreatorRoomState(room, roomState);
-    logger.info('user code player quit', creatorRoomState);
-    const newRoomState = this.userCodeRaw.onPlayerQuit(
-      plrId,
-      creatorRoomState,
-    );
-    logger.info('user code player quit result', newRoomState);
-    return newRoomState;
-  }
-
-  playerMove(plrId, move, room, roomState) {
-    const creatorRoomState = UserCode.getCreatorRoomState(room, roomState);
-    logger.info('user code player move', creatorRoomState);
+  static playerOperation(room, roomState, operation, operationFunc) {
+    logger.info(`Operation: ${operation}`);
+    let creatorRoomState = {};
+    if (room && roomState) {
+      creatorRoomState = UserCode.getCreatorRoomState(room, roomState);
+      logger.info('current creatorRoomState', creatorRoomState);
+    }
     try {
-      const newRoomState = this.userCodeRaw.onPlayerMove(
-        plrId,
-        move,
-        creatorRoomState,
-      );
-      logger.info('user code player move result', newRoomState);
+      const newRoomState = operationFunc(creatorRoomState);
+      logger.info('result creatorRoomState', newRoomState);
       return newRoomState;
     } catch (error) {
       if (error.name) {
-        throw new CreatorInvalidMoveError(error.name, error.message);
+        throw new CreatorError(error.name, error.message);
       }
       throw error;
     }
+  }
+
+  startRoom() {
+    const { userCodeRaw } = this;
+    return UserCode.playerOperation(null, null, 'onRoomStart', () => userCodeRaw.onRoomStart({}));
+  }
+
+  playerJoin(plrId, room, roomState) {
+    const { userCodeRaw } = this;
+    return UserCode.playerOperation(room, roomState, 'onPlayerJoin', (creatorRoomState) => userCodeRaw.onPlayerJoin(
+      plrId,
+      creatorRoomState,
+    ));
+  }
+
+  playerQuit(plrId, room, roomState) {
+    const { userCodeRaw } = this;
+    return UserCode.playerOperation(room, roomState, 'onPlayerQuit', (creatorRoomState) => userCodeRaw.onPlayerQuit(
+      plrId,
+      creatorRoomState,
+    ));
+  }
+
+  playerMove(plrId, move, room, roomState) {
+    const { userCodeRaw } = this;
+    return UserCode.playerOperation(room, roomState, 'onPlayerMove', (creatorRoomState) => userCodeRaw.onPlayerMove(
+      plrId,
+      move,
+      creatorRoomState,
+    ));
   }
 }
 
