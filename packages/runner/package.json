@@ -7,7 +7,7 @@
   "scripts": {
     "start": "localrunner",
     "build": "concurrently \"cd frontend && npm run build\"",
-    "dev": "concurrently \"localrunner -de -t http://localhost:3000\" \"cd frontend && npm start\""
+    "dev": "concurrently \"localrunner -de -t http://localhost:3100\" \"cd frontend && PORT=3100 npm start\""
   },
   "repository": {
     "type": "git",
@@ -22,7 +22,8 @@
   "description": "",
   "dependencies": {
     "commander": "^9.1.0",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "http-status-codes": "^2.2.0"
   },
   "devDependencies": {
     "concurrently": "^7.1.0",
