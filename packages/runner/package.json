@@ -1,12 +1,13 @@
 {
-  "name": "@sarahannali/localrunner",
-  "version": "1.0.8",
-  "main": "bin/index.js",
+  "name": "@turnbasedgames/localrunner",
+  "version": "1.0.8dev0",
   "bin": {
-    "local-runner": "bin/index.js"
+    "localrunner": "bin/localrunner.js"
   },
   "scripts": {
-    "local-runner": "node bin/index.js"
+    "start": "localrunner",
+    "build": "concurrently \"cd frontend && npm run build\"",
+    "dev": "concurrently \"localrunner -de -t http://localhost:3000\" \"cd frontend && npm start\""
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,13 @@
   "homepage": "https://github.com/turnbasedgames/localrunner#readme",
   "description": "",
   "dependencies": {
+    "commander": "^9.1.0",
     "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "concurrently": "^7.1.0",
+    "eslint": "^8.13.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0"
   }
 }
