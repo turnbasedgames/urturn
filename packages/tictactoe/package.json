@@ -1,0 +1,22 @@
+{
+  "name": "tictactoe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "localrunner"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/turnbasedgames/tictactoe.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/turnbasedgames/tictactoe/issues"
+  },
+  "homepage": "https://github.com/turnbasedgames/tictactoe#readme",
+  "dependencies": {
+    "@turnbasedgames/localrunner": "^1.0.8-dev0"
+  }
+}
