@@ -12,9 +12,9 @@ module.exports = {
   setupServer(isEmptyBackend) {
     let backendModule = {
       onRoomStart: () => ({}),
-      onPlayerJoin: () => null,
-      onPlayerMove: () => null,
-      onPlayerQuit: () => null,
+      onPlayerJoin: () => ({}),
+      onPlayerMove: () => ({}),
+      onPlayerQuit: () => ({}),
     };
     if (!isEmptyBackend) {
     // eslint-disable-next-line global-require, import/no-dynamic-require
@@ -62,7 +62,7 @@ module.exports = {
     });
 
     app.get('/state', (req, res) => {
-      res.status(StatusCodes.OK).json(boardGame);
+      res.status(StatusCodes.OK).json(filterBoardGame(boardGame));
     });
 
     app.delete('/room', (req, res) => {

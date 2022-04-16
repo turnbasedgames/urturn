@@ -1,22 +1,28 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AppBar, Toolbar, Typography, Stack, Button, IconButton, Paper,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import ClearIcon from '@mui/icons-material/Clear';
 import ReactJson from 'react-json-view';
+import { addPlayer, getState } from './game';
 
 function GameManager() {
   const theme = useTheme();
-  const curGameState = {
-    msg: 'TODO: MAIN-66 this is the current game state',
-  };
-  const curPlayers = ['UserId1']; // TODO: MAIN-66 need to get this dynamically
+  const [gameState, setGameState] = useState(null);
+  const { players = [] } = gameState || {};
+  async function reloadGameState() {
+    const state = await getState();
+    setGameState(state);
+  }
+  useEffect(() => {
+    reloadGameState();
+  }, []);
   let playerTitle = 'No Players!';
-  if (curPlayers.length === 1) {
+  if (players.length === 1) {
     playerTitle = '1 Player';
-  } else if (curPlayers.length > 1) {
-    playerTitle = `${curPlayers.length} Players`;
+  } else if (players.length > 1) {
+    playerTitle = `${players.length} Players`;
   }
   return (
     <Stack height="50%">
@@ -26,8 +32,23 @@ function GameManager() {
             Current Game State
           </Typography>
           <Stack spacing={1} direction="row">
-            <Button size="small" variant="outlined">Add Player</Button>
-            <Button size="small" variant="outlined" color="error">Restart Game</Button>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={async () => {
+                await addPlayer();
+                await reloadGameState();
+              }}
+            >
+              Add Player
+            </Button>
+            <Button
+              size="small"
+              variant="outlined"
+              color="error"
+            >
+              Restart Game
+            </Button>
           </Stack>
         </Toolbar>
       </AppBar>
@@ -44,7 +65,7 @@ function GameManager() {
                 style={{ margin: theme.spacing(1) }}
                 name={false}
                 theme="twilight"
-                src={curGameState}
+                src={gameState}
               />
             </Paper>
             <Paper>
@@ -54,8 +75,8 @@ function GameManager() {
                     {playerTitle}
                   </Typography>
                 </Stack>
-                {curPlayers.map((player) => (
-                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                {players.map((player) => (
+                  <Stack key={player} direction="row" justifyContent="space-between" alignItems="center">
                     <Typography color="text.primary">{player}</Typography>
                     <IconButton size="small" color="error"><ClearIcon /></IconButton>
                   </Stack>

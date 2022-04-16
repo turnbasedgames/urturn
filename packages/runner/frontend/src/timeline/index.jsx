@@ -27,7 +27,6 @@ function Timeline() {
               Actions
             </Typography>
             <MenuList
-              alignItem
               id="basic-menu"
               open
               variant="selectedMenu"
