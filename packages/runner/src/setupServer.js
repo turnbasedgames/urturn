@@ -44,7 +44,7 @@ module.exports = {
       if (!boardGame.players.includes(id)) {
         res.status(StatusCodes.BAD_REQUEST).json({ message: `${id} is not in the board game` });
       }
-      boardGame.players = boardGame.players.filter((p) => p.id !== id);
+      boardGame.players = boardGame.players.filter((p) => p !== id);
       boardGame = applyBoardGameResult(
         boardGame,
         backendModule.onPlayerQuit(id, filterBoardGame(boardGame)),

@@ -5,7 +5,9 @@ import {
 import { useTheme } from '@mui/material/styles';
 import ClearIcon from '@mui/icons-material/Clear';
 import ReactJson from 'react-json-view';
-import { addPlayer, getState, resetState } from './game';
+import {
+  addPlayer, getState, resetState, removePlayer,
+} from './game';
 
 function GameManager() {
   const theme = useTheme();
@@ -82,7 +84,16 @@ function GameManager() {
                 {players.map((player) => (
                   <Stack key={player} direction="row" justifyContent="space-between" alignItems="center">
                     <Typography color="text.primary">{player}</Typography>
-                    <IconButton size="small" color="error"><ClearIcon /></IconButton>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={async () => {
+                        await removePlayer(player);
+                        await reloadGameState();
+                      }}
+                    >
+                      <ClearIcon />
+                    </IconButton>
                   </Stack>
                 ))}
               </Stack>

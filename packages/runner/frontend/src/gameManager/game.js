@@ -10,3 +10,5 @@ export const getState = async () => {
 };
 
 export const resetState = async () => axios.delete(`${BASE_URL}/state`);
+
+export const removePlayer = (playerId) => axios.delete(`${BASE_URL}/player/${playerId}`);
