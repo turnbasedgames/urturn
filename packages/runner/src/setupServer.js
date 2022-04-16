@@ -1,6 +1,7 @@
 // TODO: MAIN-67 setup socket server
 const express = require('express');
 const { StatusCodes } = require('http-status-codes');
+const cors = require('cors');
 const {
   userBackend,
 } = require('../config/paths');
@@ -25,6 +26,7 @@ module.exports = {
     let boardGame = newBoardGame(backendModule);
 
     const app = express();
+    app.use(cors());
 
     app.post('/player', (_, res) => {
       const playerId = `user_${boardGame.playerIdCounter}`;

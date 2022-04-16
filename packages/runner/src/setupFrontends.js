@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const {
   buildPath,
   userFrontendPath,
@@ -11,6 +12,7 @@ module.exports = {
         return;
       }
       const app = express();
+      app.use(cors());
       app.use(express.static(path));
       const server = app.listen(port, () => {
         const url = `http://localhost:${server.address().port}`;

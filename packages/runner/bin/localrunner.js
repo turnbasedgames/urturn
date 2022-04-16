@@ -2,7 +2,6 @@
 const { program, Option } = require('commander');
 const { stringIsAValidUrl } = require('../src/util');
 const { setupFrontends } = require('../src/setupFrontends');
-// TODO: MAIN-82 cors on everything
 // TODO: MAIN-83 setup dev environment option for a local dummy user frontend and backend
 // TODO: MAIN-84 handle when ports are taken in elegant way
 // (react-scripts start prompts user with Y/n question to auto choose available port)
