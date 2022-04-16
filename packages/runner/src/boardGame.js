@@ -25,7 +25,7 @@ function newBoardGame(backendModule) {
     joinable: true,
     finished: false,
     players: [],
-    version: 0,
+    version: -1,
     // Used to generate unique user ids with a simple counter. No new user will have the same id
     playerIdCounter: 0,
   };

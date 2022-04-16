@@ -8,3 +8,5 @@ export const getState = async () => {
   const { data } = await axios.get(`${BASE_URL}/state`);
   return data;
 };
+
+export const resetState = async () => axios.delete(`${BASE_URL}/state`);

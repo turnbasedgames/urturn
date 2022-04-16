@@ -5,7 +5,7 @@ import {
 import { useTheme } from '@mui/material/styles';
 import ClearIcon from '@mui/icons-material/Clear';
 import ReactJson from 'react-json-view';
-import { addPlayer, getState } from './game';
+import { addPlayer, getState, resetState } from './game';
 
 function GameManager() {
   const theme = useTheme();
@@ -46,6 +46,10 @@ function GameManager() {
               size="small"
               variant="outlined"
               color="error"
+              onClick={async () => {
+                await resetState();
+                await reloadGameState();
+              }}
             >
               Restart Game
             </Button>

@@ -65,7 +65,7 @@ module.exports = {
       res.status(StatusCodes.OK).json(filterBoardGame(boardGame));
     });
 
-    app.delete('/room', (req, res) => {
+    app.delete('/state', (req, res) => {
       boardGame = newBoardGame(backendModule);
       res.sendStatus(StatusCodes.OK);
     });
