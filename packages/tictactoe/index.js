@@ -1,7 +1,5 @@
 // TicTacToe Example
 
-// TODO: FIGURE OUT WHY LINTING AINT WORKING HERE
-
 function getPlrToMove(board, plrs) {
   const { xCount, oCount } = board.reduce((curCounts, row) => row.reduce(
     ({ xCount: x, oCount: o }, mark) => {
