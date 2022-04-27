@@ -8,8 +8,8 @@
 # testing
 /coverage
 
-# production
-/build
+# production: leave build in so that website can serve from this
+# /build
 
 # misc
 .DS_Store
