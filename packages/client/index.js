@@ -12,16 +12,6 @@ const connection = connectToParent({
   },
 });
 
-async function getStates(){
-  const parent = await connection.promise
-  return parent.getStates()
-}
-
-async function getLatestState(){
-  const parent = await connection.promise
-  return parent.getLatestState()
-}
-
 async function makeMove(move){
   const parent = await connection.promise
   return parent.makeMove(move)
