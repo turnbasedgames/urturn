@@ -4,7 +4,8 @@
   "description": "client used for a turnbasedgame",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint . --ignore-path .gitignore --ext .js",
+    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix"
   },
   "repository": {
     "type": "git",
