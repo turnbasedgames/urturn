@@ -28,7 +28,7 @@ const IFrame = ({
   const parsedGithubURL = new URL(githubURL);
   const repoOwner = parsedGithubURL.pathname.split('/')[1];
   const repo = parsedGithubURL.pathname.split('/')[2];
-  const cdnURL = `https://rawcdn.githack.com/${repoOwner}/${repo}/${commitSHA}/frontend/dist/index.html`;
+  const cdnURL = `https://rawcdn.githack.com/${repoOwner}/${repo}/${commitSHA}/frontend/build/index.html`;
   const [childClient, setChildClient] = useState<any | null>();
 
   useEffect(() => {
