@@ -27,11 +27,11 @@ if (options.tbgFrontendUrl) {
     throw new Error(`Invalid '--tbg-frontend-url' option provided: ${options.tbgFrontendUrl}`);
   }
 }
-if (options.frontendEndUrl) {
-  if (!stringIsAValidUrl(options.frontendEndUrl)) {
-    throw new Error(`Invalid '--frontend-url' option provided: ${options.frontendEndUrl}`);
+if (options.frontendUrl) {
+  if (!stringIsAValidUrl(options.frontendUrl)) {
+    throw new Error(`Invalid '--frontend-url' option provided: ${options.frontendUrl}`);
   }
 }
 
-setupFrontends({ frontendEndUrl: options.frontendEndUrl, tbgFrontendUrl: options.tbgFrontendUrl });
+setupFrontends({ frontendUrl: options.frontendUrl, tbgFrontendUrl: options.tbgFrontendUrl });
 setupServer(options.emptyBackend);

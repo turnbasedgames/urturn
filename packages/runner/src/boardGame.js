@@ -32,4 +32,10 @@ function newBoardGame(backendModule) {
   return applyBoardGameResult(boardGame, backendModule.onRoomStart());
 }
 
-module.exports = { newBoardGame, applyBoardGameResult, filterBoardGame };
+module.exports = {
+  CREATOR_EDITABLE_FIELDS,
+  CREATOR_VIEWABLE_FIELDS,
+  newBoardGame,
+  applyBoardGameResult,
+  filterBoardGame,
+};

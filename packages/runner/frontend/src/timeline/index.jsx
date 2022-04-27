@@ -20,8 +20,8 @@ function Timeline() {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Stack margin={1} spacing={1} direction="row" sx={{ flexGrow: 1 }}>
-        <Paper>
+      <Stack margin={1} spacing={1} direction="row" sx={{ flexGrow: 1, minHeight: 0 }}>
+        <Paper sx={{ overflow: 'auto', minWidth: '200px' }}>
           <Stack marginTop={1} marginBottom={1}>
             <Typography paddingLeft={1} paddingRight={1} color="text.primary">
               Actions
@@ -41,7 +41,7 @@ function Timeline() {
             </MenuList>
           </Stack>
         </Paper>
-        <Paper sx={{ flexGrow: 1 }}>
+        <Paper sx={{ flexGrow: 1, overflow: 'auto', maxWidth: '60%' }}>
           <ReactJson
             style={{ margin: theme.spacing(1) }}
             name={false}
@@ -49,7 +49,7 @@ function Timeline() {
             src={curDiffViewer}
           />
         </Paper>
-        <Paper sx={{ flexGrow: 1 }}>
+        <Paper sx={{ flexGrow: 1, overflow: 'auto', maxWidth: '60%' }}>
           <ReactJson
             style={{ margin: theme.spacing(1) }}
             name={false}

@@ -2,6 +2,7 @@
 const express = require('express');
 const { StatusCodes } = require('http-status-codes');
 const cors = require('cors');
+const defaultBackendModule = require('../test_app/index');
 const {
   userBackend,
 } = require('../config/paths');
@@ -10,12 +11,7 @@ const { newBoardGame, applyBoardGameResult, filterBoardGame } = require('./board
 // TODO: MAIN-89 hot reload based on backendModule changes
 module.exports = {
   setupServer(isEmptyBackend) {
-    let backendModule = {
-      onRoomStart: () => ({}),
-      onPlayerJoin: () => ({}),
-      onPlayerMove: () => ({}),
-      onPlayerQuit: () => ({}),
-    };
+    let backendModule = defaultBackendModule;
     if (!isEmptyBackend) {
     // eslint-disable-next-line global-require, import/no-dynamic-require
       backendModule = require(userBackend);
@@ -27,6 +23,7 @@ module.exports = {
 
     const app = express();
     app.use(cors());
+    app.use(express.json());
 
     app.post('/player', (_, res) => {
       const playerId = `user_${boardGame.playerIdCounter}`;
@@ -36,7 +33,7 @@ module.exports = {
         boardGame,
         backendModule.onPlayerJoin(playerId, filterBoardGame(boardGame)),
       );
-      res.sendStatus(StatusCodes.OK);
+      res.status(StatusCodes.OK).json({ id: playerId });
     });
 
     app.delete('/player/:id', (req, res) => {
@@ -52,11 +49,12 @@ module.exports = {
       res.sendStatus(StatusCodes.OK);
     });
 
-    app.post('/move', (req, res) => {
+    app.post('/player/:id/move', (req, res) => {
+      const { id } = req.params;
       const move = req.body;
       boardGame = applyBoardGameResult(
         boardGame,
-        backendModule.onMove(move, filterBoardGame(boardGame)),
+        backendModule.onPlayerMove(id, move, filterBoardGame(boardGame)),
       );
       res.sendStatus(StatusCodes.OK);
     });

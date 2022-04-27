@@ -1,13 +1,13 @@
 {
   "name": "@turnbasedgames/localrunner",
-  "version": "1.0.8dev0",
+  "version": "1.0.8-dev6",
   "bin": {
     "localrunner": "bin/localrunner.js"
   },
   "scripts": {
     "start": "localrunner",
-    "build": "concurrently \"cd frontend && npm run build\"",
-    "dev": "concurrently \"localrunner -de -t http://localhost:3100\" \"cd frontend && PORT=3100 npm start\""
+    "build": "concurrently \"cd frontend && npm run build\" \"cd test_app/frontend && npm run build\"",
+    "dev": "concurrently \"localrunner -de -t http://localhost:3100 -f http://localhost:3101\" \"cd frontend && PORT=3100 npm start\" \"cd test_app/frontend && BROWSER=none PORT=3101 npm start\""
   },
   "repository": {
     "type": "git",
@@ -19,6 +19,15 @@
     "url": "https://github.com/turnbasedgames/localrunner/issues"
   },
   "homepage": "https://github.com/turnbasedgames/localrunner#readme",
+  "files": [
+    "bin/",
+    "src/",
+    "config/",
+    "test_app/frontend/build/",
+    "test_app/src/",
+    "test_app/index.js",
+    "frontend/build/"
+  ],
   "description": "",
   "dependencies": {
     "commander": "^9.1.0",

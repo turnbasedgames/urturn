@@ -1,21 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import {
-  AppBar, Toolbar, Typography, Stack, Button, IconButton, Paper,
+  AppBar, Toolbar, Typography, Stack, Button, IconButton, Paper, MenuItem, MenuList, LinearProgress,
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 import ClearIcon from '@mui/icons-material/Clear';
 import ReactJson from 'react-json-view';
 import {
   addPlayer, getState, resetState, removePlayer,
-} from './game';
+} from '../data';
 
 function GameManager() {
-  const theme = useTheme();
+  const openPlayerTab = (id) => {
+    window.open(`/player/${id}`, '_blank').focus();
+  };
+
+  const [loading, setLoading] = useState(true);
   const [gameState, setGameState] = useState(null);
   const { players = [] } = gameState || {};
   async function reloadGameState() {
+    setLoading(true);
     const state = await getState();
     setGameState(state);
+    setLoading(false);
   }
   useEffect(() => {
     reloadGameState();
@@ -38,8 +43,9 @@ function GameManager() {
               size="small"
               variant="outlined"
               onClick={async () => {
-                await addPlayer();
+                const { id } = await addPlayer();
                 await reloadGameState();
+                openPlayerTab(id);
               }}
             >
               Add Player
@@ -57,48 +63,69 @@ function GameManager() {
             </Button>
           </Stack>
         </Toolbar>
+        {loading && <LinearProgress position="relative" />}
       </AppBar>
-      <Stack direction="row" spacing={1} sx={{ flexGrow: 1 }}>
-        <Stack spacing={1} sx={{ flexGrow: 1 }}>
-          <Stack
-            sx={{ flexGrow: 1 }}
-            direction="row"
-            spacing={1}
-            margin={1}
+      <Stack direction="row" spacing={1} sx={{ minHeight: 0, flexGrow: 1 }}>
+        <Stack
+          sx={{ padding: 1, flexGrow: 1, minWidth: 0 }}
+          direction="row"
+          spacing={1}
+        >
+          <Paper sx={{
+            padding: 1,
+            flexGrow: 1,
+            overflow: 'auto',
+          }}
           >
-            <Paper sx={{ flexGrow: 1 }}>
-              <ReactJson
-                style={{ margin: theme.spacing(1) }}
-                name={false}
-                theme="twilight"
-                src={gameState}
-              />
-            </Paper>
-            <Paper>
-              <Stack margin={1}>
-                <Stack spacing={2} direction="row" justifyContent="space-between" alignItems="center">
-                  <Typography color="text.primary" sx={{ fontWeight: 'bold' }}>
-                    {playerTitle}
-                  </Typography>
-                </Stack>
+            <ReactJson
+              name={false}
+              theme="twilight"
+              src={gameState}
+            />
+          </Paper>
+          <Paper sx={{
+            padding: 1,
+            minWidth: '120px',
+            overflow: 'auto',
+          }}
+          >
+            <Stack>
+              <Stack spacing={2} direction="row" justifyContent="space-between" alignItems="center">
+                <Typography color="text.primary" sx={{ fontWeight: 'bold' }}>
+                  {playerTitle}
+                </Typography>
+              </Stack>
+              <MenuList
+                id="basic-menu"
+                open
+                variant="selectedMenu"
+              >
                 {players.map((player) => (
-                  <Stack key={player} direction="row" justifyContent="space-between" alignItems="center">
-                    <Typography color="text.primary">{player}</Typography>
+                  <MenuItem onClick={() => {
+                    openPlayerTab(player);
+                  }}
+                  >
+                    <Typography
+                      color="text.primary"
+                    >
+                      {player}
+                    </Typography>
                     <IconButton
                       size="small"
                       color="error"
-                      onClick={async () => {
+                      onClick={async (e) => {
+                        e.stopPropagation();
                         await removePlayer(player);
                         await reloadGameState();
                       }}
                     >
                       <ClearIcon />
                     </IconButton>
-                  </Stack>
+                  </MenuItem>
                 ))}
-              </Stack>
-            </Paper>
-          </Stack>
+              </MenuList>
+            </Stack>
+          </Paper>
         </Stack>
       </Stack>
     </Stack>
