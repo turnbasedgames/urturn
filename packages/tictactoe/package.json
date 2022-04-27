@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint . --ignore-path .gitignore --ext .js",
+    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix",
     "start": "localrunner"
   },
   "repository": {
@@ -18,5 +20,10 @@
   "homepage": "https://github.com/turnbasedgames/tictactoe#readme",
   "dependencies": {
     "@turnbasedgames/localrunner": "^1.0.8-dev0"
+  },
+  "devDependencies": {
+    "eslint": "^8.14.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0"
   }
 }

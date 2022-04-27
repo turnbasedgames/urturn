@@ -1,4 +1,8 @@
 module.exports = {
+  ignorePatterns: [
+    'build', // build folder is for releases
+  ],
+  root: true,
   env: {
     browser: true,
     es2021: true,
