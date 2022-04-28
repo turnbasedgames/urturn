@@ -6,6 +6,7 @@
   },
   "scripts": {
     "start": "localrunner",
+    "lint": "eslint . --ignore-path .gitignore --ext .js",
     "build": "concurrently \"cd frontend && npm run build\" \"cd test_app/frontend && npm run build\"",
     "dev": "concurrently \"localrunner -de -t http://localhost:3100 -f http://localhost:3101\" \"cd frontend && PORT=3100 npm start\" \"cd test_app/frontend && BROWSER=none PORT=3101 npm start\""
   },
@@ -37,7 +38,7 @@
   },
   "devDependencies": {
     "concurrently": "^7.1.0",
-    "eslint": "^8.13.0",
+    "eslint": "^8.14.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0"
   }
