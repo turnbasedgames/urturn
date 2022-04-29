@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:3000';
+export const BASE_URL = 'http://localhost:3000';
 
 export const addPlayer = async () => {
   const { data } = await axios.post(`${BASE_URL}/player`);

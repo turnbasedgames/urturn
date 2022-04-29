@@ -5,7 +5,8 @@ import {
 import { connectToChild } from 'penpal';
 import { Typography, LinearProgress } from '@mui/material';
 import axios from 'axios';
-import { isPlayerInGame, makeMove } from '../data';
+import { io } from 'socket.io-client';
+import { isPlayerInGame, makeMove, BASE_URL } from '../data';
 
 function Player() {
   const { playerId } = useParams();
@@ -23,6 +24,24 @@ function Player() {
   }, [playerId]);
 
   const [childClient, setChildClient] = useState(null);
+
+  useEffect(() => {
+    if (!childClient) {
+      return () => {};
+    }
+
+    const setLatestStateWithContender = (contender) => {
+      childClient.stateChanged(contender);
+    };
+    const socket = io(BASE_URL);
+    socket.on('stateChanged', setLatestStateWithContender);
+
+    return () => {
+      socket.off('stateChanged', setLatestStateWithContender);
+      socket.disconnect();
+    };
+  }, [childClient]);
+
   const iframeRef = useCallback((iframe) => {
     if (iframe) {
       // TODO: MAIN-85 dynamically set the src url
@@ -58,7 +77,6 @@ function Player() {
       });
     }
   }, [playerId]);
-  console.log('child client:', childClient);
 
   if (loading) {
     return (

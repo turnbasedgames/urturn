@@ -1,7 +1,8 @@
-// TODO: MAIN-67 setup socket server
 const express = require('express');
 const { StatusCodes } = require('http-status-codes');
 const cors = require('cors');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
 const defaultBackendModule = require('../test_app/index');
 const {
   userBackend,
@@ -22,6 +23,18 @@ module.exports = {
     let boardGame = newBoardGame(backendModule);
 
     const app = express();
+    const httpServer = createServer(app);
+
+    const io = new Server(httpServer, {
+      serveClient: false,
+      cors: {
+        origin: '*',
+      },
+    });
+    io.on('connection', (socket) => {
+      socket.emit('stateChanged', boardGame);
+    });
+
     app.use(cors());
     app.use(express.json());
 
@@ -33,6 +46,7 @@ module.exports = {
         boardGame,
         backendModule.onPlayerJoin(playerId, filterBoardGame(boardGame)),
       );
+      io.sockets.emit('stateChanged', boardGame);
       res.status(StatusCodes.OK).json({ id: playerId });
     });
 
@@ -46,6 +60,7 @@ module.exports = {
         boardGame,
         backendModule.onPlayerQuit(id, filterBoardGame(boardGame)),
       );
+      io.sockets.emit('stateChanged', boardGame);
       res.sendStatus(StatusCodes.OK);
     });
 
@@ -56,6 +71,7 @@ module.exports = {
         boardGame,
         backendModule.onPlayerMove(id, move, filterBoardGame(boardGame)),
       );
+      io.sockets.emit('stateChanged', boardGame);
       res.sendStatus(StatusCodes.OK);
     });
 
@@ -68,7 +84,7 @@ module.exports = {
       res.sendStatus(StatusCodes.OK);
     });
 
-    const server = app.listen(3000, () => {
+    const server = httpServer.listen(3000, () => {
       const url = `http://localhost:${server.address().port}`;
       console.log(`api server at ${url}`);
     });
