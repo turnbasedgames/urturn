@@ -1,25 +1,25 @@
 {
-  "name": "@turnbasedgames/localrunner",
-  "version": "0.0.1",
+  "name": "@urturn/runner",
+  "version": "0.0.1-dev0",
   "bin": {
-    "localrunner": "bin/localrunner.js"
+    "runner": "bin/runner.js"
   },
   "scripts": {
-    "start": "localrunner",
+    "start": "runner",
     "lint": "eslint . --ignore-path .gitignore --ext .js",
     "build": "concurrently \"cd frontend && npm run build\" \"cd test_app/frontend && npm run build\"",
-    "dev": "concurrently \"localrunner -de -t http://localhost:3100 -f http://localhost:3101\" \"cd frontend && PORT=3100 npm start\" \"cd test_app/frontend && BROWSER=none PORT=3101 npm start\""
+    "dev": "concurrently \"runner -de -t http://localhost:3100 -f http://localhost:3101\" \"cd frontend && PORT=3100 npm start\" \"cd test_app/frontend && BROWSER=none PORT=3101 npm start\""
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/turnbasedgames/localrunner.git"
+    "url": "git+https://github.com/turnbasedgames/runner.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/turnbasedgames/localrunner/issues"
+    "url": "https://github.com/turnbasedgames/runner/issues"
   },
-  "homepage": "https://github.com/turnbasedgames/localrunner#readme",
+  "homepage": "https://github.com/turnbasedgames/runner#readme",
   "files": [
     "bin/",
     "src/",

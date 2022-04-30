@@ -3,7 +3,7 @@ import {
   AppBar, Toolbar, Typography, Button, Stack,
 } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
-import client, { events } from '@turnbasedgames/client';
+import client, { events } from '@urturn/client';
 import Editor from '@monaco-editor/react';
 import theme from './theme';
 

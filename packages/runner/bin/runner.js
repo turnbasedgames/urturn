@@ -11,7 +11,7 @@ program
   .addOption(new Option('-t, --tbg-frontend-url <tbgFrontendUrl>').hideHelp())
   .addOption(new Option('-e, --empty-backend').hideHelp())
   // TODO: MAIN-85 tbg frontend needs to query for this value
-  // this enables users of react js to be able to hot reload their frontend used by localrunner
+  // this enables users of react js to be able to hot reload their frontend used by runner
   // if this is not enabled then we serve the files in the user's project "frontend/bulid"
   .option('-f, --frontend-url <frontendUrl>', 'if you are already serving your frontend in a dev environment (e.g. React), you can specify the url here')
   .option('-d, --debug', 'print debug logs to stdout'); // TODO: MAIN-86 we need to use a logger instead of console.log and add debug log outputs everywhere

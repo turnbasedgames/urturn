@@ -59,7 +59,7 @@ function Player() {
                 axios.isAxiosError(err) && err.response
               ) {
                 // TODO: MAIN-90 good candidate for common constants across server and clients
-                // server, website, localrunner, and tbg-client uses these error names
+                // server, website, runner, and client uses these error names
                 if (err.response.data.name === 'CreatorInvalidMove') {
                   return { error: err.response.data.creatorError };
                 }

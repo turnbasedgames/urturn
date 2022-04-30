@@ -26,9 +26,9 @@ jobs:
           cd test_app/frontend
           npm ci
           npm run build
-      - name: public localrunner package
+      - name: public package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           npm ci
-          npm publish
+          npm publish --access public
