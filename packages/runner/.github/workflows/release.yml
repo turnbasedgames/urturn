@@ -13,11 +13,15 @@ jobs:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
       - name: build frontend
+        env:
+          CI: false
         run: |
           cd frontend
           npm ci
           npm run build
       - name: build test_app/frontend
+        env:
+          CI: false
         run: |
           cd test_app/frontend
           npm ci
