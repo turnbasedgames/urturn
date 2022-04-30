@@ -1,0 +1,30 @@
+name: Publish Package to npmjs
+on:
+  release:
+    types: [created]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: build frontend
+        run: |
+          cd frontend
+          npm ci
+          npm run build
+      - name: build test_app/frontend
+        run: |
+          cd test_app/frontend
+          npm ci
+          npm run build
+      - name: public localrunner package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+        npm ci
+        npm publish
