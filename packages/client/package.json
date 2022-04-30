@@ -1,7 +1,7 @@
 {
-  "name": "@turnbasedgames/client",
+  "name": "@urturn/client",
   "version": "0.0.1-dev0",
-  "description": "client used for a turnbasedgame",
+  "description": "client used for a turn based game",
   "main": "index.js",
   "scripts": {
     "lint": "eslint . --ignore-path .gitignore --ext .js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/turnbasedgames/tbg-client.git"
+    "url": "git+https://github.com/turnbasedgames/client.git"
   },
   "author": "kevo1ution",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/turnbasedgames/tbg-client/issues"
+    "url": "https://github.com/turnbasedgames/client/issues"
   },
-  "homepage": "https://github.com/turnbasedgames/tbg-client#readme",
+  "homepage": "https://github.com/turnbasedgames/client#readme",
   "dependencies": {
     "penpal": "^5.3.0"
   },
