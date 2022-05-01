@@ -32,7 +32,7 @@ function GameManager() {
     playerTitle = `${players.length} Players`;
   }
   return (
-    <Stack sx={{ flexGrow: 1 }}>
+    <Stack height="100%">
       <AppBar position="relative">
         <Toolbar variant="dense" sx={{ justifyContent: 'space-between' }}>
           <Typography color="text.primary">

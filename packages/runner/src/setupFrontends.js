@@ -23,10 +23,12 @@ const setupFrontendService = (currentUrl, frontendPath, port) => {
 };
 
 module.exports = {
-  setupFrontends({ frontendUrl, tbgFrontendUrl, portForRunner }) {
+  setupFrontends({
+    frontendUrl, tbgFrontendUrl, portForRunner, portForUserFrontend,
+  }) {
     const cleanupFuncs = [
       setupFrontendService(tbgFrontendUrl, buildPath, portForRunner),
-      setupFrontendService(frontendUrl, userFrontendPath, portForRunner + 1),
+      setupFrontendService(frontendUrl, userFrontendPath, portForUserFrontend),
     ];
 
     return () => cleanupFuncs.forEach((cleanupFunc) => cleanupFunc());

@@ -1,6 +1,6 @@
 {
   "name": "@urturn/runner",
-  "version": "0.0.1-dev3",
+  "version": "0.0.1-dev4",
   "bin": {
     "runner": "bin/runner.js"
   },
@@ -8,7 +8,7 @@
     "start": "runner",
     "lint": "eslint . --ignore-path .gitignore --ext .js",
     "build": "concurrently \"cd frontend && npm run build\" \"cd test_app/frontend && npm run build\"",
-    "dev": "concurrently \"runner -Dde -t http://localhost:3100 -f http://localhost:3101\" \"cd frontend && PORT=3100 npm start\" \"cd test_app/frontend && BROWSER=none PORT=3101 npm start\""
+    "dev": "concurrently \"runner -Dde -t http://localhost:3101 -f http://localhost:3000\" \"cd frontend && PORT=3101 npm start\" \"cd test_app/frontend && BROWSER=none npm start\""
   },
   "repository": {
     "type": "git",

@@ -9,8 +9,9 @@ const { setupFrontends } = require('../src/setupFrontends');
 // (react-scripts start prompts user with Y/n question to auto choose available port)
 const { setupServer } = require('../src/setupServer');
 
-const apiPort = 3000;
-const portForRunner = 3100;
+const portForUserFrontend = 3000;
+const apiPort = 3100;
+const portForRunner = apiPort + 1;
 const runnerUrl = `http://localhost:${portForRunner}`;
 
 program
@@ -47,6 +48,7 @@ const cleanupFrotnendsFunc = setupFrontends({
   frontendUrl: options.frontendUrl,
   tbgFrontendUrl: options.tbgFrontendUrl,
   portForRunner,
+  portForUserFrontend,
 });
 
 console.log(`${chalk.green('\nYou can now view the runner in the browser at:')} \n${chalk.green.bold(runnerUrl)}`);
