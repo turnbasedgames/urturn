@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "runner",
     "lint": "eslint . --ignore-path .gitignore --ext .js",
-    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix",
-    "start": "localrunner"
+    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix"
   },
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/turnbasedgames/tictactoe#readme",
   "dependencies": {
-    "@turnbasedgames/localrunner": "^1.0.8-dev0"
+    "@urturn/runner": "0.0.1-dev0"
   },
   "devDependencies": {
     "eslint": "^8.14.0",

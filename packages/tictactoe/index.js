@@ -1,23 +1,9 @@
 // TicTacToe Example
-
-function getPlrToMove(board, plrs) {
-  const { xCount, oCount } = board.reduce((curCounts, row) => row.reduce(
-    ({ xCount: x, oCount: o }, mark) => {
-      if (mark === 'X') {
-        return { xCount: x + 1, o };
-      } if (mark === 'O') {
-        return { oCount: o + 1, x };
-      }
-      return { xCount, oCount };
-    },
-    curCounts,
-  ), { xCount: 0, oCount: 0 });
-
-  if (xCount === oCount) {
-    return plrs[0];
-  }
-  return plrs[1];
-}
+const Status = Object.freeze({
+  PreGame: 'preGame',
+  InGame: 'inGame',
+  EndGame: 'endGame',
+});
 
 function getPlrMark(plr, plrs) {
   if (plr === plrs[0]) {
@@ -91,7 +77,7 @@ function isEndGame(board, plrs) {
 function onRoomStart() {
   return {
     state: {
-      state: 'NOT_STARTED', // NOT_STARTED, IN_GAME
+      status: Status.PreGame,
       board: [
         [null, null, null],
         [null, null, null],
@@ -113,7 +99,7 @@ function onPlayerJoin(plr, boardGame) {
 
   // VALIDATIONS
   // check if game has started
-  if (state.state !== 'NOT_STARTED') {
+  if (state.status !== Status.PreGame) {
     throw new Error("game has already started, can't join the game!");
   }
 
@@ -121,7 +107,8 @@ function onPlayerJoin(plr, boardGame) {
   // determine if we should start the game
   if (players.length === 2) {
     // start game
-    state.state = 'IN_GAME';
+    state.status = Status.InGame;
+    state.plrToMoveIndex = 0;
     return {
       state,
       joinable: false,
@@ -142,15 +129,15 @@ function onPlayerJoin(plr, boardGame) {
  */
 function onPlayerMove(plr, move, boardGame) {
   const { state, players } = boardGame;
-  const { board } = state;
+  const { board, plrToMoveIndex } = state;
 
   // VALIDATIONS
   // boardgame must be in the game
   const { x, y } = move;
-  if (state.state !== 'IN_GAME') {
+  if (state.status !== Status.InGame) {
     throw new Error("game is not in progress, can't make move!");
   }
-  if (getPlrToMove(board, players) !== plr) {
+  if (players[plrToMoveIndex] !== plr) {
     throw new Error(`Its not this player's turn: ${plr}`);
   }
   if (board[x][y] !== null) {
@@ -163,9 +150,12 @@ function onPlayerMove(plr, move, boardGame) {
   // Check if game is over
   const [isEnd, winner] = isEndGame(board, players);
   if (isEnd) {
+    state.status = Status.EndGame;
     state.winner = winner;
     return { state, finished: true };
   }
+
+  state.plrToMoveIndex = plrToMoveIndex === 0 ? 1 : 0;
   return { state };
 }
 

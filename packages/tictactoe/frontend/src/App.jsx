@@ -3,7 +3,7 @@ import {
   Paper, Typography, Stack, Box,
 } from '@mui/material';
 
-import client, { events } from '@turnbasedgames/client';
+import client, { events } from '@urturn/client';
 
 function App() {
   const [grid, setGrid] = useState([[null, null, null], [null, null, null], [null, null, null]]);
