@@ -8,7 +8,7 @@ const {
 
 const setupFrontendService = (currentUrl, frontendPath, port) => {
   if (currentUrl) {
-    return;
+    return () => {};
   }
   const app = express();
   app.use(cors());
@@ -16,15 +16,19 @@ const setupFrontendService = (currentUrl, frontendPath, port) => {
   app.get('*', (_, res) => {
     res.sendFile(path.resolve(frontendPath, 'index.html'));
   });
-  const server = app.listen(port, () => {
-    const url = `http://localhost:${server.address().port}`;
-    console.log(`serving ${frontendPath} at ${url}`);
-  });
+  const server = app.listen(port);
+  const url = `http://localhost:${server.address().port}`;
+  console.log(`serving ${frontendPath} at ${url}`);
+  return () => server.close();
 };
 
 module.exports = {
-  setupFrontends({ frontendUrl, tbgFrontendUrl }) {
-    setupFrontendService(tbgFrontendUrl, buildPath, 3100);
-    setupFrontendService(frontendUrl, userFrontendPath, 3101);
+  setupFrontends({ frontendUrl, tbgFrontendUrl, portForRunner }) {
+    const cleanupFuncs = [
+      setupFrontendService(tbgFrontendUrl, buildPath, portForRunner),
+      setupFrontendService(frontendUrl, userFrontendPath, portForRunner + 1),
+    ];
+
+    return () => cleanupFuncs.forEach((cleanupFunc) => cleanupFunc());
   },
 };

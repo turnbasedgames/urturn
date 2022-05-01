@@ -5,7 +5,7 @@ import {
 import ClearIcon from '@mui/icons-material/Clear';
 import ReactJson from 'react-json-view';
 import {
-  addPlayer, getState, resetState, removePlayer,
+  addPlayer, getState, removePlayer,
 } from '../data';
 
 function GameManager() {
@@ -32,7 +32,7 @@ function GameManager() {
     playerTitle = `${players.length} Players`;
   }
   return (
-    <Stack height="50%">
+    <Stack sx={{ flexGrow: 1 }}>
       <AppBar position="relative">
         <Toolbar variant="dense" sx={{ justifyContent: 'space-between' }}>
           <Typography color="text.primary">
@@ -50,7 +50,7 @@ function GameManager() {
             >
               Add Player
             </Button>
-            <Button
+            {/* <Button
               size="small"
               variant="outlined"
               color="error"
@@ -60,7 +60,7 @@ function GameManager() {
               }}
             >
               Restart Game
-            </Button>
+            </Button> */}
           </Stack>
         </Toolbar>
         {loading && <LinearProgress position="relative" />}

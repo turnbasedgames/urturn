@@ -9,7 +9,6 @@ import {
 } from 'react-router-dom';
 import theme from './theme';
 import GameManager from './gameManager';
-import Timeline from './timeline';
 import Player from './player';
 
 function App() {
@@ -25,7 +24,6 @@ function App() {
                 height="100vh"
               >
                 <GameManager />
-                <Timeline />
               </Stack>
           )}
           />

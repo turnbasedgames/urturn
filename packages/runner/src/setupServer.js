@@ -11,13 +11,12 @@ const { newBoardGame, applyBoardGameResult, filterBoardGame } = require('./board
 
 // TODO: MAIN-89 hot reload based on backendModule changes
 module.exports = {
-  setupServer(isEmptyBackend) {
+  setupServer({ isEmptyBackend, apiPort }) {
     let backendModule = defaultBackendModule;
     if (!isEmptyBackend) {
     // eslint-disable-next-line global-require, import/no-dynamic-require
       backendModule = require(userBackend);
     }
-    console.log('loaded backend module', backendModule);
 
     // State that is being tracked for any operation (e.g. make move, add player)
     let boardGame = newBoardGame(backendModule);
@@ -84,9 +83,9 @@ module.exports = {
       res.sendStatus(StatusCodes.OK);
     });
 
-    const server = httpServer.listen(3000, () => {
-      const url = `http://localhost:${server.address().port}`;
-      console.log(`api server at ${url}`);
-    });
+    const server = httpServer.listen(apiPort);
+    const url = `http://localhost:${apiPort}`;
+    console.log(`api server at ${url}`);
+    return () => server.close();
   },
 };
