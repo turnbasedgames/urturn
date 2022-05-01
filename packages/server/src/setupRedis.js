@@ -4,16 +4,24 @@ const logger = require('./logger');
 
 const pubClient = redis.createClient({
   url: process.env.REDIS_CONNECTION_URL,
+  socket: {
+    tls: true,
+    rejectUnauthorized: false,
+  },
 });
 const subClient = pubClient.duplicate();
-
-pubClient.on('ready', () => {
-  logger.info('redis client is ready');
+subClient.on('ready', () => {
+  logger.info('redis subscriber is ready');
+});
+subClient.on('error', (error) => {
+  logger.error('redis subscriber client error', { error });
 });
 
-// TODO: fix the error message "missing 'error' handler on this Redis client"
+pubClient.on('ready', () => {
+  logger.info('redis publisher is ready');
+});
 pubClient.on('error', (error) => {
-  logger.error('redis error', { error });
+  logger.error('redis publish client error', { error });
 });
 
 module.exports = { pubClient, subClient };
