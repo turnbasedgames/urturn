@@ -35,5 +35,5 @@ jobs:
         env:
           FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
           GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
-          REDIS_CONNECTION_URL: redis://localhost:6379
+          REDIS_URL: redis://localhost:6379
           MONGODB_CONNECTION_URL: mongodb://localhost:27017/test?replicaSet=testrs

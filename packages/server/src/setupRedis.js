@@ -3,11 +3,7 @@ const redis = require('redis');
 const logger = require('./logger');
 
 const pubClient = redis.createClient({
-  url: process.env.REDIS_CONNECTION_URL,
-  socket: {
-    tls: true,
-    rejectUnauthorized: false,
-  },
+  url: process.env.REDIS_URL,
 });
 const subClient = pubClient.duplicate();
 subClient.on('ready', () => {
@@ -24,4 +20,9 @@ pubClient.on('error', (error) => {
   logger.error('redis publish client error', { error });
 });
 
-module.exports = { pubClient, subClient };
+const setupRedis = async () => {
+  await pubClient.connect();
+  await subClient.connect();
+};
+
+module.exports = { setupRedis, pubClient, subClient };

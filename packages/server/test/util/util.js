@@ -65,7 +65,7 @@ const setupMongoDB = makePersistentDependencyFn('MongoDB', 'MONGODB_CONNECTION_U
     return [uri, async () => { await mongod.stop(); }];
   });
 
-const setupRedis = makePersistentDependencyFn('Redis', 'REDIS_CONNECTION_URL',
+const setupRedis = makePersistentDependencyFn('Redis', 'REDIS_URL',
   async () => {
     const redisServer = new RedisMemoryServer();
     const host = await redisServer.getHost();
