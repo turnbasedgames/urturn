@@ -6,7 +6,7 @@ import {
   Errors, makeMove, Room, RoomState,
 } from '../../../models/room';
 
-const socket = io();
+const socket = io({ transports: ['websocket'] });
 
 type WatchRoomRes = {
   error: string
