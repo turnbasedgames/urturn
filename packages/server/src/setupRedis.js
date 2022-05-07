@@ -1,4 +1,5 @@
 const redis = require('redis');
+const { createAdapter } = require('@socket.io/redis-adapter');
 
 const logger = require('./logger');
 
@@ -20,9 +21,9 @@ pubClient.on('error', (error) => {
   logger.error('redis publish client error', { error });
 });
 
-const setupRedis = async () => {
-  await pubClient.connect();
-  await subClient.connect();
+const setupRedis = async ({ io }) => {
+  await Promise.all([pubClient.connect(), subClient.connect()]);
+  io.adapter(createAdapter(pubClient, subClient));
 };
 
 module.exports = { setupRedis, pubClient, subClient };

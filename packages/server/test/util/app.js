@@ -4,6 +4,7 @@ const axios = require('axios');
 const getPort = require('get-port');
 
 const { waitFor, setupMongoDB, setupRedis } = require('./util');
+const logger = require('../../src/logger');
 
 function waitUntilRunning(api, timeout = 10000, buffer = 200) {
   return waitFor(async () => { await api.get('/readiness'); },
@@ -69,9 +70,21 @@ async function spawnApp(options = {}) {
     cleanupMongoDB,
     cleanup: async () => {
       // TODO: cleanup users created in firebase
+      // wait a second because server may be in a cleanup process
+      const exitPromise = new Promise((resolve, reject) => {
+        server.on('exit', () => {
+          logger.info('server properly exited');
+          resolve();
+        });
+        setTimeout(() => {
+          logger.error('server timed out waiting to cleanup');
+          reject(new Error('timeout reached'));
+        }, 10000);
+      });
       server.kill();
       await cleanupMongoDB();
       await cleanupRedis();
+      await exitPromise;
     },
   };
 }

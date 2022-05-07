@@ -1,13 +1,8 @@
-const redisAdapter = require('@socket.io/redis-adapter');
-
-const { pubClient, subClient } = require('./setupRedis');
 const logger = require('./logger');
 
 const defaultCb = (...args) => logger.info('callback did not exist, so was not called with args:', args);
 
 function setupSocketio(io) {
-  io.adapter(redisAdapter(pubClient, subClient));
-
   io.on('connection', (socket) => {
     logger.info('new socket connection', { id: socket.id });
 

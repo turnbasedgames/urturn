@@ -14,7 +14,7 @@ const gameRouter = require('./src/models/game/route');
 const roomRouter = require('./src/models/room/route');
 const errorHandler = require('./src/middleware/errorHandler');
 const setupSocketio = require('./src/setupSocketio');
-const { setupRedis } = require('./src/setupRedis');
+const { setupRedis, pubClient, subClient } = require('./src/setupRedis');
 
 const PORT = process.env.PORT || 8080;
 
@@ -22,9 +22,11 @@ const main = async () => {
   const app = express();
   const httpServer = http.createServer(app);
   const db = setupDB();
-  const io = socketio(httpServer, { serveClient: false });
+  const io = socketio(httpServer, {
+    transports: ['websocket'],
+  });
 
-  await setupRedis();
+  await setupRedis({ io });
   setupSocketio(io);
 
   app.use(cors());
@@ -46,6 +48,33 @@ const main = async () => {
   httpServer.listen(PORT, () => {
     logger.info(`listening on Port ${PORT}`);
   });
+
+  return () => {
+    logger.warn('cleaning up nodejs application');
+    httpServer.close(async () => {
+      logger.warn('closed express app');
+      try {
+        await Promise.all([pubClient.quit(), subClient.quit()]);
+        logger.warn('closed redis clients');
+      } catch {
+        logger.error('failed to close redis clients');
+      }
+      process.exit();
+    });
+    setTimeout(() => {
+      logger.error('cleanup timed out');
+      process.exit();
+    }, 2000);
+  };
 };
 
-main();
+const cleanupAppPromise = main();
+
+['SIGINT', 'SIGTERM'].forEach((sig) => {
+  process.on(sig, () => {
+    logger.warn(`signal received to terminate process: ${sig}`);
+    cleanupAppPromise.then((cleanupApp) => {
+      cleanupApp();
+    });
+  });
+});

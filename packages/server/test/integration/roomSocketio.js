@@ -11,7 +11,7 @@ const {
 const { waitFor, createOrUpdateSideApps } = require('../util/util');
 
 async function createSocketAndWatchRoom(baseURL, room) {
-  const socket = io(baseURL);
+  const socket = io(baseURL, { transports: ['websocket'] });
   const emitAsync = promisify(socket.emit).bind(socket);
   await emitAsync('watchRoom', { roomId: room.id });
   socket.messageHistory = [];
