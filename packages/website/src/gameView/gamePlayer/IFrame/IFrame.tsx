@@ -5,8 +5,21 @@ import axios from 'axios';
 import {
   Errors, makeMove, Room, RoomState,
 } from '../../../models/room';
+import API_URL from '../../../models/util';
 
-const socket = io({ transports: ['websocket'] });
+const socket = io(API_URL, { transports: ['websocket'] });
+
+socket.on('connect', () => {
+  console.log('socket connected: ', socket.id);
+});
+
+socket.on('disconnect', (reason) => {
+  console.log('socket disconnected with reason: ', reason);
+  if (reason === 'io server disconnect') {
+    console.log('manually trying to reconnect socket');
+    socket.connect();
+  }
+});
 
 type WatchRoomRes = {
   error: string

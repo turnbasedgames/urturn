@@ -23,22 +23,22 @@ export interface Room {
 }
 
 export const joinRoom = async (roomId: String): Promise<Room> => {
-  const res = await axios.post(`/api/room/${roomId}/join`);
+  const res = await axios.post(`room/${roomId}/join`);
   return res.data.room;
 };
 
 export const quitRoom = async (roomId: String): Promise<Room> => {
-  const res = await axios.post(`/api/room/${roomId}/quit`);
+  const res = await axios.post(`room/${roomId}/quit`);
   return res.data.room;
 };
 
 export const makeMove = async (roomId: String, move: any) => {
-  const res = await axios.post(`/api/room/${roomId}/move`, move);
+  const res = await axios.post(`room/${roomId}/move`, move);
   return res.data.room;
 };
 
 export const createRoom = async (gameId: String): Promise<Room> => {
-  const res = await axios.post('/api/room', { game: gameId });
+  const res = await axios.post('room', { game: gameId });
   return res.data.room;
 };
 
@@ -51,12 +51,12 @@ export type RoomsQuery = {
 };
 
 export const getRooms = async (query: RoomsQuery): Promise<Room[]> => {
-  const res = await axios.get('/api/room', { params: { ...query } });
+  const res = await axios.get('room', { params: { ...query } });
   return res.data.rooms;
 };
 
 export const getRoom = async (roomId: String): Promise<Room> => {
-  const res = await axios.get(`/api/room/${roomId}`);
+  const res = await axios.get(`room/${roomId}`);
   return res.data.room;
 };
 

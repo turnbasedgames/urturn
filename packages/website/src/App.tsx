@@ -17,9 +17,12 @@ import GameView from './gameView';
 import { getUser, User, UserContext } from './models/user';
 import CreatorView from './creatorView';
 import ProfileView from './profileView';
+import API_URL from './models/util';
 
 const firebaseConfig = process.env.REACT_APP_FIREBASE_CONFIG as string;
 firebase.initializeApp(JSON.parse(Buffer.from(firebaseConfig, 'base64').toString('ascii')));
+
+axios.defaults.baseURL = API_URL;
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
