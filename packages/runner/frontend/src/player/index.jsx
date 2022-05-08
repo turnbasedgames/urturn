@@ -60,7 +60,10 @@ function Player() {
               ) {
                 // TODO: MAIN-90 good candidate for common constants across server and clients
                 // server, website, runner, and client uses these error names
-                if (err.response.data.name === 'CreatorInvalidMove') {
+
+                // assume that if the error field is provided in response body then it
+                // must be a creator error
+                if (err.response.data.name === 'CreatorError') {
                   return { error: err.response.data.creatorError };
                 }
                 return { error: err.response.data };

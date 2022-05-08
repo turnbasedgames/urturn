@@ -29,8 +29,9 @@ function App() {
               <Button
                 size="small"
                 variant="outlined"
-                onClick={() => {
-                  client.makeMove(moveObj);
+                onClick={async () => {
+                  const result = await client.makeMove(moveObj);
+                  console.log('result from move:', { moveObj, result });
                 }}
               >
                 Make Move

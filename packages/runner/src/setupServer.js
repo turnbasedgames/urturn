@@ -66,10 +66,21 @@ module.exports = {
     app.post('/player/:id/move', (req, res) => {
       const { id } = req.params;
       const move = req.body;
-      boardGame = applyBoardGameResult(
-        boardGame,
-        backendModule.onPlayerMove(id, move, filterBoardGame(boardGame)),
-      );
+      try {
+        boardGame = applyBoardGameResult(
+          boardGame,
+          backendModule.onPlayerMove(id, move, filterBoardGame(boardGame)),
+        );
+      } catch (err) {
+        res.status(StatusCodes.BAD_REQUEST).json({
+          name: 'CreatorError',
+          creatorError: {
+            name: err.name,
+            message: err.message,
+          },
+        });
+        return;
+      }
       io.sockets.emit('stateChanged', boardGame);
       res.sendStatus(StatusCodes.OK);
     });
