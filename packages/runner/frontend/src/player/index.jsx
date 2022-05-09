@@ -30,14 +30,14 @@ function Player() {
       return () => {};
     }
 
-    const setLatestStateWithContender = (contender) => {
-      childClient.stateChanged(contender);
+    const handleNewBoardGame = (boardGame) => {
+      childClient.stateChanged(boardGame);
     };
     const socket = io(BASE_URL);
-    socket.on('stateChanged', setLatestStateWithContender);
+    socket.on('stateChanged', handleNewBoardGame);
 
     return () => {
-      socket.off('stateChanged', setLatestStateWithContender);
+      socket.off('stateChanged', handleNewBoardGame);
       socket.disconnect();
     };
   }, [childClient]);
