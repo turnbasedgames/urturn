@@ -167,8 +167,9 @@ function onPlayerMove(plr, move, boardGame) {
  */
 function onPlayerQuit(plr, boardGame) {
   const { state, players } = boardGame;
+  state.status = Status.EndGame;
   if (players.length === 1) {
-    const [winner] = players.filter((playerId) => playerId !== plr)[0];
+    const [winner] = players;
     state.winner = winner;
     return { state, joinable: false, finished: true };
   }
