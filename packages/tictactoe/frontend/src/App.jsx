@@ -27,7 +27,8 @@ const getStatusMsg = ({
 };
 
 function App() {
-  const [boardGame, setBoardGame] = useState({});
+  const [boardGame, setBoardGame] = useState(client.getBoardGame() || {});
+  console.log('boardGame:', boardGame);
   useEffect(() => {
     const onStateChanged = (newBoardGame) => {
       setBoardGame(newBoardGame);
