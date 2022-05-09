@@ -18,9 +18,22 @@ export interface Room {
   id: string
   game: Game,
   players: User[],
-  joinable: Boolean
+  finished: Boolean,
+  joinable: Boolean,
   latestState: RoomState,
 }
+
+export const generateBoardGame = (room: Room, roomState: RoomState) => {
+  const { players, joinable, finished } = room;
+  const { state, version } = roomState;
+  return {
+    players: players.map((player) => player.id),
+    joinable,
+    finished,
+    state,
+    version,
+  };
+};
 
 export const joinRoom = async (roomId: String): Promise<Room> => {
   const res = await axios.post(`room/${roomId}/join`);

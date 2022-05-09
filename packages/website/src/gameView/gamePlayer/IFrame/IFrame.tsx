@@ -3,7 +3,7 @@ import { connectToChild } from 'penpal';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 import {
-  Errors, makeMove, Room, RoomState,
+  Errors, makeMove, Room, generateBoardGame,
 } from '../../../models/room';
 import API_URL from '../../../models/util';
 
@@ -41,27 +41,27 @@ const IFrame = ({
   const parsedGithubURL = new URL(githubURL);
   const repoOwner = parsedGithubURL.pathname.split('/')[1];
   const repo = parsedGithubURL.pathname.split('/')[2];
+  // TODO: make this configurable by an environment variable for testing
   const cdnURL = `https://rawcdn.githack.com/${repoOwner}/${repo}/${commitSHA}/frontend/build/index.html`;
   const [childClient, setChildClient] = useState<any | null>();
 
   useEffect(() => {
-    let curLatestState: RoomState | undefined;
-    const setLatestStateWithContender = (contender: RoomState) => {
-      if (!curLatestState || (curLatestState.version < contender.version)) {
-        if (childClient) {
-          childClient.stateChanged(contender);
-        }
-      }
-    };
+    if (!childClient) {
+      return () => {};
+    }
+
+    function handleNewBoardGame(boardGame: any) {
+      childClient.stateChanged(boardGame);
+    }
 
     async function setupRoomSocket() {
-      socket.on('room:latestState', setLatestStateWithContender);
+      socket.on('room:latestState', handleNewBoardGame);
       socket.emit('watchRoom', { roomId }, (res: null | WatchRoomRes) => {
         if (res) {
           console.error('error trying to watch room', res.error);
         }
       });
-      setLatestStateWithContender(room.latestState);
+      childClient.stateChanged(generateBoardGame(room, room.latestState));
     }
 
     setupRoomSocket();
@@ -71,7 +71,7 @@ const IFrame = ({
           console.error('error trying to unwatch room', res.error);
         }
       });
-      socket.off('room:latestState', setLatestStateWithContender);
+      socket.off('room:latestState', handleNewBoardGame);
     };
   }, [childClient]);
 
@@ -82,19 +82,6 @@ const IFrame = ({
       const connection = connectToChild({
         iframe,
         methods: {
-          getStates() {
-            // TODO: need to implement this
-            // 1. do we make a request to get all the states?
-            // 2. do we just check what we tracked locally?
-            //   a. on roomPlayer load we get all the latest states
-            //   b. maintain a list of states
-            //      (what to do if we receive a state with version greater by 2 than the previous?)
-            console.log('parent: getStates');
-          },
-          getLatestState() {
-            // TODO: our implementation here should be based on the above
-            console.log('parent: getLatestState');
-          },
           async makeMove(move: any) {
             try {
               await makeMove(roomId, move);
