@@ -5,7 +5,7 @@ import { User } from './user';
 
 export enum Errors {
   RoomNotJoinable = 'RoomNotJoinable',
-  CreatorInvalidMove = 'CreatorInvalidMove',
+  CreatorError = 'CreatorError',
 }
 
 export interface RoomState {

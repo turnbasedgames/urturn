@@ -90,7 +90,7 @@ const IFrame = ({
               if (
                 axios.isAxiosError(err) && err.response
               ) {
-                if (err.response.data.name === Errors.CreatorInvalidMove) {
+                if (err.response.data.name === Errors.CreatorError) {
                   return { error: err.response.data.creatorError };
                 }
                 return { error: err.response.data };
