@@ -1,2 +1,2 @@
-# Turn-Based-Games Documentation
+# Urturn Documentation
 https://turnbasedgames.github.io/

@@ -6,13 +6,13 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Turn-Based-Games',
+  title: 'Urturn',
   tagline: 'Build massive multiplayer turn-based games',
   url: 'https://github.com/turnbasedgames', // TODO: link to official website
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/favicon.ico', // TODO: replace with turn based games logo
+  // favicon: 'img/favicon.ico', TODO: replace with turn based games logo
   organizationName: 'turnbasedgames',
   projectName: 'docs',
   deploymentBranch: 'gh-pages',
@@ -42,9 +42,9 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'Turn-Based-Games',
+        title: 'Urturn',
         logo: {
-          alt: 'Turn-Based-Games Logo',
+          alt: 'Urturn',
           src: 'img/logo.svg', // TODO: need to change logo
         },
         items: [
