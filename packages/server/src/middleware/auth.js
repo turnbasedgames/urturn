@@ -2,7 +2,6 @@ const asyncHandler = require('express-async-handler');
 const { StatusCodes } = require('http-status-codes');
 const admin = require('firebase-admin');
 
-const logger = require('../logger');
 const User = require('../models/user/user');
 
 module.exports = asyncHandler(async (req, res, next) => {
@@ -16,9 +15,9 @@ module.exports = asyncHandler(async (req, res, next) => {
   if (!decodedToken) {
     res.sendStatus(StatusCodes.UNAUTHORIZED);
   } else {
-    logger.info('firebase decodedToken', decodedToken);
+    req.log.info('firebase decodedToken', decodedToken);
     const user = await User.findOne({ firebaseId: decodedToken.uid });
-    logger.info(`user found: ${user && user.id}`);
+    req.log.info(`user found: ${user && user.id}`);
     req.user = user;
     req.decodedToken = decodedToken;
     next();

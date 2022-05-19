@@ -1,13 +1,11 @@
 const { StatusCodes } = require('http-status-codes');
 const mongoose = require('mongoose');
 
-const logger = require('../logger');
-
 // eslint-disable-next-line no-unused-vars
 module.exports = (err, req, res, next) => {
-  logger.error(`${err.message} ${err.stack}`);
+  req.log.error(`${err.message} ${err.stack}`);
   if (err.toJSON) {
-    logger.error('error JSON:', err.toJSON());
+    req.log.error('error JSON:', err.toJSON());
   }
   if (err.status) {
     res.status(err.status);

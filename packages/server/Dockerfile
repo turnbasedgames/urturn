@@ -1,5 +1,8 @@
 FROM node:16
 
+# set env variable
+ENV NODE_ENV=production
+
 # Create and change to the app directory.
 WORKDIR /usr/src/app
 

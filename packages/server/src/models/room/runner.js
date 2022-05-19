@@ -1,15 +1,15 @@
 const { NodeVM } = require('vm2');
 const axios = require('axios');
 
-const logger = require('../../logger');
 const { CreatorError } = require('./errors');
 
 class UserCode {
-  constructor(userCodeRaw) {
+  constructor(logger, userCodeRaw) {
     this.userCodeRaw = userCodeRaw;
+    this.logger = logger;
   }
 
-  static async fromGame(game) {
+  static async fromGame(logger, game) {
     logger.info('getting game code', { url: game.githubURL, id: game.id });
     const githubURL = new URL(game.githubURL);
     const [owner, repo] = githubURL.pathname.match(/[^/]+/g);
@@ -17,10 +17,11 @@ class UserCode {
     const { data: userCodeRawStr } = await axios.get(url);
     const vm = new NodeVM({});
     vm.on('console.log', (data) => {
-      logger.info('user code:', { data });
+      logger.info('creator log', { data, gameId: game.id });
     });
     const userCodeRaw = vm.run(userCodeRawStr);
-    const userCode = new UserCode(userCodeRaw);
+    const userCode = new UserCode(logger, userCodeRaw);
+
     return userCode;
   }
 
@@ -33,16 +34,16 @@ class UserCode {
     }));
   }
 
-  static playerOperation(room, roomState, operation, operationFunc) {
-    logger.info(`Operation: ${operation}`);
+  static playerOperation(logger, room, roomState, operation, operationFunc) {
+    logger.info('running room operation', { operation });
     let creatorRoomState = {};
     if (room && roomState) {
       creatorRoomState = UserCode.getCreatorRoomState(room, roomState);
-      logger.info('current creatorRoomState', creatorRoomState);
+      logger.info('state before operation', { creatorRoomState });
     }
     try {
       const newRoomState = operationFunc(creatorRoomState);
-      logger.info('result creatorRoomState', newRoomState);
+      logger.info('state after operation', { newRoomState });
       return newRoomState;
     } catch (error) {
       if (error.name) {
@@ -53,29 +54,29 @@ class UserCode {
   }
 
   startRoom() {
-    const { userCodeRaw } = this;
-    return UserCode.playerOperation(null, null, 'onRoomStart', () => userCodeRaw.onRoomStart({}));
+    const { userCodeRaw, logger } = this;
+    return UserCode.playerOperation(logger, null, null, 'onRoomStart', () => userCodeRaw.onRoomStart({}));
   }
 
   playerJoin(plrId, room, roomState) {
-    const { userCodeRaw } = this;
-    return UserCode.playerOperation(room, roomState, 'onPlayerJoin', (creatorRoomState) => userCodeRaw.onPlayerJoin(
+    const { userCodeRaw, logger } = this;
+    return UserCode.playerOperation(logger, room, roomState, 'onPlayerJoin', (creatorRoomState) => userCodeRaw.onPlayerJoin(
       plrId,
       creatorRoomState,
     ));
   }
 
   playerQuit(plrId, room, roomState) {
-    const { userCodeRaw } = this;
-    return UserCode.playerOperation(room, roomState, 'onPlayerQuit', (creatorRoomState) => userCodeRaw.onPlayerQuit(
+    const { userCodeRaw, logger } = this;
+    return UserCode.playerOperation(logger, room, roomState, 'onPlayerQuit', (creatorRoomState) => userCodeRaw.onPlayerQuit(
       plrId,
       creatorRoomState,
     ));
   }
 
   playerMove(plrId, move, room, roomState) {
-    const { userCodeRaw } = this;
-    return UserCode.playerOperation(room, roomState, 'onPlayerMove', (creatorRoomState) => userCodeRaw.onPlayerMove(
+    const { userCodeRaw, logger } = this;
+    return UserCode.playerOperation(logger, room, roomState, 'onPlayerMove', (creatorRoomState) => userCodeRaw.onPlayerMove(
       plrId,
       move,
       creatorRoomState,

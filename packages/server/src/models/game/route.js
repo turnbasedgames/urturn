@@ -6,7 +6,6 @@ const { celebrate, Segments } = require('celebrate');
 const Joi = require('../../middleware/joi');
 const auth = require('../../middleware/auth');
 const Game = require('./game');
-const logger = require('../../logger');
 
 const PATH = '/game';
 const router = express.Router();
@@ -72,7 +71,11 @@ router.put('/:id', auth,
         await oldGame.populate('creator').execPopulate();
         res.status(StatusCodes.OK).json({ game: oldGame });
       } else {
-        logger.info(`user ${user.id} not allowed to update game ${id} created by ${oldGame.creator}`);
+        req.log.info('user is not allowed to update the game', {
+          userId: user.id,
+          gameId: id,
+          creatorId: oldGame.creator,
+        });
         res.sendStatus(StatusCodes.UNAUTHORIZED);
       }
     } else {
@@ -98,7 +101,11 @@ router.delete('/:id', auth,
         await game.deleteOne();
         res.sendStatus(StatusCodes.OK);
       } else {
-        logger.info(`user ${user.id} not allowed to delete game ${id} created by ${game.creator}`);
+        req.log.info('user is not allowed to delete the game', {
+          userId: user.id,
+          gameId: id,
+          creatorId: game.creator,
+        });
         res.sendStatus(StatusCodes.UNAUTHORIZED);
       }
     } else {

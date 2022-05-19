@@ -76,7 +76,7 @@ function setupRouter({ io }) {
     }
 
     await room.populate('players').populate('game').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
-    const userCode = await UserCode.fromGame(room.game);
+    const userCode = await UserCode.fromGame(req.log, room.game);
     const creatorInitRoomState = userCode.startRoom();
     const roomState = new RoomState({
       room: room.id,
@@ -112,7 +112,7 @@ function setupRouter({ io }) {
         room = await Room.findById(id).populate('game').populate('latestState').session(session);
         room.playerJoin(userId);
         const prevRoomState = room.latestState;
-        const userCode = await UserCode.fromGame(room.game);
+        const userCode = await UserCode.fromGame(req.log, room.game);
         const creatorJoinRoomState = userCode.playerJoin(userId, room, prevRoomState);
         newRoomState = await applyCreatorResult(prevRoomState, room, creatorJoinRoomState, session);
       });
@@ -145,7 +145,7 @@ function setupRouter({ io }) {
         room = await Room.findById(id).populate('game').populate('latestState').session(session);
         room.playerMove(userId);
         const prevRoomState = room.latestState;
-        const userCode = await UserCode.fromGame(room.game);
+        const userCode = await UserCode.fromGame(req.log, room.game);
         const creatorMoveRoomState = userCode.playerMove(userId, move, room, prevRoomState);
         newRoomState = await applyCreatorResult(prevRoomState, room, creatorMoveRoomState, session);
       });
@@ -177,7 +177,7 @@ function setupRouter({ io }) {
         room = await Room.findById(id).populate('game').populate('latestState').session(session);
         room.playerQuit(userId);
         const prevRoomState = room.latestState;
-        const userCode = await UserCode.fromGame(room.game);
+        const userCode = await UserCode.fromGame(req.log, room.game);
         const creatorQuitRoomState = userCode.playerQuit(userId, room, prevRoomState);
         newRoomState = await applyCreatorResult(prevRoomState, room, creatorQuitRoomState, session);
       });

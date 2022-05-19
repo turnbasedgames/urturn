@@ -6,7 +6,7 @@ const { StatusCodes } = require('http-status-codes');
 const socketio = require('socket.io');
 
 require('./src/setupFirebase');
-const httpLogger = require('./src/middleware/httpLogger');
+const setupHttpLogger = require('./src/middleware/setupHttpLogger');
 const logger = require('./src/logger');
 const setupDB = require('./src/setupDB');
 const userRouter = require('./src/models/user/route');
@@ -20,6 +20,7 @@ const PORT = process.env.PORT || 8080;
 
 const main = async () => {
   const app = express();
+  app.use(await setupHttpLogger());
   const httpServer = http.createServer(app);
   const db = setupDB();
   const io = socketio(httpServer, {
@@ -31,7 +32,6 @@ const main = async () => {
 
   app.use(cors());
   app.use(express.json());
-  app.use(httpLogger);
 
   app.use(userRouter.PATH, userRouter.router);
   app.use(gameRouter.PATH, gameRouter.router);
