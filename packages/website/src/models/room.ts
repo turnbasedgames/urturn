@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import { Game } from './game';
-import { User } from './user';
+import { RoomUser } from './user';
 
 export enum Errors {
   RoomNotJoinable = 'RoomNotJoinable',
@@ -17,7 +17,7 @@ export interface RoomState {
 export interface Room {
   id: string
   game: Game,
-  players: User[],
+  players: RoomUser[],
   finished: Boolean,
   joinable: Boolean,
   latestState: RoomState,
@@ -26,8 +26,9 @@ export interface Room {
 export const generateBoardGame = (room: Room, roomState: RoomState) => {
   const { players, joinable, finished } = room;
   const { state, version } = roomState;
+
   return {
-    players: players.map((player) => player.id),
+    players,
     joinable,
     finished,
     state,

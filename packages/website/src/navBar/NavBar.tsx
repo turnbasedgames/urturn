@@ -88,7 +88,7 @@ const NavBar = ({ user }: Props) => {
               history.push('/');
             }}
             >
-              Turn-Based-Games
+              Urturn
             </Typography>
           </Stack>
           <Search />

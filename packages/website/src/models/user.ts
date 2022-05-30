@@ -7,12 +7,19 @@ export enum Errors {
   UserNotFound = 'UserNotFound',
 }
 
+// this User class is meant to describe the current authenticated user
 export interface User {
   id: string,
   username: string,
   firebaseID: string,
   firebaseUser: firebase.User
   signInProvider: string,
+}
+
+// fields in RoomUser are visible publically, and used to describe ANY user (e.g. playing game with)
+export interface RoomUser {
+  id: string,
+  username: string,
 }
 
 export const getUser = async (firebaseUser: firebase.User, upsert: boolean): Promise<User> => {
