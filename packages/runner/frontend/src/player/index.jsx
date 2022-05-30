@@ -6,16 +6,18 @@ import { connectToChild } from 'penpal';
 import { Typography, LinearProgress } from '@mui/material';
 import axios from 'axios';
 import { io } from 'socket.io-client';
-import { isPlayerInGame, makeMove, BASE_URL } from '../data';
+import {
+  getPlayerInGameById, makeMove, BASE_URL,
+} from '../data';
 
 function Player() {
   const { playerId } = useParams();
-  const [found, setFound] = useState(false);
+  const [player, setPlayer] = useState(undefined);
   const [loading, setLoading] = useState(true);
 
   const setupPlayer = async (id) => {
-    const plrFound = await isPlayerInGame(id);
-    setFound(plrFound);
+    const plr = await getPlayerInGameById(id);
+    setPlayer(plr);
     setLoading(false);
   };
 
@@ -52,9 +54,11 @@ function Player() {
         methods: {
           async makeMove(move) {
             try {
-              await makeMove(playerId, move);
+              console.log('making move with player', player);
+              await makeMove(player, move);
               return { success: true };
             } catch (err) {
+              console.log(player, err);
               if (
                 axios.isAxiosError(err) && err.response
               ) {
@@ -79,13 +83,13 @@ function Player() {
         setChildClient(child);
       });
     }
-  }, [playerId]);
+  }, [player]);
 
   if (loading) {
     return (
       <LinearProgress />
     );
-  } if (found) {
+  } if (player !== undefined) {
     // TODO: MAIN-91 can we pull this into a common component used by both local runner and website?
     return (
       <iframe

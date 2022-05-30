@@ -12,13 +12,13 @@ export const getState = async () => {
   return data;
 };
 
-export const makeMove = (playerId, move) => axios.post(`${BASE_URL}/player/${playerId}/move`, move);
+export const makeMove = (player, move) => axios.post(`${BASE_URL}/player/${player.id}/move`, move);
 
 export const resetState = async () => axios.delete(`${BASE_URL}/state`);
 
-export const removePlayer = (playerId) => axios.delete(`${BASE_URL}/player/${playerId}`);
+export const removePlayer = (player) => axios.delete(`${BASE_URL}/player/${player.id}`);
 
-export const isPlayerInGame = async (playerId) => {
+export const getPlayerInGameById = async (plrId) => {
   const { players } = await getState();
-  return players.includes(playerId);
+  return players.find((somePlr) => somePlr.id === plrId);
 };

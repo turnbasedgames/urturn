@@ -7,7 +7,9 @@ const defaultBackendModule = require('../test_app/index');
 const {
   userBackend,
 } = require('../config/paths');
-const { newBoardGame, applyBoardGameResult, filterBoardGame } = require('./boardGame');
+const {
+  newBoardGame, applyBoardGameResult, filterBoardGame, getPlayerById, removePlayerById,
+} = require('./boardGame');
 
 // TODO: MAIN-89 hot reload based on backendModule changes
 module.exports = {
@@ -38,26 +40,32 @@ module.exports = {
     app.use(express.json());
 
     app.post('/player', (_, res) => {
-      const playerId = `user_${boardGame.playerIdCounter}`;
+      const username = `user_${boardGame.playerIdCounter}`;
+      const id = `id_${boardGame.playerIdCounter}`;
+      const player = {
+        id, username,
+      };
       boardGame.playerIdCounter += 1;
-      boardGame.players.push(playerId);
+      boardGame.players.push(player);
       boardGame = applyBoardGameResult(
         boardGame,
-        backendModule.onPlayerJoin(playerId, filterBoardGame(boardGame)),
+        backendModule.onPlayerJoin(player, filterBoardGame(boardGame)),
       );
       io.sockets.emit('stateChanged', boardGame);
-      res.status(StatusCodes.OK).json({ id: playerId });
+      res.status(StatusCodes.OK).json(player);
     });
 
     app.delete('/player/:id', (req, res) => {
       const { id } = req.params;
-      if (!boardGame.players.includes(id)) {
+      const player = getPlayerById(id, boardGame);
+      if (player === undefined) {
         res.status(StatusCodes.BAD_REQUEST).json({ message: `${id} is not in the board game` });
+        return;
       }
-      boardGame.players = boardGame.players.filter((p) => p !== id);
+      boardGame = removePlayerById(id, boardGame);
       boardGame = applyBoardGameResult(
         boardGame,
-        backendModule.onPlayerQuit(id, filterBoardGame(boardGame)),
+        backendModule.onPlayerQuit(player, filterBoardGame(boardGame)),
       );
       io.sockets.emit('stateChanged', boardGame);
       res.sendStatus(StatusCodes.OK);
@@ -65,11 +73,16 @@ module.exports = {
 
     app.post('/player/:id/move', (req, res) => {
       const { id } = req.params;
+      const player = getPlayerById(id, boardGame);
+      if (player === undefined) {
+        res.status(StatusCodes.BAD_REQUEST).json({ message: `${id} is not in the board game` });
+        return;
+      }
       const move = req.body;
       try {
         boardGame = applyBoardGameResult(
           boardGame,
-          backendModule.onPlayerMove(id, move, filterBoardGame(boardGame)),
+          backendModule.onPlayerMove(player, move, filterBoardGame(boardGame)),
         );
       } catch (err) {
         res.status(StatusCodes.BAD_REQUEST).json({

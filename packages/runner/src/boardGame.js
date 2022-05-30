@@ -32,10 +32,20 @@ function newBoardGame(backendModule) {
   return applyBoardGameResult(boardGame, backendModule.onRoomStart());
 }
 
+function getPlayerById(id, boardGame) {
+  return boardGame.players.find((plr) => plr.id === id);
+}
+
+function removePlayerById(id, boardGame) {
+  return { ...boardGame, players: boardGame.players.filter((p) => p.id !== id) };
+}
+
 module.exports = {
   CREATOR_EDITABLE_FIELDS,
   CREATOR_VIEWABLE_FIELDS,
   newBoardGame,
   applyBoardGameResult,
   filterBoardGame,
+  getPlayerById,
+  removePlayerById,
 };

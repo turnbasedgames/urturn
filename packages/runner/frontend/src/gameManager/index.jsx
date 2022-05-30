@@ -9,8 +9,8 @@ import {
 } from '../data';
 
 function GameManager() {
-  const openPlayerTab = (id) => {
-    window.open(`/player/${id}`, '_blank').focus();
+  const openPlayerTab = (player) => {
+    window.open(`/player/${player.id}`, '_blank').focus();
   };
 
   const [loading, setLoading] = useState(true);
@@ -43,9 +43,9 @@ function GameManager() {
               size="small"
               variant="outlined"
               onClick={async () => {
-                const { id } = await addPlayer();
+                const player = await addPlayer();
                 await reloadGameState();
-                openPlayerTab(id);
+                openPlayerTab(player);
               }}
             >
               Add Player
@@ -108,7 +108,7 @@ function GameManager() {
                     <Typography
                       color="text.primary"
                     >
-                      {player}
+                      {player.username}
                     </Typography>
                     <IconButton
                       size="small"

@@ -6,13 +6,13 @@ module.exports = {
       message: 'room start!',
     },
   }),
-  onPlayerJoin: (plr, boardGame) => ({
+  onPlayerJoin: ({ username }, boardGame) => ({
     state: {
-      message: `${plr} joined!`,
+      message: `${username} joined!`,
       last: boardGame,
     },
   }),
-  onPlayerMove: (plr, move, boardGame) => {
+  onPlayerMove: ({ username }, move, boardGame) => {
     // move.error triggers an error to be thrown immediately for testing purposes
     const { error } = move;
     if (error) {
@@ -26,15 +26,15 @@ module.exports = {
       return prev;
     }, {
       state: {
-        message: `${plr} made move!`,
+        message: `${username} made move!`,
         move,
         last: boardGame,
       },
     });
   },
-  onPlayerQuit: (plr, boardGame) => ({
+  onPlayerQuit: ({ username }, boardGame) => ({
     state: {
-      message: `${plr} left!`,
+      message: `${username} left!`,
       last: boardGame,
     },
   }),
