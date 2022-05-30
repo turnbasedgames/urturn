@@ -5,8 +5,8 @@ const Status = Object.freeze({
   EndGame: 'endGame',
 });
 
-function getPlrMark(plr, plrs) {
-  if (plr === plrs[0]) {
+function getPlrMark(player, plrs) {
+  if (player.id === plrs[0].id) {
     return 'X';
   }
   return 'O';
@@ -50,6 +50,11 @@ function isEndGame(board, plrs) {
 
 /**
  * Generic board game types
+ * @type Player: json object, in the format of
+ * {
+ *  id: string, unique player id
+ *  username: string, the player's display name
+ * }
  * @type BoardGame: json object, in the format of
  * {
  *  // creator read write fields
@@ -58,7 +63,7 @@ function isEndGame(board, plrs) {
  *  finished: boolean (default=false), when true there will be no new board game state changes
  *
  *  // creator read only
- *  players: [string], array of unique playerIds
+ *  players: [Player], array of player objects
  *  version: Number, an integer value that increases by 1 with each state change
  * }
  * @type BoardGameResult: json object, in the format of
@@ -90,11 +95,11 @@ function onRoomStart() {
 
 /**
  * onPlayerJoin
- * @param {string} plr string, which represents the player id
+ * @param {Player} player, represents the player that is attempting to join this game
  * @param {BoardGame} currentGame
  * @returns {BoardGameResult}
  */
-function onPlayerJoin(plr, boardGame) {
+function onPlayerJoin(player, boardGame) {
   const { players, state } = boardGame;
 
   // VALIDATIONS
@@ -122,12 +127,12 @@ function onPlayerJoin(plr, boardGame) {
 
 /**
  * onPlayerMove
- * @param {string} plr string, which represents the player id
+ * @param {Player} player, the player that is attempting to make a move
  * @param {*} move json object, controlled the creator that represents the player's move
  * @param {BoardGame} currentGame
  * @returns {BoardGameResult}
  */
-function onPlayerMove(plr, move, boardGame) {
+function onPlayerMove(player, move, boardGame) {
   const { state, players } = boardGame;
   const { board, plrToMoveIndex } = state;
 
@@ -137,14 +142,14 @@ function onPlayerMove(plr, move, boardGame) {
   if (state.status !== Status.InGame) {
     throw new Error("game is not in progress, can't make move!");
   }
-  if (players[plrToMoveIndex] !== plr) {
-    throw new Error(`Its not this player's turn: ${plr}`);
+  if (players[plrToMoveIndex].id !== player.id) {
+    throw new Error(`Its not this player's turn: ${player.username}`);
   }
   if (board[x][y] !== null) {
     throw new Error(`Invalid move, someone already marked here: ${x},${y}`);
   }
 
-  const plrMark = getPlrMark(plr, players);
+  const plrMark = getPlrMark(player, players);
   board[x][y] = plrMark;
 
   // Check if game is over
@@ -161,11 +166,11 @@ function onPlayerMove(plr, move, boardGame) {
 
 /**
  * onPlayerQuit
- * @param {string} plr string, which represents the player id
+ * @param {Player} player, the player that is attempting to quit the game
  * @param {BoardGame} currentGame
  * @returns {BoardGameResult}
  */
-function onPlayerQuit(plr, boardGame) {
+function onPlayerQuit(player, boardGame) {
   const { state, players } = boardGame;
   state.status = Status.EndGame;
   if (players.length === 1) {

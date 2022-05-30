@@ -15,13 +15,13 @@ const getStatusMsg = ({
 }) => {
   if (finished) {
     if (winner) {
-      return `${winner} won the game!`;
+      return `${winner.username} won the game!`;
     }
     return "It's a tie!";
   } if (status === 'preGame') {
     return 'Waiting on another player...';
   } if (status === 'inGame') {
-    return `Waiting on player ${plrToMove} to make their move...`;
+    return `Waiting on player ${plrToMove.username} to make their move...`;
   }
   return 'Error: You should never see this. Contact developers!';
 };
@@ -103,8 +103,8 @@ function App() {
               <Typography disableGutter color="text.primary">Players</Typography>
               <List dense disablePadding padding={0}>
                 {players.map((player, ind) => (
-                  <ListItem dense disablePadding key={player}>
-                    <ListItemText primary={`${ind + 1}: ${player}`} />
+                  <ListItem dense disablePadding key={player.id}>
+                    <ListItemText primary={`${ind + 1}: ${player.username}`} />
                   </ListItem>
                 ))}
               </List>
