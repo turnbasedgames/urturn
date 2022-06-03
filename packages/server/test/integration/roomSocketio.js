@@ -6,7 +6,8 @@ const io = require('socket.io-client');
 const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
 const {
-  createUserAndAssert, createGameAndAssert, createRoomAndAssert, startTicTacToeRoom,
+  getPublicUserFromUser, createUserAndAssert, createGameAndAssert, createRoomAndAssert,
+  startTicTacToeRoom,
 } = require('../util/api_util');
 const { waitFor, createOrUpdateSideApps } = require('../util/util');
 
@@ -95,22 +96,24 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
             null,
           ],
         ],
-        state: 'IN_GAME',
+        plrToMoveIndex: 0,
+        status: 'inGame',
         winner: null,
       },
     },
-    players: [userOne, userTwo],
+    players: [userOne, userTwo].map(getPublicUserFromUser),
     inactivePlayers: [],
   });
 
   await assertNextSocketLatestState(t, sockets, {
     finished: false,
     joinable: false,
-    players: [userOne.id, userTwo.id],
+    players: [userOne, userTwo].map(getPublicUserFromUser),
     version: 1,
     state: {
       board: [[null, null, null], [null, null, null], [null, null, null]],
-      state: 'IN_GAME',
+      plrToMoveIndex: 0,
+      status: 'inGame',
       winner: null,
     },
   });
@@ -122,11 +125,12 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
   await assertNextSocketLatestState(t, sockets, {
     finished: false,
     joinable: false,
-    players: [userOne.id, userTwo.id],
+    players: [userOne, userTwo].map(getPublicUserFromUser),
     version: 2,
     state: {
       board: [['X', null, null], [null, null, null], [null, null, null]],
-      state: 'IN_GAME',
+      plrToMoveIndex: 1,
+      status: 'inGame',
       winner: null,
     },
   });
@@ -138,11 +142,12 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
   await assertNextSocketLatestState(t, sockets, {
     finished: false,
     joinable: false,
-    players: [userOne.id, userTwo.id],
+    players: [userOne, userTwo].map(getPublicUserFromUser),
     version: 3,
     state: {
       board: [['X', 'O', null], [null, null, null], [null, null, null]],
-      state: 'IN_GAME',
+      plrToMoveIndex: 0,
+      status: 'inGame',
       winner: null,
     },
   });
@@ -163,11 +168,12 @@ test('sockets can unwatch a room to no longer receive room:latestState events wh
   await assertNextSocketLatestState(t, [socket1, socket2], {
     finished: false,
     joinable: false,
-    players: [userOne.id, userTwo.id],
+    players: [userOne, userTwo].map(getPublicUserFromUser),
     version: 2,
     state: {
       board: [['X', null, null], [null, null, null], [null, null, null]],
-      state: 'IN_GAME',
+      status: 'inGame',
+      plrToMoveIndex: 1,
       winner: null,
     },
   });
@@ -181,11 +187,12 @@ test('sockets can unwatch a room to no longer receive room:latestState events wh
   await assertNextLatestState(t, socket1, {
     finished: false,
     joinable: false,
-    players: [userOne.id, userTwo.id],
+    players: [userOne, userTwo].map(getPublicUserFromUser),
     version: 3,
     state: {
       board: [['X', 'O', null], [null, null, null], [null, null, null]],
-      state: 'IN_GAME',
+      plrToMoveIndex: 0,
+      status: 'inGame',
       winner: null,
     },
   });
@@ -195,7 +202,8 @@ test('sockets can unwatch a room to no longer receive room:latestState events wh
     version: 3,
     state: {
       board: [['X', 'O', null], [null, null, null], [null, null, null]],
-      state: 'IN_GAME',
+      plrToMoveIndex: 0,
+      status: 'inGame',
       winner: null,
     },
   }));
@@ -223,11 +231,12 @@ test('sockets can be connected to different nodejs instances and receive events 
   await assertNextSocketLatestState(t, sockets, {
     finished: false,
     joinable: false,
-    players: [userOne.id, userTwo.id],
+    players: [userOne, userTwo].map(getPublicUserFromUser),
     version: 2,
     state: {
       board: [['X', null, null], [null, null, null], [null, null, null]],
-      state: 'IN_GAME',
+      plrToMoveIndex: 1,
+      status: 'inGame',
       winner: null,
     },
   });
@@ -239,11 +248,12 @@ test('sockets can be connected to different nodejs instances and receive events 
   await assertNextSocketLatestState(t, sockets, {
     finished: false,
     joinable: false,
-    players: [userOne.id, userTwo.id],
+    players: [userOne, userTwo].map(getPublicUserFromUser),
     version: 3,
     state: {
       board: [['X', 'O', null], [null, null, null], [null, null, null]],
-      state: 'IN_GAME',
+      plrToMoveIndex: 0,
+      status: 'inGame',
       winner: null,
     },
   });

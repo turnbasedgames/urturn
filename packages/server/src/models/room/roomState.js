@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-const { addKVToObjectFactoryFn, getKVToObjectFactoryFn } = require('./util');
+const { addKVToObjectFactoryFn, getKVToObjectFactoryFn } = require('../util');
 
 const CREATOR_EDITABLE_KEYS = ['state'];
 const CREATOR_VIEWABLE_KEYS = [...CREATOR_EDITABLE_KEYS, 'version'];

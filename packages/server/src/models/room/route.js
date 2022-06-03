@@ -11,7 +11,7 @@ const Room = require('./room');
 const RoomState = require('./roomState');
 const UserCode = require('./runner');
 const {
-  RoomNotJoinableError, RoomFinishedError, UserNotInRoomError, CreatorError,
+  RoomNotJoinableError, RoomFinishedError, UserNotInRoomError, CreatorError, UserAlreadyInRoomError,
 } = require('./errors');
 const { applyCreatorResult, handlePostRoomOperation } = require('./util');
 
@@ -63,7 +63,8 @@ function setupRouter({ io }) {
     }));
 
   router.post('/', auth, asyncHandler(async (req, res) => {
-    const userId = req.user.id;
+    const { user } = req;
+    const player = user.getCreatorDataView();
     const roomRaw = req.body;
     const room = new Room(roomRaw);
     room.players = [req.user];
@@ -83,7 +84,7 @@ function setupRouter({ io }) {
       version: 0,
     });
     roomState.applyCreatorData(creatorInitRoomState);
-    const creatorJoinRoomState = userCode.playerJoin(userId, room, roomState);
+    const creatorJoinRoomState = userCode.playerJoin(player, room, roomState);
     roomState.applyCreatorData(creatorJoinRoomState);
     room.applyCreatorRoomState(creatorJoinRoomState);
     room.latestState = roomState.id;
@@ -102,18 +103,20 @@ function setupRouter({ io }) {
       id: Joi.objectId(),
     }),
   }), auth, asyncHandler(async (req, res) => {
-    const userId = req.user.id;
+    const { user } = req;
+    const player = user.getCreatorDataView();
     const { id } = req.params;
 
     let room;
     let newRoomState;
     try {
       await mongoose.connection.transaction(async (session) => {
-        room = await Room.findById(id).populate('game').populate('latestState').session(session);
-        room.playerJoin(userId);
+        room = await Room.findById(id).populate('game').populate('players').populate('latestState')
+          .session(session);
+        room.playerJoin(user);
         const prevRoomState = room.latestState;
         const userCode = await UserCode.fromGame(req.log, room.game);
-        const creatorJoinRoomState = userCode.playerJoin(userId, room, prevRoomState);
+        const creatorJoinRoomState = userCode.playerJoin(player, room, prevRoomState);
         newRoomState = await applyCreatorResult(prevRoomState, room, creatorJoinRoomState, session);
       });
       await handlePostRoomOperation(res, io, room, newRoomState);
@@ -123,6 +126,8 @@ function setupRouter({ io }) {
       } else if (err instanceof CreatorError) {
         err.status = StatusCodes.BAD_REQUEST;
       } else if (err instanceof RoomNotJoinableError) {
+        err.status = StatusCodes.BAD_REQUEST;
+      } else if (err instanceof UserAlreadyInRoomError) {
         err.status = StatusCodes.BAD_REQUEST;
       }
       throw err;
@@ -134,7 +139,8 @@ function setupRouter({ io }) {
       id: Joi.objectId(),
     }),
   }), auth, asyncHandler(async (req, res) => {
-    const userId = req.user.id;
+    const { user } = req;
+    const player = user.getCreatorDataView();
     const { id } = req.params;
     const move = req.body;
 
@@ -142,11 +148,12 @@ function setupRouter({ io }) {
       let room;
       let newRoomState;
       await mongoose.connection.transaction(async (session) => {
-        room = await Room.findById(id).populate('game').populate('latestState').session(session);
-        room.playerMove(userId);
+        room = await Room.findById(id).populate('game').populate('players').populate('latestState')
+          .session(session);
+        room.playerMove(player);
         const prevRoomState = room.latestState;
         const userCode = await UserCode.fromGame(req.log, room.game);
-        const creatorMoveRoomState = userCode.playerMove(userId, move, room, prevRoomState);
+        const creatorMoveRoomState = userCode.playerMove(player, move, room, prevRoomState);
         newRoomState = await applyCreatorResult(prevRoomState, room, creatorMoveRoomState, session);
       });
       await handlePostRoomOperation(res, io, room, newRoomState);
@@ -167,18 +174,20 @@ function setupRouter({ io }) {
       id: Joi.objectId(),
     }),
   }), auth, asyncHandler(async (req, res) => {
-    const userId = req.user.id;
+    const { user } = req;
+    const player = user.getCreatorDataView();
     const { id } = req.params;
 
     try {
       let room;
       let newRoomState;
       await mongoose.connection.transaction(async (session) => {
-        room = await Room.findById(id).populate('game').populate('latestState').session(session);
-        room.playerQuit(userId);
+        room = await Room.findById(id).populate('game').populate('players').populate('latestState')
+          .session(session);
+        room.playerQuit(user);
         const prevRoomState = room.latestState;
         const userCode = await UserCode.fromGame(req.log, room.game);
-        const creatorQuitRoomState = userCode.playerQuit(userId, room, prevRoomState);
+        const creatorQuitRoomState = userCode.playerQuit(player, room, prevRoomState);
         newRoomState = await applyCreatorResult(prevRoomState, room, creatorQuitRoomState, session);
       });
       await handlePostRoomOperation(res, io, room, newRoomState);

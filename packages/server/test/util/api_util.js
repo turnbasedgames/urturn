@@ -3,11 +3,20 @@ const { v4: uuidv4 } = require('uuid');
 
 const { createUserCred } = require('./firebase');
 
+function getPublicUserFromUser(user) {
+  return {
+    id: user.id,
+    username: user.username,
+  };
+}
+
 async function createGameAndAssert(t, api, userCred, user) {
+  // TODO: we should switch from using tictactoe to runner/test_app backend where we
+  // have more control over the backend behavior. We can force trigger errors, or other behaviors
   const gameRaw = {
     name: `integration-tests-${uuidv4()}`,
     description: 'test description',
-    commitSHA: '0f768bc1d74e804b73d81f290f14c86721c9cc90',
+    commitSHA: '3bc1743b0d7580a043884a5d6b9e0bffd64c1c61',
     githubURL: 'https://github.com/turnbasedgames/tictactoe',
   };
   const authToken = await userCred.user.getIdToken();
@@ -34,7 +43,7 @@ async function createRoomAndAssert(t, api, userCred, game, user) {
   t.is(status, StatusCodes.CREATED);
   t.deepEqual(room.game, game);
   t.is(room.joinable, true);
-  t.deepEqual(room.players, [user]);
+  t.deepEqual(room.players, [user].map(getPublicUserFromUser));
   t.deepEqual(room.latestState.state, {
     board: [
       [
@@ -53,7 +62,7 @@ async function createRoomAndAssert(t, api, userCred, game, user) {
         null,
       ],
     ],
-    state: 'NOT_STARTED',
+    status: 'preGame',
     winner: null,
   });
   return room;
@@ -73,7 +82,7 @@ async function startTicTacToeRoom(t) {
   t.is(status, StatusCodes.OK);
   t.deepEqual(resRoom.game, game);
   t.is(resRoom.joinable, false);
-  t.deepEqual(resRoom.players, [userOne, userTwo]);
+  t.deepEqual(resRoom.players, [userOne, userTwo].map(getPublicUserFromUser));
   t.deepEqual(resRoom.latestState.state, {
     board: [
       [
@@ -92,7 +101,8 @@ async function startTicTacToeRoom(t) {
         null,
       ],
     ],
-    state: 'IN_GAME',
+    plrToMoveIndex: 0,
+    status: 'inGame',
     winner: null,
   });
   return {
@@ -101,5 +111,9 @@ async function startTicTacToeRoom(t) {
 }
 
 module.exports = {
-  createGameAndAssert, createRoomAndAssert, createUserAndAssert, startTicTacToeRoom,
+  getPublicUserFromUser,
+  createGameAndAssert,
+  createRoomAndAssert,
+  createUserAndAssert,
+  startTicTacToeRoom,
 };

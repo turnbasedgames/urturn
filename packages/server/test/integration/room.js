@@ -5,7 +5,8 @@ const { Types } = require('mongoose');
 const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
 const {
-  createUserAndAssert, createGameAndAssert, createRoomAndAssert, startTicTacToeRoom,
+  getPublicUserFromUser, createUserAndAssert, createGameAndAssert, createRoomAndAssert,
+  startTicTacToeRoom,
 } = require('../util/api_util');
 const { createOrUpdateSideApps } = require('../util/util');
 
@@ -147,6 +148,28 @@ test('POST /room/:id/join on a non joinable room provides a 400', async (t) => {
   t.is(message, `${room.id} is not joinable!`);
 });
 
+test('POST /room/:id/join on a room a player already joined provides a 400', async (t) => {
+  const { api } = t.context.app;
+  const userCredOne = await createUserCred();
+  const userOne = await createUserAndAssert(t, api, userCredOne);
+  const game = await createGameAndAssert(t, api, userCredOne, userOne);
+  const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
+  const authTokenOne = await userCredOne.user.getIdToken();
+
+  const {
+    response: { status, data: { message, name } },
+  } = await t.throwsAsync(api.post(
+    `/room/${room.id}/join`,
+    undefined,
+    {
+      headers: { authorization: authTokenOne },
+    },
+  ));
+  t.is(status, StatusCodes.BAD_REQUEST);
+  t.is(name, 'UserAlreadyInRoom');
+  t.is(message, `${userOne.id}: ${userOne.username} is already in room ${room.id}!`);
+});
+
 test('POST /room/:id/join on a finished room throws an error', async (t) => {
   await testOperationOnFinishedRoom(t, 'join');
 });
@@ -249,9 +272,9 @@ test('POST /room/:id/quit user is no longer in the room, and is in inactivePlaye
   t.is(getStatus, StatusCodes.OK);
   t.is(joinable, false);
   t.is(finished, true);
-  t.is(winner, userTwo.id);
+  t.deepEqual(winner, getPublicUserFromUser(userTwo));
   t.deepEqual(players, []);
-  t.deepEqual(inactivePlayers, [userOne, userTwo]);
+  t.deepEqual(inactivePlayers, [userOne, userTwo].map(getPublicUserFromUser));
   t.deepEqual([
     [null, null, null],
     [null, null, null],
@@ -276,7 +299,7 @@ test('POST /room/:id/quit provides error if user is not in the room', async (t) 
     data,
     {
       name: 'UserNotInRoom',
-      message: `${userTwo.id} is not in ${room.id}!`,
+      message: `${userTwo.id}: ${userTwo.username} is not in ${room.id}!`,
     },
   );
 });

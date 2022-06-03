@@ -16,6 +16,7 @@ class UserCode {
     const url = `https://raw.githubusercontent.com/${owner}/${repo}/${game.commitSHA}/index.js`;
     const { data: userCodeRawStr } = await axios.get(url);
     const vm = new NodeVM({});
+    // TODO: actually put the creator logs somewhere useful so that developers can debug
     vm.on('console.log', (data) => {
       logger.info('creator log', { data, gameId: game.id });
     });
@@ -58,26 +59,26 @@ class UserCode {
     return UserCode.playerOperation(logger, null, null, 'onRoomStart', () => userCodeRaw.onRoomStart({}));
   }
 
-  playerJoin(plrId, room, roomState) {
+  playerJoin(player, room, roomState) {
     const { userCodeRaw, logger } = this;
     return UserCode.playerOperation(logger, room, roomState, 'onPlayerJoin', (creatorRoomState) => userCodeRaw.onPlayerJoin(
-      plrId,
+      player,
       creatorRoomState,
     ));
   }
 
-  playerQuit(plrId, room, roomState) {
+  playerQuit(player, room, roomState) {
     const { userCodeRaw, logger } = this;
     return UserCode.playerOperation(logger, room, roomState, 'onPlayerQuit', (creatorRoomState) => userCodeRaw.onPlayerQuit(
-      plrId,
+      player,
       creatorRoomState,
     ));
   }
 
-  playerMove(plrId, move, room, roomState) {
+  playerMove(player, move, room, roomState) {
     const { userCodeRaw, logger } = this;
     return UserCode.playerOperation(logger, room, roomState, 'onPlayerMove', (creatorRoomState) => userCodeRaw.onPlayerMove(
-      plrId,
+      player,
       move,
       creatorRoomState,
     ));

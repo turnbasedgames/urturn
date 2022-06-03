@@ -2,8 +2,10 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-const { addKVToObjectFactoryFn, getKVToObjectFactoryFn } = require('./util');
-const { UserNotInRoomError, RoomFinishedError, RoomNotJoinableError } = require('./errors');
+const { addKVToObjectFactoryFn, getKVToObjectFactoryFn } = require('../util');
+const {
+  UserNotInRoomError, UserAlreadyInRoomError, RoomFinishedError, RoomNotJoinableError,
+} = require('./errors');
 
 const MAX_NUM_PLAYERS = 50;
 const CREATOR_EDITABLE_KEYS = ['joinable', 'finished'];
@@ -20,7 +22,7 @@ const RoomSchema = new Schema({
     required: true,
     ref: 'RoomState',
   },
-  players: { // TODO: should we populate this providing it to users
+  players: {
     type: [{
       type: Schema.Types.ObjectId,
       required: true,
@@ -56,11 +58,21 @@ const RoomSchema = new Schema({
 }, { timestamps: true });
 
 RoomSchema.method('toJSON', function toJSON() {
+  // Prevents user data from being leaked. Only public viewable data is provided
+  // (e.g. username, id). See UserSchema for implementation.
+  let { players, inactivePlayers } = this;
+  if (this.populated('players')) {
+    players = players.map((plr) => plr.getCreatorDataView());
+  }
+  if (this.populated('inactivePlayers')) {
+    inactivePlayers = inactivePlayers.map((plr) => plr.getCreatorDataView());
+  }
+
   return {
     id: this.id,
     game: this.game,
-    players: this.players,
-    inactivePlayers: this.inactivePlayers,
+    players,
+    inactivePlayers,
     joinable: this.joinable,
     finished: this.finished,
     latestState: this.latestState,
@@ -80,47 +92,65 @@ RoomSchema.method('applyCreatorRoomState', function applyCreatorRoomState(creato
   this.latestState = newRoomStateId;
   this.markModified('latestState');
 });
-RoomSchema.method('getCreatorDataView', getKVToObjectFactoryFn(CREATOR_VIEWABLE_KEYS));
-RoomSchema.method('addPlayer', function removePlayer(playerId) {
-  this.players.push(playerId);
+RoomSchema.method('getCreatorDataView', getKVToObjectFactoryFn(CREATOR_VIEWABLE_KEYS, {
+  // prevents exposure of other player private data when viewing the room data
+  players: (players) => players.map((plr) => plr.getCreatorDataView()),
+}));
+RoomSchema.method('removePlayer', function removePlayer(playerToRemove) {
+  // this.players may or may not be populated. We need to handle both cases.
+  if (this.populated('players') === undefined) {
+    this.players = this.players.filter((player) => !player.equals(playerToRemove.id));
+  } else {
+    this.players = this.players.filter((player) => player.id !== playerToRemove.id);
+  }
   this.markModified('players');
-});
-RoomSchema.method('removePlayer', function removePlayer(playerId) {
-  this.players = this.players.filter((player) => player.toString() !== playerId);
-  this.markModified('players');
-  this.inactivePlayers = Array.from(new Set([...this.inactivePlayers, playerId]));
+  this.inactivePlayers = Array.from(new Set([...this.inactivePlayers, playerToRemove.id]));
   this.markModified('inactivePlayers');
 });
-RoomSchema.method('containsPlayer', function containsPlayer(playerId) {
-  return this.players.includes(playerId);
+
+RoomSchema.method('containsPlayer', function containsPlayer(player) {
+  // this.players may or may not be populated. We need to handle both cases.
+  if (this.populated('players') === undefined) {
+    return this.players.some((somePlrId) => somePlrId.equals(player.id));
+  }
+  return this.players.some(
+    (somePlr) => somePlr // player can be null reference if deleted
+     // don't use .equals operator because .id is a string not an ObjectId
+     // https://stackoverflow.com/questions/15724272/what-is-the-difference-between-id-and-id-in-mongoose
+     && somePlr.id === player.id,
+  );
 });
 
-RoomSchema.method('playerQuit', function playerQuit(playerId) {
+RoomSchema.method('playerQuit', function playerQuit(player) {
   if (this.finished) {
     throw new RoomFinishedError(this);
   }
-  if (!this.containsPlayer(playerId)) {
-    throw new UserNotInRoomError(playerId, this);
+  if (!this.containsPlayer(player)) {
+    throw new UserNotInRoomError(player, this);
   }
-  this.removePlayer(playerId);
+  this.removePlayer(player);
 });
 
-RoomSchema.method('playerJoin', function playerJoin(playerId) {
+RoomSchema.method('playerJoin', function playerJoin(player) {
   if (this.finished) {
     throw new RoomFinishedError(this);
   }
   if (!this.joinable) {
     throw new RoomNotJoinableError(this);
   }
-  this.addPlayer(playerId);
+  if (this.containsPlayer(player)) {
+    throw new UserAlreadyInRoomError(player, this);
+  }
+  this.players.push(player);
+  this.markModified('players');
 });
 
-RoomSchema.method('playerMove', function playerMove(playerId) {
+RoomSchema.method('playerMove', function playerMove(player) {
   if (this.finished) {
     throw new RoomFinishedError(this);
   }
-  if (!this.containsPlayer(playerId)) {
-    throw new UserNotInRoomError(playerId, this);
+  if (!this.containsPlayer(player)) {
+    throw new UserNotInRoomError(player, this);
   }
 });
 
