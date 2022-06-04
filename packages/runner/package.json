@@ -6,6 +6,7 @@
   },
   "scripts": {
     "start": "runner",
+    "postinstall": "(cd frontend && npm install); (cd test_app/frontend && npm install);",
     "lint": "eslint . --ignore-path .gitignore --ext .js",
     "build": "concurrently \"cd frontend && npm run build\" \"cd test_app/frontend && npm run build\"",
     "dev": "concurrently \"runner -Dde -t http://localhost:3101 -f http://localhost:3000\" \"cd frontend && PORT=3101 npm start\" \"cd test_app/frontend && BROWSER=none npm start\""
