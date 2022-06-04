@@ -24,11 +24,16 @@ function getBoardGame() {
   return curBoardGame;
 }
 
+async function getLocalPlayer() {
+  const parent = await connection.promise;
+  return parent.getLocalPlayer();
+}
+
 async function makeMove(move) {
   const parent = await connection.promise;
   return parent.makeMove(move);
 }
 
 module.exports = {
-  getBoardGame, makeMove, events: eventEmitter,
+  getBoardGame, getLocalPlayer, makeMove, events: eventEmitter,
 };
