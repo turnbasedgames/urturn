@@ -37,6 +37,12 @@ async function createUserAndAssert(t, api, userCred) {
   return user;
 }
 
+async function deleteUserAndAssert(t, api, userCred) {
+  const authToken = await userCred.user.getIdToken();
+  const { status } = await api.delete('/user', { headers: { authorization: authToken } });
+  t.is(status, StatusCodes.OK);
+}
+
 async function createRoomAndAssert(t, api, userCred, game, user) {
   const authToken = await userCred.user.getIdToken();
   const { data: { room }, status } = await api.post('/room', { game: game.id }, { headers: { authorization: authToken } });
@@ -115,5 +121,6 @@ module.exports = {
   createGameAndAssert,
   createRoomAndAssert,
   createUserAndAssert,
+  deleteUserAndAssert,
   startTicTacToeRoom,
 };

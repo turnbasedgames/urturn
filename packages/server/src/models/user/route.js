@@ -1,4 +1,5 @@
 const express = require('express');
+const admin = require('firebase-admin');
 const { StatusCodes } = require('http-status-codes');
 const asyncHandler = require('express-async-handler');
 
@@ -39,6 +40,22 @@ router.post('/', asyncHandler(async (req, res) => {
     });
   } else {
     res.sendStatus(StatusCodes.CONFLICT);
+  }
+}));
+
+router.delete('/', asyncHandler(async (req, res) => {
+  const { decodedToken, user } = req;
+  const firebaseId = decodedToken.uid;
+
+  try {
+    await Promise.all([
+      User.findOneAndDelete({ id: user.id }),
+      admin.auth().deleteUser(firebaseId),
+    ]);
+  } catch (err) {
+    req.log.error('error completely deleting user', err);
+  } finally {
+    res.sendStatus(StatusCodes.OK);
   }
 }));
 

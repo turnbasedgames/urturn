@@ -3,16 +3,25 @@ const { StatusCodes } = require('http-status-codes');
 
 const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
-const { createUserAndAssert } = require('../util/api_util');
+const { createUserAndAssert, deleteUserAndAssert } = require('../util/api_util');
 const { createOrUpdateSideApps } = require('../util/util');
 
 test.before(async (t) => {
   const app = await spawnApp();
   // eslint-disable-next-line no-param-reassign
+  t.context.createdUsers = [];
   t.context.app = app;
 });
 
 test.after.always(async (t) => {
+  const { api } = t.context.app;
+  const { createdUsers } = t.context;
+
+  // delete users created during tests
+  for (const userCred of createdUsers) {
+    await deleteUserAndAssert(t, api, userCred);
+  }
+
   await t.context.app.cleanup();
 });
 
@@ -41,6 +50,8 @@ test('GET /user returns user object', async (t) => {
   const { api } = t.context.app;
   const userCred = await createUserCred();
   const user = await createUserAndAssert(t, api, userCred);
+  t.context.createdUsers.push(userCred);
+
   const authToken = await userCred.user.getIdToken();
   const { status, data } = await api.get('/user', { headers: { authorization: authToken } });
   t.is(status, StatusCodes.OK);
@@ -51,6 +62,8 @@ test('POST /user returns 409 if one already exists', async (t) => {
   const { api } = t.context.app;
   const userCred = await createUserCred();
   await createUserAndAssert(t, api, userCred);
+  t.context.createdUsers.push(userCred);
+
   const authToken = await userCred.user.getIdToken();
   const { response: { status } } = await t.throwsAsync(api.post('/user', {}, { headers: { authorization: authToken } }));
   t.is(status, StatusCodes.CONFLICT);
@@ -65,6 +78,7 @@ test('POST /user returns 500 if username generation fails', async (t) => {
   // the first user created will be successful and take up the only generated username "test"
   const userCredOne = await createUserCred();
   await createUserAndAssert(t, api, userCredOne);
+  t.context.createdUsers.push(userCredOne);
 
   const userCredTwo = await createUserCred();
   const authTokenTwo = await userCredTwo.user.getIdToken();
@@ -77,6 +91,7 @@ test('POST /user creates user', async (t) => {
   const { api } = t.context.app;
   const userCred = await createUserCred();
   await createUserAndAssert(t, api, userCred);
+  t.context.createdUsers.push(userCred);
 });
 
 test('POST /user username generator adds random numbers when there is a collision', async (t) => {
@@ -88,8 +103,10 @@ test('POST /user username generator adds random numbers when there is a collisio
   // the first user created will be successful and take up the only generated username "test"
   const userCredOne = await createUserCred();
   await createUserAndAssert(t, api, userCredOne);
+  t.context.createdUsers.push(userCredOne);
 
   const userCredTwo = await createUserCred();
   const userTwo = await createUserAndAssert(t, api, userCredTwo);
+  t.context.createdUsers.push(userCredTwo);
   t.regex(userTwo.username, /test_[0-9]/);
 });
