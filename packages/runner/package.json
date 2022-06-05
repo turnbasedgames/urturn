@@ -1,6 +1,6 @@
 {
   "name": "@urturn/runner",
-  "version": "0.0.1-dev6",
+  "version": "0.0.1-dev7",
   "bin": {
     "runner": "bin/runner.js"
   },
