@@ -6,6 +6,8 @@ import {
   Errors, makeMove, Room, generateBoardGame,
 } from '../../../models/room';
 import API_URL from '../../../models/util';
+import withUser from '../../../withUser';
+import { User } from '../../../models/user';
 
 const socket = io(API_URL, { transports: ['websocket'] });
 
@@ -30,11 +32,13 @@ type UnwatchRoomRes = {
 };
 
 interface Props {
-  room: Room
+  room: Room,
+  user: User,
 }
 
 const IFrame = ({
   room,
+  user,
 }: Props) => {
   const roomId = room.id;
   const { game: { githubURL, commitSHA } } = room;
@@ -82,6 +86,9 @@ const IFrame = ({
       const connection = connectToChild({
         iframe,
         methods: {
+          async getLocalPlayer() {
+            return { id: user.id, username: user.username };
+          },
           async makeMove(move: any) {
             try {
               await makeMove(roomId, move);
@@ -119,4 +126,4 @@ const IFrame = ({
   );
 };
 
-export default IFrame;
+export default withUser(IFrame, { redirectOnAnonymous: true });
