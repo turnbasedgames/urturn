@@ -86,7 +86,7 @@ const GameInfo = () => {
                 }}
                 title={game.name}
                 titleTypographyProps={{ noWrap: true }}
-                subheader={`by ${game.creator.id}`}
+                subheader={`by ${game.creator.username}`}
                 subheaderTypographyProps={{ noWrap: true }}
                 action={(
                   <GameCardActions

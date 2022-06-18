@@ -35,11 +35,12 @@ const GameList = () => {
         {games.map((game) => (
           <ListItem
             disableGutters
-            sx={{ maxWidth: '300px', paddingRight: 2 }}
+            sx={{ width: '300px', paddingRight: 2 }}
             key={`GameListItem-${game.id}`}
           >
             <Card // TODO: separate component
               key={`GameCard-${game.id}`}
+              sx={{ width: '100%' }}
             >
               <CardActionArea
                 onClick={() => history.push(`/games/${game.id}`)}
@@ -53,7 +54,7 @@ const GameList = () => {
                 <CardContent>
                   <Typography noWrap>{game.name}</Typography>
                   <Typography noWrap>
-                    {`by: ${game.creator.id}`}
+                    {`by: ${game.creator.username}`}
                   </Typography>
                 </CardContent>
               </CardActionArea>
