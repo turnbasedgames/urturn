@@ -32,13 +32,16 @@ const NavBar = ({ user }: Props) => {
         >
           <AddBoxIcon />
         </IconButton>
-        <IconButton
+        <Button
           onClick={() => {
             history.push('/profile');
           }}
         >
           <PersonIcon />
-        </IconButton>
+          <Typography variant="button" ml={1} component="div">
+            {user.username}
+          </Typography>
+        </Button>
       </>
     );
   } else if (firebaseUserDetermined) {
