@@ -9,7 +9,7 @@ const {
   createUserAndAssert,
   createGameAndAssert,
   createRoomAndAssert,
-  deleteUserAndAssert,
+  cleanupTestUsers,
   startTicTacToeRoom,
 } = require('../util/api_util');
 const { createOrUpdateSideApps } = require('../util/util');
@@ -32,20 +32,16 @@ async function testOperationOnFinishedRoom(t, operation) {
 
 test.before(async (t) => {
   const app = await spawnApp();
-  // eslint-disable-next-line no-param-reassign
+  /* eslint-disable no-param-reassign */
   t.context.app = app;
   t.context.createdUsers = [];
+  /* eslint-enable no-param-reassign */
 });
 
 test.after.always(async (t) => {
-  const { app, sideApps, createdUsers } = t.context;
-  const { api } = t.context.app;
+  const { app, sideApps } = t.context;
 
-  // delete users created during tests
-  for (const userCred of createdUsers) {
-    await deleteUserAndAssert(t, api, userCred);
-  }
-
+  await cleanupTestUsers(t);
   await app.cleanup();
   if (sideApps) {
     await sideApps.cleanup();
@@ -155,7 +151,6 @@ test('POST /room returns \'room.game must exist\' if no room', async (t) => {
 });
 
 test('POST /room/:id/join joins a game', async (t) => {
-  const { api } = t.context.app;
   const { userCredOne, userCredTwo } = await startTicTacToeRoom(t);
   t.context.createdUsers.push(userCredOne);
   t.context.createdUsers.push(userCredTwo);
@@ -362,7 +357,7 @@ test('GET /room/:id returns a room', async (t) => {
 
   const game = await createGameAndAssert(t, api, userCred, user);
   const room = await createRoomAndAssert(t, api, userCred, game, user);
-  const { data, status } = await api.get(
+  const { status } = await api.get(
     `/room/${room.id}`,
   );
   t.is(status, StatusCodes.OK);

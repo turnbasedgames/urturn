@@ -5,24 +5,18 @@ const { Types } = require('mongoose');
 
 const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
-const { createGameAndAssert, createUserAndAssert, deleteUserAndAssert } = require('../util/api_util');
+const { createGameAndAssert, createUserAndAssert, cleanupTestUsers } = require('../util/api_util');
 
 test.before(async (t) => {
   const app = await spawnApp();
-  // eslint-disable-next-line no-param-reassign
+  /* eslint-disable no-param-reassign */
   t.context.app = app;
   t.context.createdUsers = [];
+  /* eslint-enable no-param-reassign */
 });
 
 test.after.always(async (t) => {
-  const { createdUsers } = t.context;
-  const { api } = t.context.app;
-
-  // delete users created during tests
-  for (const userCred of createdUsers) {
-    await deleteUserAndAssert(t, api, userCred);
-  }
-
+  await cleanupTestUsers(t);
   await t.context.app.cleanup();
 });
 

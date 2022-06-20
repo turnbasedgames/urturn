@@ -43,6 +43,11 @@ async function deleteUserAndAssert(t, api, userCred) {
   t.is(status, StatusCodes.OK);
 }
 
+async function cleanupTestUsers(t) {
+  const { createdUsers, app: { api } } = t.context;
+  return Promise.all(createdUsers.map((cred) => deleteUserAndAssert(t, api, cred)));
+}
+
 async function createRoomAndAssert(t, api, userCred, game, user) {
   const authToken = await userCred.user.getIdToken();
   const { data: { room }, status } = await api.post('/room', { game: game.id }, { headers: { authorization: authToken } });
@@ -121,6 +126,6 @@ module.exports = {
   createGameAndAssert,
   createRoomAndAssert,
   createUserAndAssert,
-  deleteUserAndAssert,
+  cleanupTestUsers,
   startTicTacToeRoom,
 };

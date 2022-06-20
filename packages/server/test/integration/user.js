@@ -3,25 +3,19 @@ const { StatusCodes } = require('http-status-codes');
 
 const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
-const { createUserAndAssert, deleteUserAndAssert } = require('../util/api_util');
+const { createUserAndAssert, cleanupTestUsers } = require('../util/api_util');
 const { createOrUpdateSideApps } = require('../util/util');
 
 test.before(async (t) => {
   const app = await spawnApp();
-  // eslint-disable-next-line no-param-reassign
+  /* eslint-disable no-param-reassign */
   t.context.createdUsers = [];
   t.context.app = app;
+  /* eslint-enable no-param-reassign */
 });
 
 test.after.always(async (t) => {
-  const { api } = t.context.app;
-  const { createdUsers } = t.context;
-
-  // delete users created during tests
-  for (const userCred of createdUsers) {
-    await deleteUserAndAssert(t, api, userCred);
-  }
-
+  await cleanupTestUsers(t);
   await t.context.app.cleanup();
 });
 
