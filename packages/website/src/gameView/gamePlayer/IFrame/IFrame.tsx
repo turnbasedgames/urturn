@@ -126,4 +126,4 @@ const IFrame = ({
   );
 };
 
-export default withUser(IFrame, { redirectOnAnonymous: true });
+export default withUser(IFrame);
