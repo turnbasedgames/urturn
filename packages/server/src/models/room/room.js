@@ -55,6 +55,11 @@ const RoomSchema = new Schema({
     required: true,
     default: false,
   },
+  private: {
+    type: Schema.Types.Boolean,
+    required: true,
+    default: false,
+  },
 }, { timestamps: true });
 
 RoomSchema.method('toJSON', function toJSON() {
@@ -76,6 +81,7 @@ RoomSchema.method('toJSON', function toJSON() {
     joinable: this.joinable,
     finished: this.finished,
     latestState: this.latestState,
+    private: this.private,
   };
 });
 RoomSchema.method('applyCreatorData', addKVToObjectFactoryFn(CREATOR_EDITABLE_KEYS));

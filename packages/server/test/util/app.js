@@ -69,7 +69,6 @@ async function spawnApp(options = {}) {
     cleanupRedis,
     cleanupMongoDB,
     cleanup: async () => {
-      // TODO: cleanup users created in firebase
       // wait a second because server may be in a cleanup process
       const exitPromise = new Promise((resolve, reject) => {
         server.on('exit', () => {

@@ -63,6 +63,21 @@ test('GET /room returns list of rooms', async (t) => {
   t.assert(rooms.length > 0);
 });
 
+test('GET /room does not return private room', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const user = await createUserAndAssert(t, api, userCred);
+  t.context.createdUsers.push(userCred);
+
+  const game = await createGameAndAssert(t, api, userCred, user);
+  await createRoomAndAssert(t, api, userCred, game, user, true);
+  const { data: { rooms }, status } = await api.get(
+    '/room', { params: { gameId: game.id } },
+  );
+  t.is(status, StatusCodes.OK);
+  t.is(rooms.length, 0);
+});
+
 test('GET /room supports query by "joinable", "containsPlayer", and "omitPlayer"', async (t) => {
   const { api } = t.context.app;
   const userCredOne = await createUserCred();
@@ -133,6 +148,16 @@ test('POST /room creates a room', async (t) => {
 
   const game = await createGameAndAssert(t, api, userCred, user);
   await createRoomAndAssert(t, api, userCred, game, user);
+});
+
+test('POST /room supports creating a private room', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const user = await createUserAndAssert(t, api, userCred);
+  t.context.createdUsers.push(userCred);
+
+  const game = await createGameAndAssert(t, api, userCred, user);
+  await createRoomAndAssert(t, api, userCred, game, user, true);
 });
 
 test('POST /room returns \'room.game must exist\' if no room', async (t) => {

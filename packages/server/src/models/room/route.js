@@ -55,6 +55,8 @@ function setupRouter({ io }) {
         ...(joinable !== undefined && { joinable }),
         ...(containsInactivePlayer && { inactivePlayers: { $eq: containsInactivePlayer } }),
         ...(userQueried && userQuery),
+        // never allow users to query for private rooms by queueing up
+        private: false,
       }).populate('game')
         .populate('players')
         .skip(skip)

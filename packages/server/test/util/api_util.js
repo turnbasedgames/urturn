@@ -48,12 +48,15 @@ async function cleanupTestUsers(t) {
   return Promise.all(createdUsers.map((cred) => deleteUserAndAssert(t, api, cred)));
 }
 
-async function createRoomAndAssert(t, api, userCred, game, user) {
+async function createRoomAndAssert(t, api, userCred, game, user, makePrivate = false) {
   const authToken = await userCred.user.getIdToken();
-  const { data: { room }, status } = await api.post('/room', { game: game.id }, { headers: { authorization: authToken } });
+  const { data: { room }, status } = await api.post('/room',
+    { game: game.id, private: makePrivate },
+    { headers: { authorization: authToken } });
   t.is(status, StatusCodes.CREATED);
   t.deepEqual(room.game, game);
   t.is(room.joinable, true);
+  t.is(room.private, makePrivate);
   t.deepEqual(room.players, [user].map(getPublicUserFromUser));
   t.deepEqual(room.latestState.state, {
     board: [

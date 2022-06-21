@@ -103,6 +103,7 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
     },
     players: [userOne, userTwo].map(getPublicUserFromUser),
     inactivePlayers: [],
+    private: false,
   });
 
   await assertNextSocketLatestState(t, sockets, {
