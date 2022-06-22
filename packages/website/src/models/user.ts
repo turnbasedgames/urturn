@@ -40,8 +40,8 @@ export const getUser = async (firebaseUser: firebase.User, upsert: boolean): Pro
 };
 
 interface UserContextProps {
-  user: User | null,
-  setUser: React.Dispatch<React.SetStateAction<User | null>>
+  user?: User,
+  setUser: React.Dispatch<React.SetStateAction<User | undefined>>
 }
 
 export const UserContext = createContext<UserContextProps>({} as UserContextProps);

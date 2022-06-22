@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, {
+  useEffect, useState, useMemo, useContext,
+} from 'react';
 import { useParams } from 'react-router-dom';
 
 import {
@@ -6,25 +8,44 @@ import {
 } from '@mui/material';
 import IFrame from './IFrame/IFrame';
 import {
-  getRoom, Room,
+  joinRoom, getRoom, Room,
 } from '../../models/room';
+import { RoomUser, User, UserContext } from '../../models/user';
 
 type RoomURLParams = {
   roomId: string
 };
 
+const shouldJoinPrivateRoom = (user?: User, room?: Room): boolean => Boolean(
+  room
+  && user
+  && room.joinable
+  && room.private
+  && !room.players.some(((p: RoomUser) => p.id === user.id)),
+);
+
 const RoomPlayer = () => {
   const { roomId } = useParams<RoomURLParams>();
-  const [room, setRoom] = useState<null | Room>(null);
+  const [room, setRoom] = useState<Room | undefined>();
   const [openMenu, setOpenMenu] = useState<boolean>(false);
+  const userContext = useContext(UserContext);
 
   useEffect(() => {
     async function setupRoom() {
       const roomRaw = await getRoom(roomId);
       setRoom(roomRaw);
+      if (shouldJoinPrivateRoom(userContext.user, roomRaw)) {
+        await joinRoom(roomId);
+      }
     }
     setupRoom();
   }, []);
+
+  useEffect(() => {
+    if (shouldJoinPrivateRoom(userContext.user, room)) {
+      joinRoom(roomId);
+    }
+  }, [userContext.user]);
 
   const iframeMemo = useMemo(() => (
     room

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { createRef, useEffect, useState } from 'react';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import {
@@ -9,8 +9,12 @@ import {
 } from 'react-router-dom';
 import axios from 'axios';
 import { ThemeProvider } from '@mui/material/styles';
+import { SnackbarProvider, SnackbarKey } from 'notistack';
+import {
+  Stack, Slide, IconButton,
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
-import { Stack } from '@mui/material';
 import theme from './theme';
 import NavBar from './navBar';
 import GameView from './gameView';
@@ -25,7 +29,7 @@ firebase.initializeApp(JSON.parse(Buffer.from(firebaseConfig, 'base64').toString
 axios.defaults.baseURL = API_URL;
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | undefined>();
   useEffect(() => {
     const authInterceptor = axios.interceptors.request.use(async (config) => {
       const newConfig = config;
@@ -55,33 +59,55 @@ function App() {
     return () => { axios.interceptors.request.eject(authInterceptor); };
   }, []);
 
+  const snackbarProviderRef = createRef<SnackbarProvider>();
+  const onClickDismiss = (key: SnackbarKey) => () => {
+    if (snackbarProviderRef && snackbarProviderRef.current) {
+      snackbarProviderRef.current.closeSnackbar(key);
+    }
+  };
+
   return (
     <ThemeProvider theme={theme}>
-      <Stack
-        height="100vh"
-        overflow="auto"
-        direction="column"
+      <SnackbarProvider
+        ref={snackbarProviderRef}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        TransitionComponent={Slide}
+        action={(key) => (
+          <IconButton onClick={onClickDismiss(key)}>
+            <CloseIcon />
+          </IconButton>
+        )}
+        maxSnack={3}
       >
-        <UserContext.Provider value={{ user, setUser }}>
-          <Router>
-            <NavBar />
-            <Switch>
-              <Route exact path="/">
-                <Redirect to="/games" />
-              </Route>
-              <Route path="/games">
-                <GameView />
-              </Route>
-              <Route path="/develop">
-                <CreatorView />
-              </Route>
-              <Route path="/profile">
-                <ProfileView />
-              </Route>
-            </Switch>
-          </Router>
-        </UserContext.Provider>
-      </Stack>
+        <Stack
+          height="100vh"
+          overflow="auto"
+          direction="column"
+        >
+          <UserContext.Provider value={{ user, setUser }}>
+            <Router>
+              <NavBar />
+              <Switch>
+                <Route exact path="/">
+                  <Redirect to="/games" />
+                </Route>
+                <Route path="/games">
+                  <GameView />
+                </Route>
+                <Route path="/develop">
+                  <CreatorView />
+                </Route>
+                <Route path="/profile">
+                  <ProfileView />
+                </Route>
+              </Switch>
+            </Router>
+          </UserContext.Provider>
+        </Stack>
+      </SnackbarProvider>
     </ThemeProvider>
   );
 }

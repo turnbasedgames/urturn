@@ -9,9 +9,10 @@ import {
   useLocation,
   useParams,
 } from 'react-router-dom';
+import { useSnackbar } from 'notistack';
 
 import { Game, getGame } from '../../models/game';
-import { joinOrCreateRoom } from '../../models/room';
+import { joinOrCreateRoom, createPrivateRoom } from '../../models/room';
 import GameCardActions from '../../creatorView/GameCardActions';
 import { UserContext } from '../../models/user';
 
@@ -22,10 +23,12 @@ type GameURLParams = {
 const GameInfo = () => {
   const { gameId } = useParams<GameURLParams>();
   const [game, setGame] = useState<null | Game>(null);
+  const [loadingPrivateRoom, setloadingPrivateRoom] = useState<boolean>(false);
   const [loadingRoom, setLoadingRoom] = useState<boolean>(false);
   const location = useLocation();
   const history = useHistory();
   const gameLoading = !game;
+  const { enqueueSnackbar } = useSnackbar();
 
   async function setupGame() {
     const gameRaw = await getGame(gameId);
@@ -60,10 +63,12 @@ const GameInfo = () => {
           }}
         >
           {!gameLoading && (
-          <Card sx={{
-            width: '100%',
-            display: 'flex',
-          }}
+          <Card
+            sx={{
+              boxShadow: 0,
+              width: '100%',
+              display: 'flex',
+            }}
           >
             <CardMedia
               sx={{ width: '60%', aspectRatio: '1920/1080', flexShrink: 0 }}
@@ -101,24 +106,57 @@ const GameInfo = () => {
                   {({ user }) => (
                     user
                     && (
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      disabled={loadingRoom}
-                      onClick={async (ev) => {
-                        ev.preventDefault();
-                        try {
-                          setLoadingRoom(true);
-                          const room = await joinOrCreateRoom(game.id, user.id);
-                          setLoadingRoom(false);
-                          history.push(`${location.pathname}/room/${room.id}`);
-                        } catch (error) {
-                          setLoadingRoom(false);
-                        }
-                      }}
-                    >
-                      {loadingRoom ? <CircularProgress size={24} /> : 'Play'}
-                    </Button>
+                    <Stack width="100%" spacing={1} padding={1}>
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        disabled={loadingRoom}
+                        onClick={async (ev) => {
+                          ev.preventDefault();
+                          try {
+                            setLoadingRoom(true);
+                            const room = await joinOrCreateRoom(game.id, user.id);
+                            setLoadingRoom(false);
+                            history.push(`${location.pathname}/room/${room.id}`);
+                          } catch (error) {
+                            setLoadingRoom(false);
+                            enqueueSnackbar('Failed to start game: Contact Developers.', {
+                              variant: 'error',
+                              autoHideDuration: 3000,
+                            });
+                          }
+                        }}
+                      >
+                        {loadingRoom ? <CircularProgress size={24} /> : 'Play'}
+                      </Button>
+                      <Button
+                        fullWidth
+                        variant="text"
+                        disabled={loadingRoom}
+                        onClick={async (ev) => {
+                          ev.preventDefault();
+                          try {
+                            setloadingPrivateRoom(true);
+                            const room = await createPrivateRoom(game.id);
+                            setloadingPrivateRoom(false);
+                            history.push(`${location.pathname}/room/${room.id}`);
+                            navigator.clipboard.writeText(window.location.href);
+                            enqueueSnackbar('Copied URL To Clipboard!', {
+                              variant: 'success',
+                              autoHideDuration: 3000,
+                            });
+                          } catch (error) {
+                            setloadingPrivateRoom(false);
+                            enqueueSnackbar('Failed to start private game: Contact Developers.', {
+                              variant: 'error',
+                              autoHideDuration: 3000,
+                            });
+                          }
+                        }}
+                      >
+                        {loadingPrivateRoom ? <CircularProgress size={24} /> : 'Create Private Room'}
+                      </Button>
+                    </Stack>
                     )
                   )}
                 </UserContext.Consumer>

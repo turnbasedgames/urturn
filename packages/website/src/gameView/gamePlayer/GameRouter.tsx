@@ -10,6 +10,7 @@ import RoomPlayer from './RoomPlayer';
 
 const GameRouter = () => {
   const match = useRouteMatch();
+
   return (
     <Switch>
       <Route exact path={`${match.path}`}>

@@ -17,9 +17,10 @@ export interface RoomState {
 export interface Room {
   id: string
   game: Game,
+  private: boolean,
   players: RoomUser[],
-  finished: Boolean,
-  joinable: Boolean,
+  finished: boolean,
+  joinable: boolean,
   latestState: RoomState,
 }
 
@@ -51,8 +52,13 @@ export const makeMove = async (roomId: String, move: any) => {
   return res.data.room;
 };
 
-export const createRoom = async (gameId: String): Promise<Room> => {
-  const res = await axios.post('room', { game: gameId });
+export interface CreateRoomReqBody{
+  private?: boolean;
+  game: String;
+}
+
+export const createRoom = async (room: CreateRoomReqBody): Promise<Room> => {
+  const res = await axios.post('room', room);
   return res.data.room;
 };
 
@@ -74,6 +80,11 @@ export const getRoom = async (roomId: String): Promise<Room> => {
   return res.data.room;
 };
 
+export const createPrivateRoom = async (gameId: String): Promise<Room> => createRoom({
+  game: gameId,
+  private: true,
+});
+
 // TODO: should this just be a part of join endpoint?
 export const joinOrCreateRoom = async (gameId: String, userId: String): Promise<Room> => {
   const maxRetries = 10;
@@ -85,7 +96,7 @@ export const joinOrCreateRoom = async (gameId: String, userId: String): Promise<
     try {
       const roomsRaw = await getRooms({ gameId, joinable: true, omitPlayer: userId });
       if (roomsRaw && roomsRaw.length === 0) {
-        const newRoom = await createRoom(gameId);
+        const newRoom = await createRoom({ game: gameId });
         return newRoom;
       }
       const room = roomsRaw[0];
