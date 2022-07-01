@@ -2,10 +2,10 @@ import {
   Button, Card, CardActionArea, CardHeader, LinearProgress, Paper, Stack, Tab, Tabs,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import firebase from 'firebase/app';
-import 'firebase/auth';
+import { signOut } from 'firebase/auth';
 import { useHistory } from 'react-router-dom';
 
+import { auth } from '../setupFirebase';
 import { User } from '../models/user';
 import withUser from '../withUser';
 import { getRooms, quitRoom, Room } from '../models/room';
@@ -81,7 +81,7 @@ const ProfileView = ({ user, setUser }: Props) => {
               <Button
                 onClick={() => {
                   setUser(null);
-                  firebase.auth().signOut();
+                  signOut(auth);
                   history.push('/');
                 }}
                 variant="outlined"

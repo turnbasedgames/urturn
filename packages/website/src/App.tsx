@@ -1,6 +1,5 @@
 import React, { createRef, useEffect, useState } from 'react';
-import firebase from 'firebase/app';
-import 'firebase/auth';
+import { onAuthStateChanged, signInAnonymously } from 'firebase/auth';
 import {
   BrowserRouter as Router,
   Switch,
@@ -15,6 +14,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
+import { auth } from './setupFirebase';
 import theme from './theme';
 import NavBar from './navBar';
 import GameView from './gameView';
@@ -23,9 +23,6 @@ import CreatorView from './creatorView';
 import ProfileView from './profileView';
 import API_URL from './models/util';
 
-const firebaseConfig = process.env.REACT_APP_FIREBASE_CONFIG as string;
-firebase.initializeApp(JSON.parse(Buffer.from(firebaseConfig, 'base64').toString('ascii')));
-
 axios.defaults.baseURL = API_URL;
 
 function App() {
@@ -33,7 +30,7 @@ function App() {
   useEffect(() => {
     const authInterceptor = axios.interceptors.request.use(async (config) => {
       const newConfig = config;
-      const firebaseUser = firebase.auth().currentUser;
+      const firebaseUser = auth.currentUser;
       if (firebaseUser) {
         if (!newConfig.headers) {
           newConfig.headers = {};
@@ -43,9 +40,9 @@ function App() {
       return newConfig;
     });
 
-    firebase.auth().onAuthStateChanged(async (firebaseUser) => {
+    onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
-        firebase.auth().signInAnonymously();
+        signInAnonymously(auth);
       } else {
         try {
           const currentUser = await getUser(firebaseUser, true);

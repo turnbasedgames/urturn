@@ -2,12 +2,12 @@ import React from 'react';
 import {
   AppBar, Button, Toolbar, Typography, IconButton, Stack,
 } from '@mui/material';
-import firebase from 'firebase/app';
-import 'firebase/auth';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import PersonIcon from '@mui/icons-material/Person';
 import { useHistory } from 'react-router-dom';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
+import { auth } from '../setupFirebase';
 import Search from './search';
 import withUser from '../withUser';
 import { User } from '../models/user';
@@ -19,7 +19,7 @@ type Props = {
 const NavBar = ({ user }: Props) => {
   const history = useHistory();
   const signedIn = user && !user.firebaseUser.isAnonymous;
-  const firebaseUserDetermined = Boolean(firebase.auth().currentUser);
+  const firebaseUserDetermined = Boolean(auth.currentUser);
 
   let userPanel;
   if (signedIn) {
@@ -50,8 +50,8 @@ const NavBar = ({ user }: Props) => {
         <Button
           onClick={(ev) => {
             ev.preventDefault();
-            const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
-            firebase.auth().signInWithPopup(googleAuthProvider);
+            const googleAuthProvider = new GoogleAuthProvider();
+            signInWithPopup(auth, googleAuthProvider);
           }}
           variant="outlined"
         >
@@ -60,8 +60,8 @@ const NavBar = ({ user }: Props) => {
         <Button
           onClick={(ev) => {
             ev.preventDefault();
-            const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
-            firebase.auth().signInWithPopup(googleAuthProvider);
+            const googleAuthProvider = new GoogleAuthProvider();
+            signInWithPopup(auth, googleAuthProvider);
           }}
           variant="contained"
         >

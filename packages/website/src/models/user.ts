@@ -1,5 +1,5 @@
 import axios from 'axios';
-import firebase from 'firebase/app';
+import { User as FirebaseUser } from 'firebase/auth';
 import { createContext } from 'react';
 import { StatusCodes } from 'http-status-codes';
 
@@ -12,7 +12,7 @@ export interface User {
   id: string,
   username: string,
   firebaseID: string,
-  firebaseUser: firebase.User
+  firebaseUser: FirebaseUser
   signInProvider: string,
 }
 
@@ -22,7 +22,7 @@ export interface RoomUser {
   username: string,
 }
 
-export const getUser = async (firebaseUser: firebase.User, upsert: boolean): Promise<User> => {
+export const getUser = async (firebaseUser: FirebaseUser, upsert: boolean): Promise<User> => {
   let user;
   try {
     const getResult = await axios.get('user');
