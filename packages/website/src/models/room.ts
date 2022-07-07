@@ -65,6 +65,7 @@ export const createRoom = async (room: CreateRoomReqBody): Promise<Room> => {
 export type RoomsQuery = {
   gameId?: String,
   joinable?: Boolean,
+  finished?: Boolean,
   omitPlayer?: String,
   containsPlayer?: String,
   containsInactivePlayer?: String,
@@ -94,13 +95,26 @@ export const joinOrCreateRoom = async (gameId: String, userId: String): Promise<
   /* eslint-disable no-await-in-loop */
   while (tries < maxRetries) {
     try {
-      const roomsRaw = await getRooms({ gameId, joinable: true, omitPlayer: userId });
-      if (roomsRaw && roomsRaw.length === 0) {
+      const [roomsAlreadyJoinedRaw, availableRooms] = await Promise.all([
+        getRooms({ gameId, finished: false, containsPlayer: userId }),
+        getRooms({ gameId, joinable: true, omitPlayer: userId }),
+      ]);
+
+      if (roomsAlreadyJoinedRaw && roomsAlreadyJoinedRaw.length > 0) {
+        const [alreadyJoinedRoom] = roomsAlreadyJoinedRaw;
+        return alreadyJoinedRoom;
+      }
+
+      let roomToJoin;
+
+      if (availableRooms && availableRooms.length > 0) {
+        [roomToJoin] = availableRooms;
+      } else {
         const newRoom = await createRoom({ game: gameId });
         return newRoom;
       }
-      const room = roomsRaw[0];
-      const newRoom = await joinRoom(room.id);
+
+      const newRoom = await joinRoom(roomToJoin.id);
       return newRoom;
     } catch (err) {
       if (axios.isAxiosError(err)) {
