@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { signOut } from 'firebase/auth';
 import { useHistory } from 'react-router-dom';
 
-import { auth } from '../setupFirebase';
+import { auth } from '../firebase/setupFirebase';
 import { User } from '../models/user';
 import withUser from '../withUser';
 import { getRooms, quitRoom, Room } from '../models/room';

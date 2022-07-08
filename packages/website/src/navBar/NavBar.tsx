@@ -7,7 +7,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import { useHistory } from 'react-router-dom';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
-import { auth } from '../setupFirebase';
+import { auth } from '../firebase/setupFirebase';
 import Search from './search';
 import withUser from '../withUser';
 import { User } from '../models/user';

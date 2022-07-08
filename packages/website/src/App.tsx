@@ -14,13 +14,14 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-import { auth } from './setupFirebase';
+import { auth } from './firebase/setupFirebase';
 import theme from './theme';
 import NavBar from './navBar';
 import GameView from './gameView';
 import { getUser, User, UserContext } from './models/user';
 import CreatorView from './creatorView';
 import ProfileView from './profileView';
+import PageTracker from './firebase/PageTracker';
 import API_URL from './models/util';
 
 axios.defaults.baseURL = API_URL;
@@ -86,6 +87,7 @@ function App() {
         >
           <UserContext.Provider value={{ user, setUser }}>
             <Router>
+              <PageTracker />
               <NavBar />
               <Switch>
                 <Route exact path="/">
