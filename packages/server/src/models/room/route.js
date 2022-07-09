@@ -28,6 +28,7 @@ function setupRouter({ io }) {
       [Segments.QUERY]: Joi.object().keys({
         gameId: Joi.objectId(),
         joinable: Joi.boolean(),
+        finished: Joi.boolean(),
         limit: Joi.number().integer().max(100).min(0)
           .default(25),
         containsPlayer: Joi.objectId(),
@@ -39,7 +40,8 @@ function setupRouter({ io }) {
     asyncHandler(async (req, res) => {
       const {
         query: {
-          containsPlayer, containsInactivePlayer, omitPlayer, gameId, joinable, limit, skip,
+          containsPlayer, containsInactivePlayer, omitPlayer, gameId, joinable, finished, limit,
+          skip,
         },
       } = req;
       const userQuery = { players: {} };
@@ -53,6 +55,7 @@ function setupRouter({ io }) {
       const rooms = await Room.find({
         ...(gameId && { game: gameId }),
         ...(joinable !== undefined && { joinable }),
+        ...(finished !== undefined && { finished }),
         ...(containsInactivePlayer && { inactivePlayers: { $eq: containsInactivePlayer } }),
         ...(userQueried && userQuery),
         // never allow users to query for private rooms by queueing up

@@ -78,7 +78,7 @@ test('GET /room does not return private room', async (t) => {
   t.is(rooms.length, 0);
 });
 
-test('GET /room supports query by "joinable", "containsPlayer", and "omitPlayer"', async (t) => {
+test('GET /room supports query by "joinable", "finished", "containsPlayer", and "omitPlayer"', async (t) => {
   const { api } = t.context.app;
   const userCredOne = await createUserCred();
   const userCredTwo = await createUserCred();
@@ -95,7 +95,11 @@ test('GET /room supports query by "joinable", "containsPlayer", and "omitPlayer"
   const { data: { rooms }, status } = await api.get(
     '/room', {
       params: {
-        gameId: game.id, joinable: true, containsPlayer: userOne.id, omitPlayer: userTwo.id,
+        gameId: game.id,
+        joinable: true,
+        finished: false,
+        containsPlayer: userOne.id,
+        omitPlayer: userTwo.id,
       },
     },
   );
