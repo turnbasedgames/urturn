@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   AppBar, Toolbar, Typography, Stack, Button, IconButton, Paper, MenuItem, MenuList, LinearProgress,
 } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import ReactJson from 'react-json-view';
 import {
-  addPlayer, getState, removePlayer,
+  addPlayer, removePlayer, useGameState,
 } from '../data';
 
 function GameManager() {
@@ -13,18 +13,9 @@ function GameManager() {
     window.open(`/player/${player.id}`, '_blank').focus();
   };
 
-  const [loading, setLoading] = useState(true);
-  const [gameState, setGameState] = useState(null);
+  const [gameState, loading] = useGameState();
   const { players = [] } = gameState || {};
-  async function reloadGameState() {
-    setLoading(true);
-    const state = await getState();
-    setGameState(state);
-    setLoading(false);
-  }
-  useEffect(() => {
-    reloadGameState();
-  }, []);
+
   let playerTitle = 'No Players!';
   if (players.length === 1) {
     playerTitle = '1 Player';
@@ -44,7 +35,6 @@ function GameManager() {
               variant="outlined"
               onClick={async () => {
                 const player = await addPlayer();
-                await reloadGameState();
                 openPlayerTab(player);
               }}
             >
@@ -116,7 +106,6 @@ function GameManager() {
                       onClick={async (e) => {
                         e.stopPropagation();
                         await removePlayer(player);
-                        await reloadGameState();
                       }}
                     >
                       <ClearIcon />
