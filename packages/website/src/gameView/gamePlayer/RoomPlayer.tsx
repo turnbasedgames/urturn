@@ -35,26 +35,23 @@ const RoomPlayer = () => {
       const roomRaw = await getRoom(roomId);
       setRoom(roomRaw);
       if (shouldJoinPrivateRoom(userContext.user, roomRaw)) {
-        await joinRoom(roomId);
+        const joinedRoomResult = await joinRoom(roomId);
+        setRoom(joinedRoomResult);
       }
     }
     setupRoom();
-  }, []);
-
-  useEffect(() => {
-    if (shouldJoinPrivateRoom(userContext.user, room)) {
-      joinRoom(roomId);
-    }
   }, [userContext.user]);
 
   const iframeMemo = useMemo(() => (
     room
+    && userContext.user
     && (
     <IFrame
+      user={userContext.user}
       room={room}
     />
     )
-  ), [room]);
+  ), [room, userContext.user]);
 
   if (room) {
     // TODO: information header? and the Iframe takes entire screen?

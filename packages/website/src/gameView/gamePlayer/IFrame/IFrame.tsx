@@ -6,7 +6,6 @@ import {
   Errors, makeMove, Room, generateBoardGame,
 } from '../../../models/room';
 import API_URL from '../../../models/util';
-import withUser from '../../../withUser';
 import { User } from '../../../models/user';
 
 const socket = io(API_URL, { transports: ['websocket'] });
@@ -80,7 +79,7 @@ const IFrame = ({
   }, [childClient]);
 
   const iframeRef = useCallback((iframe: HTMLIFrameElement | null) => {
-    if (iframe && user) {
+    if (iframe) {
       // eslint-disable-next-line no-param-reassign
       iframe.src = cdnURL;
       const connection = connectToChild({
@@ -113,7 +112,7 @@ const IFrame = ({
         setChildClient(child);
       });
     }
-  }, [room, user]);
+  }, []);
 
   return (
     <iframe
@@ -126,4 +125,4 @@ const IFrame = ({
   );
 };
 
-export default withUser(IFrame);
+export default IFrame;
