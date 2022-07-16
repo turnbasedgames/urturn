@@ -80,7 +80,7 @@ const IFrame = ({
   }, [childClient]);
 
   const iframeRef = useCallback((iframe: HTMLIFrameElement | null) => {
-    if (iframe) {
+    if (iframe && user) {
       // eslint-disable-next-line no-param-reassign
       iframe.src = cdnURL;
       const connection = connectToChild({
@@ -113,7 +113,7 @@ const IFrame = ({
         setChildClient(child);
       });
     }
-  }, [room]);
+  }, [room, user]);
 
   return (
     <iframe
