@@ -40,18 +40,20 @@ module.exports = {
     app.use(express.json());
 
     app.post('/player', (_, res) => {
+      let boardGameContender = JSON.parse(JSON.stringify(boardGame));
       const username = `user_${boardGame.playerIdCounter}`;
       const id = `id_${boardGame.playerIdCounter}`;
       const player = {
         id, username,
       };
-      boardGame.playerIdCounter += 1;
-      boardGame.players.push(player);
-      boardGame = applyBoardGameResult(
-        boardGame,
-        backendModule.onPlayerJoin(player, filterBoardGame(boardGame)),
+      boardGameContender.playerIdCounter += 1;
+      boardGameContender.players.push(player);
+      boardGameContender = applyBoardGameResult(
+        boardGameContender,
+        backendModule.onPlayerJoin(player, filterBoardGame(boardGameContender)),
       );
-      io.sockets.emit('stateChanged', boardGame);
+      io.sockets.emit('stateChanged', boardGameContender);
+      boardGame = boardGameContender;
       res.status(StatusCodes.OK).json(player);
     });
 
@@ -62,27 +64,30 @@ module.exports = {
         res.status(StatusCodes.BAD_REQUEST).json({ message: `${id} is not in the board game` });
         return;
       }
-      boardGame = removePlayerById(id, boardGame);
-      boardGame = applyBoardGameResult(
-        boardGame,
-        backendModule.onPlayerQuit(player, filterBoardGame(boardGame)),
+      let boardGameContender = JSON.parse(JSON.stringify(boardGame));
+      boardGameContender = removePlayerById(id, boardGameContender);
+      boardGameContender = applyBoardGameResult(
+        boardGameContender,
+        backendModule.onPlayerQuit(player, filterBoardGame(boardGameContender)),
       );
-      io.sockets.emit('stateChanged', boardGame);
+      io.sockets.emit('stateChanged', boardGameContender);
+      boardGame = boardGameContender;
       res.sendStatus(StatusCodes.OK);
     });
 
     app.post('/player/:id/move', (req, res) => {
       const { id } = req.params;
-      const player = getPlayerById(id, boardGame);
+      let boardGameContender = JSON.parse(JSON.stringify(boardGame));
+      const player = getPlayerById(id, boardGameContender);
       if (player === undefined) {
         res.status(StatusCodes.BAD_REQUEST).json({ message: `${id} is not in the board game` });
         return;
       }
       const move = req.body;
       try {
-        boardGame = applyBoardGameResult(
-          boardGame,
-          backendModule.onPlayerMove(player, move, filterBoardGame(boardGame)),
+        boardGameContender = applyBoardGameResult(
+          boardGameContender,
+          backendModule.onPlayerMove(player, move, filterBoardGame(boardGameContender)),
         );
       } catch (err) {
         res.status(StatusCodes.BAD_REQUEST).json({
@@ -94,7 +99,8 @@ module.exports = {
         });
         return;
       }
-      io.sockets.emit('stateChanged', boardGame);
+      io.sockets.emit('stateChanged', boardGameContender);
+      boardGame = boardGameContender;
       res.sendStatus(StatusCodes.OK);
     });
 
@@ -105,6 +111,13 @@ module.exports = {
     app.delete('/state', (req, res) => {
       boardGame = newBoardGame(backendModule);
       res.sendStatus(StatusCodes.OK);
+    });
+
+    app.use((err, req, res) => {
+      // log error for developers so they can see any potential errors on the backendModule for
+      // functions related to onRoomStart, onPlayerJoin, and onPlayerQuit
+      console.error(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(err);
     });
 
     const server = httpServer.listen(apiPort);
