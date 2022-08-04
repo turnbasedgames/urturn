@@ -1,4 +1,4 @@
-const { CREATOR_EDITABLE_FIELDS } = require('../src/boardGame');
+const { CREATOR_EDITABLE_FIELDS } = require('../src/boardGame.cjs');
 
 module.exports = {
   onRoomStart: () => ({

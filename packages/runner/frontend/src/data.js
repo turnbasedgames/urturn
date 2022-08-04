@@ -2,7 +2,11 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
-export const BASE_URL = 'http://localhost:3100';
+if (!process.env.REACT_APP_BACKEND_PORT) {
+  throw new Error('No backend port provided!');
+}
+
+export const BASE_URL = `http://localhost:${process.env.REACT_APP_BACKEND_PORT}`;
 
 export const addPlayer = async () => {
   const { data } = await axios.post(`${BASE_URL}/player`);

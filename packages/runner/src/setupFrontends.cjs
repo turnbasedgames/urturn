@@ -4,7 +4,7 @@ const cors = require('cors');
 const {
   buildPath,
   userFrontendPath,
-} = require('../config/paths');
+} = require('../config/paths.cjs');
 
 const setupFrontendService = (currentUrl, frontendPath, port) => {
   if (currentUrl) {
@@ -24,10 +24,10 @@ const setupFrontendService = (currentUrl, frontendPath, port) => {
 
 module.exports = {
   setupFrontends({
-    frontendUrl, tbgFrontendUrl, portForRunner, portForUserFrontend,
+    frontendUrl, tbgFrontendUrl, portForRunnerFrontend, portForUserFrontend,
   }) {
     const cleanupFuncs = [
-      setupFrontendService(tbgFrontendUrl, buildPath, portForRunner),
+      setupFrontendService(tbgFrontendUrl, buildPath, portForRunnerFrontend),
       setupFrontendService(frontendUrl, userFrontendPath, portForUserFrontend),
     ];
 

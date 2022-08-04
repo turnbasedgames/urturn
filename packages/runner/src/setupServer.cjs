@@ -3,13 +3,13 @@ const { StatusCodes } = require('http-status-codes');
 const cors = require('cors');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
-const defaultBackendModule = require('../test_app/index');
+const defaultBackendModule = require('../test_app/index.cjs');
 const {
   userBackend,
-} = require('../config/paths');
+} = require('../config/paths.cjs');
 const {
   newBoardGame, applyBoardGameResult, filterBoardGame, getPlayerById, removePlayerById,
-} = require('./boardGame');
+} = require('./boardGame.cjs');
 
 // TODO: MAIN-89 hot reload based on backendModule changes
 module.exports = {
