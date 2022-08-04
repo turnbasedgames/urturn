@@ -1,6 +1,6 @@
 {
   "name": "@urturn/runner",
-  "version": "0.0.1-dev9",
+  "version": "0.0.1-dev10",
   "bin": {
     "runner": "bin/runner.js"
   },
@@ -28,7 +28,7 @@
     "config/",
     "test_app/frontend/build/",
     "test_app/src/",
-    "test_app/index.js",
+    "test_app/index.*",
     "frontend/build/"
   ],
   "description": "",
