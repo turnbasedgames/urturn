@@ -16,8 +16,8 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
-            to="/docs/intro">
-            Make Your First Game - 10min ⏱️
+            to="/docs/getting-started/introduction">
+            Make your first game - 15 min ⏱️
           </Link>
         </div>
       </div>
@@ -29,8 +29,8 @@ export default function Home() {
   const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title={`Build massive multiplayer games and focus just on your game | ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      title={`Quickly build multiplayer games - only four functions! | ${siteConfig.title}`}
+      description="Quickly build multiplayer games - only four functions!">
       <HomepageHeader />
       <main>
         <HomepageFeatures />

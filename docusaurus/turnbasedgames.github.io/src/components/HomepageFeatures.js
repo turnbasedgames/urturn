@@ -8,7 +8,7 @@ const FeatureList = [
     title: 'Free!',
     description: (
       <>
-        Urturn was designed for the Creator. Easily setup a new game and deploy on the platform for free without worrying about operational costs.
+        UrTurn was designed for the Creator. Easily setup a new game and deploy on the platform for free without worrying about operational costs.
       </>
     ),
   },

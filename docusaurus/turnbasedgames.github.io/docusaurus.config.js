@@ -6,8 +6,8 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Urturn',
-  tagline: 'Build massive multiplayer turn-based games',
+  title: 'UrTurn',
+  tagline: 'Quickly build multiplayer games - only four functions!',
   url: 'https://github.com/turnbasedgames', // TODO: link to official website
   baseUrl: '/',
   onBrokenLinks: 'throw',
@@ -17,6 +17,7 @@ const config = {
   projectName: 'docs',
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
+  themes: ['@docusaurus/theme-live-codeblock'],
   presets: [
     [
       'classic',
@@ -24,12 +25,12 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl: 'https://github.com/turnbasedgames/docs',
+          editUrl: 'https://github.com/turnbasedgames/turnbasedgames.github.io',
         },
         blog: {
           showReadingTime: true,
           editUrl:
-            'https://github.com/turnbasedgames/docs',
+            'https://github.com/turnbasedgames/turnbasedgames.github.io',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -41,16 +42,19 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      colorMode: {
+        defaultMode: 'dark',
+      },
       navbar: {
-        title: 'Urturn',
+        title: 'UrTurn',
         logo: {
-          alt: 'Urturn',
+          alt: 'UrTurn',
           src: 'img/logo.svg', // TODO: need to change logo
         },
         items: [
           {
             type: 'doc',
-            docId: 'intro',
+            docId: 'getting-started/introduction',
             position: 'left',
             label: 'Docs',
           },
@@ -70,7 +74,7 @@ const config = {
             items: [
               {
                 label: 'Tutorial',
-                to: '/docs/intro',
+                to: '/docs/getting started',
               },
             ],
           },
