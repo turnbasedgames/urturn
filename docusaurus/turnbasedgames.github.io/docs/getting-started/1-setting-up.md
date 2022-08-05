@@ -6,7 +6,6 @@ title: Setting Up Your Environment
 
 - [NodeJS](https://nodejs.org/en/)
 - [Git](https://git-scm.com/video/what-is-version-control)
-- [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install) if using Windows
 - A basic understanding of [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript#tutorials) and [ReactJS](https://reactjs.org/tutorial/tutorial.html)
 
 ### 2. Fork the TurnBasedGames/tictactoe repository
