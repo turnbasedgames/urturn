@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   useParams,
@@ -7,7 +8,7 @@ import { Typography, LinearProgress } from '@mui/material';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import {
-  getPlayerInGameById, makeMove, BASE_URL,
+  getPlayerInGameById, makeMove, getBaseUrl,
 } from '../data';
 
 function Player() {
@@ -27,7 +28,7 @@ function Player() {
 
   const [childClient, setChildClient] = useState(null);
 
-  useEffect(() => {
+  useEffect(async () => {
     if (!childClient) {
       return () => {};
     }
@@ -35,7 +36,7 @@ function Player() {
     const handleNewBoardGame = (boardGame) => {
       childClient.stateChanged(boardGame);
     };
-    const socket = io(BASE_URL);
+    const socket = io(await getBaseUrl());
     socket.on('stateChanged', handleNewBoardGame);
 
     return () => {
@@ -44,15 +45,16 @@ function Player() {
     };
   }, [childClient]);
 
-  const iframeRef = useCallback((iframe) => {
+  const iframeRef = useCallback(async (iframe) => {
     if (iframe) {
       if (!process.env.REACT_APP_USER_PORT) {
-        throw new Error('No frontend port provided!');
+        const response = await axios.get('/.well-known/get-frontend-port');
+        iframe.src = `http://localhost:${response.data.frontendPort}`;
+      } else {
+        iframe.src = `http://localhost:${process.env.REACT_APP_USER_PORT}`;
       }
 
       // TODO: MAIN-85 dynamically set the src url
-      // eslint-disable-next-line no-param-reassign
-      iframe.src = `http://localhost:${process.env.REACT_APP_USER_PORT}`;
       const connection = connectToChild({
         iframe,
         methods: {

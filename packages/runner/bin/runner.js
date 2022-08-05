@@ -18,7 +18,7 @@ import { setupServer } from '../src/setupServer.cjs';
     // TODO: MAIN-85 tbg frontend needs to query for this value
     // this enables users of react js to be able to hot reload their frontend used by runner
     // if this is not enabled then we serve the files in the user's project "frontend/bulid"
-    .option('-f, --frontend-url <frontendUrl>', 'if you are already serving your frontend in a dev environment (e.g. React), you can specify the url here')
+    .option('-f, --frontend-port <frontendPort>', 'if you are already serving your frontend in a dev environment (e.g. React), you can specify the port here')
     .option('-d, --debug', 'print debug logs to stdout') // TODO: MAIN-86 we need to use a logger instead of console.log and add debug log outputs everywhere
     .option('-D, --disable-open', 'Disable opening the runner automatically. User must navigate to url of runner');
 
@@ -37,15 +37,13 @@ import { setupServer } from '../src/setupServer.cjs';
     }
   }
 
-  const portForUserFrontend = await getPort({ port: 3000 });
+  const portForUserFrontend = options.frontendPort ?? await getPort({ port: 3000 });
   const portForRunnerBackend = await getPort({ port: 3100 });
   const portForRunnerFrontend = await getPort({ port: portForRunnerBackend + 1 });
 
   const runnerUrl = `http://localhost:${portForRunnerFrontend}`;
-  const userFrontendURL = options.frontendUrl
-  ?? `http://localhost:${portForUserFrontend}`;
-  const runnerFrontendURL = options.tbgFrontendUrl
-  ?? `http://localhost:${portForRunnerFrontend}`;
+  const userFrontendURL = options.frontendPort && `http://localhost:${portForUserFrontend}`;
+  const runnerFrontendURL = options.tbgFrontendUrl;
 
   clearConsole();
   console.log(chalk.gray('Starting runner with your game...\n'));
@@ -55,21 +53,25 @@ import { setupServer } from '../src/setupServer.cjs';
     isEmptyBackend: options.emptyBackend,
     apiPort: portForRunnerBackend,
   });
-  const cleanupFrontendsFunc = setupFrontends({
-    frontendUrl: runnerFrontendURL,
-    tbgFrontendUrl: userFrontendURL,
-    portForRunnerFrontend,
-    portForUserFrontend,
-  });
 
+  let cleanupFrontendsFunc;
   let runnerFrontendProcess;
   let userFrontendProcess;
-  if (options.dev) {
-    runnerFrontendProcess = exec(`cd frontend && PORT=${portForRunnerFrontend} REACT_APP_USER_PORT=${portForUserFrontend} REACT_APP_BACKEND_PORT=${portForRunnerBackend} npm start`);
-    runnerFrontendProcess.stdout.pipe(process.stdout);
 
+  if (options.dev) {
     userFrontendProcess = exec(`cd test_app/frontend && BROWSER=None PORT=${portForUserFrontend} npm start`);
     userFrontendProcess.stdout.pipe(process.stdout);
+
+    runnerFrontendProcess = exec(`cd frontend && PORT=${portForRunnerFrontend} REACT_APP_USER_PORT=${portForUserFrontend} REACT_APP_BACKEND_PORT=${portForRunnerBackend} npm start`);
+    runnerFrontendProcess.stdout.pipe(process.stdout);
+  } else {
+    cleanupFrontendsFunc = setupFrontends({
+      frontendUrl: userFrontendURL,
+      tbgFrontendUrl: runnerFrontendURL,
+      portForRunnerFrontend,
+      portForUserFrontend,
+      portForRunnerBackend,
+    });
   }
 
   console.log(`${chalk.green('\nYou can now view the runner in the browser at:')} \n${chalk.green.bold(runnerUrl)}`);

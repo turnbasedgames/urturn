@@ -2,27 +2,31 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
-if (!process.env.REACT_APP_BACKEND_PORT) {
-  throw new Error('No backend port provided!');
-}
+const getBaseUrlPromise = (async () => {
+  if (!process.env.REACT_APP_BACKEND_PORT) {
+    const response = await axios.get('/.well-known/get-server-port');
+    return `http://localhost:${response.data.backendPort}`;
+  }
+  return `http://localhost:${process.env.REACT_APP_BACKEND_PORT}`;
+})();
 
-export const BASE_URL = `http://localhost:${process.env.REACT_APP_BACKEND_PORT}`;
+export const getBaseUrl = () => getBaseUrlPromise;
 
 export const addPlayer = async () => {
-  const { data } = await axios.post(`${BASE_URL}/player`);
+  const { data } = await axios.post(`${await getBaseUrl()}/player`);
   return data;
 };
 
 export const getState = async () => {
-  const { data } = await axios.get(`${BASE_URL}/state`);
+  const { data } = await axios.get(`${await getBaseUrl()}/state`);
   return data;
 };
 
-export const makeMove = (player, move) => axios.post(`${BASE_URL}/player/${player.id}/move`, move);
+export const makeMove = async (player, move) => axios.post(`${await getBaseUrl()}/player/${player.id}/move`, move);
 
-export const resetState = async () => axios.delete(`${BASE_URL}/state`);
+export const resetState = async () => axios.delete(`${await getBaseUrl()}/state`);
 
-export const removePlayer = (player) => axios.delete(`${BASE_URL}/player/${player.id}`);
+export const removePlayer = async (player) => axios.delete(`${await getBaseUrl()}/player/${player.id}`);
 
 export const getPlayerInGameById = async (plrId) => {
   const { players } = await getState();
@@ -38,8 +42,8 @@ export const useGameState = () => {
     setGameState(state);
     setLoading(false);
   }
-  useEffect(() => {
-    const socket = io(BASE_URL);
+  useEffect(async () => {
+    const socket = io(await getBaseUrl());
     socket.on('stateChanged', reloadGameState);
     reloadGameState();
 

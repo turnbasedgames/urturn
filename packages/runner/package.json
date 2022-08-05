@@ -1,6 +1,6 @@
 {
   "name": "@urturn/runner",
-  "version": "0.0.1-dev10",
+  "version": "0.0.1-dev11",
   "bin": {
     "runner": "bin/runner.js"
   },
@@ -9,7 +9,7 @@
     "start": "runner",
     "prepare": "(cd frontend && npm install); (cd test_app/frontend && npm install);",
     "lint": "eslint . --ignore-path .gitignore --ext .js",
-    "build": "concurrently \"cd frontend && npm run build\" \"cd test_app/frontend && npm run build\"",
+    "build": "concurrently \"cd frontend && npm run build\"",
     "dev": "runner -Dde --dev"
   },
   "repository": {
