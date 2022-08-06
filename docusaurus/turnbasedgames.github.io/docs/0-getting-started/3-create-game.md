@@ -493,6 +493,10 @@ export default App;
 </TabItem>
 </Tabs>
 
+## Adding a Thumbnail
+
+We'll now find a suitable thumbnail for our game, such as [this one](https://unsplash.com/photos/67Rp3mulEVA). We'll download it, upload it at the highest level of our folder structure, and rename it "thumbnail.png" (the actual filetype doesn't matter - but it **must** have this name).
+
 ## Testing Your Game
 
 We're now ready to test our game! In the Runner, you should see the empty board game state. Click **Add Player** to add a player to the game. This will open a new tab that simulates what the player will see upon joining.
@@ -507,4 +511,4 @@ You currently must refresh the Runner to see all "state" specific changes.
 
 :::
 
-[Here](https://github.com/turnbasedgames/tictactoe/tree/solution) is the finish tic-tac-toe game in production, which includes error handling, move validation, player validation, and more!
+[Here](https://github.com/turnbasedgames/tictactoe/tree/solution) is the finished tic-tac-toe game in production, which includes error handling, move validation, player validation, and more!

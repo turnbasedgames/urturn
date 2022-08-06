@@ -22,6 +22,7 @@ An automatic GitHub action will run to build your project and deploy it to a bra
 You now need to find the commit containing the correct file versions you want to serve on UrTurn. You can access this through the GitHub UI or by running the following command ***after*** the branch has been created by your GitHub action:
 
 ```bash
+git fetch --all
 git rev-parse origin/published
 ```
 
