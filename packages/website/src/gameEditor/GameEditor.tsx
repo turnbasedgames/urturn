@@ -116,6 +116,7 @@ const GameEditor = ({
             }}
           />
           <TextField
+            required
             multiline
             rows={5}
             label="Description"
