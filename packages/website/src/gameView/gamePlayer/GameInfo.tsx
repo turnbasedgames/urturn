@@ -1,7 +1,6 @@
 import {
-  Button, Card, CardActions, CardHeader, CardMedia,
-  CircularProgress,
-  LinearProgress, Paper, Stack, Typography,
+  Button, Card, CardActions, CardHeader,
+  CircularProgress, LinearProgress, Paper, Stack, Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import {
@@ -15,6 +14,7 @@ import { Game, getGame } from '../../models/game';
 import { joinOrCreateRoom, createPrivateRoom } from '../../models/room';
 import GameCardActions from '../../creatorView/GameCardActions';
 import { UserContext } from '../../models/user';
+import CardMediaWithFallback from '../CardMediaWithFallback';
 
 type GameURLParams = {
   gameId: string
@@ -70,11 +70,9 @@ const GameInfo = () => {
               display: 'flex',
             }}
           >
-            <CardMedia
+            <CardMediaWithFallback
               sx={{ width: '60%', aspectRatio: '1920/1080', flexShrink: 0 }}
-              component="img"
-              image="https://images.unsplash.com/photo-1570989614585-581ee5f7e165?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80"
-              alt={game.name}
+              game={game}
             />
             <Stack sx={{ overflow: 'hidden' }} flexGrow="1" direction="column" justifyContent="space-between">
               <CardHeader
