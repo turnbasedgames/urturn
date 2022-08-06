@@ -9,6 +9,7 @@ const {
 } = require('../config/paths.cjs');
 const {
   newBoardGame, applyBoardGameResult, filterBoardGame, getPlayerById, removePlayerById,
+  validateBoardGame,
 } = require('./boardGame.cjs');
 
 // TODO: MAIN-89 hot reload based on backendModule changes
@@ -106,6 +107,22 @@ module.exports = {
 
     app.get('/state', (req, res) => {
       res.status(StatusCodes.OK).json(filterBoardGame(boardGame));
+    });
+
+    app.post('/state', (req, res) => {
+      let boardGameContender;
+
+      try {
+        boardGameContender = JSON.parse(JSON.stringify(req.body));
+        validateBoardGame(boardGameContender);
+      } catch (err) {
+        res.status(StatusCodes.BAD_REQUEST).json({ message: err.message });
+        return;
+      }
+
+      io.sockets.emit('stateChanged', boardGameContender);
+      boardGame = boardGameContender;
+      res.sendStatus(StatusCodes.OK);
     });
 
     app.delete('/state', (req, res) => {

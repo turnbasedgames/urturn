@@ -1,6 +1,18 @@
 const CREATOR_EDITABLE_FIELDS = ['joinable', 'finished', 'state'];
 const CREATOR_VIEWABLE_FIELDS = [...CREATOR_EDITABLE_FIELDS, 'version', 'players'];
 
+const FIELD_TYPES = {
+  joinable: (x) => typeof x === 'boolean',
+  finished: (x) => typeof x === 'boolean',
+  state: (x) => typeof x === 'object',
+  version: (x) => typeof x === 'number',
+  players: (x) => Array.isArray(x)
+   && x.every(
+     (player) => typeof player.id === 'string'
+      && typeof player.username === 'string',
+   ),
+};
+
 function filterBoardGame(state) {
   return CREATOR_VIEWABLE_FIELDS.reduce(
     (newState, key) => ({
@@ -9,6 +21,25 @@ function filterBoardGame(state) {
     }),
     {},
   );
+}
+
+function validateBoardGame(state) {
+  const filteredState = filterBoardGame(state);
+
+  Object.keys(state).forEach((key) => {
+    if (!CREATOR_VIEWABLE_FIELDS.includes(key)) throw Error(`Invalid key: ${key} - maybe move into the 'state' field?`);
+  });
+
+  Object.keys(filteredState).forEach((key) => {
+    if (state[key] === undefined) throw Error(`Missing key: ${key}`);
+  });
+
+  Object.keys(filteredState).forEach((key) => {
+    // eslint-disable-next-line valid-typeof
+    if (!(FIELD_TYPES[key](filteredState[key]))) {
+      throw Error(`Typeof ${key} is incorrect.`);
+    }
+  });
 }
 
 function applyBoardGameResult(state, result) {
@@ -48,4 +79,5 @@ module.exports = {
   filterBoardGame,
   getPlayerById,
   removePlayerById,
+  validateBoardGame,
 };

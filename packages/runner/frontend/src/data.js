@@ -22,6 +22,8 @@ export const getState = async () => {
   return data;
 };
 
+export const setState = async (state) => axios.post(`${await getBaseUrl()}/state`, state);
+
 export const makeMove = async (player, move) => axios.post(`${await getBaseUrl()}/player/${player.id}/move`, move);
 
 export const resetState = async () => axios.delete(`${await getBaseUrl()}/state`);
@@ -42,6 +44,16 @@ export const useGameState = () => {
     setGameState(state);
     setLoading(false);
   }
+
+  async function updateGameState(state) {
+    setLoading(true);
+
+    await setState(JSON.parse(state));
+    setGameState(state);
+
+    setLoading(false);
+  }
+
   useEffect(async () => {
     const socket = io(await getBaseUrl());
     socket.on('stateChanged', reloadGameState);
@@ -53,5 +65,5 @@ export const useGameState = () => {
     };
   }, []);
 
-  return [gameState, loading];
+  return [gameState, updateGameState, loading];
 };
