@@ -64,7 +64,9 @@ function newBoardGame(backendModule) {
 }
 
 function getPlayerById(id, boardGame) {
-  return boardGame.players.find((plr) => plr.id === id);
+  // Use a new object value so developers do not try to do plr === boardGame.players[x]
+  // Rather developers should be comparing the player ids instead
+  return { ...boardGame.players.find((plr) => plr.id === id) };
 }
 
 function removePlayerById(id, boardGame) {
