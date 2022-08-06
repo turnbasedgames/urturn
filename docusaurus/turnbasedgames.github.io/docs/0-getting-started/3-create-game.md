@@ -115,7 +115,7 @@ function onPlayerMove(plr, move, boardGame) {
 
 ```js title="index.js"
 function getPlrMark(plr, plrs) {
-  if (plr === plrs[0]) { // for simplicity, the first player will be 'X'
+  if (plr.id === plrs[0].id) { // for simplicity, the first player will be 'X'
     return 'X';
   }
   return 'O';
