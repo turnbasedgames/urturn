@@ -1,6 +1,4 @@
-const { CREATOR_EDITABLE_FIELDS } = require('../src/boardGame.cjs');
-
-module.exports = {
+module.export = {
   onRoomStart: () => ({
     state: {
       message: 'room start!',
@@ -18,7 +16,9 @@ module.exports = {
     if (error) {
       throw new Error(error);
     }
-    return CREATOR_EDITABLE_FIELDS.reduce((prev, field) => {
+    // This is duplicated from src/boardGame.js CREATOR_EDITABLE_FIELDS
+    // TODO: we can use that variable if this file turns into an es6 file
+    return ['joinable', 'finished', 'state'].reduce((prev, field) => {
       if (move[field]) {
         // allow a move to change any CREATOR_EDITABLE_FIELD for testing
         return { ...prev, [field]: move[field] };

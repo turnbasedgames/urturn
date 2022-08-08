@@ -1,5 +1,8 @@
-const path = require('path');
-const fs = require('fs');
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const parentFolder = path.dirname(fileURLToPath(import.meta.url));
 
 // Make sure any symlinks in the project folder are resolved
 const appDirectory = fs.realpathSync(process.cwd());
@@ -23,8 +26,6 @@ const resolveModule = (resolveFn, filePath) => {
   return resolveFn(`${filePath}.js`);
 };
 
-module.exports = {
-  buildPath: path.join(__dirname, '..', 'frontend', 'build'),
-  userFrontendPath: resolveApp('frontend/build'),
-  userBackend: resolveModule(resolveApp, 'index'),
-};
+export const buildPath = path.join(parentFolder, '..', 'frontend', 'build');
+export const userFrontendPath = resolveApp('frontend/build');
+export const userBackend = resolveModule(resolveApp, 'index');

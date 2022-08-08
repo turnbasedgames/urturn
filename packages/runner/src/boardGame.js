@@ -1,5 +1,5 @@
-const CREATOR_EDITABLE_FIELDS = ['joinable', 'finished', 'state'];
-const CREATOR_VIEWABLE_FIELDS = [...CREATOR_EDITABLE_FIELDS, 'version', 'players'];
+export const CREATOR_EDITABLE_FIELDS = ['joinable', 'finished', 'state'];
+export const CREATOR_VIEWABLE_FIELDS = [...CREATOR_EDITABLE_FIELDS, 'version', 'players'];
 
 const FIELD_TYPES = {
   joinable: (x) => typeof x === 'boolean',
@@ -13,7 +13,7 @@ const FIELD_TYPES = {
    ),
 };
 
-function filterBoardGame(state) {
+export function filterBoardGame(state) {
   return CREATOR_VIEWABLE_FIELDS.reduce(
     (newState, key) => ({
       ...newState,
@@ -23,7 +23,7 @@ function filterBoardGame(state) {
   );
 }
 
-function validateBoardGame(state) {
+export function validateBoardGame(state) {
   const filteredState = filterBoardGame(state);
 
   Object.keys(state).forEach((key) => {
@@ -42,7 +42,7 @@ function validateBoardGame(state) {
   });
 }
 
-function applyBoardGameResult(state, result) {
+export function applyBoardGameResult(state, result) {
   return Object.keys(result).reduce((newState, key) => {
     if (CREATOR_EDITABLE_FIELDS.includes(key)) {
       return { ...newState, [key]: result[key] };
@@ -51,7 +51,7 @@ function applyBoardGameResult(state, result) {
   }, { ...state, version: state.version + 1 });
 }
 
-function newBoardGame(backendModule) {
+export function newBoardGame(backendModule) {
   const boardGame = {
     joinable: true,
     finished: false,
@@ -63,23 +63,12 @@ function newBoardGame(backendModule) {
   return applyBoardGameResult(boardGame, backendModule.onRoomStart());
 }
 
-function getPlayerById(id, boardGame) {
+export function getPlayerById(id, boardGame) {
   // Use a new object value so developers do not try to do plr === boardGame.players[x]
   // Rather developers should be comparing the player ids instead
   return { ...boardGame.players.find((plr) => plr.id === id) };
 }
 
-function removePlayerById(id, boardGame) {
+export function removePlayerById(id, boardGame) {
   return { ...boardGame, players: boardGame.players.filter((p) => p.id !== id) };
 }
-
-module.exports = {
-  CREATOR_EDITABLE_FIELDS,
-  CREATOR_VIEWABLE_FIELDS,
-  newBoardGame,
-  applyBoardGameResult,
-  filterBoardGame,
-  getPlayerById,
-  removePlayerById,
-  validateBoardGame,
-};

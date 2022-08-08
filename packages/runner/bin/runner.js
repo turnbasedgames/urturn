@@ -4,12 +4,11 @@ import chalk from 'chalk';
 import open from 'open';
 import { exec } from 'child_process';
 import getPort from 'get-port';
-import { stringIsAValidUrl, clearConsole } from '../src/util.cjs';
-import { setupFrontends } from '../src/setupFrontends.cjs';
-import { setupServer } from '../src/setupServer.cjs';
+import { stringIsAValidUrl, clearConsole } from '../src/util.js';
+import setupFrontends from '../src/setupFrontends.js';
+import setupServer from '../src/setupServer.js';
 
 // TODO: MAIN-83 setup dev environment option for a local dummy user frontend and backend
-
 (async () => {
   program
     .addOption(new Option('-t, --tbg-frontend-url <tbgFrontendUrl>').hideHelp())
@@ -49,7 +48,7 @@ import { setupServer } from '../src/setupServer.cjs';
   console.log(chalk.gray('Starting runner with your game...\n'));
   console.log('running with options:', options);
 
-  const cleanupServerFunc = setupServer({
+  const cleanupServerFunc = await setupServer({
     isEmptyBackend: options.emptyBackend,
     apiPort: portForRunnerBackend,
   });
@@ -83,7 +82,9 @@ import { setupServer } from '../src/setupServer.cjs';
   ['SIGINT', 'SIGTERM'].forEach((sig) => {
     process.on(sig, () => {
       cleanupServerFunc();
-      cleanupFrontendsFunc();
+      if (cleanupFrontendsFunc) {
+        cleanupFrontendsFunc();
+      }
 
       if (runnerFrontendProcess) {
         runnerFrontendProcess.kill();

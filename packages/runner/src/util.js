@@ -1,6 +1,6 @@
-const { URL } = require('url');
+import { URL } from 'url';
 
-const stringIsAValidUrl = (s) => {
+export const stringIsAValidUrl = (s) => {
   try {
     // eslint-disable-next-line no-new
     new URL(s);
@@ -10,13 +10,8 @@ const stringIsAValidUrl = (s) => {
   }
 };
 
-const clearConsole = () => {
+export const clearConsole = () => {
   process.stdout.write(
     process.platform === 'win32' ? '\x1B[2J\x1B[0f' : '\x1B[2J\x1B[3J\x1B[H',
   );
-};
-
-module.exports = {
-  stringIsAValidUrl,
-  clearConsole,
 };

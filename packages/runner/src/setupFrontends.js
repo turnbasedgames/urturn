@@ -1,10 +1,7 @@
-const express = require('express');
-const path = require('path');
-const cors = require('cors');
-const {
-  buildPath,
-  userFrontendPath,
-} = require('../config/paths.cjs');
+import express from 'express';
+import path from 'path';
+import cors from 'cors';
+import { buildPath, userFrontendPath } from '../config/paths.js';
 
 const setupFrontendService = (
   currentUrl,
@@ -35,21 +32,21 @@ const setupFrontendService = (
   return () => server.close();
 };
 
-module.exports = {
-  setupFrontends({
-    frontendUrl, tbgFrontendUrl, portForRunnerFrontend, portForUserFrontend, portForRunnerBackend,
-  }) {
-    const cleanupFuncs = [
-      setupFrontendService(
-        tbgFrontendUrl,
-        buildPath,
-        portForRunnerFrontend,
-        portForRunnerBackend,
-        portForUserFrontend,
-      ),
-      setupFrontendService(frontendUrl, userFrontendPath, portForUserFrontend),
-    ];
+const setupFrontends = ({
+  frontendUrl, tbgFrontendUrl, portForRunnerFrontend, portForUserFrontend, portForRunnerBackend,
+}) => {
+  const cleanupFuncs = [
+    setupFrontendService(
+      tbgFrontendUrl,
+      buildPath,
+      portForRunnerFrontend,
+      portForRunnerBackend,
+      portForUserFrontend,
+    ),
+    setupFrontendService(frontendUrl, userFrontendPath, portForUserFrontend),
+  ];
 
-    return () => cleanupFuncs.forEach((cleanupFunc) => cleanupFunc());
-  },
+  return () => cleanupFuncs.forEach((cleanupFunc) => cleanupFunc());
 };
+
+export default setupFrontends;

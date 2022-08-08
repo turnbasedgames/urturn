@@ -3,7 +3,6 @@ module.exports = {
     'frontend', // frontend folder has it's own eslint config
   ],
   env: {
-    commonjs: true,
     es2021: true,
     node: true,
   },
@@ -11,8 +10,10 @@ module.exports = {
     'airbnb-base',
   ],
   parserOptions: {
-    ecmaVersion: 12,
+    ecmaVersion: 'latest',
+    sourceType: 'module',
   },
   rules: {
+    'import/extensions': 'off',
   },
 };
