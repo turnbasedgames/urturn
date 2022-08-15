@@ -1,4 +1,4 @@
-module.export = {
+export default {
   onRoomStart: () => ({
     state: {
       message: 'room start!',

@@ -34,6 +34,11 @@ function Player() {
     }
 
     const handleNewBoardGame = (boardGame) => {
+      // we should close the tab when the player is no longer in the game
+      // this happens usually when the backend is hot reloaded and the state is reset
+      if (!boardGame.players.some((p) => p.id === playerId)) {
+        window.close();
+      }
       childClient.stateChanged(boardGame);
     };
     const socket = io(await getBaseUrl());
