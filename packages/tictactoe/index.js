@@ -88,7 +88,8 @@ function onRoomStart() {
         [null, null, null],
         [null, null, null],
       ],
-      winner: null, // null means tie if game is finished, otherwise set to the plr that won
+      winner: null, // null means tie if game is finished, otherwise set to the plr that won,
+      emptyObject: {}
     },
   };
 }
