@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/turnbasedgames/client.git"
+    "url": "git+https://github.com/turnbasedgames/urturn.git"
   },
   "author": "kevo1ution",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/turnbasedgames/client/issues"
+    "url": "https://github.com/turnbasedgames/urturn/issues"
   },
-  "homepage": "https://github.com/turnbasedgames/client#readme",
+  "homepage": "https://github.com/turnbasedgames/urturn/tree/main/packages/client#readme",
   "dependencies": {
     "penpal": "^5.3.0"
   },
