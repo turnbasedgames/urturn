@@ -7,9 +7,9 @@
   "type": "module",
   "scripts": {
     "start": "runner",
-    "prepare": "(cd frontend && npm install); (cd test_app/frontend && npm install);",
+    "prepare": "cd frontend && npm install",
     "lint": "eslint . --ignore-path .gitignore --ext .js",
-    "build": "concurrently \"cd frontend && npm run build\"",
+    "build": "cd frontend && npm run build",
     "dev": "runner -Dde --dev"
   },
   "repository": {
@@ -26,13 +26,12 @@
     "bin/",
     "src/",
     "config/",
-    "test_app/frontend/build/",
-    "test_app/src/",
-    "test_app/index.*",
     "frontend/build/"
   ],
   "description": "",
   "dependencies": {
+    "@urturn/test-app-backend": "*",
+    "@urturn/test-app-frontend": "*",
     "chalk": "^4.1.2",
     "commander": "^9.1.0",
     "cors": "^2.8.5",
@@ -43,7 +42,6 @@
     "socket.io": "^4.5.0"
   },
   "devDependencies": {
-    "concurrently": "^7.1.0",
     "eslint": "^8.21.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0"
