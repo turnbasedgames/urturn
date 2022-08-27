@@ -14,14 +14,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/turnbasedgames/runner.git"
+    "url": "git+https://github.com/turnbasedgames/urturn.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/turnbasedgames/runner/issues"
+    "url": "https://github.com/turnbasedgames/urturn/issues"
   },
-  "homepage": "https://github.com/turnbasedgames/runner#readme",
+  "homepage": "https://github.com/turnbasedgames/urturn/tree/main/packages/runner#readme",
   "files": [
     "bin/",
     "src/",
