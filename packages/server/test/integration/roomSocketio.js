@@ -99,6 +99,7 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
         plrToMoveIndex: 0,
         status: 'inGame',
         winner: null,
+        emptyObject: {},
       },
     },
     players: [userOne, userTwo].map(getPublicUserFromUser),
@@ -116,6 +117,7 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
       plrToMoveIndex: 0,
       status: 'inGame',
       winner: null,
+      emptyObject: {},
     },
   });
 
@@ -133,6 +135,7 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
       plrToMoveIndex: 1,
       status: 'inGame',
       winner: null,
+      emptyObject: {},
     },
   });
 
@@ -150,6 +153,7 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
       plrToMoveIndex: 0,
       status: 'inGame',
       winner: null,
+      emptyObject: {},
     },
   });
 });
@@ -176,6 +180,7 @@ test('sockets can unwatch a room to no longer receive room:latestState events wh
       status: 'inGame',
       plrToMoveIndex: 1,
       winner: null,
+      emptyObject: {},
     },
   });
 
@@ -195,6 +200,7 @@ test('sockets can unwatch a room to no longer receive room:latestState events wh
       plrToMoveIndex: 0,
       status: 'inGame',
       winner: null,
+      emptyObject: {},
     },
   });
 
@@ -206,6 +212,7 @@ test('sockets can unwatch a room to no longer receive room:latestState events wh
       plrToMoveIndex: 0,
       status: 'inGame',
       winner: null,
+      emptyObject: {},
     },
   }));
 });
@@ -239,6 +246,7 @@ test('sockets can be connected to different nodejs instances and receive events 
       plrToMoveIndex: 1,
       status: 'inGame',
       winner: null,
+      emptyObject: {},
     },
   });
 
@@ -256,6 +264,7 @@ test('sockets can be connected to different nodejs instances and receive events 
       plrToMoveIndex: 0,
       status: 'inGame',
       winner: null,
+      emptyObject: {},
     },
   });
 });

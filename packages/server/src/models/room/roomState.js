@@ -23,7 +23,7 @@ const RoomStateSchema = new Schema({
     required: true,
     default: {},
   },
-}, { timestamps: true });
+}, { timestamps: true, minimize: false });
 
 RoomStateSchema.index({ room: 1, version: 1 }, { unique: true });
 RoomStateSchema.method('toJSON', function toJSON() {

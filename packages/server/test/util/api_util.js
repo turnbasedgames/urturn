@@ -16,7 +16,7 @@ async function createGameAndAssert(t, api, userCred, user) {
   const gameRaw = {
     name: `integration-tests-${uuidv4()}`,
     description: 'test description',
-    commitSHA: '3bc1743b0d7580a043884a5d6b9e0bffd64c1c61',
+    commitSHA: '0870320e312f711d20e8c8078399d8a6aceb6d46',
     githubURL: 'https://github.com/turnbasedgames/tictactoe',
   };
   const authToken = await userCred.user.getIdToken();
@@ -78,6 +78,7 @@ async function createRoomAndAssert(t, api, userCred, game, user, makePrivate = f
     ],
     status: 'preGame',
     winner: null,
+    emptyObject: {},
   });
   return room;
 }
@@ -118,6 +119,7 @@ async function startTicTacToeRoom(t) {
     plrToMoveIndex: 0,
     status: 'inGame',
     winner: null,
+    emptyObject: {},
   });
   return {
     userOne, userTwo, userCredOne, userCredTwo, game, room: resRoom,
