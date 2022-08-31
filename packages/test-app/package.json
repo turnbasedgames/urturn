@@ -1,0 +1,26 @@
+{
+  "name": "@urturn/test-app",
+  "private": true,
+  "type": "module",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "runner",
+    "dev": "concurrently \"npm run dev:runner\" \"npm run dev:frontend\"",
+    "dev:runner": "runner --frontend-port 3000 --disable-open --debug --dev",
+    "dev:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start",
+    "lint": "eslint . --ignore-path .gitignore --ext .js",
+    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix",
+    "postinstall": "cd frontend && npm install"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@urturn/runner": "0.1.0",
+    "cross-env": "^7.0.3"
+  },
+  "devDependencies": {
+    "concurrently": "^7.1.0"
+  }  
+}

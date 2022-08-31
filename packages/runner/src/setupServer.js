@@ -3,21 +3,15 @@ import { StatusCodes } from 'http-status-codes';
 import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
 import { watchFile } from 'fs';
 import { userBackend } from '../config/paths.js';
 import {
   newBoardGame, applyBoardGameResult, filterBoardGame, getPlayerById, removePlayerById,
   validateBoardGame,
 } from './boardGame.js';
-import require from './require.cjs';
+import requireUtil from './requireUtil.cjs';
 
 const backendHotReloadIntervalMs = 100;
-const fileDirName = fileURLToPath(import.meta.url);
-const fileDir = dirname(fileDirName);
-const testAppBackendPath = join(fileDir, '../test_app/index.js');
-const getBackendPath = (isEmptyBackend) => (isEmptyBackend ? testAppBackendPath : userBackend);
 
 const getLatestBackendModule = async (backendPath) => {
   // Nodejs doesn't support cache busting interface yet for esm https://github.com/nodejs/help/issues/2806
@@ -29,14 +23,13 @@ const getLatestBackendModule = async (backendPath) => {
   const { default: backendModule } = await import(cacheBustingModulePath);
 
   // the cacheBusting workaround for esm modules does not work for commonjs
-  require.cleanupCommonJSModule(backendPath);
+  requireUtil.cleanupCommonJSModule(backendPath);
 
   return backendModule;
 };
 
-async function setupServer({ isEmptyBackend, apiPort }) {
-  const backendPath = getBackendPath(isEmptyBackend);
-  let backendModule = await getLatestBackendModule(backendPath);
+async function setupServer({ apiPort }) {
+  let backendModule = await getLatestBackendModule(userBackend);
 
   // State that is being tracked for any operation (e.g. make move, add player)
   let boardGame = newBoardGame(backendModule);
@@ -55,11 +48,11 @@ async function setupServer({ isEmptyBackend, apiPort }) {
   });
 
   // setup a watch to detect when we should refresh the backend module
-  watchFile(backendPath, { interval: backendHotReloadIntervalMs }, async () => {
-    console.log('Triggering hot reload due to change detected in:', backendPath);
+  watchFile(userBackend, { interval: backendHotReloadIntervalMs }, async () => {
+    console.log('Triggering hot reload due to change detected in:', userBackend);
     console.log('Resetting game state with new backend.');
     console.log('Closing player tabs.');
-    backendModule = await getLatestBackendModule(backendPath);
+    backendModule = await getLatestBackendModule(userBackend);
     boardGame = newBoardGame(backendModule);
     io.sockets.emit('stateChanged', boardGame);
   });

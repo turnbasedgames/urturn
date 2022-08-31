@@ -4,15 +4,19 @@ import chalk from 'chalk';
 import open from 'open';
 import { exec } from 'child_process';
 import getPort from 'get-port';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 import { stringIsAValidUrl, clearConsole } from '../src/util.js';
 import setupFrontends from '../src/setupFrontends.js';
 import setupServer from '../src/setupServer.js';
+
+const parentFolder = dirname(fileURLToPath(import.meta.url));
+const runnerFrontendPath = join(parentFolder, '..', 'frontend');
 
 // TODO: MAIN-83 setup dev environment option for a local dummy user frontend and backend
 (async () => {
   program
     .addOption(new Option('-t, --tbg-frontend-url <tbgFrontendUrl>').hideHelp())
-    .addOption(new Option('-e, --empty-backend').hideHelp())
     .addOption(new Option('--dev').hideHelp())
     // TODO: MAIN-85 tbg frontend needs to query for this value
     // this enables users of react js to be able to hot reload their frontend used by runner
@@ -48,20 +52,13 @@ import setupServer from '../src/setupServer.js';
   console.log(chalk.gray('Starting runner with your game...\n'));
   console.log('running with options:', options);
 
-  const cleanupServerFunc = await setupServer({
-    isEmptyBackend: options.emptyBackend,
-    apiPort: portForRunnerBackend,
-  });
+  const cleanupServerFunc = await setupServer({ apiPort: portForRunnerBackend });
 
   let cleanupFrontendsFunc;
   let runnerFrontendProcess;
-  let userFrontendProcess;
 
   if (options.dev) {
-    userFrontendProcess = exec(`cd test_app/frontend && BROWSER=None PORT=${portForUserFrontend} npm start`);
-    userFrontendProcess.stdout.pipe(process.stdout);
-
-    runnerFrontendProcess = exec(`cd frontend && PORT=${portForRunnerFrontend} REACT_APP_USER_PORT=${portForUserFrontend} REACT_APP_BACKEND_PORT=${portForRunnerBackend} npm start`);
+    runnerFrontendProcess = exec(`cd ${runnerFrontendPath} && PORT=${portForRunnerFrontend} REACT_APP_USER_PORT=${portForUserFrontend} REACT_APP_BACKEND_PORT=${portForRunnerBackend} npm start`);
     runnerFrontendProcess.stdout.pipe(process.stdout);
   } else {
     cleanupFrontendsFunc = setupFrontends({
@@ -88,10 +85,6 @@ import setupServer from '../src/setupServer.js';
 
       if (runnerFrontendProcess) {
         runnerFrontendProcess.kill();
-      }
-
-      if (userFrontendProcess) {
-        userFrontendProcess.kill();
       }
 
       process.exit();
