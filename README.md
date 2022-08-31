@@ -2,7 +2,7 @@
 Urturn Monorepo
 </h1>
 
-<p align="center">Urturn makes creating and maanging your web multiplayer games easier. Implement monetization, matchmaking, and multiplayer in a few weeks not years.</p>
+<p align="center">Urturn makes creating and managing your web multiplayer games easier. Implement monetization, matchmaking, and multiplayer in a few weeks not years.</p>
 
 <p align="center">
   <a href="https://www.urturn.app">
