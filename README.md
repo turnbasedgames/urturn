@@ -17,7 +17,7 @@ Urturn Monorepo
 </p>
 
 ## User Documentation
-https://turnbasedgames.github.io/
+https://docs.urturn.app/
 
 ## Have questions?
 

@@ -25,12 +25,12 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl: 'https://github.com/turnbasedgames/turnbasedgames.github.io',
+          editUrl: 'https://github.com/turnbasedgames/urturn',
         },
         blog: {
           showReadingTime: true,
           editUrl:
-            'https://github.com/turnbasedgames/turnbasedgames.github.io',
+            'https://github.com/turnbasedgames/urturn',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),

@@ -170,7 +170,7 @@ function GameManager() {
                 size="small"
                 variant="outlined"
                 target="_blank"
-                href="https://turnbasedgames.github.io/docs/backend#boardgame"
+                href="https://docs.urturn.app/docs/backend#boardgame"
                 sx={{ position: 'fixed', bottom: 15, width: 120 }}
               >
                 Docs
