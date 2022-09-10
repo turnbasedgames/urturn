@@ -14,7 +14,7 @@ const config = {
   onBrokenMarkdownLinks: 'warn',
   // favicon: 'img/favicon.ico', TODO: replace with turn based games logo
   organizationName: 'turnbasedgames',
-  projectName: 'docs',
+  projectName: 'urturn',
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
   themes: ['@docusaurus/theme-live-codeblock'],
