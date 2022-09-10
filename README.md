@@ -8,9 +8,6 @@ Urturn Monorepo
   <a href="https://www.urturn.app">
     <img alt="website" src="https://img.shields.io/website-up-down-green-red/https/urturn.app.svg"/>
   </a>
-  <a href="https://docs.urturn.app">
-    <img alt="docs website" src="https://img.shields.io/website-up-down-green-red/https/docs.urturn.app.svg"/>
-  </a>
   <a href="https://www.npmjs.com/org/urturn">
     <img alt="npm org" src="https://img.shields.io/badge/npm-urturn-green.svg"/>
   </a>
