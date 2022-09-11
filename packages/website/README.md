@@ -6,7 +6,7 @@ Deployed at https://www.urturn.app
 
 ## User Documentation
 
-https://turnbasedgames.github.io/
+https://docs.urturn.app/
 
 ## Have questions?
 

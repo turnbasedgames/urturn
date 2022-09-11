@@ -57,7 +57,7 @@ const CreatorView = ({ user } : Props) => {
             Developer Resources
           </Typography>
           <Button
-            href="https://turnbasedgames.github.io/"
+            href="https://docs.urturn.app/"
             variant="outlined"
             target="_blank"
           >
