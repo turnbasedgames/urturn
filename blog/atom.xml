@@ -21,6 +21,10 @@
             <name>Sarah Ali</name>
             <uri>https://github.com/sarahannali</uri>
         </author>
+        <author>
+            <name>Yoofi Quansah</name>
+            <uri>https://github.com/yquansah</uri>
+        </author>
         <category label="welcome" term="welcome"/>
     </entry>
 </feed>
