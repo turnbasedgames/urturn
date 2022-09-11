@@ -1,7 +1,7 @@
 ---
 slug: welcome
 title: Welcome
-authors: [kevo1ution, sarahannali]
+authors: [kevo1ution, sarahannali, yquansah]
 tags: [welcome]
 ---
 
