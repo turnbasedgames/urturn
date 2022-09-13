@@ -35,31 +35,55 @@ function setupRouter({ io }) {
         containsInactivePlayer: Joi.objectId(),
         omitPlayer: Joi.objectId(),
         skip: Joi.number().integer().min(0).default(0),
+        privateRooms: Joi.boolean(),
       }),
     }),
+    auth,
     asyncHandler(async (req, res) => {
       const {
         query: {
           containsPlayer, containsInactivePlayer, omitPlayer, gameId, joinable, finished, limit,
-          skip,
+          skip, privateRooms,
         },
+        user,
       } = req;
       const userQuery = { players: {} };
       const userQueried = Boolean(containsPlayer || omitPlayer);
+
+      const privateInfo = {};
+
+      if ((privateRooms === true || privateRooms === undefined)) {
+        if (!containsPlayer && !containsInactivePlayer) {
+          const err = new Error('privateRooms has to be specified with containsPlayer or containsInactivePlayer');
+          err.status = StatusCodes.BAD_REQUEST;
+          throw err;
+        } else if (!((containsPlayer && containsPlayer.equals(user.id))
+            || (containsInactivePlayer && containsInactivePlayer.equals(user.id)))) {
+          const err = new Error('unauthorized');
+          err.status = StatusCodes.UNAUTHORIZED;
+          throw err;
+        }
+      }
+
+      if (privateRooms !== undefined) {
+        privateInfo.private = privateRooms;
+      }
+
       if (containsPlayer) {
         userQuery.players.$eq = containsPlayer;
       }
+
       if (omitPlayer) {
         userQuery.players.$ne = omitPlayer;
       }
+
       const rooms = await Room.find({
         ...(gameId && { game: gameId }),
         ...(joinable !== undefined && { joinable }),
         ...(finished !== undefined && { finished }),
         ...(containsInactivePlayer && { inactivePlayers: { $eq: containsInactivePlayer } }),
         ...(userQueried && userQuery),
-        // never allow users to query for private rooms by queueing up
-        private: false,
+        ...privateInfo,
       }).populate('game')
         .populate('players')
         .skip(skip)

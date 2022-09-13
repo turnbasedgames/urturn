@@ -51,13 +51,15 @@ test.after.always(async (t) => {
 test('GET /room returns list of rooms', async (t) => {
   const { api } = t.context.app;
   const userCred = await createUserCred();
+  const authToken = await userCred.user.getIdToken();
+
   const user = await createUserAndAssert(t, api, userCred);
   t.context.createdUsers.push(userCred);
 
   const game = await createGameAndAssert(t, api, userCred, user);
   await createRoomAndAssert(t, api, userCred, game, user);
   const { data: { rooms }, status } = await api.get(
-    '/room', { params: { gameId: game.id } },
+    '/room', { params: { gameId: game.id, privateRooms: false }, headers: { authorization: authToken } },
   );
   t.is(status, StatusCodes.OK);
   t.assert(rooms.length > 0);
@@ -66,22 +68,161 @@ test('GET /room returns list of rooms', async (t) => {
 test('GET /room does not return private room', async (t) => {
   const { api } = t.context.app;
   const userCred = await createUserCred();
+  const authToken = await userCred.user.getIdToken();
+
   const user = await createUserAndAssert(t, api, userCred);
   t.context.createdUsers.push(userCred);
 
   const game = await createGameAndAssert(t, api, userCred, user);
   await createRoomAndAssert(t, api, userCred, game, user, true);
   const { data: { rooms }, status } = await api.get(
-    '/room', { params: { gameId: game.id } },
+    '/room', { params: { gameId: game.id, privateRooms: false }, headers: { authorization: authToken } },
   );
   t.is(status, StatusCodes.OK);
   t.is(rooms.length, 0);
+});
+
+test('GET /room returns private room(s) for users that are querying there own data with containsPlayer', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const authToken = await userCred.user.getIdToken();
+
+  const user = await createUserAndAssert(t, api, userCred);
+  t.context.createdUsers.push(userCred);
+
+  const game = await createGameAndAssert(t, api, userCred, user);
+  await createRoomAndAssert(t, api, userCred, game, user, true);
+  const { data: { rooms }, status } = await api.get(
+    '/room', { params: { gameId: game.id, containsPlayer: user.id }, headers: { authorization: authToken } },
+  );
+
+  t.is(status, StatusCodes.OK);
+  t.is(rooms.length, 1);
+});
+
+test('GET /room returns private room(s) for users that are querying there own data with containsInactivePlayer', async (t) => {
+  const { api } = t.context.app;
+  const {
+    userCredOne, userTwo, userCredTwo, room, game,
+  } = await startTicTacToeRoom(t);
+  const authTokenTwo = await userCredTwo.user.getIdToken();
+  t.context.createdUsers.push(userCredOne);
+  t.context.createdUsers.push(userCredTwo);
+
+  // only user two attempts to quit room, but because this triggers a finished room
+  // user one also becomes an inactive player
+  await api.post(`/room/${room.id}/quit`, {}, { headers: { authorization: authTokenTwo } });
+
+  const { data: { rooms }, status } = await api.get(
+    '/room', { params: { gameId: game.id, containsInactivePlayer: userTwo.id }, headers: { authorization: authTokenTwo } },
+  );
+
+  t.is(status, StatusCodes.OK);
+  t.is(rooms.length, 1);
+});
+
+test('GET /room throws error if private query param is true and containsPlayer is not specified', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const authToken = await userCred.user.getIdToken();
+
+  const user = await createUserAndAssert(t, api, userCred);
+  t.context.createdUsers.push(userCred);
+
+  const game = await createGameAndAssert(t, api, userCred, user);
+  await createRoomAndAssert(t, api, userCred, game, user, true);
+  const { response: { status } } = await t.throwsAsync(api.get(
+    '/room', { params: { gameId: game.id, privateRooms: true }, headers: { authorization: authToken } },
+  ));
+
+  t.is(status, StatusCodes.BAD_REQUEST);
+});
+
+test('GET /room throws error if containsPlayer does not match user.id and private rooms are requested', async (t) => {
+  const { api } = t.context.app;
+  const userCredOne = await createUserCred();
+  const userCredTwo = await createUserCred();
+  const authTokenOne = await userCredOne.user.getIdToken();
+
+  const userOne = await createUserAndAssert(t, api, userCredOne);
+  const userTwo = await createUserAndAssert(t, api, userCredTwo);
+  t.context.createdUsers.push(userCredOne);
+  t.context.createdUsers.push(userCredTwo);
+
+  const game = await createGameAndAssert(t, api, userCredOne, userOne);
+  await createRoomAndAssert(t, api, userCredOne, game, userOne, true);
+  const { response: { status } } = await t.throwsAsync(api.get(
+    '/room', { params: { gameId: game.id, containsPlayer: userTwo.id, privateRooms: true }, headers: { authorization: authTokenOne } },
+  ));
+
+  t.is(status, StatusCodes.UNAUTHORIZED);
+});
+
+test('GET /room throws error if containsInactivePlayer does not match user.id and private rooms are requested', async (t) => {
+  const { api } = t.context.app;
+  const userCredOne = await createUserCred();
+  const userCredTwo = await createUserCred();
+  const authTokenOne = await userCredOne.user.getIdToken();
+
+  const userOne = await createUserAndAssert(t, api, userCredOne);
+  const userTwo = await createUserAndAssert(t, api, userCredTwo);
+  t.context.createdUsers.push(userCredOne);
+  t.context.createdUsers.push(userCredTwo);
+
+  const game = await createGameAndAssert(t, api, userCredOne, userOne);
+  await createRoomAndAssert(t, api, userCredOne, game, userOne, true);
+  const { response: { status } } = await t.throwsAsync(api.get(
+    '/room', { params: { gameId: game.id, containsInactivePlayer: userTwo.id, privateRooms: true }, headers: { authorization: authTokenOne } },
+  ));
+
+  t.is(status, StatusCodes.UNAUTHORIZED);
+});
+
+test('GET /room throws error if containsPlayer does not match user.id and private rooms are not set', async (t) => {
+  const { api } = t.context.app;
+  const userCredOne = await createUserCred();
+  const userCredTwo = await createUserCred();
+  const authTokenOne = await userCredOne.user.getIdToken();
+
+  const userOne = await createUserAndAssert(t, api, userCredOne);
+  const userTwo = await createUserAndAssert(t, api, userCredTwo);
+  t.context.createdUsers.push(userCredOne);
+  t.context.createdUsers.push(userCredTwo);
+
+  const game = await createGameAndAssert(t, api, userCredOne, userOne);
+  await createRoomAndAssert(t, api, userCredOne, game, userOne, true);
+  const { response: { status } } = await t.throwsAsync(api.get(
+    '/room', { params: { gameId: game.id, containsPlayer: userTwo.id }, headers: { authorization: authTokenOne } },
+  ));
+
+  t.is(status, StatusCodes.UNAUTHORIZED);
+});
+
+test('GET /room throws error if containsInactivePlayer does not match user.id and private rooms are not set', async (t) => {
+  const { api } = t.context.app;
+  const userCredOne = await createUserCred();
+  const userCredTwo = await createUserCred();
+  const authTokenOne = await userCredOne.user.getIdToken();
+
+  const userOne = await createUserAndAssert(t, api, userCredOne);
+  const userTwo = await createUserAndAssert(t, api, userCredTwo);
+  t.context.createdUsers.push(userCredOne);
+  t.context.createdUsers.push(userCredTwo);
+
+  const game = await createGameAndAssert(t, api, userCredOne, userOne);
+  await createRoomAndAssert(t, api, userCredOne, game, userOne, true);
+  const { response: { status } } = await t.throwsAsync(api.get(
+    '/room', { params: { gameId: game.id, containsPlayer: userTwo.id }, headers: { authorization: authTokenOne } },
+  ));
+
+  t.is(status, StatusCodes.UNAUTHORIZED);
 });
 
 test('GET /room supports query by "joinable", "finished", "containsPlayer", and "omitPlayer"', async (t) => {
   const { api } = t.context.app;
   const userCredOne = await createUserCred();
   const userCredTwo = await createUserCred();
+  const authTokenOne = await userCredOne.user.getIdToken();
   const authTokenTwo = await userCredTwo.user.getIdToken();
   const userOne = await createUserAndAssert(t, api, userCredOne);
   const userTwo = await createUserAndAssert(t, api, userCredTwo);
@@ -100,6 +241,9 @@ test('GET /room supports query by "joinable", "finished", "containsPlayer", and 
         finished: false,
         containsPlayer: userOne.id,
         omitPlayer: userTwo.id,
+      },
+      headers: {
+        authorization: authTokenOne,
       },
     },
   );
@@ -124,7 +268,10 @@ test('GET /room supports query by "containsInactivePlayer"', async (t) => {
   const { data: { rooms: roomsUserOneQuit }, status: statusUserOne } = await api.get(
     '/room', {
       params: {
-        gameId: game.id, containsInactivePlayer: userTwo.id,
+        gameId: game.id, containsInactivePlayer: userTwo.id, privateRooms: false,
+      },
+      headers: {
+        authorization: authTokenTwo,
       },
     },
   );
@@ -135,7 +282,10 @@ test('GET /room supports query by "containsInactivePlayer"', async (t) => {
   const { data: { rooms: roomsUserTwoQuit }, status: statusUserTwo } = await api.get(
     '/room', {
       params: {
-        gameId: game.id, containsInactivePlayer: userTwo.id,
+        gameId: game.id, containsInactivePlayer: userTwo.id, privateRooms: false,
+      },
+      headers: {
+        authorization: authTokenTwo,
       },
     },
   );
