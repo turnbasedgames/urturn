@@ -69,6 +69,7 @@ export type RoomsQuery = {
   omitPlayer?: String,
   containsPlayer?: String,
   containsInactivePlayer?: String,
+  privateRooms?: Boolean,
 };
 
 export const getRooms = async (query: RoomsQuery): Promise<Room[]> => {
@@ -97,7 +98,9 @@ export const joinOrCreateRoom = async (gameId: String, userId: String): Promise<
     try {
       const [roomsAlreadyJoinedRaw, availableRooms] = await Promise.all([
         getRooms({ gameId, finished: false, containsPlayer: userId }),
-        getRooms({ gameId, joinable: true, omitPlayer: userId }),
+        getRooms({
+          gameId, joinable: true, omitPlayer: userId, privateRooms: false,
+        }),
       ]);
 
       if (roomsAlreadyJoinedRaw && roomsAlreadyJoinedRaw.length > 0) {
