@@ -20,5 +20,5 @@ jobs:
         run: |
           npm ci
           npx lerna bootstrap
-          npx lerna run lint
-          npx lerna run lint:fix
+          npx lerna run lint --parallel
+          npx lerna run lint:fix --parallel
