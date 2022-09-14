@@ -60,7 +60,7 @@ const config = {
           },
           {to: '/blog', label: 'Blog', position: 'left'},
           {
-            href: 'https://github.com/turnbasedgames/docs',
+            href: 'https://github.com/turnbasedgames/urturn',
             label: 'GitHub',
             position: 'right',
           },
@@ -112,6 +112,8 @@ const config = {
         darkTheme: darkCodeTheme,
       },
     }),
-};
+  // This is required to make the docs site searchable https://github.com/praveenn77/docusaurus-lunr-search
+  plugins: [require.resolve('docusaurus-lunr-search')]
+ };
 
 module.exports = config;
