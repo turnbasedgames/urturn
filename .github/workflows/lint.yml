@@ -1,0 +1,30 @@
+name: lint
+
+on: [ push ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: install and setup the monorepo dependencies
+        run: |
+          npm ci
+          npx lerna bootstrap
+      - name: all packages need to have lint script defined in package.json
+        run: ./bin/every-package-json.sh ".scripts.lint != null"
+      - name: all packages need to have lint:fix script defined in package.json
+        run: ./bin/every-package-json.sh '.scripts."lint:fix" != null'
+      - name: checking if packages are formatted properly (lint)
+        run: npx lerna run lint --parallel
+      - name: checking if packages can be auto formatted (lint:fix)
+        run: npx lerna run lint:fix --parallel
