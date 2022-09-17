@@ -29,6 +29,15 @@ const UserSchema = new Schema({
     lowercase: true,
     trim: true,
   },
+  urbux: {
+    type: Number,
+    required: true,
+    default: 0,
+    validate: {
+      validator: (urbux) => Number.isInteger(urbux) && urbux >= 0,
+      message: '{VALUE} is not a non-negative integer value',
+    },
+  },
 }, { timestamps: true });
 
 UserSchema.plugin(uniqueValidator);

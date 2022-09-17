@@ -3,6 +3,10 @@ const { RedisMemoryServer } = require('redis-memory-server');
 
 const logger = require('../../src/logger');
 
+function getNested(obj, ...args) {
+  return args.reduce((nestedObj, level) => nestedObj && nestedObj[level], obj);
+}
+
 function waitFor(testAsyncFunc, timeoutMs = 10000, bufferMs = 200, errorMsg = 'Test Function did not pass') {
   const timeoutThreshold = Date.now() + timeoutMs;
   return new Promise((res, rej) => {
@@ -75,5 +79,5 @@ const setupRedis = makePersistentDependencyFn('Redis', 'REDIS_URL',
   });
 
 module.exports = {
-  waitFor, setupMongoDB, setupRedis, createOrUpdateSideApps,
+  waitFor, setupMongoDB, setupRedis, createOrUpdateSideApps, getNested,
 };
