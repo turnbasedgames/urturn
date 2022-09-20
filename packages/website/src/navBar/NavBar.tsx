@@ -91,7 +91,7 @@ const NavBar = ({ user }: Props) => {
               history.push('/');
             }}
             >
-              Urturn
+              UrTurn
             </Typography>
           </Stack>
           <Search />
