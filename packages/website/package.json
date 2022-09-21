@@ -18,6 +18,7 @@
     "@types/react-router-dom": "^5.3.3",
     "axios": "^0.21.1",
     "bootstrap": "^4.6.0",
+    "buffer": "^6.0.3",
     "firebase": "^9.8.4",
     "http-status-codes": "^2.1.4",
     "notistack": "^2.0.5",
