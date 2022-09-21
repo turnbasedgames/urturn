@@ -1,0 +1,22 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "@typescript-eslint",
+    "import",
+    "react"
+  ],
+  "extends": [
+    "airbnb-typescript"
+  ],
+  "parserOptions": {
+    "project": [
+      "tsconfig.json"
+    ]
+  },
+  "rules": {
+    // Unnecessary rule; default props don't have to be defined in functional component
+    // https://stackoverflow.com/questions/52332394/if-a-proptype-isnt-required-why-does-eslint-want-to-provide-default-prop-for-it
+    "react/require-default-props": 0
+  }
+}
