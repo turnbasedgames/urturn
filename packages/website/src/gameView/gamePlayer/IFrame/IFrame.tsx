@@ -12,12 +12,15 @@ import { User } from '../../../models/user';
 const socket = io(API_URL, { transports: ['websocket'] });
 
 socket.on('connect', () => {
+  // eslint-disable-next-line no-console
   console.log('socket connected: ', socket.id);
 });
 
 socket.on('disconnect', (reason) => {
+  // eslint-disable-next-line no-console
   console.log('socket disconnected with reason: ', reason);
   if (reason === 'io server disconnect') {
+    // eslint-disable-next-line no-console
     console.log('manually trying to reconnect socket');
     socket.connect();
   }
@@ -75,6 +78,7 @@ const IFrame = ({
       socket.on('room:latestState', handleNewBoardGame);
       socket.emit('watchRoom', { roomId }, (res: null | WatchRoomRes) => {
         if (res) {
+          // eslint-disable-next-line no-console
           console.error('error trying to watch room', res.error);
         }
       });
@@ -85,6 +89,7 @@ const IFrame = ({
     return () => {
       socket.emit('unwatchRoom', { roomId }, (res: null | UnwatchRoomRes) => {
         if (res) {
+          // eslint-disable-next-line no-console
           console.error('error trying to unwatch room', res.error);
         }
       });

@@ -123,6 +123,7 @@ export const joinOrCreateRoom = async (gameId: String, userId: String): Promise<
     } catch (err) {
       if (axios.isAxiosError(err)) {
         if (err.response && err.response.data.name === Errors.RoomNotJoinable) {
+          // eslint-disable-next-line no-console
           console.log(err.response.data.message);
         }
       }
