@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { User } from './user';
 
-export interface Game{
+export interface Game {
   id: string,
   name: string,
   description: string,
@@ -10,14 +10,14 @@ export interface Game{
   commitSHA: string
 }
 
-export interface GameReqBody{
+export interface GameReqBody {
   name: string,
   description: string,
   githubURL: string,
   commitSHA: string
 }
 
-export interface GamesQuery{
+export interface GamesQuery {
   creator?: string,
 }
 

@@ -53,7 +53,7 @@ export const makeMove = async (roomId: String, move: any) => {
   return res.data.room;
 };
 
-export interface CreateRoomReqBody{
+export interface CreateRoomReqBody {
   private?: boolean;
   game: String;
 }
