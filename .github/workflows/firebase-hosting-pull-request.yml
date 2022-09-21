@@ -10,13 +10,18 @@ jobs:
     environment: development
     steps:
       - uses: actions/checkout@v2
-      - name: Build Website
+      - name: install and setup the monorepo dependencies
+        run: |
+          npm ci
+          npx lerna bootstrap
+      - name: build @urturn/website
         env:
           REACT_APP_FIREBASE_CONFIG: ${{ secrets.REACT_APP_FIREBASE_CONFIG }}
           REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
-        run: npm ci && npm run build
+        run: npx lerna run build --scope=@urturn/website
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BOARD_GAMES_PROD }}'
           projectId: board-games-prod
+          entryPoint: packages/website
