@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { signOut } from 'firebase/auth';
 import { useHistory } from 'react-router-dom';
 
+import { useSnackbar } from 'notistack';
 import { auth } from '../firebase/setupFirebase';
 import { User } from '../models/user';
 import withUser from '../withUser';
@@ -35,6 +36,7 @@ const capitalizeUsername = (username: string): string => {
 
 const ProfileView = ({ user, setUser }: Props) => {
   const history = useHistory();
+  const { enqueueSnackbar } = useSnackbar();
 
   const [activeTab, setActiveTab] = React.useState(0);
   const handleChange = (event: any, newValue: number) => {
@@ -105,40 +107,60 @@ const ProfileView = ({ user, setUser }: Props) => {
           }}
           />
           <Stack>
-            {!displayedRoomsLoading && displayedRooms.map((room) => (
-              <Card key={room.id} sx={{ display: 'flex' }} color="">
-                <CardActionArea onClick={() => {
-                  // TODO: Handling rejoins (say a player leaves to prevent from causing a loss)
-                  // - support a reconnect and disconnect event
-                  // - reconnect happens when a player connects a session to the original game
-                  // - disconnect happens when no session a player is connected is in the game
-                  // (e.g. multiple tabs should only trigger it once)
-                  history.push(`/games/${room.game.id}/room/${room.id}`);
-                }}
-                >
-                  <CardHeader
-                    title={room.game.name}
-                    subheader={room.id}
-                    action={((activeTab === ProfileTab.Active) && (
-                      <Button
-                        onClick={async (event) => {
-                          event.stopPropagation();
-                          await quitRoom(room.id);
-                          setupActiveRooms();
-                          setupInactiveRooms();
-                        }}
-                        color="error"
-                        variant="text"
-                        onMouseDown={(event) => event.stopPropagation()}
-                      >
-                        Quit
-                      </Button>
-                    )
-                    )}
-                  />
-                </CardActionArea>
-              </Card>
-            ))}
+            {!displayedRoomsLoading && displayedRooms
+              // The game may not exist. We should not display the room.
+              .filter((room) => room.game)
+              .map((room) => (
+                <Card key={room.id} sx={{ display: 'flex' }} color="">
+                  <CardActionArea onClick={() => {
+                    // TODO: Handling rejoins (say a player leaves to prevent from causing a loss)
+                    // - support a reconnect and disconnect event
+                    // - reconnect happens when a player connects a session to the original game
+                    // - disconnect happens when no session a player is connected is in the game
+                    // (e.g. multiple tabs should only trigger it once)
+
+                    // when game is hard deleted, we show a snackbar error because players can't
+                    // play a game that has been deleted
+                    if (room.game) {
+                      history.push(`/games/${room.game.id}/room/${room.id}`);
+                    } else {
+                      enqueueSnackbar('This game was deleted', {
+                        variant: 'error',
+                        autoHideDuration: 3000,
+                      });
+                    }
+                  }}
+                  >
+                    <CardHeader
+                      title={room.game ? room.game.name : '[Deleted Game]'}
+                      subheader={room.id}
+                      action={((activeTab === ProfileTab.Active) && (
+                        <Button
+                          onClick={async (event) => {
+                            event.stopPropagation();
+                            try {
+                              await quitRoom(room.id);
+                            } catch (err) {
+                              enqueueSnackbar('Error when trying to quit room', {
+                                variant: 'error',
+                                autoHideDuration: 3000,
+                              });
+                              return;
+                            }
+                            setupActiveRooms();
+                            setupInactiveRooms();
+                          }}
+                          color="error"
+                          variant="text"
+                          onMouseDown={(event) => event.stopPropagation()}
+                        >
+                          Quit
+                        </Button>
+                      ))}
+                    />
+                  </CardActionArea>
+                </Card>
+              ))}
           </Stack>
         </Paper>
       </Stack>

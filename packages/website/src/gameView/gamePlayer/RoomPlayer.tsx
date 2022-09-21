@@ -3,9 +3,7 @@ import React, {
 } from 'react';
 import { useParams } from 'react-router-dom';
 
-import {
-  LinearProgress, Modal, Paper, Typography,
-} from '@mui/material';
+import { LinearProgress } from '@mui/material';
 import IFrame from './IFrame/IFrame';
 import {
   joinRoom, getRoom, Room,
@@ -27,7 +25,6 @@ const shouldJoinPrivateRoom = (user?: User, room?: Room): boolean => Boolean(
 const RoomPlayer = () => {
   const { roomId } = useParams<RoomURLParams>();
   const [room, setRoom] = useState<Room | undefined>();
-  const [openMenu, setOpenMenu] = useState<boolean>(false);
   const userContext = useContext(UserContext);
 
   useEffect(() => {
@@ -61,21 +58,7 @@ const RoomPlayer = () => {
     //          open user profiles)
     //       3. we should remove the original navbar, it feels unnecessary
     //       4. escape keybinding, but also physical button
-    return (
-      <>
-        <Modal
-          open={openMenu}
-          onClose={() => setOpenMenu(false)}
-        >
-          <Paper>
-            <Typography>
-              this is a test modal
-            </Typography>
-          </Paper>
-        </Modal>
-        {iframeMemo}
-      </>
-    );
+    return <>{iframeMemo}</>;
   }
 
   return (<LinearProgress />);

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { connectToChild } from 'penpal';
 import { io } from 'socket.io-client';
 import axios from 'axios';
+import { Typography } from '@mui/material';
 import {
   Errors, makeMove, Room, generateBoardGame,
 } from '../../../models/room';
@@ -39,6 +40,19 @@ const IFrame = ({
   room,
   user,
 }: Props) => {
+  if (!room.game) {
+    return (
+      <Typography
+        marginTop="10px"
+        variant="h4"
+        align="center"
+        color="text.primary"
+      >
+        Game not found
+      </Typography>
+    );
+  }
+
   const roomId = room.id;
   const { game: { githubURL, commitSHA } } = room;
   const parsedGithubURL = new URL(githubURL);

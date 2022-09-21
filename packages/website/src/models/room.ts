@@ -16,7 +16,8 @@ export interface RoomState {
 
 export interface Room {
   id: string
-  game: Game,
+  // The game may be hard deleted, so we have to assume its possible for this to be null
+  game?: Game,
   private: boolean,
   players: RoomUser[],
   finished: boolean,
