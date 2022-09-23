@@ -14,6 +14,9 @@ async function main() {
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64) {
     env.GOOGLE_APPLICATION_CREDENTIALS_BASE64 = process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64;
   }
+  if (process.env.STRIPE_KEY) {
+    env.STRIPE_KEY = process.env.STRIPE_KEY;
+  }
 
   const [envWithMongo, cleanupMongoDB] = await setupMongoDB();
   const [envWithRedis, cleanupRedis] = await setupRedis();

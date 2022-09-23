@@ -37,3 +37,4 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
           REDIS_URL: redis://localhost:6379
           MONGODB_CONNECTION_URL: mongodb://localhost:27017/test?replicaSet=testrs
+          STRIPE_KEY: ${{ secrets.STRIPE_KEY }}

@@ -88,6 +88,58 @@ test('POST /user creates user', async (t) => {
   t.context.createdUsers.push(userCred);
 });
 
+test('POST /user/create-payment-intent throws error for unsupported currency', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const authToken = await userCred.user.getIdToken();
+
+  await createUserAndAssert(t, api, userCred);
+
+  const { response: { status } } = await t.throwsAsync(api.post('/user/create-payment-intent', {
+    currency: 'ghs',
+    amount: 1000,
+  }, { headers: { authorization: authToken } }));
+
+  t.is(status, StatusCodes.BAD_REQUEST);
+
+  t.context.createdUsers.push(userCred);
+});
+
+test('POST /user/create-payment-intent throws error for any other amount than 100 usd', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const authToken = await userCred.user.getIdToken();
+
+  await createUserAndAssert(t, api, userCred);
+
+  const { response: { status } } = await t.throwsAsync(api.post('/user/create-payment-intent', {
+    currency: 'usd',
+    amount: 50,
+  }, { headers: { authorization: authToken } }));
+
+  t.is(status, StatusCodes.BAD_REQUEST);
+
+  t.context.createdUsers.push(userCred);
+});
+
+test('POST /user/create-payment-intent creates a payment intent for a user', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const authToken = await userCred.user.getIdToken();
+
+  await createUserAndAssert(t, api, userCred);
+
+  const { status, data } = await api.post('/user/create-payment-intent', {
+    currency: 'usd',
+    amount: 100,
+  }, { headers: { authorization: authToken } });
+
+  t.is(status, StatusCodes.CREATED);
+  t.true(data.clientSecret.includes('pi'));
+
+  t.context.createdUsers.push(userCred);
+});
+
 test('POST /user username generator adds random numbers when there is a collision', async (t) => {
   // create a separate app to force possible usernames to be "test" and "test_[0-9]"
   const customApp = await spawnApp({ nameDictionary: 'test', nameIterations: 1 });

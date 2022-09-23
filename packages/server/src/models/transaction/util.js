@@ -2,4 +2,6 @@ const USD_TO_URBUX = {
   1: 100,
 };
 
-module.exports = { USD_TO_URBUX };
+const ALLOWED_CURRENCIES_SET = new Set(['usd']);
+
+module.exports = { USD_TO_URBUX, ALLOWED_CURRENCIES_SET };
