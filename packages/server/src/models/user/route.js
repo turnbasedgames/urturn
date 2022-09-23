@@ -2,7 +2,9 @@ const express = require('express');
 const admin = require('firebase-admin');
 const { StatusCodes } = require('http-status-codes');
 const asyncHandler = require('express-async-handler');
+const { celebrate, Segments } = require('celebrate');
 
+const Joi = require('../../middleware/joi');
 const auth = require('../../middleware/auth');
 const { stripeClient } = require('../../utils/stripe');
 const User = require('./user');
@@ -15,16 +17,21 @@ const router = express.Router();
 
 router.use(auth);
 
-router.get('/', (req, res) => {
-  const { user } = req;
-  if (!user) {
-    const err = new UserNotFoundError();
-    err.status = StatusCodes.NOT_FOUND;
-    throw err;
-  } else {
-    res.status(StatusCodes.OK).json({ user });
-  }
-});
+router.get('/',
+  celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+      includePrivate: Joi.boolean().default(false),
+    }),
+  }), (req, res) => {
+    const { user, query: { includePrivate } } = req;
+    if (!user) {
+      const err = new UserNotFoundError();
+      err.status = StatusCodes.NOT_FOUND;
+      throw err;
+    } else {
+      res.status(StatusCodes.OK).json({ user: user.toJSON({ includePrivate }) });
+    }
+  });
 
 router.post('/', asyncHandler(async (req, res) => {
   const { user, decodedToken } = req;
