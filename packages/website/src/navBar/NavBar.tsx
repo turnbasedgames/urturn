@@ -36,9 +36,14 @@ const NavBar = ({ user }: Props) => {
           onClick={() => {
             history.push('/profile');
           }}
+          size="small"
         >
           <PersonIcon />
-          <Typography variant="button" ml={1} component="div">
+          <Typography
+            variant="button"
+            component="div"
+            sx={{ display: { xs: 'none', sm: 'flex' } }}
+          >
             {user.username}
           </Typography>
         </Button>
@@ -90,6 +95,7 @@ const NavBar = ({ user }: Props) => {
             <Typography onClick={() => {
               history.push('/');
             }}
+              sx={{ display: { xs: 'none', sm: 'flex' } }}
             >
               UrTurn
             </Typography>
@@ -100,7 +106,6 @@ const NavBar = ({ user }: Props) => {
             direction="row"
             justifyContent="flex-end"
             alignItems="center"
-            spacing={1}
           >
             {userPanel}
           </Stack>

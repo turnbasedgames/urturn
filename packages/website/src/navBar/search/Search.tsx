@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { logEvent } from 'firebase/analytics';
 import {
-  IconButton, InputBase, Paper,
+  Paper, IconButton, InputBase, Stack,
 } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
 import { analytics } from '../../firebase/setupFirebase';
@@ -15,30 +15,34 @@ const Search = () => {
   };
   return (
     <Paper>
-      <InputBase
-        sx={{ ml: 1, flex: 1 }}
-        value={searchText}
-        placeholder="Search"
-        onKeyPress={(ev) => {
-          if (ev.key === 'Enter') {
+      <Stack direction='row' alignItems="center">
+        <InputBase
+          sx={{ ml: 1, flex: 1 }}
+          value={searchText}
+          placeholder="Search"
+          onKeyPress={(ev) => {
+            if (ev.key === 'Enter') {
+              ev.preventDefault();
+              onSearch(searchText);
+            }
+          }}
+          onChange={(ev) => {
+            setSearchText(ev.target.value);
+          }}
+        />
+        <IconButton
+          type="submit"
+          aria-label="search"
+          size="small"
+          sx={{ display: { xs: 'none', sm: 'flex' } }}
+          onClick={(ev) => {
             ev.preventDefault();
             onSearch(searchText);
-          }
-        }}
-        onChange={(ev) => {
-          setSearchText(ev.target.value);
-        }}
-      />
-      <IconButton
-        type="submit"
-        aria-label="search"
-        onClick={(ev) => {
-          ev.preventDefault();
-          onSearch(searchText);
-        }}
-      >
-        <SearchIcon />
-      </IconButton>
+          }}
+        >
+          <SearchIcon />
+        </IconButton>
+      </Stack>
     </Paper>
   );
 };
