@@ -14,6 +14,7 @@ export interface User {
   firebaseID: string
   firebaseUser: FirebaseUser
   signInProvider: string
+  urbux: number
 }
 
 // fields in RoomUser are visible publically, and used to describe ANY user (e.g. playing game with)
@@ -25,7 +26,11 @@ export interface RoomUser {
 export const getUser = async (firebaseUser: FirebaseUser, upsert: boolean): Promise<User> => {
   let user
   try {
-    const getResult = await axios.get('user')
+    const getResult = await axios.get('user', {
+      params: {
+        includePrivate: true
+      }
+    })
     user = getResult.data.user
   } catch (err) {
     if (axios.isAxiosError(err) && err.response?.status === StatusCodes.NOT_FOUND && upsert) {

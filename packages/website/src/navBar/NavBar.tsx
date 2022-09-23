@@ -2,10 +2,11 @@ import React from 'react'
 import {
   AppBar, Button, Toolbar, Typography, IconButton, Stack
 } from '@mui/material'
-import AddBoxIcon from '@mui/icons-material/AddBox'
 import PersonIcon from '@mui/icons-material/Person'
 import { useHistory } from 'react-router-dom'
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
+import { GiTwoCoins } from 'react-icons/gi'
+import { IoBuild } from 'react-icons/io5'
 
 import { auth } from '../firebase/setupFirebase'
 import Search from './search'
@@ -30,14 +31,24 @@ const NavBar = ({ user }: Props): React.ReactElement => {
   if (signedIn) {
     userPanel = (
       <>
+        <Button color="secondary" startIcon={<GiTwoCoins />}
+          sx={{ display: { xs: 'none', sm: 'flex' } }}
+        >
+          <Typography
+            component="div"
+          >
+            {user.urbux}
+          </Typography>
+        </Button>
         <IconButton
           onClick={() => {
             history.push('/develop')
           }}
         >
-          <AddBoxIcon />
+          <IoBuild />
         </IconButton>
         <Button
+          color="inherit"
           onClick={() => {
             history.push('/profile')
           }}
@@ -78,7 +89,7 @@ const NavBar = ({ user }: Props): React.ReactElement => {
 
   return (
     <AppBar position="sticky">
-      <Toolbar>
+      <Toolbar variant="dense">
         <Stack
           width="100%"
           direction="row"
