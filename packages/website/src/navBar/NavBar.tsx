@@ -58,6 +58,7 @@ const NavBar = ({ user }: Props): React.ReactElement => {
     userPanel = (
       <>
         <Button
+          sx={{ marginRight: 1 }}
           onClick={onSignIn}
           variant="outlined"
         >
