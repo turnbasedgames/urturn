@@ -29,16 +29,15 @@ const GameList = (): React.ReactElement => {
       </Typography>
       <Grid
         container
-        marginTop={1}
       >
         {games.map((game) => (
           <Card // TODO: separate component
-            sx={{ margin: '10px' }}
+            sx={{ margin: 1 }}
             key={`GameCard-${game.id}`}
           >
             <CardActionArea onClick={() => history.push(`/games/${game.id}`)}>
               <CardMediaWithFallback
-                sx={{ height: '200px', width: '180px' }}
+                sx={{ height: '170px', width: '170px' }}
                 game={game}
               />
               <CardContent sx={{ padding: 1 }}>
