@@ -35,9 +35,7 @@ const NavBar = ({ user }: Props): React.ReactElement => {
         <Button color="secondary" startIcon={<GiTwoCoins />}
           sx={{ display: { xs: 'none', sm: 'flex' } }}
         >
-          <Typography
-            component="div"
-          >
+          <Typography>
             {user.urbux}
           </Typography>
         </Button>
