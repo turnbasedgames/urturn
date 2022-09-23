@@ -49,23 +49,11 @@ test('GET /user returns user object', async (t) => {
   const authToken = await userCred.user.getIdToken();
   const { status, data } = await api.get('/user', { headers: { authorization: authToken } });
   t.is(status, StatusCodes.OK);
-  t.deepEqual(data, { user });
+  const { urbux, ...publicUser } = user;
+  t.deepEqual(data, { user: publicUser });
 });
 
-test('GET /user default returns only public values', async (t) => {
-  const { api } = t.context.app;
-  const userCred = await createUserCred();
-  const user = await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
-
-  const authToken = await userCred.user.getIdToken();
-  const { status, data } = await api.get('/user', { headers: { authorization: authToken } });
-
-  t.is(status, StatusCodes.OK);
-  t.deepEqual(data, { user });
-});
-
-test('GET /user override returns private values', async (t) => {
+test('GET /user includePrivate query parameter returns private values', async (t) => {
   const { api } = t.context.app;
   const userCred = await createUserCred();
   const user = await createUserAndAssert(t, api, userCred, true);

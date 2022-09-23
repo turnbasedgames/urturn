@@ -45,7 +45,7 @@ router.post('/', asyncHandler(async (req, res) => {
     await newUser.save();
     req.log.info('created new account', { firebaseId: decodedToken.uid, userId: newUser.id });
     res.status(StatusCodes.CREATED).json({
-      user: newUser,
+      user: newUser.toJSON({ includePrivate: true }),
     });
   } else {
     res.sendStatus(StatusCodes.CONFLICT);

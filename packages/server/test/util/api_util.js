@@ -22,23 +22,20 @@ async function createGameAndAssert(t, api, userCred, user) {
   const authToken = await userCred.user.getIdToken();
   const { data: { game }, status } = await api.post('/game', gameRaw, { headers: { authorization: authToken } });
   t.is(status, StatusCodes.CREATED);
-  t.deepEqual(game.creator, user);
+  const { urbux, ...publicUser } = user;
+  t.deepEqual(game.creator, publicUser);
   Object.keys(gameRaw).forEach((key) => {
     t.is(gameRaw[key], game[key]);
   });
   return game;
 }
 
-async function createUserAndAssert(t, api, userCred, includePrivate = false) {
+async function createUserAndAssert(t, api, userCred) {
   const authToken = await userCred.user.getIdToken();
   const { data: { user }, status } = await api.post('/user', {}, { headers: { authorization: authToken } });
   t.is(status, StatusCodes.CREATED);
   t.is(user.firebaseId, userCred.user.uid);
-
-  if (includePrivate) {
-    user.urbux = 0;
-  }
-
+  t.is(user.urbux, 0);
   return user;
 }
 
