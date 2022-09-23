@@ -3,6 +3,7 @@ import {
 } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
+import { DISCORD_URL } from '../util'
 
 import GameEditor from '../gameEditor'
 import DevGameCard from './DevGameCard'
@@ -65,7 +66,7 @@ const CreatorView = ({ user }: Props): React.ReactElement => {
           </Button>
           <Button
             variant="outlined"
-            href="https://discord.gg/myWacjdb5S"
+            href={DISCORD_URL}
             target="_blank"
           >
             Discord
