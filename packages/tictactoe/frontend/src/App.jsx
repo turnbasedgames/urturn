@@ -11,7 +11,7 @@ const getRowKey = (row, rowNum) => `${rowNum}-${row.join('-')}`;
 const getColKey = (val, colNum) => `${colNum}-${val}`;
 
 const getStatusMsg = ({
-  status, winner, finished, plrToMove,
+  status, winner, finished, plrToMove, curPlr,
 }) => {
   if (finished) {
     if (winner) {
@@ -19,9 +19,13 @@ const getStatusMsg = ({
     }
     return "It's a tie!";
   } if (status === 'preGame') {
-    return 'Waiting on another player...';
+    return 'Waiting on for another player to join...';
   } if (status === 'inGame') {
-    return `Waiting on player ${plrToMove.username} to make their move...`;
+    console.log(plrToMove, curPlr);
+    if (plrToMove.id === curPlr?.id) {
+      return "It's ur turn; make a move";
+    }
+    return `Waiting on other player ${plrToMove.username} to make their move...`;
   }
   return 'Error: You should never see this. Contact developers!';
 };
@@ -37,6 +41,16 @@ function App() {
     return () => {
       events.off('stateChanged', onStateChanged);
     };
+  }, []);
+
+  const [curPlr, setCurPlr] = useState();
+  useEffect(() => {
+    const setupCurPlr = async () => {
+      const newCurPlr = await client.getLocalPlayer();
+      console.log('new current plr', newCurPlr);
+      setCurPlr(newCurPlr);
+    };
+    setupCurPlr();
   }, []);
 
   const [recentErrorMsg, setRecentErrorMsg] = useState(null);
@@ -57,7 +71,7 @@ function App() {
   } = boardGame;
   const { players = [], finished } = boardGame;
   const generalStatus = getStatusMsg({
-    status, winner, finished, plrToMove: status === 'inGame' ? players[plrToMoveIndex] : null,
+    status, winner, finished, plrToMove: status === 'inGame' ? players[plrToMoveIndex] : null, curPlr,
   });
 
   return (

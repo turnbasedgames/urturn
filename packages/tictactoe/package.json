@@ -6,8 +6,8 @@
   "scripts": {
     "start": "runner",
     "dev": "concurrently \"npm run dev:runner\" \"npm run dev:frontend\"",
-    "dev:runner": "runner --frontend-url localhost:3000",
-    "dev:frontend": "cd frontend && BROWSER=none npm start",
+    "dev:runner": "runner --frontend-port 3000 --debug",
+    "dev:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start",
     "lint": "eslint . --ignore-path .gitignore --ext .js",
     "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix"
   },
@@ -22,12 +22,13 @@
   },
   "homepage": "https://github.com/turnbasedgames/tictactoe#readme",
   "dependencies": {
-    "@urturn/runner": "0.0.1-dev6"
+    "@urturn/runner": "0.1.0"
   },
   "devDependencies": {
     "concurrently": "^7.1.0",
     "eslint": "^8.14.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.26.0"
+    "eslint-plugin-import": "^2.26.0",
+    "cross-env": "^7.0.3"
   }
 }
