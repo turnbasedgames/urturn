@@ -14,10 +14,12 @@ const getStatusMsg = ({
   status, winner, finished, plrToMove, curPlr,
 }) => {
   if (finished) {
-    if (winner) {
-      return `${winner.username} won the game!`;
+    if (winner == null) {
+      return "It's a tie!";
+    } if (winner?.id === curPlr?.id) {
+      return 'You won!';
     }
-    return "It's a tie!";
+    return 'You Lost';
   } if (status === 'preGame') {
     return 'Waiting on for another player to join...';
   } if (status === 'inGame') {
@@ -44,10 +46,10 @@ function App() {
   }, []);
 
   const [curPlr, setCurPlr] = useState();
+  console.log('new current plr', curPlr);
   useEffect(() => {
     const setupCurPlr = async () => {
       const newCurPlr = await client.getLocalPlayer();
-      console.log('new current plr', newCurPlr);
       setCurPlr(newCurPlr);
     };
     setupCurPlr();

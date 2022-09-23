@@ -8,6 +8,7 @@
 # testing
 /coverage
 
+# build artifact should not be commited to development branches
 /build
 
 # misc
