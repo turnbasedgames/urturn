@@ -4,7 +4,7 @@ import { logEvent } from 'firebase/analytics'
 
 import { analytics } from './setupFirebase'
 
-const PageTracker = () => {
+const PageTracker = (): React.ReactElement => {
   const location = useLocation()
   useEffect(() => {
     const pagePath = location.pathname + location.search

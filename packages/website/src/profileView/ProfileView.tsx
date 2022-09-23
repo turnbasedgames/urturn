@@ -34,12 +34,12 @@ const capitalizeUsername = (username: string): string => {
   return newUsername
 }
 
-const ProfileView = ({ user, setUser }: Props) => {
+const ProfileView = ({ user, setUser }: Props): React.ReactElement => {
   const history = useHistory()
   const { enqueueSnackbar } = useSnackbar()
 
   const [activeTab, setActiveTab] = React.useState(0)
-  const handleChange = (event: any, newValue: number) => {
+  const handleChange = (event: any, newValue: number): void => {
     setActiveTab(newValue)
   }
 
@@ -47,18 +47,30 @@ const ProfileView = ({ user, setUser }: Props) => {
   const [inactiveRooms, setInactiveRooms] = useState<Room[] | null>(null)
   const displayedRooms = activeTab === ProfileTab.Active ? activeRooms : inactiveRooms
   const displayedRoomsLoading = displayedRooms == null
-  const setupActiveRooms = async () => {
+  const setupActiveRooms = async (): Promise<void> => {
     const roomsRaw = await getRooms({ containsPlayer: user.id })
     setActiveRooms(roomsRaw)
   }
-  const setupInactiveRooms = async () => {
+  const setupInactiveRooms = async (): Promise<void> => {
     const roomsRaw = await getRooms({ containsInactivePlayer: user.id })
     setInactiveRooms(roomsRaw)
   }
   useEffect(() => {
-    setupActiveRooms()
-    setupInactiveRooms()
+    Promise.all([setupActiveRooms(), setupInactiveRooms()]).catch(console.error)
   }, [])
+
+  const onRoomQuit = async (room: Room): Promise<void> => {
+    try {
+      await quitRoom(room.id)
+    } catch (err) {
+      enqueueSnackbar('Error when trying to quit room', {
+        variant: 'error',
+        autoHideDuration: 3000
+      })
+      return
+    }
+    await Promise.all([setupActiveRooms(), setupInactiveRooms()])
+  }
 
   return (
     <Stack
@@ -83,7 +95,7 @@ const ProfileView = ({ user, setUser }: Props) => {
               <Button
                 onClick={() => {
                   setUser(null)
-                  signOut(auth)
+                  signOut(auth).catch(console.error)
                   history.push('/')
                 }}
                 variant="outlined"
@@ -136,19 +148,9 @@ const ProfileView = ({ user, setUser }: Props) => {
                       subheader={room.id}
                       action={((activeTab === ProfileTab.Active) && (
                         <Button
-                          onClick={async (event) => {
+                          onClick={(event) => {
                             event.stopPropagation()
-                            try {
-                              await quitRoom(room.id)
-                            } catch (err) {
-                              enqueueSnackbar('Error when trying to quit room', {
-                                variant: 'error',
-                                autoHideDuration: 3000
-                              })
-                              return
-                            }
-                            setupActiveRooms()
-                            setupInactiveRooms()
+                            onRoomQuit(room).catch(console.error)
                           }}
                           color="error"
                           variant="text"

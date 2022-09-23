@@ -16,23 +16,30 @@ interface Props {
   game: Game
 }
 
-const GameCardActions = ({ game, onDelete, onUpdate }: Props) => {
+const GameCardActions = ({ game, onDelete, onUpdate }: Props): React.ReactElement => {
   const [anchorEl, setAnchorEl] = React.useState(null)
   const [openEditor, setOpenEditor] = React.useState(false)
   const [openDeleteModal, setOpenDeleteModal] = React.useState(false)
   const open = Boolean(anchorEl)
-  const handleClick = (event: any) => {
+  const handleClick = (event: any): void => {
     event.stopPropagation()
     setAnchorEl(event.currentTarget)
   }
-  const handleClose = () => {
+  const handleClose = (): void => {
     setAnchorEl(null)
+  }
+  const handleDelete = async (): Promise<void> => {
+    await deleteGame(game.id)
+    setOpenDeleteModal(false)
+    if (onDelete != null) {
+      onDelete()
+    }
   }
 
   return (
     <UserContext.Consumer>
       {({ user }) => {
-        const ownsGame = game && (user != null) && game.creator.id === user.id
+        const ownsGame = (user != null) && game.creator.id === user.id
 
         return (
           <>
@@ -65,12 +72,8 @@ const GameCardActions = ({ game, onDelete, onUpdate }: Props) => {
                     </Button>
                     <Button
                       variant="contained"
-                      onClick={async () => {
-                        await deleteGame(game.id)
-                        setOpenDeleteModal(false)
-                        if (onDelete != null) {
-                          onDelete()
-                        }
+                      onClick={() => {
+                        handleDelete().catch(console.error)
                       }}
                     >
                       Delete

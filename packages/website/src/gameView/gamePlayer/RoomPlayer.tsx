@@ -22,13 +22,13 @@ const shouldJoinPrivateRoom = (user?: User, room?: Room): boolean => Boolean(
   !room.players.some((p: RoomUser) => p.id === user.id)
 )
 
-const RoomPlayer = () => {
+const RoomPlayer = (): React.ReactElement => {
   const { roomId } = useParams<RoomURLParams>()
   const [room, setRoom] = useState<Room | undefined>()
   const userContext = useContext(UserContext)
 
   useEffect(() => {
-    async function setupRoom () {
+    async function setupRoom (): Promise<void> {
       const roomRaw = await getRoom(roomId)
       setRoom(roomRaw)
       if (shouldJoinPrivateRoom(userContext.user, roomRaw)) {
@@ -36,7 +36,7 @@ const RoomPlayer = () => {
         setRoom(joinedRoomResult)
       }
     }
-    setupRoom()
+    setupRoom().catch(console.error)
   }, [userContext.user])
 
   const iframeMemo = useMemo(() => (

@@ -42,7 +42,7 @@ interface Props {
 const IFrame = ({
   room,
   user
-}: Props) => {
+}: Props): React.ReactElement => {
   if (room.game == null) {
     return (
       <Typography
@@ -66,15 +66,15 @@ const IFrame = ({
   const [childClient, setChildClient] = useState<any | null>()
 
   useEffect(() => {
-    if (!childClient) {
+    if (childClient == null) {
       return () => {}
     }
 
-    function handleNewBoardGame (boardGame: any) {
+    function handleNewBoardGame (boardGame: any): void {
       childClient.stateChanged(boardGame)
     }
 
-    async function setupRoomSocket () {
+    async function setupRoomSocket (): Promise<void> {
       socket.on('room:latestState', handleNewBoardGame)
       socket.emit('watchRoom', { roomId }, (res: null | WatchRoomRes) => {
         if (res != null) {
@@ -85,7 +85,7 @@ const IFrame = ({
       childClient.stateChanged(generateBoardGame(room, room.latestState))
     }
 
-    setupRoomSocket()
+    setupRoomSocket().catch(console.error)
     return () => {
       socket.emit('unwatchRoom', { roomId }, (res: null | UnwatchRoomRes) => {
         if (res != null) {
@@ -129,7 +129,7 @@ const IFrame = ({
       })
       connection.promise.then((child) => {
         setChildClient(child)
-      })
+      }).catch(console.error)
     }
   }, [])
 

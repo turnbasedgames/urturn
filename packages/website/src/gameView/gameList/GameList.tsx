@@ -7,14 +7,14 @@ import { useHistory } from 'react-router-dom'
 import { Game, getGames } from '../../models/game'
 import CardMediaWithFallback from '../CardMediaWithFallback'
 
-const GameList = () => {
+const GameList = (): React.ReactElement => {
   const [games, setGames] = useState<Game[]>([])
   useEffect(() => {
-    async function setupGames () {
+    async function setupGames (): Promise<void> {
       const gamesRaw = await getGames()
       setGames(gamesRaw)
     }
-    setupGames()
+    setupGames().catch(console.error)
   }, [])
   const history = useHistory()
 

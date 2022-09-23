@@ -2,12 +2,12 @@ import React from 'react'
 import { CardMedia, SxProps } from '@mui/material'
 import { Game } from '../models/game'
 
-const CardMediaWithFallback = ({ game, sx }: { game: Game, sx: SxProps }) => {
+const CardMediaWithFallback = ({ game, sx }: { game: Game, sx: SxProps }): React.ReactElement => {
   const parsedGithubURL = new URL(game.githubURL)
   const repoOwner = parsedGithubURL.pathname.split('/')[1]
   const repo = parsedGithubURL.pathname.split('/')[2]
 
-  const handleImageError = (e: any) => {
+  const handleImageError = (e: any): void => {
     e.target.onerror = null
     e.target.src = 'https://images.unsplash.com/photo-1570989614585-581ee5f7e165?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80'
   }

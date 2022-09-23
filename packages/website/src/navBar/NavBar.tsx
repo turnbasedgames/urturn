@@ -16,10 +16,15 @@ interface Props {
   user: User | null
 }
 
-const NavBar = ({ user }: Props) => {
+const NavBar = ({ user }: Props): React.ReactElement => {
   const history = useHistory()
   const signedIn = (user != null) && !user.firebaseUser.isAnonymous
   const firebaseUserDetermined = Boolean(auth.currentUser)
+  const onSignIn = (ev: React.MouseEvent): void => {
+    ev.preventDefault()
+    const googleAuthProvider = new GoogleAuthProvider()
+    signInWithPopup(auth, googleAuthProvider).catch(console.error)
+  }
 
   let userPanel
   if (signedIn) {
@@ -53,21 +58,13 @@ const NavBar = ({ user }: Props) => {
     userPanel = (
       <>
         <Button
-          onClick={(ev) => {
-            ev.preventDefault()
-            const googleAuthProvider = new GoogleAuthProvider()
-            signInWithPopup(auth, googleAuthProvider)
-          }}
+          onClick={onSignIn}
           variant="outlined"
         >
           Sign In
         </Button>
         <Button
-          onClick={(ev) => {
-            ev.preventDefault()
-            const googleAuthProvider = new GoogleAuthProvider()
-            signInWithPopup(auth, googleAuthProvider)
-          }}
+          onClick={onSignIn}
           variant="contained"
         >
           Sign Up

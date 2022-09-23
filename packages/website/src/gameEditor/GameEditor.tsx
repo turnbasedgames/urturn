@@ -16,16 +16,9 @@ interface Props {
   onSubmit?: (game: Game) => void
 }
 
-interface GameFormErrors {
-  name?: string
-  description?: string
-  githubURL?: string
-  commitSHA?: string
-}
-
 const GameEditor = ({
   open, onClose, onSubmit, editingGame
-}: Props) => {
+}: Props): React.ReactElement => {
   const emptyForm = {
     name: '',
     description: '',
@@ -40,26 +33,24 @@ const GameEditor = ({
         commitSHA: editingGame?.commitSHA
       }
     : emptyForm)
-  const [errors, setErrors] = useState<GameFormErrors>({})
+  const [errors, setErrors] = useState(new Map())
   const titleText = (editingGame != null) ? 'Edit Game' : 'Create Game'
-  const setField = (field: string, value: string) => {
+  const setField = (field: string, value: string): void => {
     setForm({
       ...form,
       [field]: value
     })
   }
-  const setError = (field: string, value?: string) => {
-    const newErrors: any = { ...errors }
+  const setError = (field: string, value?: string): void => {
     if (value === undefined) {
-      delete newErrors[field]
+      errors.delete(field)
     } else {
-      newErrors[field] = value
+      errors.set(field, value)
     }
-    setErrors(newErrors)
+    setErrors(errors)
   }
-  const handleSubmit = async (event: any) => {
-    event.preventDefault()
-    if (Object.keys(errors).length === 0) {
+  const handleSubmit = async (): Promise<void> => {
+    if (errors.size === 0) {
       const gameObj: GameReqBody = form
       const game = (editingGame != null)
         ? await updateGame(editingGame.id, gameObj)
@@ -93,8 +84,8 @@ const GameEditor = ({
             }}
           />
           <TextField
-            error={'githubURL' in errors}
-            helperText={errors.githubURL}
+            error={errors.has('githubURL')}
+            helperText={errors.get('githubURL')}
             required
             label="GitHub Repo URL"
             value={form.githubURL}
@@ -133,7 +124,10 @@ const GameEditor = ({
             <Button onClick={onClose}>
               Cancel
             </Button>
-            <Button variant="contained" onClick={handleSubmit}>
+            <Button variant="contained" onClick={(ev) => {
+              ev.preventDefault()
+              handleSubmit().catch(console.error)
+            }}>
               {(editingGame != null) ? 'Update' : 'Create'}
             </Button>
           </Stack>

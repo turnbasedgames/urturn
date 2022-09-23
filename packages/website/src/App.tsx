@@ -1,5 +1,5 @@
 import React, { createRef, useEffect, useState } from 'react'
-import { onAuthStateChanged, signInAnonymously } from 'firebase/auth'
+import { onAuthStateChanged, signInAnonymously, User as FirebaseUser } from 'firebase/auth'
 import {
   BrowserRouter as Router,
   Switch,
@@ -26,14 +26,14 @@ import API_URL from './models/util'
 
 axios.defaults.baseURL = API_URL
 
-function App () {
+const App = (): React.ReactElement => {
   const [user, setUser] = useState<User | undefined>()
   useEffect(() => {
     const authInterceptor = axios.interceptors.request.use(async (config) => {
       const newConfig = config
       const firebaseUser = auth.currentUser
       if (firebaseUser != null) {
-        if (!newConfig.headers) {
+        if (newConfig.headers == null) {
           newConfig.headers = {}
         }
         newConfig.headers.authorization = await firebaseUser.getIdToken()
@@ -41,16 +41,16 @@ function App () {
       return newConfig
     })
 
-    onAuthStateChanged(auth, async (firebaseUser) => {
+    const setupUser = async (firebaseUser: FirebaseUser): Promise<void> => {
+      const currentUser = await getUser(firebaseUser, true)
+      setUser(currentUser)
+    }
+
+    onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser == null) {
-        signInAnonymously(auth)
+        signInAnonymously(auth).catch(console.error)
       } else {
-        try {
-          const currentUser = await getUser(firebaseUser, true)
-          setUser(currentUser)
-        } catch (err) {
-          // TODO: snackbar error with link to our discord?
-        }
+        setupUser(firebaseUser).catch(console.error)
       }
     })
 
@@ -59,7 +59,7 @@ function App () {
 
   const snackbarProviderRef = createRef<SnackbarProvider>()
   const onClickDismiss = (key: SnackbarKey) => () => {
-    if (snackbarProviderRef && (snackbarProviderRef.current != null)) {
+    if (snackbarProviderRef.current != null) {
       snackbarProviderRef.current.closeSnackbar(key)
     }
   }

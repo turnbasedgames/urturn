@@ -41,7 +41,8 @@ export const getUser = async (firebaseUser: FirebaseUser, upsert: boolean): Prom
 
 interface UserContextProps {
   user?: User
-  setUser: React.Dispatch<React.SetStateAction<User | undefined>>
+  setUser?: React.Dispatch<React.SetStateAction<User | undefined>>
 }
 
-export const UserContext = createContext<UserContextProps>({} as UserContextProps)
+const defaultUserContext: UserContextProps = {}
+export const UserContext = createContext<UserContextProps>(defaultUserContext)

@@ -14,17 +14,17 @@ interface Props {
   user: User
 }
 
-const CreatorView = ({ user }: Props) => {
+const CreatorView = ({ user }: Props): React.ReactElement => {
   const [games, setGames] = useState<Game[] | null>(null)
   const gamesLoading = games == null
   const [openCreate, setOpenCreate] = useState<boolean>(false)
   const history = useHistory()
-  const setupGames = async () => {
+  const setupGames = async (): Promise<void> => {
     const gamesRaw = await getGames({ creator: user.id })
     setGames(gamesRaw)
   }
   useEffect(() => {
-    setupGames()
+    setupGames().catch(console.error)
   }, [])
 
   return (
@@ -88,10 +88,14 @@ const CreatorView = ({ user }: Props) => {
           >
             Create Game
           </Button>
-          {(games != null) && games.map((game) => (
+          {games?.map((game) => (
             <DevGameCard
-              onUpdate={setupGames}
-              onDelete={setupGames}
+              onUpdate={() => {
+                setupGames().catch(console.error)
+              }}
+              onDelete={() => {
+                setupGames().catch(console.error)
+              }}
               key={`DevGameCard-${game.id}`}
               game={game}
             />

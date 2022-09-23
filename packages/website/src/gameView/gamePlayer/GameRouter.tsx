@@ -8,7 +8,7 @@ import {
 import GameInfo from './GameInfo'
 import RoomPlayer from './RoomPlayer'
 
-const GameRouter = () => {
+const GameRouter = (): React.ReactElement => {
   const match = useRouteMatch()
 
   return (

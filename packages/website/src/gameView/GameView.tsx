@@ -8,7 +8,7 @@ import {
 import GamePlayer from './gamePlayer'
 import GameList from './gameList'
 
-const GameView = () => {
+const GameView = (): React.ReactElement => {
   const match = useRouteMatch()
   return (
     <Switch>

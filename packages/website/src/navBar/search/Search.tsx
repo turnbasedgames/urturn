@@ -6,9 +6,9 @@ import {
 import { Search as SearchIcon } from '@mui/icons-material'
 import { analytics } from '../../firebase/setupFirebase'
 
-const Search = () => {
+const Search = (): React.ReactElement => {
   const [searchText, setSearchText] = useState('')
-  const onSearch = (text: string) => {
+  const onSearch = (text: string): void => {
     logEvent(analytics, 'search', {
       search_term: text
     })

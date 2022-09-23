@@ -13,9 +13,13 @@ interface Props {
   game: Game
 }
 
-const DevGameCard = ({ game, onDelete, onUpdate }: Props) => {
+const DevGameCard = ({ game, onDelete, onUpdate }: Props): React.ReactElement => {
   const history = useHistory()
-  const openGameIfClicked = (event: SyntheticEvent) => event.currentTarget === event.target && history.push(`/games/${game.id}`)
+  const openGameIfClicked = (event: SyntheticEvent): void => {
+    if (event.currentTarget === event.target) {
+      history.push(`/games/${game.id}`)
+    }
+  }
 
   return (
     <Card

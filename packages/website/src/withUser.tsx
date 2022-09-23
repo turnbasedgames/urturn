@@ -11,12 +11,12 @@ interface Options {
 const withUser = (
   WrappedComponent: any,
   options: Options = {}
-) => {
+): React.FC => {
   const { redirectOnAnonymous } = options
-  return (props: any) => (
-    <UserContext.Consumer>
+  return function ComponentWithUser (props: any) {
+    return <UserContext.Consumer>
       {({ user, setUser }) => {
-        if ((user != null) && user.firebaseUser.isAnonymous && (redirectOnAnonymous != null)) {
+        if (user?.firebaseUser?.isAnonymous === true && (redirectOnAnonymous != null)) {
           return <Redirect to="/" />
         }
         if (((user != null) && !user.firebaseUser.isAnonymous) || (redirectOnAnonymous == null)) {
@@ -31,7 +31,7 @@ const withUser = (
         )
       }}
     </UserContext.Consumer>
-  )
+  }
 }
 
 export default withUser
