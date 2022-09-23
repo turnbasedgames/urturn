@@ -1,15 +1,15 @@
-import React from 'react';
+import React from 'react'
 import {
   Switch,
   Route,
-  useRouteMatch,
-} from 'react-router-dom';
+  useRouteMatch
+} from 'react-router-dom'
 
-import GamePlayer from './gamePlayer';
-import GameList from './gameList';
+import GamePlayer from './gamePlayer'
+import GameList from './gameList'
 
 const GameView = () => {
-  const match = useRouteMatch();
+  const match = useRouteMatch()
   return (
     <Switch>
       <Route exact path={`${match.path}`}>
@@ -19,7 +19,7 @@ const GameView = () => {
         <GamePlayer />
       </Route>
     </Switch>
-  );
-};
+  )
+}
 
-export default GameView;
+export default GameView

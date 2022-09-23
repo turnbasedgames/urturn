@@ -1,3 +1,3 @@
-import CreatorView from './CreatorView';
+import CreatorView from './CreatorView'
 
-export default CreatorView;
+export default CreatorView

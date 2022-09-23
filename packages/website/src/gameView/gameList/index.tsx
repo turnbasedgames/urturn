@@ -1,3 +1,3 @@
-import GameList from './GameList';
+import GameList from './GameList'
 
-export default GameList;
+export default GameList

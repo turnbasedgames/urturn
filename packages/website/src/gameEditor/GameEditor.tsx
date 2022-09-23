@@ -1,73 +1,73 @@
 import {
   Button,
-  Modal, Paper, Stack, TextField, Typography,
-} from '@mui/material';
-import React, { useState } from 'react';
+  Modal, Paper, Stack, TextField, Typography
+} from '@mui/material'
+import React, { useState } from 'react'
 import {
-  createGame, Game, GameReqBody, updateGame,
-} from '../models/game';
+  createGame, Game, GameReqBody, updateGame
+} from '../models/game'
 
-const githubURLRegExp = /^https:\/\/(www.)?github.com\/.+\/.+\/?/;
+const githubURLRegExp = /^https:\/\/(www.)?github.com\/.+\/.+\/?/
 
-type Props = {
+interface Props {
   editingGame?: Game
   open: boolean
   onClose?: () => void
-  onSubmit?: (game :Game) => void
-};
+  onSubmit?: (game: Game) => void
+}
 
-type GameFormErrors = {
-  name?: string,
-  description?: string,
-  githubURL?:string,
-  commitSHA?:string
-};
+interface GameFormErrors {
+  name?: string
+  description?: string
+  githubURL?: string
+  commitSHA?: string
+}
 
 const GameEditor = ({
-  open, onClose, onSubmit, editingGame,
-} : Props) => {
+  open, onClose, onSubmit, editingGame
+}: Props) => {
   const emptyForm = {
     name: '',
     description: '',
     githubURL: '',
-    commitSHA: '',
-  };
-  const [form, setForm] = useState(editingGame
+    commitSHA: ''
+  }
+  const [form, setForm] = useState((editingGame != null)
     ? {
-      name: editingGame.name,
-      description: editingGame.description,
-      githubURL: editingGame.githubURL,
-      commitSHA: editingGame?.commitSHA,
-    }
-    : emptyForm);
-  const [errors, setErrors] = useState<GameFormErrors>({});
-  const titleText = editingGame ? 'Edit Game' : 'Create Game';
+        name: editingGame.name,
+        description: editingGame.description,
+        githubURL: editingGame.githubURL,
+        commitSHA: editingGame?.commitSHA
+      }
+    : emptyForm)
+  const [errors, setErrors] = useState<GameFormErrors>({})
+  const titleText = (editingGame != null) ? 'Edit Game' : 'Create Game'
   const setField = (field: string, value: string) => {
     setForm({
       ...form,
-      [field]: value,
-    });
-  };
+      [field]: value
+    })
+  }
   const setError = (field: string, value?: string) => {
-    const newErrors: any = { ...errors };
+    const newErrors: any = { ...errors }
     if (value === undefined) {
-      delete newErrors[field];
+      delete newErrors[field]
     } else {
-      newErrors[field] = value;
+      newErrors[field] = value
     }
-    setErrors(newErrors);
-  };
+    setErrors(newErrors)
+  }
   const handleSubmit = async (event: any) => {
-    event.preventDefault();
+    event.preventDefault()
     if (Object.keys(errors).length === 0) {
-      const gameObj: GameReqBody = form;
-      const game = editingGame
+      const gameObj: GameReqBody = form
+      const game = (editingGame != null)
         ? await updateGame(editingGame.id, gameObj)
-        : await createGame(gameObj);
-      if (onClose) { onClose(); }
-      if (onSubmit) { onSubmit(game); }
+        : await createGame(gameObj)
+      if (onClose != null) { onClose() }
+      if (onSubmit != null) { onSubmit(game) }
     }
-  };
+  }
 
   return (
     <Modal
@@ -89,7 +89,7 @@ const GameEditor = ({
             label="Name"
             value={form.name}
             onChange={({ target: { value } }) => {
-              setField('name', value);
+              setField('name', value)
             }}
           />
           <TextField
@@ -100,11 +100,11 @@ const GameEditor = ({
             value={form.githubURL}
             onChange={({ target: { value } }) => {
               if (!githubURLRegExp.test(value)) {
-                setError('githubURL', 'invalid github url format');
+                setError('githubURL', 'invalid github url format')
               } else {
-                setError('githubURL');
+                setError('githubURL')
               }
-              setField('githubURL', value);
+              setField('githubURL', value)
             }}
           />
           <TextField
@@ -112,7 +112,7 @@ const GameEditor = ({
             label="Commit or branch"
             value={form.commitSHA}
             onChange={({ target: { value } }) => {
-              setField('commitSHA', value);
+              setField('commitSHA', value)
             }}
           />
           <TextField
@@ -122,7 +122,7 @@ const GameEditor = ({
             label="Description"
             value={form.description}
             onChange={({ target: { value } }) => {
-              setField('description', value);
+              setField('description', value)
             }}
           />
           <Stack
@@ -134,13 +134,13 @@ const GameEditor = ({
               Cancel
             </Button>
             <Button variant="contained" onClick={handleSubmit}>
-              {editingGame ? 'Update' : 'Create'}
+              {(editingGame != null) ? 'Update' : 'Create'}
             </Button>
           </Stack>
         </Stack>
       </Paper>
     </Modal>
-  );
-};
+  )
+}
 
-export default GameEditor;
+export default GameEditor

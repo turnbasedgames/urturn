@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import { logEvent } from 'firebase/analytics';
+import React, { useState } from 'react'
+import { logEvent } from 'firebase/analytics'
 import {
-  Paper, IconButton, InputBase, Stack,
-} from '@mui/material';
-import { Search as SearchIcon } from '@mui/icons-material';
-import { analytics } from '../../firebase/setupFirebase';
+  Paper, IconButton, InputBase, Stack
+} from '@mui/material'
+import { Search as SearchIcon } from '@mui/icons-material'
+import { analytics } from '../../firebase/setupFirebase'
 
 const Search = () => {
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState('')
   const onSearch = (text: string) => {
     logEvent(analytics, 'search', {
-      search_term: text,
-    });
-  };
+      search_term: text
+    })
+  }
   return (
     <Paper>
       <Stack direction='row' alignItems="center">
@@ -22,12 +22,12 @@ const Search = () => {
           placeholder="Search"
           onKeyPress={(ev) => {
             if (ev.key === 'Enter') {
-              ev.preventDefault();
-              onSearch(searchText);
+              ev.preventDefault()
+              onSearch(searchText)
             }
           }}
           onChange={(ev) => {
-            setSearchText(ev.target.value);
+            setSearchText(ev.target.value)
           }}
         />
         <IconButton
@@ -36,15 +36,15 @@ const Search = () => {
           size="small"
           sx={{ display: { xs: 'none', sm: 'flex' } }}
           onClick={(ev) => {
-            ev.preventDefault();
-            onSearch(searchText);
+            ev.preventDefault()
+            onSearch(searchText)
           }}
         >
           <SearchIcon />
         </IconButton>
       </Stack>
     </Paper>
-  );
-};
+  )
+}
 
-export default Search;
+export default Search

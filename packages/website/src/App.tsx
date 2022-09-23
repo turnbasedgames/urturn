@@ -1,68 +1,68 @@
-import React, { createRef, useEffect, useState } from 'react';
-import { onAuthStateChanged, signInAnonymously } from 'firebase/auth';
+import React, { createRef, useEffect, useState } from 'react'
+import { onAuthStateChanged, signInAnonymously } from 'firebase/auth'
 import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Redirect,
-} from 'react-router-dom';
-import axios from 'axios';
-import { ThemeProvider } from '@mui/material/styles';
-import { SnackbarProvider, SnackbarKey } from 'notistack';
+  Redirect
+} from 'react-router-dom'
+import axios from 'axios'
+import { ThemeProvider } from '@mui/material/styles'
+import { SnackbarProvider, SnackbarKey } from 'notistack'
 import {
-  Stack, Slide, IconButton,
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+  Stack, Slide, IconButton
+} from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
 
-import { auth } from './firebase/setupFirebase';
-import theme from './theme';
-import NavBar from './navBar';
-import GameView from './gameView';
-import { getUser, User, UserContext } from './models/user';
-import CreatorView from './creatorView';
-import ProfileView from './profileView';
-import PageTracker from './firebase/PageTracker';
-import API_URL from './models/util';
+import { auth } from './firebase/setupFirebase'
+import theme from './theme'
+import NavBar from './navBar'
+import GameView from './gameView'
+import { getUser, User, UserContext } from './models/user'
+import CreatorView from './creatorView'
+import ProfileView from './profileView'
+import PageTracker from './firebase/PageTracker'
+import API_URL from './models/util'
 
-axios.defaults.baseURL = API_URL;
+axios.defaults.baseURL = API_URL
 
-function App() {
-  const [user, setUser] = useState<User | undefined>();
+function App () {
+  const [user, setUser] = useState<User | undefined>()
   useEffect(() => {
     const authInterceptor = axios.interceptors.request.use(async (config) => {
-      const newConfig = config;
-      const firebaseUser = auth.currentUser;
-      if (firebaseUser) {
+      const newConfig = config
+      const firebaseUser = auth.currentUser
+      if (firebaseUser != null) {
         if (!newConfig.headers) {
-          newConfig.headers = {};
+          newConfig.headers = {}
         }
-        newConfig.headers.authorization = await firebaseUser.getIdToken();
+        newConfig.headers.authorization = await firebaseUser.getIdToken()
       }
-      return newConfig;
-    });
+      return newConfig
+    })
 
     onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) {
-        signInAnonymously(auth);
+      if (firebaseUser == null) {
+        signInAnonymously(auth)
       } else {
         try {
-          const currentUser = await getUser(firebaseUser, true);
-          setUser(currentUser);
+          const currentUser = await getUser(firebaseUser, true)
+          setUser(currentUser)
         } catch (err) {
           // TODO: snackbar error with link to our discord?
         }
       }
-    });
+    })
 
-    return () => { axios.interceptors.request.eject(authInterceptor); };
-  }, []);
+    return () => { axios.interceptors.request.eject(authInterceptor) }
+  }, [])
 
-  const snackbarProviderRef = createRef<SnackbarProvider>();
+  const snackbarProviderRef = createRef<SnackbarProvider>()
   const onClickDismiss = (key: SnackbarKey) => () => {
-    if (snackbarProviderRef && snackbarProviderRef.current) {
-      snackbarProviderRef.current.closeSnackbar(key);
+    if (snackbarProviderRef && (snackbarProviderRef.current != null)) {
+      snackbarProviderRef.current.closeSnackbar(key)
     }
-  };
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -70,7 +70,7 @@ function App() {
         ref={snackbarProviderRef}
         anchorOrigin={{
           vertical: 'top',
-          horizontal: 'right',
+          horizontal: 'right'
         }}
         TransitionComponent={Slide}
         action={(key) => (
@@ -108,7 +108,7 @@ function App() {
         </Stack>
       </SnackbarProvider>
     </ThemeProvider>
-  );
+  )
 }
 
-export default App;
+export default App
