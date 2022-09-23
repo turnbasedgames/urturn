@@ -1,22 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'
 import {
-  Card, CardActionArea, CardContent, Stack, Typography, 
-} from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2';
-import { useHistory } from 'react-router-dom';
-import { Game, getGames } from '../../models/game';
-import CardMediaWithFallback from '../CardMediaWithFallback';
+  Card, CardActionArea, CardContent, Stack, Typography
+} from '@mui/material'
+import Grid from '@mui/material/Unstable_Grid2'
+import { useHistory } from 'react-router-dom'
+import { Game, getGames } from '../../models/game'
+import CardMediaWithFallback from '../CardMediaWithFallback'
 
-const GameList = () => {
-  const [games, setGames] = useState<Game[]>([]);
+const GameList = (): React.ReactElement => {
+  const [games, setGames] = useState<Game[]>([])
   useEffect(() => {
-    async function setupGames() {
-      const gamesRaw = await getGames();
-      setGames(gamesRaw);
+    async function setupGames (): Promise<void> {
+      const gamesRaw = await getGames()
+      setGames(gamesRaw)
     }
-    setupGames();
-  }, []);
-  const history = useHistory();
+    setupGames().catch(console.error)
+  }, [])
+  const history = useHistory()
 
   return (
     <Stack
@@ -27,18 +27,17 @@ const GameList = () => {
       <Typography color="text.primary">
         All Games
       </Typography>
-      <Grid 
-        container 
-        marginTop={1}
+      <Grid
+        container
       >
         {games.map((game) => (
           <Card // TODO: separate component
-            sx={{ margin: '10px' }}
+            sx={{ margin: 1 }}
             key={`GameCard-${game.id}`}
           >
             <CardActionArea onClick={() => history.push(`/games/${game.id}`)}>
               <CardMediaWithFallback
-                sx={{ height: '200px', width: '180px' }}
+                sx={{ height: '170px', width: '170px' }}
                 game={game}
               />
               <CardContent sx={{ padding: 1 }}>
@@ -52,7 +51,7 @@ const GameList = () => {
         ))}
       </Grid>
     </Stack>
-  );
-};
+  )
+}
 
-export default GameList;
+export default GameList

@@ -1,56 +1,56 @@
 import React, {
-  useEffect, useState, useMemo, useContext,
-} from 'react';
-import { useParams } from 'react-router-dom';
+  useEffect, useState, useMemo, useContext
+} from 'react'
+import { useParams } from 'react-router-dom'
 
-import { LinearProgress } from '@mui/material';
-import IFrame from './IFrame/IFrame';
+import { LinearProgress } from '@mui/material'
+import IFrame from './IFrame/IFrame'
 import {
-  joinRoom, getRoom, Room,
-} from '../../models/room';
-import { RoomUser, User, UserContext } from '../../models/user';
+  joinRoom, getRoom, Room
+} from '../../models/room'
+import { RoomUser, User, UserContext } from '../../models/user'
 
-type RoomURLParams = {
+interface RoomURLParams {
   roomId: string
-};
+}
 
 const shouldJoinPrivateRoom = (user?: User, room?: Room): boolean => Boolean(
-  room
-  && user
-  && room.joinable
-  && room.private
-  && !room.players.some(((p: RoomUser) => p.id === user.id)),
-);
+  (room != null) &&
+  (user != null) &&
+  room.joinable &&
+  room.private &&
+  !room.players.some((p: RoomUser) => p.id === user.id)
+)
 
-const RoomPlayer = () => {
-  const { roomId } = useParams<RoomURLParams>();
-  const [room, setRoom] = useState<Room | undefined>();
-  const userContext = useContext(UserContext);
+const RoomPlayer = (): React.ReactElement => {
+  const { roomId } = useParams<RoomURLParams>()
+  const [room, setRoom] = useState<Room | undefined>()
+  const userContext = useContext(UserContext)
 
   useEffect(() => {
-    async function setupRoom() {
-      const roomRaw = await getRoom(roomId);
-      setRoom(roomRaw);
+    async function setupRoom (): Promise<void> {
+      const roomRaw = await getRoom(roomId)
+      setRoom(roomRaw)
       if (shouldJoinPrivateRoom(userContext.user, roomRaw)) {
-        const joinedRoomResult = await joinRoom(roomId);
-        setRoom(joinedRoomResult);
+        const joinedRoomResult = await joinRoom(roomId)
+        setRoom(joinedRoomResult)
       }
     }
-    setupRoom();
-  }, [userContext.user]);
+    setupRoom().catch(console.error)
+  }, [userContext.user])
 
   const iframeMemo = useMemo(() => (
-    room
-    && userContext.user
-    && (
+    (room != null) &&
+    (userContext.user != null) &&
+    (
     <IFrame
       user={userContext.user}
       room={room}
     />
     )
-  ), [room, userContext.user]);
+  ), [room, userContext.user])
 
-  if (room) {
+  if (room != null) {
     // TODO: information header? and the Iframe takes entire screen?
     //       information header provides:
     //       1. exit the game
@@ -58,10 +58,10 @@ const RoomPlayer = () => {
     //          open user profiles)
     //       3. we should remove the original navbar, it feels unnecessary
     //       4. escape keybinding, but also physical button
-    return <>{iframeMemo}</>;
+    return <>{iframeMemo}</>
   }
 
-  return (<LinearProgress />);
-};
+  return (<LinearProgress />)
+}
 
-export default RoomPlayer;
+export default RoomPlayer

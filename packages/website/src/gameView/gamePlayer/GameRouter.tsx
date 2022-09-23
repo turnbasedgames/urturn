@@ -1,15 +1,15 @@
-import React from 'react';
+import React from 'react'
 import {
   Route,
   Switch,
-  useRouteMatch,
-} from 'react-router-dom';
+  useRouteMatch
+} from 'react-router-dom'
 
-import GameInfo from './GameInfo';
-import RoomPlayer from './RoomPlayer';
+import GameInfo from './GameInfo'
+import RoomPlayer from './RoomPlayer'
 
-const GameRouter = () => {
-  const match = useRouteMatch();
+const GameRouter = (): React.ReactElement => {
+  const match = useRouteMatch()
 
   return (
     <Switch>
@@ -20,7 +20,7 @@ const GameRouter = () => {
         <RoomPlayer />
       </Route>
     </Switch>
-  );
-};
+  )
+}
 
-export default GameRouter;
+export default GameRouter

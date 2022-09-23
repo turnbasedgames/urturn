@@ -1,38 +1,45 @@
 import {
-  Button, IconButton, Menu, MenuItem, Modal, Paper, Stack, Typography,
-} from '@mui/material';
+  Button, IconButton, Menu, MenuItem, Modal, Paper, Stack, Typography
+} from '@mui/material'
 import {
-  GitHub as GitHubIcon, MoreVert as MoreVertIcon, Edit as EditIcon, Delete as DeleteIcon,
-} from '@mui/icons-material';
-import React from 'react';
+  GitHub as GitHubIcon, MoreVert as MoreVertIcon, Edit as EditIcon, Delete as DeleteIcon
+} from '@mui/icons-material'
+import React from 'react'
 
-import GameEditor from '../gameEditor';
-import { deleteGame, Game } from '../models/game';
-import { UserContext } from '../models/user';
+import GameEditor from '../gameEditor'
+import { deleteGame, Game } from '../models/game'
+import { UserContext } from '../models/user'
 
-type Props = {
+interface Props {
   onDelete?: () => void
   onUpdate?: () => void
   game: Game
-};
+}
 
-const GameCardActions = ({ game, onDelete, onUpdate }: Props) => {
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [openEditor, setOpenEditor] = React.useState(false);
-  const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
-  const open = Boolean(anchorEl);
-  const handleClick = (event: any) => {
-    event.stopPropagation();
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+const GameCardActions = ({ game, onDelete, onUpdate }: Props): React.ReactElement => {
+  const [anchorEl, setAnchorEl] = React.useState(null)
+  const [openEditor, setOpenEditor] = React.useState(false)
+  const [openDeleteModal, setOpenDeleteModal] = React.useState(false)
+  const open = Boolean(anchorEl)
+  const handleClick = (event: any): void => {
+    event.stopPropagation()
+    setAnchorEl(event.currentTarget)
+  }
+  const handleClose = (): void => {
+    setAnchorEl(null)
+  }
+  const handleDelete = async (): Promise<void> => {
+    await deleteGame(game.id)
+    setOpenDeleteModal(false)
+    if (onDelete != null) {
+      onDelete()
+    }
+  }
 
   return (
     <UserContext.Consumer>
       {({ user }) => {
-        const ownsGame = game && user && game.creator.id === user.id;
+        const ownsGame = (user != null) && game.creator.id === user.id
 
         return (
           <>
@@ -58,19 +65,15 @@ const GameCardActions = ({ game, onDelete, onUpdate }: Props) => {
                     spacing={2}
                   >
                     <Button onClick={() => {
-                      setOpenDeleteModal(false);
+                      setOpenDeleteModal(false)
                     }}
                     >
                       Cancel
                     </Button>
                     <Button
                       variant="contained"
-                      onClick={async () => {
-                        await deleteGame(game.id);
-                        setOpenDeleteModal(false);
-                        if (onDelete) {
-                          onDelete();
-                        }
+                      onClick={() => {
+                        handleDelete().catch(console.error)
                       }}
                     >
                       Delete
@@ -109,18 +112,18 @@ const GameCardActions = ({ game, onDelete, onUpdate }: Props) => {
                 onClose={handleClose}
                 anchorOrigin={{
                   vertical: 'bottom',
-                  horizontal: 'right',
+                  horizontal: 'right'
                 }}
                 transformOrigin={{
                   vertical: 'top',
-                  horizontal: 'right',
+                  horizontal: 'right'
                 }}
               >
                 <MenuItem
                   dense
                   onClick={() => {
-                    setOpenEditor(true);
-                    handleClose();
+                    setOpenEditor(true)
+                    handleClose()
                   }}
                   disableRipple
                 >
@@ -130,8 +133,8 @@ const GameCardActions = ({ game, onDelete, onUpdate }: Props) => {
                 <MenuItem
                   dense
                   onClick={() => {
-                    setOpenDeleteModal(true);
-                    handleClose();
+                    setOpenDeleteModal(true)
+                    handleClose()
                   }}
                   disableRipple
                 >
@@ -141,10 +144,10 @@ const GameCardActions = ({ game, onDelete, onUpdate }: Props) => {
               </Menu>
             </Stack>
           </>
-        );
+        )
       }}
     </UserContext.Consumer>
-  );
-};
+  )
+}
 
-export default GameCardActions;
+export default GameCardActions

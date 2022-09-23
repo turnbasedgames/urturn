@@ -1,37 +1,37 @@
-import { LinearProgress } from '@mui/material';
-import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { LinearProgress } from '@mui/material'
+import React from 'react'
+import { Redirect } from 'react-router-dom'
 
-import { UserContext } from './models/user';
+import { UserContext } from './models/user'
 
-type Options = {
+interface Options {
   redirectOnAnonymous?: Boolean
-};
+}
 
 const withUser = (
   WrappedComponent: any,
-  options: Options = {},
-) => {
-  const { redirectOnAnonymous } = options;
-  return (props: any) => (
-    <UserContext.Consumer>
+  options: Options = {}
+): React.FC => {
+  const { redirectOnAnonymous } = options
+  return function ComponentWithUser (props: any) {
+    return <UserContext.Consumer>
       {({ user, setUser }) => {
-        if (user && user.firebaseUser.isAnonymous && redirectOnAnonymous) {
-          return <Redirect to="/" />;
+        if (user?.firebaseUser?.isAnonymous === true && (redirectOnAnonymous != null)) {
+          return <Redirect to="/" />
         }
-        if ((user && !user.firebaseUser.isAnonymous) || !redirectOnAnonymous) {
+        if (((user != null) && !user.firebaseUser.isAnonymous) || (redirectOnAnonymous == null)) {
           // eslint-disable-next-line react/jsx-props-no-spreading
-          return <WrappedComponent user={user} setUser={setUser} {...props} />;
+          return <WrappedComponent user={user} setUser={setUser} {...props} />
         }
         return (
           <LinearProgress sx={{
-            position: 'relative',
+            position: 'relative'
           }}
           />
-        );
+        )
       }}
     </UserContext.Consumer>
-  );
-};
+  }
+}
 
-export default withUser;
+export default withUser

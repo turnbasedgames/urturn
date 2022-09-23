@@ -1,40 +1,45 @@
-import React from 'react';
+import React from 'react'
 import {
-  AppBar, Button, Toolbar, Typography, IconButton, Stack,
-} from '@mui/material';
-import AddBoxIcon from '@mui/icons-material/AddBox';
-import PersonIcon from '@mui/icons-material/Person';
-import { useHistory } from 'react-router-dom';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+  AppBar, Button, Toolbar, Typography, IconButton, Stack
+} from '@mui/material'
+import AddBoxIcon from '@mui/icons-material/AddBox'
+import PersonIcon from '@mui/icons-material/Person'
+import { useHistory } from 'react-router-dom'
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 
-import { auth } from '../firebase/setupFirebase';
-import Search from './search';
-import withUser from '../withUser';
-import { User } from '../models/user';
+import { auth } from '../firebase/setupFirebase'
+import Search from './search'
+import withUser from '../withUser'
+import { User } from '../models/user'
 
-type Props = {
-  user: User | null,
-};
+interface Props {
+  user: User | null
+}
 
-const NavBar = ({ user }: Props) => {
-  const history = useHistory();
-  const signedIn = user && !user.firebaseUser.isAnonymous;
-  const firebaseUserDetermined = Boolean(auth.currentUser);
+const NavBar = ({ user }: Props): React.ReactElement => {
+  const history = useHistory()
+  const signedIn = (user != null) && !user.firebaseUser.isAnonymous
+  const firebaseUserDetermined = Boolean(auth.currentUser)
+  const onSignIn = (ev: React.MouseEvent): void => {
+    ev.preventDefault()
+    const googleAuthProvider = new GoogleAuthProvider()
+    signInWithPopup(auth, googleAuthProvider).catch(console.error)
+  }
 
-  let userPanel;
+  let userPanel
   if (signedIn) {
     userPanel = (
       <>
         <IconButton
           onClick={() => {
-            history.push('/develop');
+            history.push('/develop')
           }}
         >
           <AddBoxIcon />
         </IconButton>
         <Button
           onClick={() => {
-            history.push('/profile');
+            history.push('/profile')
           }}
           size="small"
         >
@@ -48,34 +53,27 @@ const NavBar = ({ user }: Props) => {
           </Typography>
         </Button>
       </>
-    );
+    )
   } else if (firebaseUserDetermined) {
     userPanel = (
       <>
         <Button
-          onClick={(ev) => {
-            ev.preventDefault();
-            const googleAuthProvider = new GoogleAuthProvider();
-            signInWithPopup(auth, googleAuthProvider);
-          }}
+          sx={{ marginRight: 1 }}
+          onClick={onSignIn}
           variant="outlined"
         >
           Sign In
         </Button>
         <Button
-          onClick={(ev) => {
-            ev.preventDefault();
-            const googleAuthProvider = new GoogleAuthProvider();
-            signInWithPopup(auth, googleAuthProvider);
-          }}
+          onClick={onSignIn}
           variant="contained"
         >
           Sign Up
         </Button>
       </>
-    );
+    )
   } else {
-    userPanel = <div />;
+    userPanel = <div />
   }
 
   return (
@@ -93,7 +91,7 @@ const NavBar = ({ user }: Props) => {
             alignItems="center"
           >
             <Typography onClick={() => {
-              history.push('/');
+              history.push('/')
             }}
               sx={{ display: { xs: 'none', sm: 'flex' } }}
             >
@@ -112,7 +110,7 @@ const NavBar = ({ user }: Props) => {
         </Stack>
       </Toolbar>
     </AppBar>
-  );
-};
+  )
+}
 
-export default withUser(NavBar);
+export default withUser(NavBar)

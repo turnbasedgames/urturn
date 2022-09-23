@@ -1,27 +1,31 @@
 import {
-  Card, CardActionArea, CardHeader, CardMedia, Stack,
-} from '@mui/material';
-import React, { SyntheticEvent } from 'react';
-import { useHistory } from 'react-router-dom';
+  Card, CardActionArea, CardHeader, CardMedia, Stack
+} from '@mui/material'
+import React, { SyntheticEvent } from 'react'
+import { useHistory } from 'react-router-dom'
 
-import { Game } from '../models/game';
-import GameCardActions from './GameCardActions';
+import { Game } from '../models/game'
+import GameCardActions from './GameCardActions'
 
-type Props = {
+interface Props {
   onDelete?: () => void
   onUpdate?: () => void
   game: Game
-};
+}
 
-const DevGameCard = ({ game, onDelete, onUpdate }: Props) => {
-  const history = useHistory();
-  const openGameIfClicked = (event: SyntheticEvent) => event.currentTarget === event.target && history.push(`/games/${game.id}`);
+const DevGameCard = ({ game, onDelete, onUpdate }: Props): React.ReactElement => {
+  const history = useHistory()
+  const openGameIfClicked = (event: SyntheticEvent): void => {
+    if (event.currentTarget === event.target) {
+      history.push(`/games/${game.id}`)
+    }
+  }
 
   return (
     <Card
       sx={{
         width: '100%',
-        display: 'flex',
+        display: 'flex'
       }}
     >
       <CardActionArea
@@ -29,7 +33,7 @@ const DevGameCard = ({ game, onDelete, onUpdate }: Props) => {
         sx={{
           width: '100%',
           display: 'flex',
-          alignItems: 'flex-start',
+          alignItems: 'flex-start'
         }}
       >
         <CardMedia
@@ -47,25 +51,25 @@ const DevGameCard = ({ game, onDelete, onUpdate }: Props) => {
               // allow underlying typography components to handle text overflow with noWrap
               // https://stackoverflow.com/questions/61675880/react-material-ui-cardheader-title-overflow-with-dots/70321025#70321025
               '& .MuiCardHeader-content': {
-                overflow: 'hidden',
-              },
+                overflow: 'hidden'
+              }
             }}
             title={game.name}
             titleTypographyProps={{
               noWrap: true,
-              onClick: openGameIfClicked,
+              onClick: openGameIfClicked
             }}
             subheader={`${game.description}`}
             subheaderTypographyProps={{
               noWrap: true,
-              onClick: openGameIfClicked,
+              onClick: openGameIfClicked
             }}
             action={(<GameCardActions game={game} onDelete={onDelete} onUpdate={onUpdate} />)}
           />
         </Stack>
       </CardActionArea>
     </Card>
-  );
-};
+  )
+}
 
-export default DevGameCard;
+export default DevGameCard

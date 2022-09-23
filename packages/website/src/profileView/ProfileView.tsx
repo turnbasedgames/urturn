@@ -1,20 +1,20 @@
 import {
-  Button, Card, CardActionArea, CardHeader, LinearProgress, Paper, Stack, Tab, Tabs,
-} from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { signOut } from 'firebase/auth';
-import { useHistory } from 'react-router-dom';
+  Button, Card, CardActionArea, CardHeader, LinearProgress, Paper, Stack, Tab, Tabs
+} from '@mui/material'
+import React, { useEffect, useState } from 'react'
+import { signOut } from 'firebase/auth'
+import { useHistory } from 'react-router-dom'
 
-import { useSnackbar } from 'notistack';
-import { auth } from '../firebase/setupFirebase';
-import { User } from '../models/user';
-import withUser from '../withUser';
-import { getRooms, quitRoom, Room } from '../models/room';
+import { useSnackbar } from 'notistack'
+import { auth } from '../firebase/setupFirebase'
+import { User } from '../models/user'
+import withUser from '../withUser'
+import { getRooms, quitRoom, Room } from '../models/room'
 
-type Props = {
-  user: User,
+interface Props {
+  user: User
   setUser: React.Dispatch<React.SetStateAction<User | null>>
-};
+}
 
 enum ProfileTab {
   Active = 0,
@@ -22,43 +22,55 @@ enum ProfileTab {
 }
 
 const capitalizeUsername = (username: string): string => {
-  let newUsername = username[0].toLocaleUpperCase();
+  let newUsername = username[0].toLocaleUpperCase()
   for (let index = 1; index < username.length; index += 1) {
-    const curChar = username[index];
+    const curChar = username[index]
     if (username[index - 1] === '_') {
-      newUsername += curChar.toLocaleUpperCase();
+      newUsername += curChar.toLocaleUpperCase()
     } else {
-      newUsername += curChar;
+      newUsername += curChar
     }
   }
-  return newUsername;
-};
+  return newUsername
+}
 
-const ProfileView = ({ user, setUser }: Props) => {
-  const history = useHistory();
-  const { enqueueSnackbar } = useSnackbar();
+const ProfileView = ({ user, setUser }: Props): React.ReactElement => {
+  const history = useHistory()
+  const { enqueueSnackbar } = useSnackbar()
 
-  const [activeTab, setActiveTab] = React.useState(0);
-  const handleChange = (event: any, newValue: number) => {
-    setActiveTab(newValue);
-  };
+  const [activeTab, setActiveTab] = React.useState(0)
+  const handleChange = (event: any, newValue: number): void => {
+    setActiveTab(newValue)
+  }
 
-  const [activeRooms, setActiveRooms] = useState<Room[] | null>(null);
-  const [inactiveRooms, setInactiveRooms] = useState<Room[] | null>(null);
-  const displayedRooms = activeTab === ProfileTab.Active ? activeRooms : inactiveRooms;
-  const displayedRoomsLoading = !displayedRooms;
-  const setupActiveRooms = async () => {
-    const roomsRaw = await getRooms({ containsPlayer: user.id });
-    setActiveRooms(roomsRaw);
-  };
-  const setupInactiveRooms = async () => {
-    const roomsRaw = await getRooms({ containsInactivePlayer: user.id });
-    setInactiveRooms(roomsRaw);
-  };
+  const [activeRooms, setActiveRooms] = useState<Room[] | null>(null)
+  const [inactiveRooms, setInactiveRooms] = useState<Room[] | null>(null)
+  const displayedRooms = activeTab === ProfileTab.Active ? activeRooms : inactiveRooms
+  const displayedRoomsLoading = displayedRooms == null
+  const setupActiveRooms = async (): Promise<void> => {
+    const roomsRaw = await getRooms({ containsPlayer: user.id })
+    setActiveRooms(roomsRaw)
+  }
+  const setupInactiveRooms = async (): Promise<void> => {
+    const roomsRaw = await getRooms({ containsInactivePlayer: user.id })
+    setInactiveRooms(roomsRaw)
+  }
   useEffect(() => {
-    setupActiveRooms();
-    setupInactiveRooms();
-  }, []);
+    Promise.all([setupActiveRooms(), setupInactiveRooms()]).catch(console.error)
+  }, [])
+
+  const onRoomQuit = async (room: Room): Promise<void> => {
+    try {
+      await quitRoom(room.id)
+    } catch (err) {
+      enqueueSnackbar('Error when trying to quit room', {
+        variant: 'error',
+        autoHideDuration: 3000
+      })
+      return
+    }
+    await Promise.all([setupActiveRooms(), setupInactiveRooms()])
+  }
 
   return (
     <Stack
@@ -82,9 +94,9 @@ const ProfileView = ({ user, setUser }: Props) => {
             action={(
               <Button
                 onClick={() => {
-                  setUser(null);
-                  signOut(auth);
-                  history.push('/');
+                  setUser(null)
+                  signOut(auth).catch(console.error)
+                  history.push('/')
                 }}
                 variant="outlined"
                 color="error"
@@ -98,12 +110,12 @@ const ProfileView = ({ user, setUser }: Props) => {
           <Tabs value={activeTab} onChange={handleChange} variant="fullWidth">
             <Tab label="Active Games" />
             <Tab
-              label={`${inactiveRooms ? inactiveRooms.length : ''} Played Game${inactiveRooms && inactiveRooms.length === 1 ? '' : 's'}`}
+              label={`${(inactiveRooms != null) ? inactiveRooms.length : ''} Played Game${(inactiveRooms != null) && inactiveRooms.length === 1 ? '' : 's'}`}
             />
           </Tabs>
           <LinearProgress sx={{
             position: 'relative',
-            visibility: displayedRoomsLoading ? 'visible' : 'hidden',
+            visibility: displayedRoomsLoading ? 'visible' : 'hidden'
           }}
           />
           <Stack>
@@ -121,34 +133,24 @@ const ProfileView = ({ user, setUser }: Props) => {
 
                     // when game is hard deleted, we show a snackbar error because players can't
                     // play a game that has been deleted
-                    if (room.game) {
-                      history.push(`/games/${room.game.id}/room/${room.id}`);
+                    if (room.game != null) {
+                      history.push(`/games/${room.game.id}/room/${room.id}`)
                     } else {
                       enqueueSnackbar('This game was deleted', {
                         variant: 'error',
-                        autoHideDuration: 3000,
-                      });
+                        autoHideDuration: 3000
+                      })
                     }
                   }}
                   >
                     <CardHeader
-                      title={room.game ? room.game.name : '[Deleted Game]'}
+                      title={(room.game != null) ? room.game.name : '[Deleted Game]'}
                       subheader={room.id}
                       action={((activeTab === ProfileTab.Active) && (
                         <Button
-                          onClick={async (event) => {
-                            event.stopPropagation();
-                            try {
-                              await quitRoom(room.id);
-                            } catch (err) {
-                              enqueueSnackbar('Error when trying to quit room', {
-                                variant: 'error',
-                                autoHideDuration: 3000,
-                              });
-                              return;
-                            }
-                            setupActiveRooms();
-                            setupInactiveRooms();
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            onRoomQuit(room).catch(console.error)
                           }}
                           color="error"
                           variant="text"
@@ -165,7 +167,7 @@ const ProfileView = ({ user, setUser }: Props) => {
         </Paper>
       </Stack>
     </Stack>
-  );
-};
+  )
+}
 
-export default withUser(ProfileView, { redirectOnAnonymous: true });
+export default withUser(ProfileView, { redirectOnAnonymous: true })
