@@ -18,6 +18,7 @@ module.exports = {
         'airbnb-typescript',
       ],
       parserOptions: {
+        tsconfigRootDir: __dirname,
         project: ['./tsconfig.json'],
       },
       rules: {
