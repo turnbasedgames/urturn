@@ -6,6 +6,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 import { useHistory } from 'react-router-dom';
 import { Game, getGames } from '../../models/game';
 import CardMediaWithFallback from '../CardMediaWithFallback';
+import logger from '../../logger';
 
 function GameList(): React.ReactElement {
   const [games, setGames] = useState<Game[]>([]);
@@ -14,7 +15,7 @@ function GameList(): React.ReactElement {
       const gamesRaw = await getGames();
       setGames(gamesRaw);
     }
-    setupGames().catch(console.error);
+    setupGames().catch(logger.error);
   }, []);
   const history = useHistory();
 

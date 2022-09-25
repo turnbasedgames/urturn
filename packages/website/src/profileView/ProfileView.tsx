@@ -10,6 +10,7 @@ import { auth } from '../firebase/setupFirebase';
 import { User } from '../models/user';
 import withUser from '../withUser';
 import { getRooms, quitRoom, Room } from '../models/room';
+import logger from '../logger';
 
 interface Props {
   user: User
@@ -56,7 +57,7 @@ function ProfileView({ user, setUser }: Props): React.ReactElement {
     setInactiveRooms(roomsRaw);
   };
   useEffect(() => {
-    Promise.all([setupActiveRooms(), setupInactiveRooms()]).catch(console.error);
+    Promise.all([setupActiveRooms(), setupInactiveRooms()]).catch(logger.error);
   }, []);
 
   const onRoomQuit = async (room: Room): Promise<void> => {
@@ -95,7 +96,7 @@ function ProfileView({ user, setUser }: Props): React.ReactElement {
               <Button
                 onClick={() => {
                   setUser(null);
-                  signOut(auth).catch(console.error);
+                  signOut(auth).catch(logger.error);
                   history.push('/');
                 }}
                 variant="outlined"
@@ -150,7 +151,7 @@ function ProfileView({ user, setUser }: Props): React.ReactElement {
                         <Button
                           onClick={(event) => {
                             event.stopPropagation();
-                            onRoomQuit(room).catch(console.error);
+                            onRoomQuit(room).catch(logger.error);
                           }}
                           color="error"
                           variant="text"

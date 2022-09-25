@@ -3,6 +3,7 @@ import {
   Modal, Paper, Stack, TextField, Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
+import logger from '../logger';
 import {
   createGame, Game, GameReqBody, updateGame,
 } from '../models/game';
@@ -128,7 +129,7 @@ function GameEditor({
               variant="contained"
               onClick={(ev) => {
                 ev.preventDefault();
-                handleSubmit().catch(console.error);
+                handleSubmit().catch(logger.error);
               }}
             >
               {(editingGame != null) ? 'Update' : 'Create'}

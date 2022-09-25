@@ -9,6 +9,7 @@ import {
   joinRoom, getRoom, Room,
 } from '../../models/room';
 import { RoomUser, User, UserContext } from '../../models/user';
+import logger from '../../logger';
 
 interface RoomURLParams {
   roomId: string
@@ -36,7 +37,7 @@ function RoomPlayer(): React.ReactElement {
         setRoom(joinedRoomResult);
       }
     }
-    setupRoom().catch(console.error);
+    setupRoom().catch(logger.error);
   }, [userContext.user]);
 
   const iframeMemo = useMemo(() => {

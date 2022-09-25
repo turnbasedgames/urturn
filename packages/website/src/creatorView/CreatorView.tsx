@@ -10,6 +10,7 @@ import DevGameCard from './DevGameCard';
 import { Game, getGames } from '../models/game';
 import { User } from '../models/user';
 import withUser from '../withUser';
+import logger from '../logger';
 
 interface Props {
   user: User
@@ -25,7 +26,7 @@ function CreatorView({ user }: Props): React.ReactElement {
     setGames(gamesRaw);
   };
   useEffect(() => {
-    setupGames().catch(console.error);
+    setupGames().catch(logger.error);
   }, []);
 
   return (
@@ -92,10 +93,10 @@ function CreatorView({ user }: Props): React.ReactElement {
           {games?.map((game) => (
             <DevGameCard
               onUpdate={() => {
-                setupGames().catch(console.error);
+                setupGames().catch(logger.error);
               }}
               onDelete={() => {
-                setupGames().catch(console.error);
+                setupGames().catch(logger.error);
               }}
               key={`DevGameCard-${game.id}`}
               game={game}

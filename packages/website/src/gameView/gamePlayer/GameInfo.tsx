@@ -15,6 +15,7 @@ import { joinOrCreateRoom, createPrivateRoom } from '../../models/room';
 import GameCardActions from '../../creatorView/GameCardActions';
 import { User, UserContext } from '../../models/user';
 import CardMediaWithFallback from '../CardMediaWithFallback';
+import logger from '../../logger';
 
 interface GameURLParams {
   gameId: string
@@ -35,7 +36,7 @@ function GameInfo(): React.ReactElement {
     setGame(gameRaw);
   }
   useEffect(() => {
-    setupGame().catch(console.error);
+    setupGame().catch(logger.error);
   }, []);
 
   async function onPlay(user: User): Promise<void> {
@@ -118,7 +119,7 @@ function GameInfo(): React.ReactElement {
                 action={(
                   <GameCardActions
                     game={game}
-                    onUpdate={() => { setupGame().catch(console.error); }}
+                    onUpdate={() => { setupGame().catch(logger.error); }}
                     onDelete={() => history.push('/develop')}
                   />
                 )}
@@ -141,7 +142,7 @@ function GameInfo(): React.ReactElement {
                               variant: 'error',
                               autoHideDuration: 3000,
                             });
-                            console.error(error);
+                            logger.error(error);
                           });
                         }}
                       >
@@ -159,7 +160,7 @@ function GameInfo(): React.ReactElement {
                               variant: 'error',
                               autoHideDuration: 3000,
                             });
-                            console.error(error);
+                            logger.error(error);
                           });
                         }}
                       >

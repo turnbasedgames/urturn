@@ -14,6 +14,7 @@ import Search from './search';
 import withUser from '../withUser';
 import { User } from '../models/user';
 import { DISCORD_URL } from '../util';
+import logger from '../logger';
 
 interface Props {
   user: User | null
@@ -26,7 +27,7 @@ function NavBar({ user }: Props): React.ReactElement {
   const onSignIn = (ev: React.MouseEvent): void => {
     ev.preventDefault();
     const googleAuthProvider = new GoogleAuthProvider();
-    signInWithPopup(auth, googleAuthProvider).catch(console.error);
+    signInWithPopup(auth, googleAuthProvider).catch(logger.error);
   };
 
   let userPanel;

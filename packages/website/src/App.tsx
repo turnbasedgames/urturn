@@ -25,6 +25,7 @@ import CreatorView from './creatorView';
 import ProfileView from './profileView';
 import PageTracker from './firebase/PageTracker';
 import API_URL from './models/util';
+import logger from './logger';
 
 axios.defaults.baseURL = API_URL;
 
@@ -65,9 +66,9 @@ function App(): React.ReactElement {
 
     onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser == null) {
-        signInAnonymously(auth).catch(console.error);
+        signInAnonymously(auth).catch(logger.error);
       } else {
-        setupUser(firebaseUser).catch(console.error);
+        setupUser(firebaseUser).catch(logger.error);
       }
     });
 

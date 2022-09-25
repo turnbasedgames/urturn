@@ -1,4 +1,5 @@
 import axios from 'axios';
+import logger from '../logger';
 
 import { Game } from './game';
 import { RoomUser } from './user';
@@ -131,8 +132,7 @@ export const joinOrCreateRoom = async (gameId: string, userId: string): Promise<
     } catch (err) {
       if (axios.isAxiosError(err)) {
         if ((err.response != null) && err.response.data.name === Errors.RoomNotJoinable) {
-          // eslint-disable-next-line no-console
-          console.log(err.response.data.message);
+          logger.log(err.response.data.message);
         }
       }
       tries += 1;

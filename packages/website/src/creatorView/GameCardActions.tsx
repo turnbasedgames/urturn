@@ -9,6 +9,7 @@ import React from 'react';
 import GameEditor from '../gameEditor';
 import { deleteGame, Game } from '../models/game';
 import { UserContext } from '../models/user';
+import logger from '../logger';
 
 interface Props {
   onDelete?: () => void
@@ -73,7 +74,7 @@ function GameCardActions({ game, onDelete, onUpdate }: Props): React.ReactElemen
                     <Button
                       variant="contained"
                       onClick={() => {
-                        handleDelete().catch(console.error);
+                        handleDelete().catch(logger.error);
                       }}
                     >
                       Delete

@@ -9,20 +9,18 @@ import {
 import API_URL from '../../../models/util';
 import { User } from '../../../models/user';
 import { GITHACK_BASE_URL } from '../../../util';
+import logger from '../../../logger';
 
 const socket = io(API_URL, { transports: ['websocket'] });
 
 socket.on('connect', () => {
-  // eslint-disable-next-line no-console
-  console.log('socket connected: ', socket.id);
+  logger.log('socket connected: ', socket.id);
 });
 
 socket.on('disconnect', (reason) => {
-  // eslint-disable-next-line no-console
-  console.log('socket disconnected with reason: ', reason);
+  logger.log('socket disconnected with reason: ', reason);
   if (reason === 'io server disconnect') {
-    // eslint-disable-next-line no-console
-    console.log('manually trying to reconnect socket');
+    logger.log('manually trying to reconnect socket');
     socket.connect();
   }
 });
@@ -79,19 +77,17 @@ function IFrame({
       socket.on('room:latestState', handleNewBoardGame);
       socket.emit('watchRoom', { roomId }, (res: null | WatchRoomRes) => {
         if (res != null) {
-          // eslint-disable-next-line no-console
-          console.error('error trying to watch room', res.error);
+          logger.error('error trying to watch room', res.error);
         }
       });
       childClient.stateChanged(generateBoardGame(room, room.latestState));
     }
 
-    setupRoomSocket().catch(console.error);
+    setupRoomSocket().catch(logger.error);
     return () => {
       socket.emit('unwatchRoom', { roomId }, (res: null | UnwatchRoomRes) => {
         if (res != null) {
-          // eslint-disable-next-line no-console
-          console.error('error trying to unwatch room', res.error);
+          logger.error('error trying to unwatch room', res.error);
         }
       });
       socket.off('room:latestState', handleNewBoardGame);
@@ -130,7 +126,7 @@ function IFrame({
       });
       connection.promise.then((child) => {
         setChildClient(child);
-      }).catch(console.error);
+      }).catch(logger.error);
     }
   }, []);
 
