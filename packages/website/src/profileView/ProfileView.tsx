@@ -1,15 +1,16 @@
 import {
-  Button, Card, CardActionArea, CardHeader, LinearProgress, Paper, Stack, Tab, Tabs
-} from '@mui/material'
-import React, { useEffect, useState } from 'react'
-import { signOut } from 'firebase/auth'
-import { useHistory } from 'react-router-dom'
+  Button, Card, CardActionArea, CardHeader, LinearProgress, Paper, Stack, Tab, Tabs,
+} from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { signOut } from 'firebase/auth';
+import { useHistory } from 'react-router-dom';
 
-import { useSnackbar } from 'notistack'
-import { auth } from '../firebase/setupFirebase'
-import { User } from '../models/user'
-import withUser from '../withUser'
-import { getRooms, quitRoom, Room } from '../models/room'
+import { useSnackbar } from 'notistack';
+import { auth } from '../firebase/setupFirebase';
+import { User } from '../models/user';
+import withUser from '../withUser';
+import { getRooms, quitRoom, Room } from '../models/room';
+import logger from '../logger';
 
 interface Props {
   user: User
@@ -22,55 +23,55 @@ enum ProfileTab {
 }
 
 const capitalizeUsername = (username: string): string => {
-  let newUsername = username[0].toLocaleUpperCase()
+  let newUsername = username[0].toLocaleUpperCase();
   for (let index = 1; index < username.length; index += 1) {
-    const curChar = username[index]
+    const curChar = username[index];
     if (username[index - 1] === '_') {
-      newUsername += curChar.toLocaleUpperCase()
+      newUsername += curChar.toLocaleUpperCase();
     } else {
-      newUsername += curChar
+      newUsername += curChar;
     }
   }
-  return newUsername
-}
+  return newUsername;
+};
 
-const ProfileView = ({ user, setUser }: Props): React.ReactElement => {
-  const history = useHistory()
-  const { enqueueSnackbar } = useSnackbar()
+function ProfileView({ user, setUser }: Props): React.ReactElement {
+  const history = useHistory();
+  const { enqueueSnackbar } = useSnackbar();
 
-  const [activeTab, setActiveTab] = React.useState(0)
+  const [activeTab, setActiveTab] = React.useState(0);
   const handleChange = (event: any, newValue: number): void => {
-    setActiveTab(newValue)
-  }
+    setActiveTab(newValue);
+  };
 
-  const [activeRooms, setActiveRooms] = useState<Room[] | null>(null)
-  const [inactiveRooms, setInactiveRooms] = useState<Room[] | null>(null)
-  const displayedRooms = activeTab === ProfileTab.Active ? activeRooms : inactiveRooms
-  const displayedRoomsLoading = displayedRooms == null
+  const [activeRooms, setActiveRooms] = useState<Room[] | null>(null);
+  const [inactiveRooms, setInactiveRooms] = useState<Room[] | null>(null);
+  const displayedRooms = activeTab === ProfileTab.Active ? activeRooms : inactiveRooms;
+  const displayedRoomsLoading = displayedRooms == null;
   const setupActiveRooms = async (): Promise<void> => {
-    const roomsRaw = await getRooms({ containsPlayer: user.id })
-    setActiveRooms(roomsRaw)
-  }
+    const roomsRaw = await getRooms({ containsPlayer: user.id });
+    setActiveRooms(roomsRaw);
+  };
   const setupInactiveRooms = async (): Promise<void> => {
-    const roomsRaw = await getRooms({ containsInactivePlayer: user.id })
-    setInactiveRooms(roomsRaw)
-  }
+    const roomsRaw = await getRooms({ containsInactivePlayer: user.id });
+    setInactiveRooms(roomsRaw);
+  };
   useEffect(() => {
-    Promise.all([setupActiveRooms(), setupInactiveRooms()]).catch(console.error)
-  }, [])
+    Promise.all([setupActiveRooms(), setupInactiveRooms()]).catch(logger.error);
+  }, []);
 
   const onRoomQuit = async (room: Room): Promise<void> => {
     try {
-      await quitRoom(room.id)
+      await quitRoom(room.id);
     } catch (err) {
       enqueueSnackbar('Error when trying to quit room', {
         variant: 'error',
-        autoHideDuration: 3000
-      })
-      return
+        autoHideDuration: 3000,
+      });
+      return;
     }
-    await Promise.all([setupActiveRooms(), setupInactiveRooms()])
-  }
+    await Promise.all([setupActiveRooms(), setupInactiveRooms()]);
+  };
 
   return (
     <Stack
@@ -94,9 +95,9 @@ const ProfileView = ({ user, setUser }: Props): React.ReactElement => {
             action={(
               <Button
                 onClick={() => {
-                  setUser(null)
-                  signOut(auth).catch(console.error)
-                  history.push('/')
+                  setUser(null);
+                  signOut(auth).catch(logger.error);
+                  history.push('/');
                 }}
                 variant="outlined"
                 color="error"
@@ -115,7 +116,7 @@ const ProfileView = ({ user, setUser }: Props): React.ReactElement => {
           </Tabs>
           <LinearProgress sx={{
             position: 'relative',
-            visibility: displayedRoomsLoading ? 'visible' : 'hidden'
+            visibility: displayedRoomsLoading ? 'visible' : 'hidden',
           }}
           />
           <Stack>
@@ -134,12 +135,12 @@ const ProfileView = ({ user, setUser }: Props): React.ReactElement => {
                     // when game is hard deleted, we show a snackbar error because players can't
                     // play a game that has been deleted
                     if (room.game != null) {
-                      history.push(`/games/${room.game.id}/room/${room.id}`)
+                      history.push(`/games/${room.game.id}/room/${room.id}`);
                     } else {
                       enqueueSnackbar('This game was deleted', {
                         variant: 'error',
-                        autoHideDuration: 3000
-                      })
+                        autoHideDuration: 3000,
+                      });
                     }
                   }}
                   >
@@ -149,8 +150,8 @@ const ProfileView = ({ user, setUser }: Props): React.ReactElement => {
                       action={((activeTab === ProfileTab.Active) && (
                         <Button
                           onClick={(event) => {
-                            event.stopPropagation()
-                            onRoomQuit(room).catch(console.error)
+                            event.stopPropagation();
+                            onRoomQuit(room).catch(logger.error);
                           }}
                           color="error"
                           variant="text"
@@ -167,7 +168,7 @@ const ProfileView = ({ user, setUser }: Props): React.ReactElement => {
         </Paper>
       </Stack>
     </Stack>
-  )
+  );
 }
 
-export default withUser(ProfileView, { redirectOnAnonymous: true })
+export default withUser(ProfileView, { redirectOnAnonymous: true });

@@ -1,22 +1,23 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import {
-  Card, CardActionArea, CardContent, Stack, Typography
-} from '@mui/material'
-import Grid from '@mui/material/Unstable_Grid2'
-import { useHistory } from 'react-router-dom'
-import { Game, getGames } from '../../models/game'
-import CardMediaWithFallback from '../CardMediaWithFallback'
+  Card, CardActionArea, CardContent, Stack, Typography,
+} from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
+import { useHistory } from 'react-router-dom';
+import { Game, getGames } from '../../models/game';
+import CardMediaWithFallback from '../CardMediaWithFallback';
+import logger from '../../logger';
 
-const GameList = (): React.ReactElement => {
-  const [games, setGames] = useState<Game[]>([])
+function GameList(): React.ReactElement {
+  const [games, setGames] = useState<Game[]>([]);
   useEffect(() => {
-    async function setupGames (): Promise<void> {
-      const gamesRaw = await getGames()
-      setGames(gamesRaw)
+    async function setupGames(): Promise<void> {
+      const gamesRaw = await getGames();
+      setGames(gamesRaw);
     }
-    setupGames().catch(console.error)
-  }, [])
-  const history = useHistory()
+    setupGames().catch(logger.error);
+  }, []);
+  const history = useHistory();
 
   return (
     <Stack
@@ -51,7 +52,7 @@ const GameList = (): React.ReactElement => {
         ))}
       </Grid>
     </Stack>
-  )
+  );
 }
 
-export default GameList
+export default GameList;

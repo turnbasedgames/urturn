@@ -1,38 +1,42 @@
-import React from 'react'
+import React from 'react';
 import {
-  AppBar, Button, Toolbar, Typography, IconButton, Stack
-} from '@mui/material'
-import PersonIcon from '@mui/icons-material/Person'
-import { useHistory } from 'react-router-dom'
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
-import { GiTwoCoins } from 'react-icons/gi'
-import { IoBuild } from 'react-icons/io5'
-import { SiDiscord } from 'react-icons/si'
+  AppBar, Button, Toolbar, Typography, IconButton, Stack,
+} from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import { useHistory } from 'react-router-dom';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { GiTwoCoins } from 'react-icons/gi';
+import { IoBuild } from 'react-icons/io5';
+import { SiDiscord } from 'react-icons/si';
 
-import { auth } from '../firebase/setupFirebase'
-import Search from './search'
-import withUser from '../withUser'
-import { User } from '../models/user'
-import { DISCORD_URL } from '../util'
+import { auth } from '../firebase/setupFirebase';
+import Search from './search';
+import withUser from '../withUser';
+import { User } from '../models/user';
+import { DISCORD_URL } from '../util';
+import logger from '../logger';
+
 interface Props {
   user: User | null
 }
 
-const NavBar = ({ user }: Props): React.ReactElement => {
-  const history = useHistory()
-  const signedIn = (user != null) && !user.firebaseUser.isAnonymous
-  const firebaseUserDetermined = Boolean(auth.currentUser)
+function NavBar({ user }: Props): React.ReactElement {
+  const history = useHistory();
+  const signedIn = (user != null) && !user.firebaseUser.isAnonymous;
+  const firebaseUserDetermined = Boolean(auth.currentUser);
   const onSignIn = (ev: React.MouseEvent): void => {
-    ev.preventDefault()
-    const googleAuthProvider = new GoogleAuthProvider()
-    signInWithPopup(auth, googleAuthProvider).catch(console.error)
-  }
+    ev.preventDefault();
+    const googleAuthProvider = new GoogleAuthProvider();
+    signInWithPopup(auth, googleAuthProvider).catch(logger.error);
+  };
 
-  let userPanel
+  let userPanel;
   if (signedIn) {
     userPanel = (
       <>
-        <Button color="secondary" startIcon={<GiTwoCoins />}
+        <Button
+          color="secondary"
+          startIcon={<GiTwoCoins />}
           sx={{ display: { xs: 'none', sm: 'flex' } }}
         >
           <Typography>
@@ -41,7 +45,7 @@ const NavBar = ({ user }: Props): React.ReactElement => {
         </Button>
         <IconButton
           onClick={() => {
-            history.push('/develop')
+            history.push('/develop');
           }}
         >
           <IoBuild />
@@ -49,7 +53,7 @@ const NavBar = ({ user }: Props): React.ReactElement => {
         <Button
           color="inherit"
           onClick={() => {
-            history.push('/profile')
+            history.push('/profile');
           }}
           size="small"
         >
@@ -63,7 +67,7 @@ const NavBar = ({ user }: Props): React.ReactElement => {
           </Typography>
         </Button>
       </>
-    )
+    );
   } else if (firebaseUserDetermined) {
     userPanel = (
       <>
@@ -81,9 +85,9 @@ const NavBar = ({ user }: Props): React.ReactElement => {
           Sign Up
         </Button>
       </>
-    )
+    );
   } else {
-    userPanel = <div />
+    userPanel = <div />;
   }
 
   return (
@@ -100,9 +104,10 @@ const NavBar = ({ user }: Props): React.ReactElement => {
             justifyContent="flex-start"
             alignItems="center"
           >
-            <Typography onClick={() => {
-              history.push('/')
-            }}
+            <Typography
+              onClick={() => {
+                history.push('/');
+              }}
               sx={{ display: { xs: 'none', sm: 'flex' } }}
             >
               UrTurn
@@ -123,7 +128,7 @@ const NavBar = ({ user }: Props): React.ReactElement => {
         </Stack>
       </Toolbar>
     </AppBar>
-  )
+  );
 }
 
-export default withUser(NavBar)
+export default withUser(NavBar);

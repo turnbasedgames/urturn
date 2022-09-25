@@ -1,3 +1,3 @@
-import GameRouter from './GameRouter'
+import GameRouter from './GameRouter';
 
-export default GameRouter
+export default GameRouter;

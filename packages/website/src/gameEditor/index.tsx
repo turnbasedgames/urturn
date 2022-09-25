@@ -1,3 +1,3 @@
-import GameEditor from './GameEditor'
+import GameEditor from './GameEditor';
 
-export default GameEditor
+export default GameEditor;

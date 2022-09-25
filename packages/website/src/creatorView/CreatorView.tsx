@@ -1,44 +1,45 @@
 import {
-  Button, LinearProgress, Stack, Typography
-} from '@mui/material'
-import React, { useEffect, useState } from 'react'
-import { useHistory } from 'react-router-dom'
-import { DISCORD_URL } from '../util'
+  Button, LinearProgress, Stack, Typography,
+} from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { DISCORD_URL, DOCS_URL } from '../util';
 
-import GameEditor from '../gameEditor'
-import DevGameCard from './DevGameCard'
-import { Game, getGames } from '../models/game'
-import { User } from '../models/user'
-import withUser from '../withUser'
+import GameEditor from '../gameEditor';
+import DevGameCard from './DevGameCard';
+import { Game, getGames } from '../models/game';
+import { User } from '../models/user';
+import withUser from '../withUser';
+import logger from '../logger';
 
 interface Props {
   user: User
 }
 
-const CreatorView = ({ user }: Props): React.ReactElement => {
-  const [games, setGames] = useState<Game[] | null>(null)
-  const gamesLoading = games == null
-  const [openCreate, setOpenCreate] = useState<boolean>(false)
-  const history = useHistory()
+function CreatorView({ user }: Props): React.ReactElement {
+  const [games, setGames] = useState<Game[] | null>(null);
+  const gamesLoading = games == null;
+  const [openCreate, setOpenCreate] = useState<boolean>(false);
+  const history = useHistory();
   const setupGames = async (): Promise<void> => {
-    const gamesRaw = await getGames({ creator: user.id })
-    setGames(gamesRaw)
-  }
+    const gamesRaw = await getGames({ creator: user.id });
+    setGames(gamesRaw);
+  };
   useEffect(() => {
-    setupGames().catch(console.error)
-  }, [])
+    setupGames().catch(logger.error);
+  }, []);
 
   return (
     <Stack direction="column">
       <LinearProgress sx={{
         position: 'relative',
-        visibility: gamesLoading ? 'visible' : 'hidden'
+        visibility: gamesLoading ? 'visible' : 'hidden',
       }}
       />
       <GameEditor
         open={openCreate}
         onClose={() => setOpenCreate(false)}
-        onSubmit={(game) => { history.push(`/games/${game.id}`) }}
+        onSubmit={(game) => { history.push(`/games/${game.id}`); }}
       />
       <Stack
         direction="row"
@@ -58,7 +59,7 @@ const CreatorView = ({ user }: Props): React.ReactElement => {
             Developer Resources
           </Typography>
           <Button
-            href="https://docs.urturn.app/"
+            href={DOCS_URL}
             variant="outlined"
             target="_blank"
           >
@@ -92,10 +93,10 @@ const CreatorView = ({ user }: Props): React.ReactElement => {
           {games?.map((game) => (
             <DevGameCard
               onUpdate={() => {
-                setupGames().catch(console.error)
+                setupGames().catch(logger.error);
               }}
               onDelete={() => {
-                setupGames().catch(console.error)
+                setupGames().catch(logger.error);
               }}
               key={`DevGameCard-${game.id}`}
               game={game}
@@ -104,7 +105,7 @@ const CreatorView = ({ user }: Props): React.ReactElement => {
         </Stack>
       </Stack>
     </Stack>
-  )
+  );
 }
 
-export default withUser(CreatorView, { redirectOnAnonymous: true })
+export default withUser(CreatorView, { redirectOnAnonymous: true });
