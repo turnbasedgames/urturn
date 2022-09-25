@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  AppBar, Button, Toolbar, Typography, IconButton, Stack,
+  AppBar, Button, Toolbar, Typography, IconButton, Stack, Link,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import { useHistory } from 'react-router-dom';
@@ -104,14 +104,11 @@ function NavBar({ user }: Props): React.ReactElement {
             justifyContent="flex-start"
             alignItems="center"
           >
-            <Typography
-              onClick={() => {
-                history.push('/');
-              }}
-              sx={{ display: { xs: 'none', sm: 'flex' } }}
-            >
-              UrTurn
-            </Typography>
+            <Link href="/" color="textPrimary" underline="hover">
+              <Typography sx={{ display: { xs: 'none', sm: 'flex' } }}>
+                UrTurn
+              </Typography>
+            </Link>
             <IconButton href={DISCORD_URL}>
               <SiDiscord />
             </IconButton>
