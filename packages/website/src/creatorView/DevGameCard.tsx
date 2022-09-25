@@ -1,8 +1,7 @@
 import {
-  Card, CardMedia, Box, CardContent, Typography, Stack,
+  Card, CardMedia, Box, CardContent, Typography, Stack, Link,
 } from '@mui/material';
-import React, { SyntheticEvent } from 'react';
-import { useHistory } from 'react-router-dom';
+import React from 'react';
 
 import { Game } from '../models/game';
 import GameCardActions from './GameCardActions';
@@ -14,13 +13,6 @@ interface Props {
 }
 
 function DevGameCard({ game, onDelete, onUpdate }: Props): React.ReactElement {
-  const history = useHistory();
-  const openGameIfClicked = (event: SyntheticEvent): void => {
-    if (event.currentTarget === event.target) {
-      history.push(`/games/${game.id}`);
-    }
-  };
-
   return (
     <Card
       sx={{
@@ -40,9 +32,11 @@ function DevGameCard({ game, onDelete, onUpdate }: Props): React.ReactElement {
       >
         <CardContent sx={{ flex: '1 0 auto' }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography noWrap variant="h5" onClick={openGameIfClicked}>
-              {game.name}
-            </Typography>
+            <Link href={`/games/${game.id}`} color="textPrimary" underline="hover" sx={{ flexGrow: 1, minWidth: 0 }}>
+              <Typography noWrap variant="h5">
+                {game.name}
+              </Typography>
+            </Link>
             <GameCardActions game={game} onDelete={onDelete} onUpdate={onUpdate} />
           </Stack>
           <Typography
