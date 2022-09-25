@@ -56,9 +56,7 @@ function GameCardActions({ game, onDelete, onUpdate }: Props): React.ReactElemen
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               <Paper>
-                <Stack
-                  m={2}
-                >
+                <Stack m={2}>
                   <Typography gutterBottom variant="h6">{`Permanently Delete "${game.name}"?`}</Typography>
                   <Stack
                     direction="row"

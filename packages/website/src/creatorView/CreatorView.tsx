@@ -63,7 +63,7 @@ function CreatorView({ user }: Props): React.ReactElement {
             variant="outlined"
             target="_blank"
           >
-            API Reference
+            API Docs
           </Button>
           <Button
             variant="outlined"
