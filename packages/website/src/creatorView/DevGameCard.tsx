@@ -1,7 +1,8 @@
 import {
-  Card, CardMedia, Box, CardContent, Typography, Stack, Link,
+  Card, Box, CardContent, Typography, Stack, Link,
 } from '@mui/material';
 import React from 'react';
+import CardMediaWithFallback from '../gameView/CardMediaWithFallback';
 
 import { Game } from '../models/game';
 import GameCardActions from './GameCardActions';
@@ -20,11 +21,9 @@ function DevGameCard({ game, onDelete, onUpdate }: Props): React.ReactElement {
         width: '100%',
       }}
     >
-      <CardMedia
+      <CardMediaWithFallback
         sx={{ width: '140px', height: '140px', minWidth: '140px' }}
-        component="img"
-        image="https://images.unsplash.com/photo-1570989614585-581ee5f7e165?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80"
-        alt={game.name}
+        game={game}
       />
       <Box sx={{
         display: 'flex', flexDirection: 'column', flexGrow: 1, minWidth: 0,
