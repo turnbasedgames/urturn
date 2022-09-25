@@ -1,33 +1,33 @@
-import React, { useState } from 'react'
-import { logEvent } from 'firebase/analytics'
+import React, { useState } from 'react';
+import { logEvent } from 'firebase/analytics';
 import {
-  Paper, IconButton, InputBase, Stack
-} from '@mui/material'
-import { Search as SearchIcon } from '@mui/icons-material'
-import { analytics } from '../../firebase/setupFirebase'
+  Paper, IconButton, InputBase, Stack,
+} from '@mui/material';
+import { Search as SearchIcon } from '@mui/icons-material';
+import { analytics } from '../../firebase/setupFirebase';
 
-const Search = (): React.ReactElement => {
-  const [searchText, setSearchText] = useState('')
+function Search(): React.ReactElement {
+  const [searchText, setSearchText] = useState('');
   const onSearch = (text: string): void => {
     logEvent(analytics, 'search', {
-      search_term: text
-    })
-  }
+      search_term: text,
+    });
+  };
   return (
     <Paper>
-      <Stack direction='row' alignItems="center">
+      <Stack direction="row" alignItems="center">
         <InputBase
           sx={{ ml: 1, flex: 1 }}
           value={searchText}
           placeholder="Search"
           onKeyPress={(ev) => {
             if (ev.key === 'Enter') {
-              ev.preventDefault()
-              onSearch(searchText)
+              ev.preventDefault();
+              onSearch(searchText);
             }
           }}
           onChange={(ev) => {
-            setSearchText(ev.target.value)
+            setSearchText(ev.target.value);
           }}
         />
         <IconButton
@@ -36,15 +36,15 @@ const Search = (): React.ReactElement => {
           size="small"
           sx={{ display: { xs: 'none', sm: 'flex' } }}
           onClick={(ev) => {
-            ev.preventDefault()
-            onSearch(searchText)
+            ev.preventDefault();
+            onSearch(searchText);
           }}
         >
           <SearchIcon />
         </IconButton>
       </Stack>
     </Paper>
-  )
+  );
 }
 
-export default Search
+export default Search;

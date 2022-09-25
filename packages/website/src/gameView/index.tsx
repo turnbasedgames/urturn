@@ -1,3 +1,3 @@
-import GameView from './GameView'
+import GameView from './GameView';
 
-export default GameView
+export default GameView;

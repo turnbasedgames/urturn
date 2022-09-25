@@ -12,8 +12,8 @@
     "@mui/icons-material": "^5.2.0",
     "@mui/material": "^5.2.2",
     "@types/jest": "^26.0.24",
-    "@types/node": "^18.7.18",
-    "@types/react": "^18.0.20",
+    "@types/node": "^18.7.21",
+    "@types/react": "^18.0.21",
     "@types/react-dom": "^18.0.6",
     "@types/react-router-dom": "^5.3.3",
     "axios": "^0.21.1",
@@ -63,12 +63,16 @@
     "@testing-library/user-event": "^12.2.2",
     "@typescript-eslint/eslint-plugin": "^5.38.0",
     "@typescript-eslint/parser": "^5.38.0",
-    "eslint": "^8.23.1",
+    "eslint": "^8.24.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-config-standard-with-typescript": "^23.0.0",
     "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jsx-a11y": "^6.6.1",
     "eslint-plugin-n": "^15.3.0",
     "eslint-plugin-promise": "^6.0.1",
     "eslint-plugin-react": "^7.31.8",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "typescript": "^4.8.3"
   }
 }
