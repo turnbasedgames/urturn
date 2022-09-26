@@ -31,7 +31,14 @@ const main = async () => {
   setupSocketio(io);
 
   app.use(cors());
-  app.use(express.json());
+  app.use((req, res, next) => {
+    // stripe webhook client requires a raw express body for verifying the signature
+    if (req.originalUrl === '/user/purchase/webhook') {
+      next();
+    } else {
+      express.json()(req, res, next);
+    }
+  });
 
   app.use(userRouter.PATH, userRouter.router);
   app.use(gameRouter.PATH, gameRouter.router);

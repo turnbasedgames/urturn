@@ -79,5 +79,9 @@ const setupRedis = makePersistentDependencyFn('Redis', 'REDIS_URL',
   });
 
 module.exports = {
-  waitFor, setupMongoDB, setupRedis, createOrUpdateSideApps, getNested,
+  createOrUpdateSideApps,
+  getNested,
+  waitFor,
+  setupMongoDB,
+  setupRedis,
 };

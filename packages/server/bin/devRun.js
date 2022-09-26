@@ -17,6 +17,9 @@ async function main() {
   if (process.env.STRIPE_KEY) {
     env.STRIPE_KEY = process.env.STRIPE_KEY;
   }
+  if (process.env.STRIPE_WEBHOOK_SECRET) {
+    env.STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+  }
 
   const [envWithMongo, cleanupMongoDB] = await setupMongoDB();
   const [envWithRedis, cleanupRedis] = await setupRedis();

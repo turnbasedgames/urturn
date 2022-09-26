@@ -3,21 +3,22 @@ const admin = require('firebase-admin');
 const { StatusCodes } = require('http-status-codes');
 const asyncHandler = require('express-async-handler');
 const { celebrate, Segments } = require('celebrate');
+const mongoose = require('mongoose');
 
 const Joi = require('../../middleware/joi');
 const auth = require('../../middleware/auth');
-const { stripeClient } = require('../../utils/stripe');
+const { stripeClient, webhookSecret } = require('../../utils/stripe');
 const User = require('./user');
+const CurrencyToUrbuxTransaction = require('../transaction/currencyToUrbuxTransaction');
 const { generateRandomUniqueUsername } = require('./util');
 const { UserNotFoundError } = require('./errors');
-const { ALLOWED_CURRENCIES_SET, USD_TO_URBUX } = require('../transaction/util');
+const { ALLOWED_CURRENCIES_SET, USD_TO_URBUX, convertAmountToUrbux } = require('../transaction/util');
 
 const PATH = '/user';
 const router = express.Router();
 
-router.use(auth);
-
 router.get('/',
+  auth,
   celebrate({
     [Segments.PARAMS]: Joi.object().keys({
       includePrivate: Joi.boolean().default(false),
@@ -33,7 +34,7 @@ router.get('/',
     }
   });
 
-router.post('/', asyncHandler(async (req, res) => {
+router.post('/', auth, asyncHandler(async (req, res) => {
   const { user, decodedToken } = req;
   if (!user) {
     req.log.info('attempting to create user document with firebase id', { firebaseId: decodedToken.uid });
@@ -54,7 +55,7 @@ router.post('/', asyncHandler(async (req, res) => {
 
 // This route handler will handle creating the paymentIntent for the client who initiated
 // this payment intent to then confirm it on the front end.
-router.post('/create-payment-intent', asyncHandler(async (req, res) => {
+router.post('/create-payment-intent', auth, asyncHandler(async (req, res) => {
   const { user } = req;
   const { body: { amount, currency } } = req;
 
@@ -93,7 +94,68 @@ router.post('/create-payment-intent', asyncHandler(async (req, res) => {
   }
 }));
 
-router.delete('/', asyncHandler(async (req, res) => {
+router.post('/purchase/webhook', express.raw({ type: 'application/json' }), asyncHandler(async (req, res) => {
+  let event;
+  try {
+    const { body } = req;
+    const sig = req.headers['stripe-signature'];
+    event = stripeClient.webhooks.constructEvent(body, sig, webhookSecret);
+  } catch (err) {
+    err.status = StatusCodes.BAD_REQUEST;
+    req.log.error('validation for stripe webhook has failed', { error: err });
+    throw err;
+  }
+
+  if (event.type !== 'payment_intent.succeeded') {
+    // By default we will respond 200 even when we don't understand the event.type so that
+    // stripe does not continue retrying failed request to our webhook endpoint
+    req.log.info('unhandled stripe webhook event', { event });
+    res.sendStatus(200);
+    return;
+  }
+
+  const succeededPaymentIntent = event.data.object;
+  const { userId } = succeededPaymentIntent;
+  const paymentAmount = succeededPaymentIntent.amount;
+
+  const urbuxAmount = convertAmountToUrbux(succeededPaymentIntent.currency, paymentAmount);
+  if (urbuxAmount === undefined) {
+    const err = new Error(`conversion to urbux failed (currency=${succeededPaymentIntent.currency}, paymentAmount=${paymentAmount})`);
+    err.status = StatusCodes.BAD_REQUEST;
+    throw err;
+  }
+
+  await mongoose.connection.transaction(async (session) => {
+    const currencyToUrbuxTransaction = await CurrencyToUrbuxTransaction.findOne({
+      paymentIntentId: succeededPaymentIntent.id,
+    }).session(session).exec();
+    if (currencyToUrbuxTransaction) {
+      req.log.info('duplicate transaction found', { succeededPaymentIntent });
+      // If the transaction document already exist with the same paymentIntentId, then we have
+      // already processed it and given the user their urbux. Because Stripe retries a webhook
+      // indefinitely when there are failures, we will respond with a 200 status code so it does
+      // not attempt to retry again. This makes this endpoint operation idempotent.
+      return;
+    }
+
+    const user = await User.findById(userId).session(session);
+    user.urbux += urbuxAmount;
+    await user.save({ session });
+
+    const newCurrencyToUrbuxTransaction = new CurrencyToUrbuxTransaction({
+      paymentIntentId: succeededPaymentIntent.id,
+      user: userId,
+      urbux: paymentAmount,
+      paymentIntent: succeededPaymentIntent,
+    });
+
+    await newCurrencyToUrbuxTransaction.save({ session });
+  });
+
+  res.sendStatus(200);
+}));
+
+router.delete('/', auth, asyncHandler(async (req, res) => {
   const { decodedToken, user } = req;
   const firebaseId = decodedToken.uid;
 

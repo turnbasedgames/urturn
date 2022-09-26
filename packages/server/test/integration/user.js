@@ -4,6 +4,7 @@ const { StatusCodes } = require('http-status-codes');
 const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
 const { createUserAndAssert, cleanupTestUsers } = require('../util/api_util');
+const { testStripeClient, testStripeWebhookSecret, createTestWebhookHeader } = require('../util/stripe');
 const { createOrUpdateSideApps } = require('../util/util');
 
 test.before(async (t) => {
@@ -157,6 +158,164 @@ test('POST /user/create-payment-intent creates a payment intent for a user', asy
   t.context.createdUsers.push(userCred);
 });
 
+test('POST /user/purchase/webhook throws 400 if wrong currency provided', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const user = await createUserAndAssert(t, api, userCred);
+  const wrongCurrencyPayload = {
+    data: {
+      object: {
+        userId: user.id,
+        amount: 100,
+        id: '894318943218943219',
+        currency: 'ghs',
+      },
+    },
+    type: 'payment_intent.succeeded',
+  };
+  const header = createTestWebhookHeader(
+    testStripeClient, wrongCurrencyPayload, testStripeWebhookSecret,
+  );
+  const { response: { data: { message }, status } } = await t.throwsAsync(
+    api.post('/user/purchase/webhook', wrongCurrencyPayload, { headers: { 'Stripe-Signature': header } }),
+  );
+
+  t.is(status, StatusCodes.BAD_REQUEST);
+  t.is(message, 'conversion to urbux failed (currency=ghs, paymentAmount=100)');
+  t.context.createdUsers.push(userCred);
+});
+
+test('POST /user/purchase/webhook throws 400 if bad Stripe-Signature header provided', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const user = await createUserAndAssert(t, api, userCred);
+  const payload = {
+    id: 'evt_test_webhook',
+    object: 'event',
+    data: {
+      object: {
+        userId: user.id,
+        amount: 100,
+        id: '894318943218943210',
+        currency: 'usd',
+      },
+    },
+    type: 'payment_intent.succeeded',
+  };
+  const header = createTestWebhookHeader(testStripeClient, payload, 'bad-webhook-secret');
+  const { response: { data: { message }, status } } = await t.throwsAsync(api.post('/user/purchase/webhook', payload, { headers: { 'Stripe-Signature': header } }));
+
+  t.is(status, StatusCodes.BAD_REQUEST);
+  t.is(message, 'No signatures found matching the expected signature for payload. Are you passing the raw request body you received from Stripe? https://github.com/stripe/stripe-node#webhook-signing');
+  t.context.createdUsers.push(userCred);
+});
+
+test('POST /user/purchase/webhook adds urbux to the user and stores currencyToUrbuxTransaction', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const user = await createUserAndAssert(t, api, userCred);
+  const authToken = await userCred.user.getIdToken();
+
+  const payload = {
+    id: 'evt_test_webhook',
+    object: 'event',
+    data: {
+      object: {
+        userId: user.id,
+        amount: 100,
+        id: '894318943218943217',
+        currency: 'usd',
+      },
+    },
+    type: 'payment_intent.succeeded',
+  };
+
+  const header = createTestWebhookHeader(testStripeClient, payload, testStripeWebhookSecret);
+  const { status } = await api.post('/user/purchase/webhook', payload, { headers: { 'Stripe-Signature': header } });
+
+  const { data: { user: newUser } } = await api.get('/user', {
+    headers: { authorization: authToken },
+    params: { includePrivate: true },
+  });
+
+  t.is(status, StatusCodes.OK);
+  t.is(newUser.id, user.id);
+  t.is(newUser.urbux, 100);
+  t.context.createdUsers.push(userCred);
+});
+
+test('POST /user/purchase/webhook duplicate transactions (paymentIntent.id gets deduplicated) result in same user state', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const user = await createUserAndAssert(t, api, userCred);
+  const authToken = await userCred.user.getIdToken();
+
+  const payload = {
+    id: 'evt_test_webhook',
+    object: 'event',
+    data: {
+      object: {
+        userId: user.id,
+        amount: 100,
+        id: '894318943218943215',
+        currency: 'usd',
+      },
+    },
+    type: 'payment_intent.succeeded',
+  };
+
+  const header = createTestWebhookHeader(testStripeClient, payload, testStripeWebhookSecret);
+  const numRequests = 10;
+  const requests = Array(numRequests).fill(null).map(() => api.post('/user/purchase/webhook', payload, { headers: { 'Stripe-Signature': header } }));
+  const responses = await Promise.all(requests);
+
+  const { data: { user: newUser } } = await api.get('/user', {
+    headers: { authorization: authToken },
+    params: { includePrivate: true },
+  });
+
+  t.true(responses.every(({ status }) => status === StatusCodes.OK));
+  t.is(newUser.id, user.id);
+  t.is(newUser.urbux, 100);
+  t.context.createdUsers.push(userCred);
+});
+
+test('POST /user/purchase/webhook with an unhandled event type is ignored and just logged', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const user = await createUserAndAssert(t, api, userCred);
+  const authToken = await userCred.user.getIdToken();
+
+  const unknownEventTypePayload = {
+    id: 'evt_test_webhook',
+    object: 'event',
+    data: {
+      object: {
+        userId: user.id,
+        amount: 100,
+        id: '894318943218943218',
+        currency: 'usd',
+      },
+    },
+    type: 'this-event-type-definitely-does-not-exist-head-ass',
+  };
+
+  const header = createTestWebhookHeader(
+    testStripeClient, unknownEventTypePayload, testStripeWebhookSecret,
+  );
+  const { status } = await api.post('/user/purchase/webhook', unknownEventTypePayload, { headers: { 'Stripe-Signature': header } });
+
+  const { data: { user: newUser } } = await api.get('/user', {
+    headers: { authorization: authToken },
+    params: { includePrivate: true },
+  });
+
+  t.is(status, StatusCodes.OK);
+  t.is(newUser.id, user.id);
+  t.is(newUser.urbux, 0); // urbux is unchanged because this event type is not handled
+  t.context.createdUsers.push(userCred);
+});
+
 test('POST /user username generator adds random numbers when there is a collision', async (t) => {
   // create a separate app to force possible usernames to be "test" and "test_[0-9]"
   const customApp = await spawnApp({ nameDictionary: 'test', nameIterations: 1 });
@@ -172,4 +331,19 @@ test('POST /user username generator adds random numbers when there is a collisio
   const userTwo = await createUserAndAssert(t, api, userCredTwo);
   t.context.createdUsers.push(userCredTwo);
   t.regex(userTwo.username, /test_[0-9]/);
+});
+
+test('Server fails and process exits when required Stripe environment variables are not provided', async (t) => {
+  const { app } = t.context;
+  const STRIPE_ENV_NAMES = ['STRIPE_KEY', 'STRIPE_WEBHOOK_SECRET'];
+  const startupErrors = await Promise.all(STRIPE_ENV_NAMES.map((envName) => t.throwsAsync(spawnApp({
+    overrideEnv: { [envName]: undefined },
+    defaultMongoEnv: app.envWithMongo,
+    defaultRedisEnv: app.envWithRedis,
+  }))));
+
+  // didn't want to spend time finding a good way to assert error logs, so
+  // we are assuming that if there is a startup timeout error than its because the
+  // missing STRIPE_KEY
+  t.true(startupErrors.every(({ message }) => message.includes('Server was not ready after')), `Server startup errors: ${startupErrors.join(',')}`);
 });

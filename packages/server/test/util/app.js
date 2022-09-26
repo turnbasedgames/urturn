@@ -5,6 +5,7 @@ const getPort = require('get-port');
 
 const { waitFor, setupMongoDB, setupRedis } = require('./util');
 const logger = require('../../src/logger');
+const { testStripeKey, testStripeWebhookSecret } = require('./stripe');
 
 function waitUntilRunning(api, timeout = 10000, buffer = 200) {
   return waitFor(async () => { await api.get('/readiness'); },
@@ -26,6 +27,7 @@ async function spawnServer(env, api) {
 
 async function spawnApp(options = {}) {
   const {
+    overrideEnv,
     defaultMongoEnv,
     defaultRedisEnv,
     forceCreatePersistentDependencies,
@@ -37,15 +39,14 @@ async function spawnApp(options = {}) {
     PORT: await getPort(),
     // testing behavior during db failures will surface faster with a lower timeout
     MONGODB_SERVER_SELECTION_TIMEOUT_MS: 1000,
+    STRIPE_KEY: testStripeKey,
+    STRIPE_WEBHOOK_SECRET: testStripeWebhookSecret,
   };
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     env.GOOGLE_APPLICATION_CREDENTIALS = process.env.GOOGLE_APPLICATION_CREDENTIALS;
   }
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64) {
     env.GOOGLE_APPLICATION_CREDENTIALS_BASE64 = process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64;
-  }
-  if (process.env.STRIPE_KEY) {
-    env.STRIPE_KEY = process.env.STRIPE_KEY;
   }
   if (nameDictionary !== undefined) {
     env.NAMES_GENERATOR_DICTIONARY = nameDictionary;
@@ -62,7 +63,9 @@ async function spawnApp(options = {}) {
 
   const baseURL = `http://localhost:${env.PORT}`;
   const api = axios.create({ baseURL });
-  const server = await spawnServer({ ...env, ...envWithMongo, ...envWithRedis }, api);
+  const server = await spawnServer({
+    ...env, ...envWithMongo, ...envWithRedis, ...overrideEnv,
+  }, api);
   return {
     api,
     server,
