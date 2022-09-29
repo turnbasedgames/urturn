@@ -5,9 +5,10 @@ import {
   GitHub as GitHubIcon, MoreVert as MoreVertIcon, Edit as EditIcon, Delete as DeleteIcon,
 } from '@mui/icons-material';
 import React from 'react';
+import { Game } from '@urturn/types-common';
 
 import GameEditor from '../gameEditor';
-import { deleteGame, Game } from '../models/game';
+import { deleteGame } from '../models/game';
 import { UserContext } from '../models/user';
 import logger from '../logger';
 

@@ -10,7 +10,7 @@ export interface User {
   urbux: number
 }
 
-// fields in RoomUser are visible publically, and used to describe ANY user (e.g. playing game with)
+// fields in RoomUser are visible publicly, and used to describe ANY user (e.g. playing game with)
 export interface RoomUser {
   id: string
   username: string
@@ -39,4 +39,13 @@ export interface BoardGame {
   finished: boolean
   state: any
   version: number
+}
+
+export interface Game {
+  id: string
+  name: string
+  description: string
+  creator: User
+  githubURL: string
+  commitSHA: string
 }

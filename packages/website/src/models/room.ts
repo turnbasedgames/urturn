@@ -1,37 +1,11 @@
 import axios from 'axios';
-import logger from '../logger';
+import { BoardGame, Room, RoomState } from '@urturn/types-common';
 
-import { Game } from './game';
-import { RoomUser } from './user';
+import logger from '../logger';
 
 export enum Errors {
   RoomNotJoinable = 'RoomNotJoinable',
   CreatorError = 'CreatorError',
-}
-
-export interface RoomState {
-  room: string
-  state: any
-  version: number
-}
-
-export interface Room {
-  id: string
-  // The game may be hard deleted, so we have to assume its possible for this to be null
-  game?: Game
-  private: boolean
-  players: RoomUser[]
-  finished: boolean
-  joinable: boolean
-  latestState: RoomState
-}
-
-export interface BoardGame {
-  players: RoomUser[]
-  joinable: boolean
-  finished: boolean
-  state: any
-  version: number
 }
 
 export const generateBoardGame = (room: Room, roomState: RoomState): BoardGame => {

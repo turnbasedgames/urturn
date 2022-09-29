@@ -1,14 +1,5 @@
 import axios from 'axios';
-import { User } from './user';
-
-export interface Game {
-  id: string
-  name: string
-  description: string
-  creator: User
-  githubURL: string
-  commitSHA: string
-}
+import { Game } from '@urturn/types-common';
 
 export interface GameReqBody {
   name: string

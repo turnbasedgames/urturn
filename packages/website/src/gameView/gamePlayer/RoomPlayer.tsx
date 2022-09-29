@@ -2,13 +2,14 @@ import React, {
   useEffect, useState, useMemo, useContext,
 } from 'react';
 import { useParams } from 'react-router-dom';
-
 import { LinearProgress } from '@mui/material';
+import { Room, RoomUser, User } from '@urturn/types-common';
 import IFrame from './IFrame/IFrame';
+
 import {
-  joinRoom, getRoom, Room,
+  joinRoom, getRoom,
 } from '../../models/room';
-import { RoomUser, User, UserContext } from '../../models/user';
+import { UserContext } from '../../models/user';
 import logger from '../../logger';
 
 interface RoomURLParams {

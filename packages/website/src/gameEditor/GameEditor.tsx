@@ -3,9 +3,11 @@ import {
   Modal, Paper, Stack, TextField, Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
+import { Game } from '@urturn/types-common';
+
 import logger from '../logger';
 import {
-  createGame, Game, GameReqBody, updateGame,
+  createGame, GameReqBody, updateGame,
 } from '../models/game';
 
 const githubURLRegExp = /^https:\/\/(www.)?github.com\/.+\/.+\/?/;

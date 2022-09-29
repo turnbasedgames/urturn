@@ -4,7 +4,9 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
 import { useHistory } from 'react-router-dom';
-import { Game, getGames } from '../../models/game';
+import { Game } from '@urturn/types-common';
+
+import { getGames } from '../../models/game';
 import CardMediaWithFallback from '../CardMediaWithFallback';
 import logger from '../../logger';
 

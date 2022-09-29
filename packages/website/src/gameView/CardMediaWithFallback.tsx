@@ -1,6 +1,6 @@
 import React from 'react';
 import { CardMedia, SxProps } from '@mui/material';
-import { Game } from '../models/game';
+import { Game } from '@urturn/types-common';
 
 function CardMediaWithFallback({ game, sx }: { game: Game, sx: SxProps }): React.ReactElement {
   const parsedGithubURL = new URL(game.githubURL);

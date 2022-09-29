@@ -16,11 +16,12 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
+import { User } from '@urturn/types-common';
 import { auth } from './firebase/setupFirebase';
 import theme from './theme';
 import NavBar from './navBar';
 import GameView from './gameView';
-import { getUser, User, UserContext } from './models/user';
+import { getUser, UserContext } from './models/user';
 import CreatorView from './creatorView';
 import ProfileView from './profileView';
 import PageTracker from './firebase/PageTracker';

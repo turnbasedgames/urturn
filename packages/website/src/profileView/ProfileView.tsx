@@ -4,12 +4,12 @@ import {
 import React, { useEffect, useState } from 'react';
 import { signOut } from 'firebase/auth';
 import { useHistory } from 'react-router-dom';
-
 import { useSnackbar } from 'notistack';
+import { Room, User } from '@urturn/types-common';
+
 import { auth } from '../firebase/setupFirebase';
-import { User } from '../models/user';
 import withUser from '../withUser';
-import { getRooms, quitRoom, Room } from '../models/room';
+import { getRooms, quitRoom } from '../models/room';
 import logger from '../logger';
 
 interface Props {
