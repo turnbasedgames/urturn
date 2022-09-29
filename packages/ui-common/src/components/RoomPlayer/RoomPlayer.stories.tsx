@@ -1,16 +1,14 @@
-import React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { ComponentMeta } from '@storybook/react';
 
-import RoomPlayer  from './RoomPlayer';
+import RoomPlayer from './RoomPlayer';
 
-export default {
+const componentMeta: ComponentMeta<typeof RoomPlayer> = {
   title: '@urturn/RoomPlayer',
   component: RoomPlayer,
-} as ComponentMeta<typeof RoomPlayer>;
+};
+export default componentMeta;
 
-const Template: ComponentStory<typeof RoomPlayer> = (args) => <RoomPlayer {...args} />;
-
-export const Default = Template.bind({});
+export const Default = RoomPlayer.bind({});
 Default.args = {
   // TODO: need to put in actual functions to play around
 };

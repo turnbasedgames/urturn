@@ -8,6 +8,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rollup -c",
+    "lint": "eslint . --ignore-path .gitignore --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ignore-path .gitignore --ext .js,.jsx,.ts,.tsx --fix",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
@@ -35,7 +37,16 @@
     "@storybook/testing-library": "^0.0.13",
     "@types/react": "^18.0.21",
     "babel-loader": "^8.2.5",
-    "react": "^18.2.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-typescript": "^17.0.0",
+    "eslint-config-standard-with-typescript": "^23.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jsx-a11y": "^6.6.1",
+    "eslint-plugin-n": "^15.3.0",
+    "eslint-plugin-promise": "^6.0.1",
+    "eslint-plugin-react": "^7.31.8",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-storybook": "^0.6.4",
     "rollup": "^2.79.1",
     "rollup-plugin-dts": "^4.2.2",
     "rollup-plugin-peer-deps-external": "^2.2.4",
@@ -45,6 +56,7 @@
   "dependencies": {
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
-    "@mui/material": "^5.10.6"
+    "@mui/material": "^5.10.6",
+    "react": "^18.2.0"
   }
 }
