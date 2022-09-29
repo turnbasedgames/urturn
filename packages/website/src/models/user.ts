@@ -2,25 +2,10 @@ import axios from 'axios';
 import { User as FirebaseUser } from 'firebase/auth';
 import { createContext } from 'react';
 import { StatusCodes } from 'http-status-codes';
+import { User } from '@urturn/types-common';
 
 export enum Errors {
   UserNotFound = 'UserNotFound',
-}
-
-// this User class is meant to describe the current authenticated user
-export interface User {
-  id: string
-  username: string
-  firebaseID: string
-  firebaseUser: FirebaseUser
-  signInProvider: string
-  urbux: number
-}
-
-// fields in RoomUser are visible publically, and used to describe ANY user (e.g. playing game with)
-export interface RoomUser {
-  id: string
-  username: string
 }
 
 export const getUser = async (firebaseUser: FirebaseUser, upsert: boolean): Promise<User> => {

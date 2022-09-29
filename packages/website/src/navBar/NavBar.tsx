@@ -8,11 +8,11 @@ import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { GiTwoCoins } from 'react-icons/gi';
 import { IoBuild } from 'react-icons/io5';
 import { SiDiscord } from 'react-icons/si';
+import { User } from '@urturn/types-common';
 
 import { auth } from '../firebase/setupFirebase';
 import Search from './search';
 import withUser from '../withUser';
-import { User } from '../models/user';
 import { DISCORD_URL } from '../util';
 import logger from '../logger';
 

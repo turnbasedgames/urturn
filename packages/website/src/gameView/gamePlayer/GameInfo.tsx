@@ -9,11 +9,12 @@ import {
   useParams,
 } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
+import { Game, User } from '@urturn/types-common';
 
-import { Game, getGame } from '../../models/game';
+import { getGame } from '../../models/game';
 import { joinOrCreateRoom, createPrivateRoom } from '../../models/room';
 import GameCardActions from '../../creatorView/GameCardActions';
-import { User, UserContext } from '../../models/user';
+import { UserContext } from '../../models/user';
 import CardMediaWithFallback from '../CardMediaWithFallback';
 import logger from '../../logger';
 

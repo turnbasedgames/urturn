@@ -3,11 +3,12 @@ import { connectToChild } from 'penpal';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 import { Typography } from '@mui/material';
+import { Room, User } from '@urturn/types-common';
+
 import {
-  Errors, makeMove, Room, generateBoardGame,
+  Errors, makeMove, generateBoardGame,
 } from '../../../models/room';
 import API_URL from '../../../models/util';
-import { User } from '../../../models/user';
 import { GITHACK_BASE_URL } from '../../../util';
 import logger from '../../../logger';
 

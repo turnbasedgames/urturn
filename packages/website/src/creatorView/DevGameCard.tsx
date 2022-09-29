@@ -2,9 +2,9 @@ import {
   Card, Box, CardContent, Typography, Stack, Link,
 } from '@mui/material';
 import React from 'react';
+import { Game } from '@urturn/types-common';
 import CardMediaWithFallback from '../gameView/CardMediaWithFallback';
 
-import { Game } from '../models/game';
 import GameCardActions from './GameCardActions';
 
 interface Props {

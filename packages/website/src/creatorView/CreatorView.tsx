@@ -3,12 +3,12 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { DISCORD_URL, DOCS_URL } from '../util';
+import { Game, User } from '@urturn/types-common';
 
+import { DISCORD_URL, DOCS_URL } from '../util';
 import GameEditor from '../gameEditor';
 import DevGameCard from './DevGameCard';
-import { Game, getGames } from '../models/game';
-import { User } from '../models/user';
+import { getGames } from '../models/game';
 import withUser from '../withUser';
 import logger from '../logger';
 
