@@ -1,0 +1,33 @@
+{
+  "name": "@urturn/types-common",
+  "public": true,
+  "version": "0.1.0",
+  "description": "common types used across urturn packages",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint . --ignore-path .gitignore --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ignore-path .gitignore --ext .js,.jsx,.ts,.tsx --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/turnbasedgames/urturn.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/turnbasedgames/urturn/issues"
+  },
+  "homepage": "https://github.com/turnbasedgames/urturn#readme",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "eslint": "^8.24.0",
+    "eslint-config-standard-with-typescript": "^23.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.3.0",
+    "eslint-plugin-promise": "^6.0.1",
+    "typescript": "^4.8.4"
+  },
+  "dependencies": {
+    "firebase": "^9.10.0"
+  }
+}
