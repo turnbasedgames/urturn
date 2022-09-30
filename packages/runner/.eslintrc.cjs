@@ -1,7 +1,4 @@
 module.exports = {
-  ignorePatterns: [
-    'frontend', // frontend folder has it's own eslint config
-  ],
   env: {
     es2021: true,
     node: true,
