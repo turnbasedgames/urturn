@@ -6,10 +6,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "runner",
-    "dev": "concurrently \"npm run dev:runner\" \"npm run dev:frontend\"",
-    "dev:runner": "runner --frontend-port 3000 --disable-open --debug --dev",
-    "dev:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start",
+    "start": "concurrently \"npm run start:runner\" \"npm run start:frontend\"",
+    "start:runner": "runner --frontend-port 3000 --debug --dev",
+    "start:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start",
     "lint": "eslint . --ignore-path .gitignore --ext .js && cd frontend && npm run lint",
     "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix && cd frontend && npm run lint:fix",
     "postinstall": "cd frontend && npm install"
@@ -17,7 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@urturn/runner": "0.1.0",
+    "@urturn/runner": "*",
     "cross-env": "^7.0.3"
   },
   "devDependencies": {

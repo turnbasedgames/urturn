@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import cors from 'cors';
-import { buildPath, userFrontendPath } from '../config/paths.js';
+import { buildPath } from '../config/paths.js';
 
 const setupFrontendService = (
   currentUrl,
@@ -33,20 +33,13 @@ const setupFrontendService = (
 };
 
 const setupFrontends = ({
-  frontendUrl, tbgFrontendUrl, portForRunnerFrontend, portForUserFrontend, portForRunnerBackend,
-}) => {
-  const cleanupFuncs = [
-    setupFrontendService(
-      tbgFrontendUrl,
-      buildPath,
-      portForRunnerFrontend,
-      portForRunnerBackend,
-      portForUserFrontend,
-    ),
-    setupFrontendService(frontendUrl, userFrontendPath, portForUserFrontend),
-  ];
-
-  return () => cleanupFuncs.forEach((cleanupFunc) => cleanupFunc());
-};
+  tbgFrontendUrl, portForRunnerFrontend, portForUserFrontend, portForRunnerBackend,
+}) => setupFrontendService(
+  tbgFrontendUrl,
+  buildPath,
+  portForRunnerFrontend,
+  portForRunnerBackend,
+  portForUserFrontend,
+);
 
 export default setupFrontends;

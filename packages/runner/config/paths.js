@@ -27,5 +27,4 @@ const resolveModule = (resolveFn, filePath) => {
 };
 
 export const buildPath = path.join(parentFolder, '..', 'frontend', 'build');
-export const userFrontendPath = resolveApp('frontend/build');
 export const userBackend = resolveModule(resolveApp, 'index');
