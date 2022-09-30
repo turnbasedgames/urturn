@@ -1,8 +1,5 @@
 import path from 'path';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
-
-const parentFolder = path.dirname(fileURLToPath(import.meta.url));
 
 // Make sure any symlinks in the project folder are resolved
 const appDirectory = fs.realpathSync(process.cwd());
@@ -26,5 +23,5 @@ const resolveModule = (resolveFn, filePath) => {
   return resolveFn(`${filePath}.js`);
 };
 
-export const buildPath = path.join(parentFolder, '..', 'frontend', 'build');
+// eslint-disable-next-line import/prefer-default-export
 export const userBackend = resolveModule(resolveApp, 'index');
