@@ -10,6 +10,13 @@ export const stringIsAValidUrl = (s) => {
   }
 };
 
+export const isInteger = (str) => {
+  if (typeof str !== 'string') {
+    return false;
+  }
+  return Number.isInteger(Number(str));
+};
+
 export const clearConsole = () => {
   process.stdout.write(
     process.platform === 'win32' ? '\x1B[2J\x1B[0f' : '\x1B[2J\x1B[3J\x1B[H',

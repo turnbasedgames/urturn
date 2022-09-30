@@ -6,7 +6,6 @@
   },
   "type": "module",
   "scripts": {
-    "start": "runner",
     "prepare": "cd frontend && npm install",
     "lint": "eslint . --ignore-path .gitignore --ext .js && cd frontend && npm run lint",
     "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix && cd frontend && npm run lint:fix",
