@@ -19,5 +19,8 @@ module.exports = {
     'react',
   ],
   rules: {
+    // disable extraneous dependencies, because when the package is deployed, only the build folder
+    // is provided
+    'import/no-extraneous-dependencies': 'off',
   },
 };

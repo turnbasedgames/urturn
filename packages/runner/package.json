@@ -6,8 +6,8 @@
   },
   "type": "module",
   "scripts": {
-    "lint": "eslint . --ignore-path .gitignore --ext .js && cd frontend && npm run lint",
-    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix && cd frontend && npm run lint:fix"
+    "lint": "eslint . --ignore-path .gitignore --ext .js",
+    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix"
   },
   "repository": {
     "type": "git",
