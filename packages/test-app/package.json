@@ -6,6 +6,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "prod": "concurrently \"npm run prod:runner\" \"npm run dev:frontend\"",
+    "prod:runner": "runner --frontend-port 3000",
     "dev": "concurrently \"npm run dev:runner\" \"npm run dev:frontend\"",
     "dev:runner": "runner --frontend-port 3000 --debug --dev",
     "dev:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start",

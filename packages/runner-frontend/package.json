@@ -15,7 +15,6 @@
   "bugs": {
     "url": "https://github.com/turnbasedgames/urturn/issues"
   },
-  "homepage": "https://github.com/turnbasedgames/urturn/tree/main/packages/runner-frontend#readme",
   "description": "",
   "scripts": {
     "start": "react-scripts start",
