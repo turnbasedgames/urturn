@@ -1,6 +1,6 @@
 {
   "name": "@urturn/runner-frontend",
-  "version": "0.1.0",
+  "version": "0.1.1-alpha.74+92da188",
   "main": "index.js",
   "files": [
     "build/",
@@ -55,5 +55,6 @@
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-react": "^7.29.4",
     "eslint-plugin-react-hooks": "^4.4.0"
-  }
+  },
+  "gitHead": "92da188da20ec204ec202ec349009e4edeb2e7ad"
 }
