@@ -99,7 +99,6 @@ function App(): React.ReactElement {
           <UserContext.Provider value={userProviderValue}>
             <Router>
               <PageTracker />
-              <NavBar />
               <Switch>
                 <Route exact path="/">
                   <Redirect to="/games" />
@@ -108,9 +107,11 @@ function App(): React.ReactElement {
                   <GameView />
                 </Route>
                 <Route path="/develop">
+                  <NavBar />
                   <CreatorView />
                 </Route>
                 <Route path="/profile">
+                  <NavBar />
                   <ProfileView />
                 </Route>
               </Switch>

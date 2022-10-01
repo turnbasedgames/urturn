@@ -7,12 +7,14 @@ import {
 
 import GamePlayer from './gamePlayer';
 import GameList from './gameList';
+import NavBar from '../navBar';
 
 function GameView(): React.ReactElement {
   const match = useRouteMatch();
   return (
     <Switch>
       <Route exact path={`${match.path}`}>
+        <NavBar />
         <GameList />
       </Route>
       <Route path={`${match.path}/:gameId`}>
