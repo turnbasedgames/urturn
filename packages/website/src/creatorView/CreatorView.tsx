@@ -1,5 +1,5 @@
 import {
-  Button, IconButton, LinearProgress, Stack,
+  Button, IconButton, LinearProgress, Stack, Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -19,7 +19,8 @@ interface Props {
 }
 
 function CreatorView({ user }: Props): React.ReactElement {
-  const [games, setGames] = useState<Game[] | null>(null);
+  // eslint-disable-next-line prefer-const
+  let [games, setGames] = useState<Game[] | null>(null);
   const gamesLoading = games == null;
   const [openCreate, setOpenCreate] = useState<boolean>(false);
   const history = useHistory();
@@ -54,9 +55,8 @@ function CreatorView({ user }: Props): React.ReactElement {
           justifyContent="flex-start"
           spacing={1}
           m={2}
-          width="70%"
           minWidth="400px"
-          maxWidth="500px"
+          maxWidth="800px"
         >
           <Stack
             alignItems="center"
@@ -65,6 +65,11 @@ function CreatorView({ user }: Props): React.ReactElement {
             justifyContent="space-between"
           >
             <Stack direction="row">
+              {games?.length === 0 && (
+              <Typography variant="h6" color="textPrimary" alignItems="center" sx={{ display: 'inherit', verticalAlign: 'middle' }}>
+                Talk To Us On:
+              </Typography>
+              )}
               <IconButton
                 href={DISCORD_URL}
                 target="_blank"
