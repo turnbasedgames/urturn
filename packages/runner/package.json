@@ -1,6 +1,6 @@
 {
   "name": "@urturn/runner",
-  "version": "0.1.1-alpha.74+92da188",
+  "version": "0.1.1-alpha.75+669a40f",
   "bin": {
     "runner": "bin/runner.js"
   },
@@ -26,7 +26,7 @@
   ],
   "description": "",
   "dependencies": {
-    "@urturn/runner-frontend": "^0.1.1-alpha.74+92da188",
+    "@urturn/runner-frontend": "^0.1.1-alpha.75+669a40f",
     "chalk": "^4.1.2",
     "commander": "^9.1.0",
     "cors": "^2.8.5",
@@ -47,5 +47,5 @@
       ".jsx"
     ]
   },
-  "gitHead": "92da188da20ec204ec202ec349009e4edeb2e7ad"
+  "gitHead": "669a40f675a16ed378e143b9ca82efdf9d05d365"
 }

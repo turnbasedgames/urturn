@@ -1,11 +1,22 @@
 {
   "name": "@urturn/runner-frontend",
-  "version": "0.1.1-alpha.74+92da188",
+  "version": "0.1.1-alpha.75+669a40f",
   "main": "index.js",
+  "author": "",
+  "license": "ISC",
   "files": [
     "build/",
     "index.js"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/turnbasedgames/urturn.git"
+  },
+  "bugs": {
+    "url": "https://github.com/turnbasedgames/urturn/issues"
+  },
+  "homepage": "https://github.com/turnbasedgames/urturn/tree/main/packages/runner-frontend#readme",
+  "description": "",
   "dependencies": {
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
@@ -56,5 +67,5 @@
     "eslint-plugin-react": "^7.29.4",
     "eslint-plugin-react-hooks": "^4.4.0"
   },
-  "gitHead": "92da188da20ec204ec202ec349009e4edeb2e7ad"
+  "gitHead": "669a40f675a16ed378e143b9ca82efdf9d05d365"
 }
