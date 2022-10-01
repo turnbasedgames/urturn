@@ -1,9 +1,11 @@
 import {
-  Button, LinearProgress, Stack, Typography,
+  Button, IconButton, LinearProgress, Stack,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Game, User } from '@urturn/types-common';
+import { SiDiscord } from 'react-icons/si';
+import SchoolIcon from '@mui/icons-material/School';
 
 import { DISCORD_URL, DOCS_URL } from '../util';
 import GameEditor from '../gameEditor';
@@ -48,33 +50,6 @@ function CreatorView({ user }: Props): React.ReactElement {
       >
         <Stack
           direction="column"
-          spacing={1}
-          m={2}
-          justifyContent="flex-start"
-        >
-          <Typography
-            variant="h5"
-            color="text.primary"
-          >
-            Developer Resources
-          </Typography>
-          <Button
-            href={DOCS_URL}
-            variant="outlined"
-            target="_blank"
-          >
-            API Docs
-          </Button>
-          <Button
-            variant="outlined"
-            href={DISCORD_URL}
-            target="_blank"
-          >
-            Discord
-          </Button>
-        </Stack>
-        <Stack
-          direction="column"
           alignItems="flex-start"
           justifyContent="flex-start"
           spacing={1}
@@ -83,13 +58,33 @@ function CreatorView({ user }: Props): React.ReactElement {
           minWidth="400px"
           maxWidth="500px"
         >
-          <Button
-            sx={{ width: '100%' }}
-            variant="contained"
-            onClick={() => setOpenCreate(true)}
+          <Stack
+            alignItems="center"
+            width="100%"
+            direction="row"
+            justifyContent="space-between"
           >
-            Create Game
-          </Button>
+            <Stack direction="row">
+              <IconButton
+                href={DISCORD_URL}
+                target="_blank"
+              >
+                <SiDiscord />
+              </IconButton>
+              <IconButton
+                href={DOCS_URL}
+                target="_blank"
+              >
+                <SchoolIcon />
+              </IconButton>
+            </Stack>
+            <Button
+              variant="contained"
+              onClick={() => setOpenCreate(true)}
+            >
+              Create Game
+            </Button>
+          </Stack>
           {games?.map((game) => (
             <DevGameCard
               onUpdate={() => {

@@ -7,13 +7,11 @@ import { useHistory } from 'react-router-dom';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { GiTwoCoins } from 'react-icons/gi';
 import { IoBuild } from 'react-icons/io5';
-import { SiDiscord } from 'react-icons/si';
 import { User } from '@urturn/types-common';
 
 import { auth } from '../firebase/setupFirebase';
 import Search from './search';
 import withUser from '../withUser';
-import { DISCORD_URL } from '../util';
 import logger from '../logger';
 
 interface Props {
@@ -109,9 +107,6 @@ function NavBar({ user }: Props): React.ReactElement {
                 UrTurn
               </Typography>
             </Link>
-            <IconButton href={DISCORD_URL}>
-              <SiDiscord />
-            </IconButton>
           </Stack>
           <Search />
           <Stack
