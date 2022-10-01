@@ -1,6 +1,6 @@
 {
   "name": "@urturn/runner-frontend",
-  "version": "0.1.1-alpha.75+669a40f",
+  "version": "0.1.1-alpha.76+120fb0c",
   "main": "index.js",
   "author": "",
   "license": "ISC",
@@ -67,5 +67,5 @@
     "eslint-plugin-react": "^7.29.4",
     "eslint-plugin-react-hooks": "^4.4.0"
   },
-  "gitHead": "669a40f675a16ed378e143b9ca82efdf9d05d365"
+  "gitHead": "120fb0cfbf7c8c3d94e03ab458e4beef2e7ed9a0"
 }
