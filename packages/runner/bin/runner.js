@@ -4,20 +4,14 @@ import chalk from 'chalk';
 import open from 'open';
 import { exec } from 'child_process';
 import getPort from 'get-port';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
-import { stringIsAValidUrl, isInteger, clearConsole } from '../src/util.js';
+import { isInteger, clearConsole } from '../src/util.js';
 import setupFrontends from '../src/setupFrontends.js';
 import setupServer from '../src/setupServer.js';
-
-const parentFolder = dirname(fileURLToPath(import.meta.url));
-const runnerFrontendPath = join(parentFolder, '..', 'frontend');
 
 // TODO: MAIN-83 setup dev environment option for a local dummy user frontend and backend
 (async () => {
   program
     // hide UrTurn dev only options
-    .addOption(new Option('-t, --tbg-frontend-url <tbgFrontendUrl>').hideHelp())
     .addOption(new Option('--dev').hideHelp())
     // user options
     .requiredOption('-f, --frontend-port <frontendPort>', 'Specify the port of where the frontend of your game is being hosted locally.')
@@ -29,11 +23,6 @@ const runnerFrontendPath = join(parentFolder, '..', 'frontend');
   const options = program.opts();
 
   // validate options
-  if (options.tbgFrontendUrl) {
-    if (!stringIsAValidUrl(options.tbgFrontendUrl)) {
-      throw new Error(`Invalid '--tbg-frontend-url' option provided: ${options.tbgFrontendUrl}`);
-    }
-  }
   if (!isInteger(options.frontendPort)) {
     throw new Error(`Invalid '--frontend-port' option provided: ${options.frontendUrl}`);
   }
@@ -42,7 +31,6 @@ const runnerFrontendPath = join(parentFolder, '..', 'frontend');
   const portForRunnerFrontend = await getPort({ port: portForRunnerBackend + 1 });
 
   const runnerUrl = `http://localhost:${portForRunnerFrontend}`;
-  const runnerFrontendURL = options.tbgFrontendUrl;
 
   clearConsole();
   console.log(chalk.gray('Starting runner with your game...\n'));
@@ -52,21 +40,18 @@ const runnerFrontendPath = join(parentFolder, '..', 'frontend');
 
   let cleanupFrontendsFunc;
   let runnerFrontendProcess;
-
   if (options.dev) {
-    runnerFrontendProcess = exec(`cd ${runnerFrontendPath} && PORT=${portForRunnerFrontend} REACT_APP_USER_PORT=${options.frontendPort} REACT_APP_BACKEND_PORT=${portForRunnerBackend} BROWSER=none npm start`);
+    runnerFrontendProcess = exec(`PORT=${portForRunnerFrontend} REACT_APP_USER_PORT=${options.frontendPort} REACT_APP_BACKEND_PORT=${portForRunnerBackend} npx lerna run start --scope="@urturn/runner-frontend"`);
     runnerFrontendProcess.stdout.pipe(process.stdout);
   } else {
     cleanupFrontendsFunc = setupFrontends({
-      tbgFrontendUrl: runnerFrontendURL,
       portForRunnerFrontend,
       portForUserFrontend: options.frontendPort,
       portForRunnerBackend,
     });
+    console.log(`${chalk.green('\nYou can now view the runner in the browser at:')} \n${chalk.green.bold(runnerUrl)}`);
+    open(runnerUrl);
   }
-
-  console.log(`${chalk.green('\nYou can now view the runner in the browser at:')} \n${chalk.green.bold(runnerUrl)}`);
-  open(runnerUrl);
 
   ['SIGINT', 'SIGTERM'].forEach((sig) => {
     process.on(sig, () => {

@@ -1,15 +1,13 @@
 {
   "name": "@urturn/runner",
-  "version": "0.1.0",
+  "version": "0.1.1-alpha.76+120fb0c",
   "bin": {
     "runner": "bin/runner.js"
   },
   "type": "module",
   "scripts": {
-    "prepare": "cd frontend && npm install",
-    "lint": "eslint . --ignore-path .gitignore --ext .js && cd frontend && npm run lint",
-    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix && cd frontend && npm run lint:fix",
-    "build": "cd frontend && npm run build"
+    "lint": "eslint . --ignore-path .gitignore --ext .js",
+    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix"
   },
   "repository": {
     "type": "git",
@@ -24,11 +22,11 @@
   "files": [
     "bin/",
     "src/",
-    "config/",
-    "frontend/build/"
+    "config/"
   ],
   "description": "",
   "dependencies": {
+    "@urturn/runner-frontend": "^0.1.1-alpha.76+120fb0c",
     "chalk": "^4.1.2",
     "commander": "^9.1.0",
     "cors": "^2.8.5",
@@ -48,5 +46,6 @@
       ".js",
       ".jsx"
     ]
-  }
+  },
+  "gitHead": "120fb0cfbf7c8c3d94e03ab458e4beef2e7ed9a0"
 }

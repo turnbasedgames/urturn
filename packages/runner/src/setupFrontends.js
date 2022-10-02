@@ -1,19 +1,14 @@
 import express from 'express';
 import path from 'path';
 import cors from 'cors';
-import { buildPath } from '../config/paths.js';
+import runnerFrontendBuildPath from '@urturn/runner-frontend';
 
 const setupFrontendService = (
-  currentUrl,
   frontendPath,
   port,
   portForRunnerBackend,
   portForUserFrontend,
 ) => {
-  if (currentUrl) {
-    return () => {};
-  }
-
   const app = express();
   app.use(cors());
   app.use(express.static(frontendPath));
@@ -33,10 +28,9 @@ const setupFrontendService = (
 };
 
 const setupFrontends = ({
-  tbgFrontendUrl, portForRunnerFrontend, portForUserFrontend, portForRunnerBackend,
+  portForRunnerFrontend, portForUserFrontend, portForRunnerBackend,
 }) => setupFrontendService(
-  tbgFrontendUrl,
-  buildPath,
+  runnerFrontendBuildPath,
   portForRunnerFrontend,
   portForRunnerBackend,
   portForUserFrontend,
