@@ -22,7 +22,7 @@ function DevGameCard({ game, onDelete, onUpdate }: Props): React.ReactElement {
       }}
     >
       <CardMediaWithFallback
-        sx={{ width: '140px', height: '140px', minWidth: '140px' }}
+        sx={{ width: '100px', height: '100px', minWidth: '100px' }}
         game={game}
       />
       <Box sx={{

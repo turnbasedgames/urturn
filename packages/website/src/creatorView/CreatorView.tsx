@@ -1,9 +1,11 @@
 import {
-  Button, LinearProgress, Stack, Typography,
+  Button, IconButton, LinearProgress, Stack, Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Game, User } from '@urturn/types-common';
+import { SiDiscord } from 'react-icons/si';
+import SchoolIcon from '@mui/icons-material/School';
 
 import { DISCORD_URL, DOCS_URL } from '../util';
 import GameEditor from '../gameEditor';
@@ -17,7 +19,8 @@ interface Props {
 }
 
 function CreatorView({ user }: Props): React.ReactElement {
-  const [games, setGames] = useState<Game[] | null>(null);
+  // eslint-disable-next-line prefer-const
+  let [games, setGames] = useState<Game[] | null>(null);
   const gamesLoading = games == null;
   const [openCreate, setOpenCreate] = useState<boolean>(false);
   const history = useHistory();
@@ -48,48 +51,45 @@ function CreatorView({ user }: Props): React.ReactElement {
       >
         <Stack
           direction="column"
-          spacing={1}
-          m={2}
-          justifyContent="flex-start"
-        >
-          <Typography
-            variant="h5"
-            color="text.primary"
-          >
-            Developer Resources
-          </Typography>
-          <Button
-            href={DOCS_URL}
-            variant="outlined"
-            target="_blank"
-          >
-            API Docs
-          </Button>
-          <Button
-            variant="outlined"
-            href={DISCORD_URL}
-            target="_blank"
-          >
-            Discord
-          </Button>
-        </Stack>
-        <Stack
-          direction="column"
           alignItems="flex-start"
           justifyContent="flex-start"
           spacing={1}
           m={2}
-          width="70%"
           minWidth="400px"
-          maxWidth="500px"
+          maxWidth="800px"
         >
-          <Button
-            sx={{ width: '100%' }}
-            variant="contained"
-            onClick={() => setOpenCreate(true)}
+          <Stack
+            alignItems="center"
+            width="100%"
+            direction="row"
+            justifyContent="space-between"
           >
-            Create Game
-          </Button>
+            <Stack direction="row">
+              {games?.length === 0 && (
+              <Typography variant="h6" color="textPrimary" alignItems="center" sx={{ display: 'inherit', verticalAlign: 'middle' }}>
+                Talk To Us On:
+              </Typography>
+              )}
+              <IconButton
+                href={DISCORD_URL}
+                target="_blank"
+              >
+                <SiDiscord />
+              </IconButton>
+              <IconButton
+                href={DOCS_URL}
+                target="_blank"
+              >
+                <SchoolIcon />
+              </IconButton>
+            </Stack>
+            <Button
+              variant="contained"
+              onClick={() => setOpenCreate(true)}
+            >
+              Create Game
+            </Button>
+          </Stack>
           {games?.map((game) => (
             <DevGameCard
               onUpdate={() => {
