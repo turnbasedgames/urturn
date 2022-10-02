@@ -17,6 +17,7 @@
     "@types/react-dom": "^18.0.6",
     "@types/react-router-dom": "^5.3.3",
     "@urturn/types-common": "*",
+    "@urturn/ui-common": "*",
     "axios": "^0.21.1",
     "bootstrap": "^4.6.0",
     "buffer": "^6.0.3",

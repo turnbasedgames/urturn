@@ -1,61 +1,31 @@
-import { User as FirebaseUser } from 'firebase/auth';
+import {
+  User,
+} from '@urturn/types-common';
 
-// TODO: common types should be pulled into a separate package, because they are used by many
-// packages, not necessarily needing this common component library
-
-export interface PublicPlayer {
-  id: string
-  username: string
+export enum Errors {
+  RoomNotJoinable = 'RoomNotJoinable',
+  CreatorError = 'CreatorError',
 }
-
-export interface MoveResult {
-  success?: boolean
-  error: any
-}
-
-export interface User {
-  id: string
-  username: string
-  firebaseID: string
-  firebaseUser: FirebaseUser
-  signInProvider: string
-  urbux: number
-}
-export interface Game {
-  id: string
-  name: string
-  description: string
-  creator: User
-  githubURL: string
-  commitSHA: string
-}
-
-export interface RoomState {
-  room: string
-  state: any
-  version: number
-}
-
-export interface Room {
-  id: string
-  // The game may be hard deleted, so we have to assume its possible for this to be null
-  game?: Game
-  private: boolean
-  players: RoomUser[]
-  finished: boolean
-  joinable: boolean
-  latestState: RoomState
-}
-
-export interface RoomUser {
-  id: string
-  username: string
-}
-
 export interface RoomPlayerProps {
-  user?: User
+  user: User
   src: string
-  setupRoom: () => Promise<Room>
-  getLocalPlayer: () => PublicPlayer
-  makeMove: (move: any) => MoveResult
+  makeMove: (move: any) => Promise<void>
+  setChildClient: (childClient: any) => void
+  // when socket changes we should send to childClient that the stateChanged
+  // note: runner frontend checks if player is still in list of players and closes the window
+  // when state changes. We should rely on the onPlayerQuit socket event instead to pull that
+  // that logic out
+
+  // child client depends on whether or not the player exist, we should destroy the client user
+  // changes.
+
+  // iframeRef: this is necessary because we need to get the iframeRef before we can
+  // use penpal to connect to the child. we set the src of the iframe before we attempt to
+  // connect to 0he child
+
+  // 1. iframeRef is defined (look into how refs work)
+  // 2. iframe calls the iframeRef callback (useCallback) with the iframe element
+  // 3. we set the iframe.src to load user code
+  // 4. we attempt to make a connection to the child
+  // 5. state change fires asynchronously
 }

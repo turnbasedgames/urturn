@@ -16,6 +16,11 @@ export interface RoomUser {
   username: string
 }
 
+export interface MoveResult {
+  success?: boolean
+  error: any
+}
+
 export interface RoomState {
   room: string
   state: any

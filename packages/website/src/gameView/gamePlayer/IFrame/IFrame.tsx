@@ -1,12 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { connectToChild } from 'penpal';
+import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
-import axios from 'axios';
 import { Typography } from '@mui/material';
-import { Room, User } from '@urturn/types-common';
-
+import { Game, Room, User } from '@urturn/types-common';
+import { RoomPlayer } from '@urturn/ui-common';
+// TODO:KEVIN need to figure out what dependency of roomPlayer is causing pollyfill issues wtf?
 import {
-  Errors, makeMove, generateBoardGame,
+  makeMove, generateBoardGame,
 } from '../../../models/room';
 import API_URL from '../../../models/util';
 import { GITHACK_BASE_URL } from '../../../util';
@@ -39,6 +38,14 @@ interface Props {
   user: User
 }
 
+function getIframeSrc(game: Game): string {
+  const { githubURL, commitSHA } = game;
+  const parsedGithubURL = new URL(githubURL);
+  const repoOwner = parsedGithubURL.pathname.split('/')[1];
+  const repo = parsedGithubURL.pathname.split('/')[2];
+  return `${GITHACK_BASE_URL}/${repoOwner}/${repo}/${commitSHA}/frontend/build/index.html`;
+}
+
 function IFrame({
   room,
   user,
@@ -57,12 +64,6 @@ function IFrame({
   }
 
   const roomId = room.id;
-  const { game: { githubURL, commitSHA } } = room;
-  const parsedGithubURL = new URL(githubURL);
-  const repoOwner = parsedGithubURL.pathname.split('/')[1];
-  const repo = parsedGithubURL.pathname.split('/')[2];
-  // TODO: make this configurable by an environment variable for testing
-  const cdnURL = `${GITHACK_BASE_URL}/${repoOwner}/${repo}/${commitSHA}/frontend/build/index.html`;
   const [childClient, setChildClient] = useState<any | null>();
 
   useEffect(() => {
@@ -95,49 +96,14 @@ function IFrame({
     };
   }, [childClient]);
 
-  const iframeRef = useCallback((iframe: HTMLIFrameElement | null) => {
-    if (iframe != null) {
-      // eslint-disable-next-line no-param-reassign
-      iframe.src = cdnURL;
-      const connection = connectToChild({
-        iframe,
-        methods: {
-          async getLocalPlayer() {
-            return { id: user.id, username: user.username };
-          },
-          async makeMove(move: any) {
-            try {
-              await makeMove(roomId, move);
-              return { success: true };
-            } catch (err) {
-              if (
-                axios.isAxiosError(err) && (err.response != null)
-              ) {
-                if (err.response.data.name === Errors.CreatorError) {
-                  return { error: err.response.data.creatorError };
-                }
-                return { error: err.response.data };
-              }
-              return { error: err };
-            }
-          },
-        },
-        // debug: true,
-        // childOrigin: 'null',
-      });
-      connection.promise.then((child) => {
-        setChildClient(child);
-      }).catch(logger.error);
-    }
-  }, []);
-
   return (
-    <iframe
-      ref={iframeRef}
-      title="gameFrame"
-      sandbox="allow-scripts allow-forms allow-same-origin" // TODO: concept of least privelege, why do we need these?
-      id="gameFrame"
-      style={{ height: 'calc(100vh - 50px)', width: '100%', border: 'none' }}
+    <RoomPlayer
+      src={getIframeSrc(room?.game)}
+      user={user}
+      setChildClient={setChildClient}
+      makeMove={async (move) => {
+        await makeMove(room.id, move);
+      }}
     />
   );
 }
