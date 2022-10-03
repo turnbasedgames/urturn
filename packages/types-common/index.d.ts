@@ -54,3 +54,11 @@ export interface Game {
   githubURL: string
   commitSHA: string
 }
+
+export interface WatchRoomRes {
+  error: string
+}
+
+export interface UnwatchRoomRes {
+  error: string
+}
