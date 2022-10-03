@@ -57,7 +57,7 @@
     "eslint-plugin-react": "^7.29.4",
     "eslint-plugin-react-hooks": "^4.4.0",
     "penpal": "^6.2.2",
-    "react": "^17.0.2",
+    "react": "17.0.2",
     "react-dom": "^17.0.2",
     "react-json-view": "^1.21.3",
     "react-router-dom": "^6.3.0",

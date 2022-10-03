@@ -1,7 +1,9 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, Story } from '@storybook/react';
 import { User } from '@urturn/types-common';
+import React from 'react';
 
 import RoomPlayer from './RoomPlayer';
+import { RoomPlayerProps } from './RoomPlayer.types';
 
 const defaultUser: User = {
   id: 'user-id-1',
@@ -38,18 +40,18 @@ const defaultUser: User = {
   urbux: 0,
 };
 
-const componentMeta: ComponentMeta<typeof RoomPlayer> = {
-  title: '@urturn/RoomPlayer',
+const meta: Meta = {
   component: RoomPlayer,
 };
-export default componentMeta;
+export default meta;
 
-const Template: ComponentStory<typeof RoomPlayer> = RoomPlayer;
+// eslint-disable-next-line react/jsx-props-no-spreading, react/function-component-definition
+const Template: Story<RoomPlayerProps> = (args) => <RoomPlayer {...args} />;
 
 export const Default = Template.bind({});
 Default.args = {
   src: 'testing',
   user: defaultUser,
   setChildClient: (childClient: any) => console.log('setting child client', { childClient }),
-  makeMove: (move: any) => console.log('make move called', { move }),
+  makeMove: async (move: any) => console.log('make move called', { move }),
 };

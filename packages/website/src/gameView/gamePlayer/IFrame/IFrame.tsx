@@ -3,7 +3,16 @@ import { io } from 'socket.io-client';
 import { Typography } from '@mui/material';
 import { Game, Room, User } from '@urturn/types-common';
 import { RoomPlayer } from '@urturn/ui-common';
-// TODO:KEVIN need to figure out what dependency of roomPlayer is causing pollyfill issues wtf?
+
+// TODO:KEVIN figure out why tf we aer getting the react error with dispatcher.useCallback:
+/**
+ * Warning: Invalid hook call. Hooks can only be called inside of the body of a function component.
+ *  This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+
+ */
 import {
   makeMove, generateBoardGame,
 } from '../../../models/room';
@@ -101,7 +110,7 @@ function IFrame({
       src={getIframeSrc(room?.game)}
       user={user}
       setChildClient={setChildClient}
-      makeMove={async (move) => {
+      makeMove={async (move: any) => {
         await makeMove(room.id, move);
       }}
     />
