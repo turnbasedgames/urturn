@@ -63,5 +63,12 @@
     "react-scripts": "5.0.0",
     "socket.io-client": "^4.5.0"
   },
-  "gitHead": "120fb0cfbf7c8c3d94e03ab458e4beef2e7ed9a0"
+  "gitHead": "120fb0cfbf7c8c3d94e03ab458e4beef2e7ed9a0",
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": ["./build"]
+      }
+    }
+  }
 }
