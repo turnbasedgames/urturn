@@ -14,23 +14,22 @@ import Player from './player';
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <Router>
-        <Routes>
-          <Route
-            exact
-            path="/"
-            element={(
-              <Stack
-                height="100vh"
-              >
-                <GameManager />
-              </Stack>
-          )}
-          />
-          <Route path="/player/:playerId" element={<Player />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
+      <Stack
+        height="100vh"
+      >
+        <Router>
+          <Routes>
+            <Route
+              exact
+              path="/"
+              element={(<GameManager />)}
+            />
+            <Route path="/player/:playerId" element={<Player />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Router>
+
+      </Stack>
     </ThemeProvider>
   );
 }
