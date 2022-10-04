@@ -6,6 +6,9 @@
     },
     "start": {
       "dependsOn": ["prebuild", "^build"]
+    },
+    "lint": {
+      "dependsOn": ["prebuild", "^build"]
     }
   },
   "tasksRunnerOptions": {
