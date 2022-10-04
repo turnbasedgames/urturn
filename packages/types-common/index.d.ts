@@ -16,6 +16,11 @@ export interface RoomUser {
   username: string
 }
 
+export interface MoveResult {
+  success?: boolean
+  error: any
+}
+
 export interface RoomState {
   room: string
   state: any
@@ -48,4 +53,12 @@ export interface Game {
   creator: User
   githubURL: string
   commitSHA: string
+}
+
+export interface WatchRoomRes {
+  error: string
+}
+
+export interface UnwatchRoomRes {
+  error: string
 }

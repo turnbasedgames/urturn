@@ -1,0 +1,79 @@
+# logs
+logs
+*.log
+
+# npm & yarn
+.npm
+npm-debug.log*
+package-lock.json
+
+.yarn-integrity
+yarn-debug.log*
+yarn-error.log*
+
+node_modules/
+
+# Lerna
+lerna-debug.log*
+
+# Output of 'npm pack'
+*.tgz
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Generated test directories
+coverage
+*.lcov
+lib-cov
+
+# TypeScript
+typings/
+*.tsbuildinfo
+
+# Lint directories
+.eslintcache
+.stylelintcache
+
+# env & config
+*.env*
+config/local*
+*/config/local*
+
+# Storybook build outputs
+.out
+.storybook-out
+storybook-static
+
+# Bundles
+_build/
+dist/
+.cache
+.parcel-cache
+
+# Temporary folders
+tmp/
+temp/
+
+# Container data
+data/
+minio/
+
+# Pubsweet
+uploads/
+
+# IDE
+.idea
+.vscode
+.vscode-test
+.devcontainer
+
+# Misc
+.cache/
+.DS_Store

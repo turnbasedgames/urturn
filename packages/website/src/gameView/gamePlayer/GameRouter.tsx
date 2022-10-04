@@ -6,7 +6,7 @@ import {
 } from 'react-router-dom';
 
 import GameInfo from './GameInfo';
-import RoomPlayer from './RoomPlayer';
+import GamePlayer from './GamePlayer';
 
 function GameRouter(): React.ReactElement {
   const match = useRouteMatch();
@@ -17,7 +17,7 @@ function GameRouter(): React.ReactElement {
         <GameInfo />
       </Route>
       <Route path={`${match.path}/room/:roomId`}>
-        <RoomPlayer />
+        <GamePlayer />
       </Route>
     </Switch>
   );

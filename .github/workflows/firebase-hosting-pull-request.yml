@@ -18,7 +18,7 @@ jobs:
         env:
           REACT_APP_FIREBASE_CONFIG: ${{ secrets.REACT_APP_FIREBASE_CONFIG }}
           REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
-        run: npx lerna run build --scope=@urturn/website
+        run: npx lerna run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
