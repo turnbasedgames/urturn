@@ -15,6 +15,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "serve": "serve -s build -l 3000",
     "lint": "eslint . --ignore-path .gitignore --ext .js,.jsx",
     "lint:fix": "eslint . --ignore-path .gitignore --ext .js,.jsx --fix",
     "build": "react-scripts build",

@@ -24,9 +24,7 @@ jobs:
         run: ./bin/every-package-json.sh ".scripts.lint != null"
       - name: all packages need to have lint:fix script defined in package.json
         run: ./bin/every-package-json.sh '.scripts."lint:fix" != null'
-      - name: build all the packages
-        run: npx lerna run build
       - name: checking if packages are formatted properly (lint)
-        run: npx lerna run lint --parallel
+        run: npx lerna run lint
       - name: checking if packages can be auto formatted (lint:fix)
-        run: npx lerna run lint:fix --parallel
+        run: npx lerna run lint:fix
