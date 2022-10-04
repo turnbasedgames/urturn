@@ -1,9 +1,21 @@
 {
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["prebuild", "^build"],
+      "outputs": ["{projectRoot}/build"]
+    },
+    "start": {
+      "dependsOn": ["prebuild", "^build"]
+    }
+  },
   "tasksRunnerOptions": {
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": ["build", "lint"]
+        "cacheableOperations": [
+          "build",
+          "lint"
+        ]
       }
     }
   }

@@ -6,25 +6,23 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "prod": "concurrently \"npm run prod:runner\" \"npm run dev:frontend\"",
-    "prod:runner": "runner --frontend-port 3000",
+    "start": "runner --frontend-port 3000",
     "dev": "concurrently \"npm run dev:runner\" \"npm run dev:frontend\"",
     "dev:runner": "runner --frontend-port 3000 --debug --dev",
-    "dev:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start",
-    "lint": "eslint . --ignore-path .gitignore --ext .js && cd frontend && npm run lint",
-    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix && cd frontend && npm run lint:fix",
-    "postinstall": "cd frontend && npm install"
+    "dev:frontend": "BROWSER=none PORT=3000 npx lerna run start --scope=@urturn/test-app-frontend",
+    "lint": "eslint . --ignore-path .gitignore --ext .js",
+    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@urturn/runner": "*",
-    "cross-env": "^7.0.3"
+    "@urturn/runner-frontend": "*"
   },
   "devDependencies": {
     "concurrently": "^7.1.0",
     "eslint": "^8.21.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0"
-  }  
+  }
 }

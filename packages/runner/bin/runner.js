@@ -13,7 +13,6 @@ import setupServer from '../src/setupServer.js';
   program
     // hide UrTurn dev only options
     .addOption(new Option('--dev').hideHelp())
-    // user options
     .requiredOption('-f, --frontend-port <frontendPort>', 'Specify the port of where the frontend of your game is being hosted locally.')
     // TODO: MAIN-86 we need to use a logger instead of console.log and add debug log outputs
     // everywhere
@@ -32,7 +31,9 @@ import setupServer from '../src/setupServer.js';
 
   const runnerUrl = `http://localhost:${portForRunnerFrontend}`;
 
-  clearConsole();
+  if (!options.dev) {
+    clearConsole();
+  }
   console.log(chalk.gray('Starting runner with your game...\n'));
   console.log('running with options:', options);
 
