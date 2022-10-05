@@ -16,9 +16,9 @@
     "lint:fix": "echo no good way to lint docusaurus repo, check: https://github.com/facebook/docusaurus/issues/2965"
   },
   "dependencies": {
-    "@docusaurus/core": "2.0.0-beta.15",
-    "@docusaurus/preset-classic": "2.0.0-beta.15",
-    "@docusaurus/theme-live-codeblock": "2.0.0-beta.15",
+    "@docusaurus/core": "2.1.0",
+    "@docusaurus/preset-classic": "2.1.0",
+    "@docusaurus/theme-live-codeblock": "2.1.0",
     "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11.10.0",
     "@mdx-js/react": "^1.6.21",
@@ -28,7 +28,8 @@
     "mui": "^0.0.1",
     "prism-react-renderer": "^1.2.1",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "react-router-dom": "^5.3.3"
   },
   "browserslist": {
     "production": [
