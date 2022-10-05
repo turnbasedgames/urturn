@@ -3,7 +3,7 @@ import {
   AppBar, Button, Toolbar, Typography, IconButton, Stack, Link,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { GiTwoCoins } from 'react-icons/gi';
 import { IoBuild } from 'react-icons/io5';
@@ -19,7 +19,7 @@ interface Props {
 }
 
 function NavBar({ user }: Props): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const signedIn = (user != null) && !user.firebaseUser.isAnonymous;
   const firebaseUserDetermined = Boolean(auth.currentUser);
   const onSignIn = (ev: React.MouseEvent): void => {
@@ -43,7 +43,7 @@ function NavBar({ user }: Props): React.ReactElement {
         </Button>
         <IconButton
           onClick={() => {
-            history.push('/develop');
+            navigate('/develop');
           }}
         >
           <IoBuild />
@@ -51,7 +51,7 @@ function NavBar({ user }: Props): React.ReactElement {
         <Button
           color="inherit"
           onClick={() => {
-            history.push('/profile');
+            navigate('/profile');
           }}
           size="small"
         >

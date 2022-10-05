@@ -1,5 +1,2 @@
-export const DISCORD_URL = 'https://discord.gg/myWacjdb5S';
-
-export const DOCS_URL = 'https://docs.urturn.app/';
-
+// eslint-disable-next-line import/prefer-default-export
 export const GITHACK_BASE_URL = 'https://rawcdn.githack.com';

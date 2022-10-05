@@ -4,9 +4,10 @@ import axios from 'axios';
 
 import logger from '../../logger';
 import { RoomPlayerProps, Errors } from './RoomPlayer.types';
+import PlayerMenu from './PlayerMenu';
 
 function RoomPlayer({
-  user, src, setChildClient, makeMove,
+  user, src, setChildClient, makeMove, quitRoom,
 }: RoomPlayerProps): React.ReactElement {
   const iframeRef = useCallback((iframe: HTMLIFrameElement | null) => {
     if (iframe != null) {
@@ -44,13 +45,16 @@ function RoomPlayer({
   }, []);
 
   return (
-    <iframe
-      ref={iframeRef}
-      title="gameFrame"
-      sandbox="allow-scripts allow-forms allow-same-origin"
-      id="gameFrame"
-      style={{ height: '100%', width: '100%', border: 'none' }}
-    />
+    <>
+      <PlayerMenu quitRoom={quitRoom} />
+      <iframe
+        ref={iframeRef}
+        title="gameFrame"
+        sandbox="allow-scripts allow-forms allow-same-origin"
+        id="gameFrame"
+        style={{ height: '100vh', width: '100%', border: 'none' }}
+      />
+    </>
   );
 }
 

@@ -3,7 +3,7 @@ import {
   Card, CardActionArea, CardContent, Stack, Typography,
 } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Game } from '@urturn/types-common';
 
 import { getGames } from '../../models/game';
@@ -19,7 +19,7 @@ function GameList(): React.ReactElement {
     }
     setupGames().catch(logger.error);
   }, []);
-  const history = useHistory();
+  const navigate = useNavigate();
 
   return (
     <Stack
@@ -38,7 +38,7 @@ function GameList(): React.ReactElement {
             sx={{ margin: 1 }}
             key={`GameCard-${game.id}`}
           >
-            <CardActionArea onClick={() => history.push(`/games/${game.id}`)}>
+            <CardActionArea onClick={() => navigate(`/games/${game.id}`)}>
               <CardMediaWithFallback
                 sx={{ height: '170px', width: '170px' }}
                 game={game}

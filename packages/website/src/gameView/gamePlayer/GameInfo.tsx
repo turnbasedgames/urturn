@@ -4,8 +4,7 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import {
-  useHistory,
-  useLocation,
+  useNavigate,
   useParams,
 } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
@@ -18,27 +17,23 @@ import { UserContext } from '../../models/user';
 import CardMediaWithFallback from '../CardMediaWithFallback';
 import logger from '../../logger';
 
-interface GameURLParams {
-  gameId: string
-}
-
 function GameInfo(): React.ReactElement {
-  const { gameId } = useParams<GameURLParams>();
+  const { gameId } = useParams();
   const [game, setGame] = useState<null | Game>(null);
   const [loadingPrivateRoom, setloadingPrivateRoom] = useState<boolean>(false);
   const [loadingRoom, setLoadingRoom] = useState<boolean>(false);
-  const location = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const gameLoading = game == null;
   const { enqueueSnackbar } = useSnackbar();
 
   async function setupGame(): Promise<void> {
+    if (gameId == null) { return; }
     const gameRaw = await getGame(gameId);
     setGame(gameRaw);
   }
   useEffect(() => {
     setupGame().catch(logger.error);
-  }, []);
+  }, [gameId]);
 
   async function onPlay(user: User): Promise<void> {
     if (game == null) {
@@ -47,7 +42,7 @@ function GameInfo(): React.ReactElement {
     setLoadingRoom(true);
     const room = await joinOrCreateRoom(game.id, user.id);
     setLoadingRoom(false);
-    history.push(`${location.pathname}/room/${room.id}`);
+    navigate(`room/${room.id}`);
   }
 
   async function onPrivatePlay(): Promise<void> {
@@ -57,7 +52,7 @@ function GameInfo(): React.ReactElement {
     setloadingPrivateRoom(true);
     const room = await createPrivateRoom(game.id);
     setloadingPrivateRoom(false);
-    history.push(`${location.pathname}/room/${room.id}`);
+    navigate(`room/${room.id}`);
     await navigator.clipboard.writeText(window.location.href);
     enqueueSnackbar('Copied URL To Clipboard!', {
       variant: 'success',
@@ -121,7 +116,7 @@ function GameInfo(): React.ReactElement {
                   <GameCardActions
                     game={game}
                     onUpdate={() => { setupGame().catch(logger.error); }}
-                    onDelete={() => history.push('/develop')}
+                    onDelete={() => navigate('/develop')}
                   />
                 )}
               />

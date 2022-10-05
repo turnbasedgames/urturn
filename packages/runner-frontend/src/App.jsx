@@ -7,13 +7,13 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom';
-import theme from './theme';
+import { Theme } from '@urturn/ui-common';
 import GameManager from './gameManager';
 import Player from './player';
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={Theme}>
       <Stack
         height="100vh"
       >
