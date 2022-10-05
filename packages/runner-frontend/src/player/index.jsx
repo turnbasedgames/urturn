@@ -8,7 +8,7 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 import { RoomPlayer } from '@urturn/ui-common';
 import {
-  getPlayerInGameById, makeMove, getBaseUrl,
+  getPlayerInGameById, makeMove, getBaseUrl, removePlayer,
 } from '../data';
 
 function Player() {
@@ -68,6 +68,9 @@ function Player() {
       setChildClient={setChildClient}
       makeMove={async (move) => {
         await makeMove(player, move);
+      }}
+      quitRoom={async () => {
+        await removePlayer(player);
       }}
     />
   );
