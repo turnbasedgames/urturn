@@ -107,8 +107,8 @@ function GamePlayer(): React.ReactElement {
               variant: 'error',
               autoHideDuration: 3000,
             });
-            navigate('../../');
           }
+          navigate(`/games${(room.game != null) ? `/${room.game.id}` : ''}`);
         }}
       />
     );

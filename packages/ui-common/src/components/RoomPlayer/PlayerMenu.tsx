@@ -50,7 +50,10 @@ function PlayerMenu({ quitRoom }: PlayerMenuProps): React.ReactElement {
       </Modal>
       <Paper
         sx={{
-          opacity: 0.7,
+          opacity: 0.4,
+          ':hover': {
+            opacity: 1,
+          },
           position: 'absolute',
           padding: 0.5,
         }}
