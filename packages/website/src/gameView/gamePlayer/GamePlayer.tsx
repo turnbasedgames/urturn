@@ -1,24 +1,21 @@
 import React, {
   useEffect, useState, useMemo, useContext,
 } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { LinearProgress, Typography } from '@mui/material';
 import {
   Game, Room, RoomUser, UnwatchRoomRes, User, WatchRoomRes,
 } from '@urturn/types-common';
 
 import { RoomPlayer } from '@urturn/ui-common';
+import { useSnackbar } from 'notistack';
 import {
-  joinRoom, getRoom, makeMove, generateBoardGame,
+  joinRoom, getRoom, makeMove, generateBoardGame, quitRoom,
 } from '../../models/room';
 import { UserContext } from '../../models/user';
 import logger from '../../logger';
 import { GITHACK_BASE_URL } from '../../util';
 import { socket } from '../../models/util';
-
-interface RoomURLParams {
-  roomId: string
-}
 
 const shouldJoinPrivateRoom = (user?: User, room?: Room): boolean => Boolean(
   (room != null)
@@ -37,12 +34,15 @@ function getIframeSrc(game: Game): string {
 }
 
 function GamePlayer(): React.ReactElement {
-  const { roomId } = useParams<RoomURLParams>();
+  const { roomId } = useParams();
   const [room, setRoom] = useState<Room | undefined>();
   const userContext = useContext(UserContext);
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function setupRoom(): Promise<void> {
+      if (roomId == null) return;
       const roomRaw = await getRoom(roomId);
       setRoom(roomRaw);
       if (shouldJoinPrivateRoom(userContext.user, roomRaw)) {
@@ -86,7 +86,7 @@ function GamePlayer(): React.ReactElement {
   }, [childClient]);
 
   const iframeMemo = useMemo(() => {
-    if (userContext.user == null || room == null || room.game == null) {
+    if (userContext.user == null || roomId == null || room == null || room.game == null) {
       // disabled because typescript typing thinks iframeMemo can be undefined otherwise
       // eslint-disable-next-line react/jsx-no-useless-fragment
       return <></>;
@@ -99,11 +99,22 @@ function GamePlayer(): React.ReactElement {
         makeMove={async (move: any) => {
           await makeMove(room.id, move);
         }}
+        quitRoom={async () => {
+          try {
+            await quitRoom(room.id);
+          } catch (err) {
+            enqueueSnackbar('Error when trying to quit room', {
+              variant: 'error',
+              autoHideDuration: 3000,
+            });
+          }
+          navigate(`/games${(room.game != null) ? `/${room.game.id}` : ''}`);
+        }}
       />
     );
   }, [room, userContext.user]);
 
-  if (room?.game == null) {
+  if (roomId == null || room?.game == null) {
     return (
       <Typography
         marginTop="10px"

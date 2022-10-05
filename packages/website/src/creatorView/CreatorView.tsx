@@ -2,12 +2,13 @@ import {
   Button, IconButton, LinearProgress, Stack, Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { Game, User } from '@urturn/types-common';
+import { useNavigate } from 'react-router-dom';
+import {
+  Game, User, DISCORD_URL, DOCS_URL,
+} from '@urturn/types-common';
 import { SiDiscord } from 'react-icons/si';
 import SchoolIcon from '@mui/icons-material/School';
 
-import { DISCORD_URL, DOCS_URL } from '../util';
 import GameEditor from '../gameEditor';
 import DevGameCard from './DevGameCard';
 import { getGames } from '../models/game';
@@ -23,7 +24,7 @@ function CreatorView({ user }: Props): React.ReactElement {
   let [games, setGames] = useState<Game[] | null>(null);
   const gamesLoading = games == null;
   const [openCreate, setOpenCreate] = useState<boolean>(false);
-  const history = useHistory();
+  const navigate = useNavigate();
   const setupGames = async (): Promise<void> => {
     const gamesRaw = await getGames({ creator: user.id });
     setGames(gamesRaw);
@@ -42,7 +43,7 @@ function CreatorView({ user }: Props): React.ReactElement {
       <GameEditor
         open={openCreate}
         onClose={() => setOpenCreate(false)}
-        onSubmit={(game) => { history.push(`/games/${game.id}`); }}
+        onSubmit={(game) => { navigate(`/games/${game.id}`); }}
       />
       <Stack
         direction="row"

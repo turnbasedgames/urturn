@@ -4,9 +4,9 @@ import React, {
 import { onAuthStateChanged, signInAnonymously, User as FirebaseUser } from 'firebase/auth';
 import {
   BrowserRouter as Router,
-  Switch,
   Route,
-  Redirect,
+  Navigate,
+  Routes,
 } from 'react-router-dom';
 import axios from 'axios';
 import { ThemeProvider } from '@mui/material/styles';
@@ -15,18 +15,19 @@ import {
   Stack, Slide, IconButton,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-
+import { Theme } from '@urturn/ui-common';
 import { User } from '@urturn/types-common';
 import { auth } from './firebase/setupFirebase';
-import theme from './theme';
-import NavBar from './navBar';
-import GameView from './gameView';
 import { getUser, UserContext } from './models/user';
 import CreatorView from './creatorView';
 import ProfileView from './profileView';
 import PageTracker from './firebase/PageTracker';
 import { API_URL } from './models/util';
 import logger from './logger';
+import GameList from './gameView/gameList';
+import GameInfo from './gameView/gamePlayer/GameInfo';
+import GamePlayer from './gameView/gamePlayer/GamePlayer';
+import NavBar from './navBar';
 
 axios.defaults.baseURL = API_URL;
 
@@ -76,11 +77,11 @@ function App(): React.ReactElement {
     return () => { axios.interceptors.request.eject(authInterceptor); };
   }, []);
   const userProviderValue = useMemo(() => ({ user, setUser }), [user, setUser]);
-
+  const NavBarMemo = useMemo(() => <NavBar />, [user, setUser]);
   const snackbarProviderRef = createRef<SnackbarProvider>();
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={Theme}>
       <SnackbarProvider
         ref={snackbarProviderRef}
         anchorOrigin={{
@@ -99,21 +100,53 @@ function App(): React.ReactElement {
           <UserContext.Provider value={userProviderValue}>
             <Router>
               <PageTracker />
-              <NavBar />
-              <Switch>
-                <Route exact path="/">
-                  <Redirect to="/games" />
+              <Routes>
+                <Route
+                  path="games/*"
+                >
+                  <Route
+                    path=""
+                    element={(
+                      <>
+                        {NavBarMemo}
+                        <GameList />
+                      </>
+                      )}
+                  />
+                  <Route
+                    path=":gameId"
+                    element={(
+                      <>
+                        {NavBarMemo}
+                        <GameInfo />
+                      </>
+                    )}
+                  />
+                  <Route
+                    path=":gameId/room/:roomId"
+                    element={<GamePlayer />}
+                  />
                 </Route>
-                <Route path="/games">
-                  <GameView />
-                </Route>
-                <Route path="/develop">
-                  <CreatorView />
-                </Route>
-                <Route path="/profile">
-                  <ProfileView />
-                </Route>
-              </Switch>
+                <Route
+                  path="develop/*"
+                  element={(
+                    <>
+                      {NavBarMemo}
+                      <CreatorView />
+                    </>
+                  )}
+                />
+                <Route
+                  path="profile/*"
+                  element={(
+                    <>
+                      {NavBarMemo}
+                      <ProfileView />
+                    </>
+                  )}
+                />
+                <Route path="*" element={<Navigate to="/games" />} />
+              </Routes>
             </Router>
           </UserContext.Provider>
         </Stack>

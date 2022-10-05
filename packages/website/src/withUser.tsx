@@ -1,6 +1,6 @@
 import { LinearProgress } from '@mui/material';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 import { UserContext } from './models/user';
 
@@ -18,7 +18,7 @@ const withUser = (
       <UserContext.Consumer>
         {({ user, setUser }) => {
           if (user?.firebaseUser?.isAnonymous === true && (redirectOnAnonymous != null)) {
-            return <Redirect to="/" />;
+            return <Navigate to="/" replace />;
           }
           if (((user != null) && !user.firebaseUser.isAnonymous) || (redirectOnAnonymous == null)) {
             // eslint-disable-next-line react/jsx-props-no-spreading

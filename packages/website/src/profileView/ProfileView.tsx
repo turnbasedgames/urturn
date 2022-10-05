@@ -3,7 +3,7 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { signOut } from 'firebase/auth';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { Room, User } from '@urturn/types-common';
 
@@ -36,7 +36,7 @@ const capitalizeUsername = (username: string): string => {
 };
 
 function ProfileView({ user, setUser }: Props): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
   const [activeTab, setActiveTab] = React.useState(0);
@@ -89,7 +89,6 @@ function ProfileView({ user, setUser }: Props): React.ReactElement {
       >
         <Card>
           <CardHeader
-            // TODO: handle updating username
             title={capitalizeUsername(user.username)}
             subheader={`id: ${user.id}`}
             action={(
@@ -97,7 +96,7 @@ function ProfileView({ user, setUser }: Props): React.ReactElement {
                 onClick={() => {
                   setUser(null);
                   signOut(auth).catch(logger.error);
-                  history.push('/');
+                  navigate('/');
                 }}
                 variant="outlined"
                 color="error"
@@ -121,21 +120,15 @@ function ProfileView({ user, setUser }: Props): React.ReactElement {
           />
           <Stack>
             {!displayedRoomsLoading && displayedRooms
-              // The game may not exist. We should not display the room.
+            // The game may not exist. We should not display the room.
               .filter((room) => room.game)
               .map((room) => (
                 <Card key={room.id} sx={{ display: 'flex' }} color="">
                   <CardActionArea onClick={() => {
-                    // TODO: Handling rejoins (say a player leaves to prevent from causing a loss)
-                    // - support a reconnect and disconnect event
-                    // - reconnect happens when a player connects a session to the original game
-                    // - disconnect happens when no session a player is connected is in the game
-                    // (e.g. multiple tabs should only trigger it once)
-
                     // when game is hard deleted, we show a snackbar error because players can't
                     // play a game that has been deleted
                     if (room.game != null) {
-                      history.push(`/games/${room.game.id}/room/${room.id}`);
+                      navigate(`/games/${room.game.id}/room/${room.id}`);
                     } else {
                       enqueueSnackbar('This game was deleted', {
                         variant: 'error',
@@ -148,17 +141,17 @@ function ProfileView({ user, setUser }: Props): React.ReactElement {
                       title={(room.game != null) ? room.game.name : '[Deleted Game]'}
                       subheader={room.id}
                       action={((activeTab === ProfileTab.Active) && (
-                        <Button
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            onRoomQuit(room).catch(logger.error);
-                          }}
-                          color="error"
-                          variant="text"
-                          onMouseDown={(event) => event.stopPropagation()}
-                        >
-                          Quit
-                        </Button>
+                      <Button
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onRoomQuit(room).catch(logger.error);
+                        }}
+                        color="error"
+                        variant="text"
+                        onMouseDown={(event) => event.stopPropagation()}
+                      >
+                        Quit
+                      </Button>
                       ))}
                     />
                   </CardActionArea>

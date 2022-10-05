@@ -1,6 +1,7 @@
 import { Meta, Story } from '@storybook/react';
 import { User } from '@urturn/types-common';
 import React from 'react';
+import logger from '../../logger';
 
 import RoomPlayer from './RoomPlayer';
 import { RoomPlayerProps } from './RoomPlayer.types';
@@ -50,8 +51,9 @@ const Template: Story<RoomPlayerProps> = (args) => <RoomPlayer {...args} />;
 
 export const Default = Template.bind({});
 Default.args = {
-  src: 'testing',
+  src: 'http://localhost:3000',
   user: defaultUser,
-  setChildClient: (childClient: any) => console.log('setting child client', { childClient }),
-  makeMove: async (move: any) => console.log('make move called', { move }),
+  setChildClient: (childClient: any) => logger.info('setting child client', { childClient }),
+  makeMove: async (move: any) => logger.info('make move called', { move }),
+  quitRoom: async () => logger.info('attempting to quit room'),
 };
