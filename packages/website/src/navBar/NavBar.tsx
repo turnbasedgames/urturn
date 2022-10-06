@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
-  AppBar, Button, Toolbar, Typography, IconButton, Stack, Link,
+  AppBar, Button, Toolbar, Typography, IconButton, Stack,
+  Link, Modal, CardHeader, Card, CardActions,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import { useNavigate } from 'react-router-dom';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { GiTwoCoins } from 'react-icons/gi';
 import { IoBuild } from 'react-icons/io5';
+// import { FaMoneyBill } from 'react-icons/fa';
 import { User } from '@urturn/types-common';
 
 import { auth } from '../firebase/setupFirebase';
@@ -20,6 +22,7 @@ interface Props {
 
 function NavBar({ user }: Props): React.ReactElement {
   const navigate = useNavigate();
+  const [urbuxModalOpen, setUrbuxModalOpen] = useState(false);
   const signedIn = (user != null) && !user.firebaseUser.isAnonymous;
   const firebaseUserDetermined = Boolean(auth.currentUser);
   const onSignIn = (ev: React.MouseEvent): void => {
@@ -36,6 +39,7 @@ function NavBar({ user }: Props): React.ReactElement {
           color="secondary"
           startIcon={<GiTwoCoins />}
           sx={{ display: { xs: 'none', sm: 'flex' } }}
+          onClick={() => { setUrbuxModalOpen(true); }}
         >
           <Typography>
             {user.urbux}
@@ -89,37 +93,58 @@ function NavBar({ user }: Props): React.ReactElement {
   }
 
   return (
-    <AppBar position="sticky">
-      <Toolbar variant="dense">
-        <Stack
-          width="100%"
-          direction="row"
-          alignItems="center"
-        >
+    <>
+      <Modal
+        open={urbuxModalOpen}
+        onClose={() => setUrbuxModalOpen(false)}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Card sx={{ maxWidth: '400px' }}>
+          <CardHeader
+            title="Buy UrBux"
+            titleTypographyProps={{ color: 'secondary' }}
+            subheader="Buy in-game items and support your favorite creators"
+            sx={{ paddingBottom: 0.5 }}
+          />
+          <CardActions>
+            <Button startIcon={<GiTwoCoins />}>
+              100 UrBux for $1
+            </Button>
+          </CardActions>
+        </Card>
+      </Modal>
+      <AppBar position="sticky">
+        <Toolbar variant="dense">
           <Stack
-            flex="1"
+            width="100%"
             direction="row"
-            justifyContent="flex-start"
             alignItems="center"
           >
-            <Link href="/" color="textPrimary" underline="hover">
-              <Typography sx={{ display: { xs: 'none', sm: 'flex' } }}>
-                UrTurn
-              </Typography>
-            </Link>
+            <Stack
+              flex="1"
+              direction="row"
+              justifyContent="flex-start"
+              alignItems="center"
+            >
+              <Link href="/" color="textPrimary" underline="hover">
+                <Typography sx={{ display: { xs: 'none', sm: 'flex' } }}>
+                  UrTurn
+                </Typography>
+              </Link>
+            </Stack>
+            <Search />
+            <Stack
+              flex="1"
+              direction="row"
+              justifyContent="flex-end"
+              alignItems="center"
+            >
+              {userPanel}
+            </Stack>
           </Stack>
-          <Search />
-          <Stack
-            flex="1"
-            direction="row"
-            justifyContent="flex-end"
-            alignItems="center"
-          >
-            {userPanel}
-          </Stack>
-        </Stack>
-      </Toolbar>
-    </AppBar>
+        </Toolbar>
+      </AppBar>
+    </>
   );
 }
 
