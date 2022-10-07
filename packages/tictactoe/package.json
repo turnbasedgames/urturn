@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "runner",
     "dev": "concurrently \"npm run dev:runner\" \"npm run dev:frontend\"",
     "dev:runner": "runner --frontend-port 3000",
     "dev:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start",
@@ -23,7 +22,7 @@
   },
   "homepage": "https://github.com/turnbasedgames/tictactoe#readme",
   "devDependencies": {
-    "@urturn/runner": "0.1.0",
+    "@urturn/runner": "0.1.1",
     "concurrently": "^7.1.0",
     "eslint": "^8.14.0",
     "eslint-config-airbnb-base": "^15.0.0",
