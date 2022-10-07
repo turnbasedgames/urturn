@@ -1,6 +1,5 @@
 {
   "name": "@urturn/types-common",
-  "public": true,
   "version": "0.1.1",
   "description": "common types used across urturn packages",
   "main": "index.js",
@@ -29,5 +28,6 @@
   },
   "dependencies": {
     "firebase": "^9.10.0"
-  }
+  },
+  "gitHead": "cd0626a6cc5f46d6b01aa56ca6725af33946f6e8"
 }
