@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
-  AppBar, Button, Toolbar, Typography, IconButton, Stack, Link,
+  AppBar, Button, Toolbar, Typography, IconButton, Stack,
+  Link,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +14,7 @@ import { auth } from '../firebase/setupFirebase';
 import Search from './search';
 import withUser from '../withUser';
 import logger from '../logger';
+import UrBuxModal from './urbuxModal';
 
 interface Props {
   user: User | null
@@ -20,6 +22,7 @@ interface Props {
 
 function NavBar({ user }: Props): React.ReactElement {
   const navigate = useNavigate();
+  const [urbuxModalOpen, setUrBuxModalOpen] = useState(false);
   const signedIn = (user != null) && !user.firebaseUser.isAnonymous;
   const firebaseUserDetermined = Boolean(auth.currentUser);
   const onSignIn = (ev: React.MouseEvent): void => {
@@ -36,6 +39,7 @@ function NavBar({ user }: Props): React.ReactElement {
           color="secondary"
           startIcon={<GiTwoCoins />}
           sx={{ display: { xs: 'none', sm: 'flex' } }}
+          onClick={() => { setUrBuxModalOpen(true); }}
         >
           <Typography>
             {user.urbux}
@@ -89,37 +93,40 @@ function NavBar({ user }: Props): React.ReactElement {
   }
 
   return (
-    <AppBar position="sticky">
-      <Toolbar variant="dense">
-        <Stack
-          width="100%"
-          direction="row"
-          alignItems="center"
-        >
+    <>
+      <UrBuxModal open={urbuxModalOpen} setOpen={setUrBuxModalOpen} />
+      <AppBar position="sticky">
+        <Toolbar variant="dense">
           <Stack
-            flex="1"
+            width="100%"
             direction="row"
-            justifyContent="flex-start"
             alignItems="center"
           >
-            <Link href="/" color="textPrimary" underline="hover">
-              <Typography sx={{ display: { xs: 'none', sm: 'flex' } }}>
-                UrTurn
-              </Typography>
-            </Link>
+            <Stack
+              flex="1"
+              direction="row"
+              justifyContent="flex-start"
+              alignItems="center"
+            >
+              <Link href="/" color="textPrimary" underline="hover">
+                <Typography sx={{ display: { xs: 'none', sm: 'flex' } }}>
+                  UrTurn
+                </Typography>
+              </Link>
+            </Stack>
+            <Search />
+            <Stack
+              flex="1"
+              direction="row"
+              justifyContent="flex-end"
+              alignItems="center"
+            >
+              {userPanel}
+            </Stack>
           </Stack>
-          <Search />
-          <Stack
-            flex="1"
-            direction="row"
-            justifyContent="flex-end"
-            alignItems="center"
-          >
-            {userPanel}
-          </Stack>
-        </Stack>
-      </Toolbar>
-    </AppBar>
+        </Toolbar>
+      </AppBar>
+    </>
   );
 }
 
