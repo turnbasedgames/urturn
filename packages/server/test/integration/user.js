@@ -1,4 +1,5 @@
 const test = require('ava');
+const mongoose = require('mongoose');
 const { StatusCodes } = require('http-status-codes');
 
 const { spawnApp } = require('../util/app');
@@ -165,10 +166,12 @@ test('POST /user/purchase/webhook throws 400 if wrong currency provided', async 
   const wrongCurrencyPayload = {
     data: {
       object: {
-        userId: user.id,
         amount: 100,
         id: '894318943218943219',
         currency: 'ghs',
+        metadata: {
+          userId: user.id,
+        },
       },
     },
     type: 'payment_intent.succeeded',
@@ -185,6 +188,57 @@ test('POST /user/purchase/webhook throws 400 if wrong currency provided', async 
   t.context.createdUsers.push(userCred);
 });
 
+test('POST /user/purchase/webhook throws 400 if no userId provided', async (t) => {
+  const { api } = t.context.app;
+  const wrongCurrencyPayload = {
+    data: {
+      object: {
+        amount: 100,
+        id: '8943189432189432123',
+        currency: 'usd',
+        metadata: {},
+      },
+    },
+    type: 'payment_intent.succeeded',
+  };
+  const header = createTestWebhookHeader(
+    testStripeClient, wrongCurrencyPayload, testStripeWebhookSecret,
+  );
+  const { response: { data: { message }, status } } = await t.throwsAsync(
+    api.post('/user/purchase/webhook', wrongCurrencyPayload, { headers: { 'Stripe-Signature': header } }),
+  );
+
+  t.is(status, StatusCodes.BAD_REQUEST);
+  t.is(message, '"event.data.object.metadata.userId" was not provided!');
+});
+
+test('POST /user/purchase/webhook throws 404 if no user found with provided userId', async (t) => {
+  const { api } = t.context.app;
+  const userId = new mongoose.Types.ObjectId();
+  const wrongCurrencyPayload = {
+    data: {
+      object: {
+        amount: 100,
+        id: '894318943218943219',
+        currency: 'usd',
+        metadata: {
+          userId,
+        },
+      },
+    },
+    type: 'payment_intent.succeeded',
+  };
+  const header = createTestWebhookHeader(
+    testStripeClient, wrongCurrencyPayload, testStripeWebhookSecret,
+  );
+  const { response: { data: { message }, status } } = await t.throwsAsync(
+    api.post('/user/purchase/webhook', wrongCurrencyPayload, { headers: { 'Stripe-Signature': header } }),
+  );
+
+  t.is(status, StatusCodes.NOT_FOUND);
+  t.is(message, `Could not find user with provided userId (userId=${userId})`);
+});
+
 test('POST /user/purchase/webhook throws 400 if bad Stripe-Signature header provided', async (t) => {
   const { api } = t.context.app;
   const userCred = await createUserCred();
@@ -194,10 +248,12 @@ test('POST /user/purchase/webhook throws 400 if bad Stripe-Signature header prov
     object: 'event',
     data: {
       object: {
-        userId: user.id,
         amount: 100,
         id: '894318943218943210',
         currency: 'usd',
+        metadata: {
+          userId: user.id,
+        },
       },
     },
     type: 'payment_intent.succeeded',
@@ -221,10 +277,12 @@ test('POST /user/purchase/webhook adds urbux to the user and stores currencyToUr
     object: 'event',
     data: {
       object: {
-        userId: user.id,
         amount: 100,
         id: '894318943218943217',
         currency: 'usd',
+        metadata: {
+          userId: user.id,
+        },
       },
     },
     type: 'payment_intent.succeeded',
@@ -255,10 +313,12 @@ test('POST /user/purchase/webhook duplicate transactions (paymentIntent.id gets 
     object: 'event',
     data: {
       object: {
-        userId: user.id,
         amount: 100,
         id: '894318943218943215',
         currency: 'usd',
+        metadata: {
+          userId: user.id,
+        },
       },
     },
     type: 'payment_intent.succeeded',
@@ -291,10 +351,12 @@ test('POST /user/purchase/webhook with an unhandled event type is ignored and ju
     object: 'event',
     data: {
       object: {
-        userId: user.id,
         amount: 100,
         id: '894318943218943218',
         currency: 'usd',
+        metadata: {
+          userId: user.id,
+        },
       },
     },
     type: 'this-event-type-definitely-does-not-exist-head-ass',

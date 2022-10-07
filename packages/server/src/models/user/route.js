@@ -115,8 +115,14 @@ router.post('/purchase/webhook', express.raw({ type: 'application/json' }), asyn
   }
 
   const succeededPaymentIntent = event.data.object;
-  const { userId } = succeededPaymentIntent;
+  const { userId } = succeededPaymentIntent.metadata;
   const paymentAmount = succeededPaymentIntent.amount;
+
+  if (userId == null) {
+    const err = new Error('"event.data.object.metadata.userId" was not provided!');
+    err.status = StatusCodes.BAD_REQUEST;
+    throw err;
+  }
 
   const urbuxAmount = convertAmountToUrbux(succeededPaymentIntent.currency, paymentAmount);
   if (urbuxAmount === undefined) {
@@ -139,6 +145,12 @@ router.post('/purchase/webhook', express.raw({ type: 'application/json' }), asyn
     }
 
     const user = await User.findById(userId).session(session);
+    if (user == null) {
+      const err = new Error(`Could not find user with provided userId (userId=${userId})`);
+      err.status = StatusCodes.NOT_FOUND;
+      throw err;
+    }
+
     user.urbux += urbuxAmount;
     await user.save({ session });
 
