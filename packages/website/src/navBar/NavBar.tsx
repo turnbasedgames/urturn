@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
 import {
   AppBar, Button, Toolbar, Typography, IconButton, Stack,
-  Link, Modal, CardHeader, Card, CardActions,
+  Link,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import { useNavigate } from 'react-router-dom';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { GiTwoCoins } from 'react-icons/gi';
 import { IoBuild } from 'react-icons/io5';
-// import { FaMoneyBill } from 'react-icons/fa';
 import { User } from '@urturn/types-common';
 
 import { auth } from '../firebase/setupFirebase';
 import Search from './search';
 import withUser from '../withUser';
 import logger from '../logger';
+import UrBuxModal from './urbuxModal';
 
 interface Props {
   user: User | null
@@ -22,7 +22,7 @@ interface Props {
 
 function NavBar({ user }: Props): React.ReactElement {
   const navigate = useNavigate();
-  const [urbuxModalOpen, setUrbuxModalOpen] = useState(false);
+  const [urbuxModalOpen, setUrBuxModalOpen] = useState(false);
   const signedIn = (user != null) && !user.firebaseUser.isAnonymous;
   const firebaseUserDetermined = Boolean(auth.currentUser);
   const onSignIn = (ev: React.MouseEvent): void => {
@@ -39,7 +39,7 @@ function NavBar({ user }: Props): React.ReactElement {
           color="secondary"
           startIcon={<GiTwoCoins />}
           sx={{ display: { xs: 'none', sm: 'flex' } }}
-          onClick={() => { setUrbuxModalOpen(true); }}
+          onClick={() => { setUrBuxModalOpen(true); }}
         >
           <Typography>
             {user.urbux}
@@ -94,25 +94,7 @@ function NavBar({ user }: Props): React.ReactElement {
 
   return (
     <>
-      <Modal
-        open={urbuxModalOpen}
-        onClose={() => setUrbuxModalOpen(false)}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-      >
-        <Card sx={{ maxWidth: '400px' }}>
-          <CardHeader
-            title="Buy UrBux"
-            titleTypographyProps={{ color: 'secondary' }}
-            subheader="Buy in-game items and support your favorite creators"
-            sx={{ paddingBottom: 0.5 }}
-          />
-          <CardActions>
-            <Button startIcon={<GiTwoCoins />}>
-              100 UrBux for $1
-            </Button>
-          </CardActions>
-        </Card>
-      </Modal>
+      <UrBuxModal open={urbuxModalOpen} setOpen={setUrBuxModalOpen} />
       <AppBar position="sticky">
         <Toolbar variant="dense">
           <Stack

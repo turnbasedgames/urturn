@@ -8,6 +8,14 @@ export enum Errors {
   UserNotFound = 'UserNotFound',
 }
 
+export const createPaymentIntent = async (amount: number): Promise<string> => {
+  const { data } = await axios.post('user/create-payment-intent', {
+    currency: 'usd',
+    amount,
+  });
+  return data.clientSecret;
+};
+
 export const getUser = async (firebaseUser: FirebaseUser, upsert: boolean): Promise<User> => {
   let user;
   try {
