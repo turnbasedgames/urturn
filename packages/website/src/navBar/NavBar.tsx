@@ -38,7 +38,6 @@ function NavBar({ user }: Props): React.ReactElement {
         <Button
           color="secondary"
           startIcon={<GiTwoCoins />}
-          sx={{ display: { xs: 'none', sm: 'flex' } }}
           onClick={() => { setUrBuxModalOpen(true); }}
         >
           <Typography>
@@ -46,6 +45,7 @@ function NavBar({ user }: Props): React.ReactElement {
           </Typography>
         </Button>
         <IconButton
+          sx={{ display: { xs: 'none', sm: 'flex' } }}
           onClick={() => {
             navigate('/develop');
           }}
@@ -120,6 +120,7 @@ function NavBar({ user }: Props): React.ReactElement {
               direction="row"
               justifyContent="flex-end"
               alignItems="center"
+              marginLeft={1}
             >
               {userPanel}
             </Stack>
