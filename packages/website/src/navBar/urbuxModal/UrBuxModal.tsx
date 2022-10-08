@@ -29,7 +29,7 @@ function UrBuxModal({ open, setOpen }: UrBuxProps): React.ReactElement {
           </Card>
         )
         : (
-          <Card sx={{ maxWidth: '400px' }}>
+          <Card sx={{ maxWidth: '300px' }}>
             <CardHeader
               title="Buy UrBux"
               titleTypographyProps={{ color: 'secondary' }}
