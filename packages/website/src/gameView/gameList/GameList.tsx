@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Card, CardActionArea, CardContent, Stack, Typography,
-} from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
-import { useNavigate } from 'react-router-dom';
 import { Game } from '@urturn/types-common';
 
-import { getGames } from '../../models/game';
-import CardMediaWithFallback from '../CardMediaWithFallback';
+import { getGame, getGames } from '../../models/game';
 import logger from '../../logger';
+import GameListCard from './GameListCard';
+
+const FEATURED_GAME_IDS = ['626eac7c65667f00160a6b42', '62adfb1b212915000e44e7a8', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42'];
 
 function GameList(): React.ReactElement {
   const [games, setGames] = useState<Game[]>([]);
@@ -19,7 +18,24 @@ function GameList(): React.ReactElement {
     }
     setupGames().catch(logger.error);
   }, []);
-  const navigate = useNavigate();
+
+  const [featuredGames, setFeaturedGames] = useState<Game[]>([]);
+  useEffect(() => {
+    async function setupFeaturedGames(): Promise<void> {
+      const featuredGamesRaw: Game[] = (await Promise.all(
+        FEATURED_GAME_IDS.map(async (gameId) => {
+          try {
+            return await getGame(gameId);
+          } catch (err) {
+            logger.error(err);
+          }
+          return undefined;
+        }),
+      )).filter((game): game is Game => game != null);
+      setFeaturedGames(featuredGamesRaw);
+    }
+    setupFeaturedGames().catch(logger.error);
+  }, []);
 
   return (
     <Stack
@@ -28,29 +44,26 @@ function GameList(): React.ReactElement {
       overflow="auto"
     >
       <Typography color="text.primary">
+        Featured Games
+      </Typography>
+      <Grid
+        container
+        direction="column"
+        sx={{
+          overflowX: 'auto',
+        }}
+      >
+        {featuredGames.map((game) => (<GameListCard game={game} />
+        ))}
+      </Grid>
+      <Typography color="text.primary">
         All Games
       </Typography>
       <Grid
         container
       >
         {games.map((game) => (
-          <Card // TODO: separate component
-            sx={{ margin: 1 }}
-            key={`GameCard-${game.id}`}
-          >
-            <CardActionArea onClick={() => navigate(`/games/${game.id}`)}>
-              <CardMediaWithFallback
-                sx={{ height: '170px', width: '170px' }}
-                game={game}
-              />
-              <CardContent sx={{ padding: 1 }}>
-                <Typography noWrap>{game.name}</Typography>
-                <Typography noWrap variant="caption">
-                  {`by: ${game.creator.username}`}
-                </Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
+          <GameListCard game={game} />
         ))}
       </Grid>
     </Stack>
