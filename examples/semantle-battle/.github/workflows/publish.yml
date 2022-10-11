@@ -1,0 +1,31 @@
+# GitHub Action that builds the frontend folder and pushes the built artifacts to the "published" branch of the repository
+# Urturn will serve the built artifacts from the frontend/build folder on the "published" branch
+name: publish
+
+on:
+  push:
+    branches:
+      - solution
+
+jobs:
+  deploy:
+    concurrency: ci-${{ github.ref }}
+    name: Build artifacts for frontend
+    runs-on: ubuntu-latest    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 16.x
+    - name: npm install and build
+      run: |
+        cd frontend
+        npm install
+        sed -i 's/\/build/# \/build/g' .gitignore
+        CI=false npm run build
+    - name: Deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        folder: .
+        branch: published-solution
