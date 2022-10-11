@@ -1,4 +1,7 @@
 // TODO: setup unit tests for the exported functions
+// TODO: cleanup jupyter notebook to output proper text files
+// TODO: use webpack and put the text files in the backend
+// TODO: UrTurn should cache the entire runner instead of just files
 const Status = Object.freeze({
   PreGame: 'preGame',
   InGame: 'inGame',
@@ -60,7 +63,6 @@ function onPlayerMovePreGame(plr, move, boardGame) {
   // validate the secret
   const valid = isValidWord(secret);
   if (!valid) {
-    console.log(typeof secret);
     throw new Error('The secret word chosen is not known.');
   }
 
@@ -70,7 +72,7 @@ function onPlayerMovePreGame(plr, move, boardGame) {
   // if both players have chosen secrets then the games should start
   // we also have to return the new state so UrTurn can update the boardGame
   // and stream changes to our frontend client
-  if (players.every(({ id }) => id in state.plrToSecretHash)) {
+  if (players.every(({ id }) => id in state.plrToSecretHash) && players.length === 2) {
     state.status = Status.InGame;
     return { state };
   }
@@ -132,7 +134,7 @@ function onPlayerQuit(_, boardGame) {
   const { status } = state;
 
   // The only player left should be considered the winner by default if the game already started.
-  if (players.length === 1 && status === Status.PreGame) {
+  if (players.length === 1 && status !== Status.PreGame) {
     const [winner] = players;
     state.winner = winner;
     return { state, joinable: false, finished: true };
@@ -144,7 +146,7 @@ function onPlayerQuit(_, boardGame) {
   return { joinable: false, finished: true };
 }
 
-export default {
+module.exports = {
   onRoomStart,
   onPlayerJoin,
   onPlayerMove,

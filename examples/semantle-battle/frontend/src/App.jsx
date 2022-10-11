@@ -1,18 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ThemeProvider, Typography, Stack, Snackbar, Alert, Fade,
+  ThemeProvider, Typography, Stack, Snackbar, Alert, Fade, LinearProgress,
 } from '@mui/material';
 
 import client, { events } from '@urturn/client';
 import theme from './theme';
-import { getStatusMsg } from './utils';
+import { getStatusMsg, getWordData } from './utils';
 import PlayerList from './PlayerList';
 import ChooseSecret from './ChooseSecret';
+import InGame from './InGame';
 
 // TODO: remove debug statements
+// TODO: add local caching per session
+// TODO: cool animated background with words bouncing around
+// TODO: add music playlist
 function App() {
+  // loading in word data
+  const [loadingWordData, setLoadingWordData] = useState(true);
+  useEffect(() => {
+    getWordData().then(() => setLoadingWordData(false)).catch(console.error);
+  });
+
   const [boardGame, setBoardGame] = useState(client.getBoardGame() || {});
-  console.log('boardGame:', boardGame);
   useEffect(() => {
     const onStateChanged = (newBoardGame) => {
       setBoardGame(newBoardGame);
@@ -24,7 +33,6 @@ function App() {
   }, []);
 
   const [curPlr, setCurPlr] = useState();
-  console.log('new current plr', curPlr);
   useEffect(() => {
     const setupCurPlr = async () => {
       const newCurPlr = await client.getLocalPlayer();
@@ -33,35 +41,65 @@ function App() {
     setupCurPlr();
   }, []);
 
+  // TODO: add loading chunks here, to fix the "You should neve see this message on startup"
+
   const [recentErrorMsg, setRecentErrorMsg] = useState(null);
 
   const {
     state: {
-      plrToSecretHash,
+      plrToSecretHash = {},
       plrToGuesses,
       status,
       winner,
     } = {},
   } = boardGame;
-  console.log(plrToSecretHash, plrToGuesses);
   const { players = [], finished } = boardGame;
+  const dataLoading = boardGame == null || curPlr == null || loadingWordData;
   const generalStatus = getStatusMsg({
-    status, winner, finished, curPlr, players, plrToSecretHash,
+    status, winner, finished, curPlr, players, plrToSecretHash, dataLoading,
   });
-  // TODO: cool animated background with words bouncing around
+  const plrToStatus = players.reduce((prev, cur) => {
+    if (status === 'preGame' && plrToSecretHash[cur.id] != null) {
+      prev.set(cur.id, { message: 'ready' });
+    }
+    return prev;
+  }, new Map());
+
   return (
     <ThemeProvider theme={theme}>
-      <Stack height="100vh" spacing={1} justifyContent="space-around">
+      <Stack height="100vh" spacing={1} justifyContent={status === 'inGame' ? 'start' : 'space-around'}>
+        {status !== 'inGame' && (
         <Stack>
           <Typography variant="h3" textAlign="center" color="text.primary">Semantle Battle</Typography>
           <Typography variant="subtitle1" textAlign="center" color="text.primary">A UrTurn Classic</Typography>
         </Stack>
-        <Stack direction="column">
+        )}
+        <Stack direction="column" sx={{ marginTop: 1 }}>
           <Typography textAlign="center" color="text.primary">{generalStatus}</Typography>
-          <Stack margin={2} spacing={1} direction="row" justifyContent="center">
-            {status === 'preGame' && !(curPlr?.id in plrToSecretHash) && <ChooseSecret setRecentErrorMsg={setRecentErrorMsg} />}
-            <PlayerList players={players} />
-          </Stack>
+          {dataLoading ? <LinearProgress />
+            : (
+              <Stack margin={2} spacing={1} direction="row" justifyContent="center">
+                {status === 'preGame' && !(curPlr?.id in plrToSecretHash)
+                && (
+                  <>
+                    <ChooseSecret
+                      setRecentErrorMsg={setRecentErrorMsg}
+                    />
+                    <PlayerList players={players} plrToStatus={plrToStatus} />
+                  </>
+                )}
+                {status === 'inGame' && (
+                <InGame
+                  players={players}
+                  curPlr={curPlr}
+                  plrToSecretHash={plrToSecretHash}
+                  plrToGuesses={plrToGuesses}
+                  setRecentErrorMsg={setRecentErrorMsg}
+                />
+                )}
+                {/* TODO: need to put the other player's secret when they win the game */}
+              </Stack>
+            )}
         </Stack>
         <Stack direction="row">
           {/* TODO: put about and other links
