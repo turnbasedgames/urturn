@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { connectToChild } from 'penpal';
 import axios from 'axios';
 
@@ -9,7 +9,6 @@ import PlayerMenu from './PlayerMenu';
 function RoomPlayer({
   user, src, setChildClient, makeMove, quitRoom,
 }: RoomPlayerProps): React.ReactElement {
-  // TODO: handle memoization of the iframe here
   const iframeRef = useCallback((iframe: HTMLIFrameElement | null) => {
     if (iframe != null) {
       // eslint-disable-next-line no-param-reassign
@@ -21,6 +20,7 @@ function RoomPlayer({
             return { id: user.id, username: user.username };
           },
           async makeMove(move: any) {
+            console.log('roomPlayer: make move was triggered');
             try {
               await makeMove(move);
               return { success: true };
@@ -45,16 +45,20 @@ function RoomPlayer({
     }
   }, []);
 
+  const iframeMemo = useMemo(() => (
+    <iframe
+      ref={iframeRef}
+      title="gameFrame"
+      sandbox="allow-scripts allow-forms allow-same-origin"
+      id="gameFrame"
+      style={{ height: '100vh', width: '100%', border: 'none' }}
+    />
+  ), [src, user.id]);
+
   return (
     <>
       <PlayerMenu quitRoom={quitRoom} />
-      <iframe
-        ref={iframeRef}
-        title="gameFrame"
-        sandbox="allow-scripts allow-forms allow-same-origin"
-        id="gameFrame"
-        style={{ height: '100vh', width: '100%', border: 'none' }}
-      />
+      {iframeMemo}
     </>
   );
 }
