@@ -114,6 +114,9 @@ function GamePlayer(): React.ReactElement {
     );
   }, [room, userContext.user]);
 
+  if (room == null || userContext.user == null) {
+    return (<LinearProgress />);
+  }
   if (roomId == null || room?.game == null) {
     return (
       <Typography
@@ -125,10 +128,6 @@ function GamePlayer(): React.ReactElement {
         Game not found
       </Typography>
     );
-  }
-
-  if (room == null || userContext.user == null) {
-    return (<LinearProgress />);
   }
   return iframeMemo;
 }
