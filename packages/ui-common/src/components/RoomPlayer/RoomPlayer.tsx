@@ -9,6 +9,7 @@ import PlayerMenu from './PlayerMenu';
 function RoomPlayer({
   user, src, setChildClient, makeMove, quitRoom,
 }: RoomPlayerProps): React.ReactElement {
+  // TODO: handle memoization of the iframe here
   const iframeRef = useCallback((iframe: HTMLIFrameElement | null) => {
     if (iframe != null) {
       // eslint-disable-next-line no-param-reassign

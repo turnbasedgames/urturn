@@ -36,6 +36,7 @@ function getIframeSrc(game: Game): string {
 function GamePlayer(): React.ReactElement {
   const { roomId } = useParams();
   const [room, setRoom] = useState<Room | undefined>();
+  const [boardGame, setBoardGame] = useState([]);
   const userContext = useContext(UserContext);
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
@@ -60,8 +61,9 @@ function GamePlayer(): React.ReactElement {
     }
 
     const curRoom = room;
-    function handleNewBoardGame(boardGame: any): void {
-      childClient.stateChanged(boardGame);
+    function handleNewBoardGame(newBoardGame: any): void {
+      childClient.stateChanged(newBoardGame);
+      setBoardGame(newBoardGame);
     }
 
     async function setupRoomSocket(): Promise<void> {
@@ -71,7 +73,7 @@ function GamePlayer(): React.ReactElement {
           logger.error('error trying to watch room', res.error);
         }
       });
-      childClient.stateChanged(generateBoardGame(curRoom, curRoom.latestState));
+      handleNewBoardGame(generateBoardGame(curRoom, curRoom.latestState));
     }
 
     setupRoomSocket().catch(logger.error);
