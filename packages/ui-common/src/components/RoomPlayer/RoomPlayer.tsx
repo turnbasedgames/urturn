@@ -20,7 +20,6 @@ function RoomPlayer({
             return { id: user.id, username: user.username };
           },
           async makeMove(move: any) {
-            console.log('roomPlayer: make move was triggered');
             try {
               await makeMove(move);
               return { success: true };
