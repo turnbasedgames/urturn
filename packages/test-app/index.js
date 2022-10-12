@@ -19,7 +19,7 @@ export default {
     // This is duplicated from src/boardGame.js CREATOR_EDITABLE_FIELDS
     // TODO: we can use that variable if this file turns into an es6 file
     return ['joinable', 'finished', 'state'].reduce((prev, field) => {
-      if (move[field]) {
+      if (field in move) {
         // allow a move to change any CREATOR_EDITABLE_FIELD for testing
         return { ...prev, [field]: move[field] };
       }

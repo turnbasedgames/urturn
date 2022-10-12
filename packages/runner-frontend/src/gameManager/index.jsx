@@ -6,6 +6,7 @@ import {
 import ClearIcon from '@mui/icons-material/Clear';
 import ReactJson from 'react-json-view';
 import Editor from '@monaco-editor/react';
+import axios from 'axios';
 import {
   addPlayer, removePlayer, useGameState,
 } from '../data';
@@ -86,8 +87,23 @@ function GameManager() {
               size="small"
               variant="outlined"
               onClick={async () => {
-                const player = await addPlayer();
-                openPlayerTab(player);
+                try {
+                  const player = await addPlayer();
+                  openPlayerTab(player);
+                } catch (err) {
+                  let errorMsg = 'Unknown Error Happened';
+                  if (
+                    axios.isAxiosError(err) && (err.response != null)
+                  ) {
+                    const data = err.response?.data;
+                    if (data?.name === 'CreatorError') {
+                      errorMsg = data?.creatorError.message;
+                    } else {
+                      errorMsg = data?.message;
+                    }
+                  }
+                  setRecentErrorMsg(errorMsg);
+                }
               }}
             >
               Add Player
@@ -108,7 +124,7 @@ function GameManager() {
             overflow: 'auto',
           }}
           >
-            {editMode
+            {!loading && (editMode
               ? (
                 <Editor
                   onChange={(jsonStr) => setEditingJSON(jsonStr)}
@@ -124,7 +140,7 @@ function GameManager() {
                   theme="twilight"
                   src={gameState}
                 />
-              )}
+              ))}
           </Paper>
           <Paper sx={{
             padding: 1,
@@ -144,9 +160,11 @@ function GameManager() {
                 variant="selectedMenu"
               >
                 {players.map((player) => (
-                  <MenuItem onClick={() => {
-                    openPlayerTab(player);
-                  }}
+                  <MenuItem
+                    key={player.id}
+                    onClick={() => {
+                      openPlayerTab(player);
+                    }}
                   >
                     <Typography
                       color="text.primary"
