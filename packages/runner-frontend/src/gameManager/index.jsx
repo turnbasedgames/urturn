@@ -17,7 +17,7 @@ function GameManager() {
     window.open(`/player/${player.id}`, '_blank').focus();
   };
 
-  const [gameState, updateGameState, loading] = useGameState();
+  const [gameState, updateGameState, refreshGameState, loading] = useGameState();
   const [editingJSON, setEditingJSON] = useState('');
   const [recentErrorMsg, setRecentErrorMsg] = useState(null);
   const { players = [] } = gameState || {};
@@ -61,6 +61,16 @@ function GameManager() {
             Current Game State
           </Typography>
           <Stack spacing={1} direction="row">
+            {!editMode && (
+            <Button
+              size="small"
+              variant="outlined"
+              color="warning"
+              onClick={() => { refreshGameState(); }}
+            >
+              Restart
+            </Button>
+            )}
             {editMode
             && (
             <Button
