@@ -1,9 +1,10 @@
 import React, {
-  useEffect, useState, useMemo, useContext,
+  useEffect, useState, useContext,
 } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LinearProgress, Typography } from '@mui/material';
 import {
+  BoardGame,
   Game, Room, RoomUser, UnwatchRoomRes, User, WatchRoomRes,
 } from '@urturn/types-common';
 
@@ -36,6 +37,7 @@ function getIframeSrc(game: Game): string {
 function GamePlayer(): React.ReactElement {
   const { roomId } = useParams();
   const [room, setRoom] = useState<Room | undefined>();
+  const [boardGame, setBoardGame] = useState<BoardGame | undefined>();
   const userContext = useContext(UserContext);
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
@@ -60,8 +62,9 @@ function GamePlayer(): React.ReactElement {
     }
 
     const curRoom = room;
-    function handleNewBoardGame(boardGame: any): void {
-      childClient.stateChanged(boardGame);
+    function handleNewBoardGame(newBoardGame: any): void {
+      childClient.stateChanged(newBoardGame);
+      setBoardGame(newBoardGame);
     }
 
     async function setupRoomSocket(): Promise<void> {
@@ -71,7 +74,7 @@ function GamePlayer(): React.ReactElement {
           logger.error('error trying to watch room', res.error);
         }
       });
-      childClient.stateChanged(generateBoardGame(curRoom, curRoom.latestState));
+      handleNewBoardGame(generateBoardGame(curRoom, curRoom.latestState));
     }
 
     setupRoomSocket().catch(logger.error);
@@ -85,39 +88,10 @@ function GamePlayer(): React.ReactElement {
     };
   }, [childClient]);
 
-  const iframeMemo = useMemo(() => {
-    if (userContext.user == null || roomId == null || room == null || room.game == null) {
-      // disabled because typescript typing thinks iframeMemo can be undefined otherwise
-      // eslint-disable-next-line react/jsx-no-useless-fragment
-      return <></>;
-    }
-    return (
-      <RoomPlayer
-        src={getIframeSrc(room?.game)}
-        user={userContext.user}
-        setChildClient={setChildClient}
-        makeMove={async (move: any) => {
-          await makeMove(room.id, move);
-        }}
-        quitRoom={async () => {
-          try {
-            await quitRoom(room.id);
-          } catch (err) {
-            enqueueSnackbar('Error when trying to quit room', {
-              variant: 'error',
-              autoHideDuration: 3000,
-            });
-          }
-          navigate(`/games${(room.game != null) ? `/${room.game.id}` : ''}`);
-        }}
-      />
-    );
-  }, [room, userContext.user]);
-
   if (room == null || userContext.user == null) {
     return (<LinearProgress />);
   }
-  if (roomId == null || room?.game == null) {
+  if (roomId == null || room.game == null) {
     return (
       <Typography
         marginTop="10px"
@@ -129,7 +103,32 @@ function GamePlayer(): React.ReactElement {
       </Typography>
     );
   }
-  return iframeMemo;
+  return (
+    <RoomPlayer
+      src={getIframeSrc(room.game)}
+      user={userContext.user}
+      setChildClient={setChildClient}
+      makeMove={async (move: any) => {
+        await makeMove(room.id, move);
+      }}
+      quitRoom={async () => {
+        try {
+          const noOp = boardGame == null
+           || boardGame.finished
+           || boardGame.players.every(({ id }: RoomUser) => id !== userContext.user?.id);
+          if (!noOp) {
+            await quitRoom(room.id);
+          }
+        } catch (err) {
+          enqueueSnackbar('Error when trying to quit room', {
+            variant: 'error',
+            autoHideDuration: 3000,
+          });
+        }
+        navigate(`/games${(room.game != null) ? `/${room.game.id}` : ''}`);
+      }}
+    />
+  );
 }
 
 export default GamePlayer;

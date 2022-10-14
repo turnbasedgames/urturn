@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { connectToChild } from 'penpal';
 import axios from 'axios';
 
@@ -44,16 +44,20 @@ function RoomPlayer({
     }
   }, []);
 
+  const iframeMemo = useMemo(() => (
+    <iframe
+      ref={iframeRef}
+      title="gameFrame"
+      sandbox="allow-scripts allow-forms allow-same-origin"
+      id="gameFrame"
+      style={{ height: '100vh', width: '100%', border: 'none' }}
+    />
+  ), [src, user.id]);
+
   return (
     <>
       <PlayerMenu quitRoom={quitRoom} />
-      <iframe
-        ref={iframeRef}
-        title="gameFrame"
-        sandbox="allow-scripts allow-forms allow-same-origin"
-        id="gameFrame"
-        style={{ height: '100vh', width: '100%', border: 'none' }}
-      />
+      {iframeMemo}
     </>
   );
 }
