@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   ThemeProvider, Typography, Stack, Box, List, ListItem, ListItemText, Paper, Snackbar, Alert, Fade,
+  Button,
 } from '@mui/material';
 
 import client, { events } from '@urturn/client';
@@ -86,7 +87,8 @@ function App() {
             {board.map((row, rowNum) => (
               <Stack key={getRowKey(row, rowNum)} direction="row">
                 {row.map((val, colNum) => (
-                  <Stack
+                  <Button
+                    disabled={val != null}
                     key={getColKey(val, colNum)}
                     direction="row"
                     justifyContent="center"
@@ -97,8 +99,7 @@ function App() {
                       height: '100px',
                       width: '100px',
                     }}
-                    onClick={async (event) => {
-                      event.preventDefault();
+                    onClick={async () => {
                       const move = { x: rowNum, y: colNum };
                       const { error } = await client.makeMove(move);
                       if (error) {
@@ -106,17 +107,20 @@ function App() {
                       }
                     }}
                   >
-                    <Typography color="text.primary" fontSize="60px">
+                    <Typography
+                      color="text.primary"
+                      fontSize="60px"
+                    >
                       {val}
                     </Typography>
-                  </Stack>
+                  </Button>
                 ))}
               </Stack>
             ))}
           </Box>
           <Paper>
             <Stack padding={1} sx={{ minWidth: '100px' }}>
-              <Typography disableGutter color="text.primary">Players</Typography>
+              <Typography color="text.primary">Players</Typography>
               <List dense disablePadding padding={0}>
                 {players.map((player, ind) => (
                   <ListItem dense disablePadding key={player.id}>
