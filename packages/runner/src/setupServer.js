@@ -62,6 +62,11 @@ async function setupServer({ apiPort }) {
 
   app.post('/player', (_, res) => {
     let boardGameContender = JSON.parse(JSON.stringify(boardGame));
+    if (!boardGameContender.joinable) {
+      res.status(StatusCodes.BAD_REQUEST).json({ message: `Cannot add player to this room because it is not joinable (boardGame.joinable=${boardGameContender.joinable}).` });
+      return;
+    }
+
     const username = `user_${boardGame.playerIdCounter}`;
     const id = `id_${boardGame.playerIdCounter}`;
     const player = {
