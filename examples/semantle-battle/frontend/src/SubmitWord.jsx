@@ -6,7 +6,6 @@ import client from '@urturn/client';
 import PropTypes from 'prop-types';
 import { getErrorMessageForWord } from './utils';
 
-// TODO: fix issue where text field does not stay focused when submitting
 function SubmitWord({
   setRecentErrorMsg, createMoveFn, submitText, textFieldDefault, dense,
 }) {
@@ -56,6 +55,7 @@ function SubmitWord({
           doesn't cause the submit button to bounce while typing. */}
       <Stack direction={dense ? 'row' : 'column'} justifyContent="space-between" padding={1} sx={{ minWidth: '100px', minHeight: dense ? '75px' : '130px' }}>
         <TextField
+          inputRef={(input) => input && input.focus()}
           autoFocus
           fullWidth
           disabled={loading}

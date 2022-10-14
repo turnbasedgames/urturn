@@ -9,6 +9,7 @@ import { getStatusMsg, getWordData } from './utils';
 import PlayerList from './PlayerList';
 import ChooseSecret from './ChooseSecret';
 import InGame from './InGame';
+import EndGame from './EndGame';
 
 // TODO: remove debug statements
 // TODO: add local caching per session
@@ -97,7 +98,8 @@ function App() {
                   setRecentErrorMsg={setRecentErrorMsg}
                 />
                 )}
-                {/* TODO: need to put the other player's secret when they win the game */}
+                {status === 'endGame' && (<EndGame players={players} curPlr={curPlr} plrToSecretHash={plrToSecretHash} />
+                )}
               </Stack>
             )}
         </Stack>
