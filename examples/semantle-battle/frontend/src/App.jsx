@@ -49,7 +49,7 @@ function App() {
   const {
     state: {
       plrToSecretHash = {},
-      plrToGuesses,
+      plrToGuessToInfo,
       status,
       winner,
     } = {},
@@ -94,7 +94,7 @@ function App() {
                   players={players}
                   curPlr={curPlr}
                   plrToSecretHash={plrToSecretHash}
-                  plrToGuesses={plrToGuesses}
+                  plrToGuessToInfo={plrToGuessToInfo}
                   setRecentErrorMsg={setRecentErrorMsg}
                 />
                 )}

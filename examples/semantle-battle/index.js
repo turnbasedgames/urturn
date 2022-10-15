@@ -26,7 +26,7 @@ function onRoomStart() {
     // serializable object.
     state: {
       plrToSecretHash: {},
-      plrToGuesses: {},
+      plrToGuessToInfo: {},
       status: Status.PreGame,
       winner: null,
     },
@@ -37,8 +37,8 @@ function onPlayerJoin(plr, boardGame) {
   // UrTurn provides the boardGame object which let's us know who is in the room
   const { players, state } = boardGame;
 
-  // set guess to empty array
-  state.plrToGuesses[plr.id] = [];
+  // set guess to an empty object
+  state.plrToGuessToInfo[plr.id] = {};
 
   // when the number of players is equal to 2, then we can start the game
   if (players.length === 2) {
@@ -94,8 +94,12 @@ function onPlayerMoveInGame(plr, move, boardGame) {
     throw new Error('Guess is not a known word.');
   }
 
-  // append guess to list of guesses for the player
-  state.plrToGuesses[plr.id].push(guess);
+  // set the guessInfo for the provided guess
+  const date = new Date();
+  const guessInfo = state.plrToGuessToInfo[plr.id][guess] ?? { count: 0 };
+  guessInfo.lastUpdateTime = date.toISOString();
+  guessInfo.count += 1;
+  state.plrToGuessToInfo[plr.id][guess] = guessInfo;
 
   // see if winner found
   const guessHash = hashSecret(guess);

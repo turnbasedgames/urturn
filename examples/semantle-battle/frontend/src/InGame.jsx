@@ -8,24 +8,24 @@ import {
 } from './utils';
 
 function InGame({
-  players, curPlr, setRecentErrorMsg, plrToSecretHash, plrToGuesses,
+  players, curPlr, setRecentErrorMsg, plrToSecretHash, plrToGuessToInfo,
 }) {
-  const guesses = plrToGuesses[curPlr.id];
+  const guessToInfo = plrToGuessToInfo[curPlr.id];
   const secret = plrToSecretHash[curPlr.id];
-  const [guessesData, setGuessesData] = useState([]);
+  const [guessesData, setGuessesData] = useState({ sortedGuesses: [] });
 
   const otherPlr = getOtherPlayer(players, curPlr);
   const otherSecret = plrToSecretHash[otherPlr.id];
-  const otherGuesses = plrToGuesses[otherPlr.id];
-  const [otherGuessesData, setOtherGuessesData] = useState([]);
+  const otherGuessToInfo = plrToGuessToInfo[otherPlr.id];
+  const [otherGuessesData, setOtherGuessesData] = useState({ sortedGuesses: [] });
 
   useEffect(() => {
-    getGuessesData(guesses, otherSecret).then(setGuessesData).catch(console.error);
-  }, [guesses]);
+    getGuessesData(guessToInfo, otherSecret).then(setGuessesData).catch(console.error);
+  }, [guessToInfo]);
 
   useEffect(() => {
-    getGuessesData(otherGuesses, secret).then(setOtherGuessesData).catch(console.error);
-  }, [otherGuesses]);
+    getGuessesData(otherGuessToInfo, secret).then(setOtherGuessesData).catch(console.error);
+  }, [otherGuessToInfo]);
 
   return (
     <Stack direction="row" spacing={2}>
@@ -62,7 +62,10 @@ InGame.propTypes = {
   setRecentErrorMsg: PropTypes.func.isRequired,
   curPlr: PropTypes.shape({ id: PropTypes.string, username: PropTypes.string }).isRequired,
   plrToSecretHash: PropTypes.objectOf(PropTypes.string).isRequired,
-  plrToGuesses: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.string)).isRequired,
+  plrToGuessToInfo: PropTypes.objectOf(PropTypes.objectOf(PropTypes.shape({
+    lastUpdateTime: PropTypes.string,
+    count: PropTypes.number,
+  }))).isRequired,
 };
 
 export default InGame;

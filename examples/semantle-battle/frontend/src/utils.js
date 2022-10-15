@@ -21,7 +21,7 @@ const processChunks = async (lines, func) => {
   }
 };
 
-const wordToNearestWordPairsPromise = fetch('data/similarity-pairs.txt')
+const wordToNearestWordPairsPromise = fetch(`data/similarity-pairs${process.env.REACT_APP_DEV === 'true' ? '-test' : ''}.txt`)
   .then((res) => res.text()).then((rawData) => {
     const wordToNearestWordPairs = new Map();
     rawData.split(/\r?\n/).forEach((line) => {
@@ -35,7 +35,7 @@ const wordToNearestWordPairsPromise = fetch('data/similarity-pairs.txt')
     return wordToNearestWordPairs;
   });
 
-const wordToVecPromise = fetch('data/word-to-vec.txt').then((res) => res.text()).then((rawData) => {
+const wordToVecPromise = fetch(`data/word-to-vec${process.env.REACT_APP_DEV === 'true' ? '-test' : ''}.txt`).then((res) => res.text()).then((rawData) => {
   const wordToVec = new Map();
   const lines = rawData.split(/\r?\n/);
   return processChunks(lines, (line) => {
@@ -132,13 +132,31 @@ export const getGettingCloseMsg = (wordToNearestWordPairs, secret, guess) => {
 
 export const getOtherPlayer = (players, curPlr) => players.find(({ id }) => id !== curPlr.id);
 
-export const getGuessesData = (guesses, secret) => getWordData()
-  .then(([wordToNearestWordPairs, wordToVec]) => guesses.map(
-    (guess) => ({
-      guess,
-      similarity: getSimilarityScore(wordToVec, guess, secret).toFixed(3),
-      closenessMsg: getGettingCloseMsg(wordToNearestWordPairs, secret, guess),
-    }),
-    // TODO: if guess is the latest we should show that first
-    // TODO: handle duplicates, we can store timing of last guesses for each word
-  ).sort((a, b) => b.similarity - a.similarity));
+export const getGuessesData = (guessToInfo, secret) => getWordData()
+  .then(([wordToNearestWordPairs, wordToVec]) => {
+    const guessEntries = Object.entries(guessToInfo);
+
+    const sortedGuesses = guessEntries.map(
+      ([guess, { count, lastUpdateTime }]) => ({
+        guess,
+        count,
+        lastUpdateTime,
+        similarity: getSimilarityScore(wordToVec, guess, secret),
+        closenessMsg: getGettingCloseMsg(wordToNearestWordPairs, secret, guess),
+      }),
+    ).sort((a, b) => b.similarity - a.similarity);
+    const latestGuess = sortedGuesses
+      .reduce(
+        (
+          curLatestGuess,
+          curGuess,
+        ) => (curLatestGuess.lastUpdateTime > curGuess.lastUpdateTime
+          ? curLatestGuess : curGuess),
+        guessEntries[0],
+      );
+    console.log({ latestGuess, sortedGuesses });
+    return {
+      latestGuess,
+      sortedGuesses,
+    };
+  });

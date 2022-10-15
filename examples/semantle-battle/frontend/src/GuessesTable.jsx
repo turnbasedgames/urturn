@@ -5,6 +5,7 @@ import {
 import PropTypes from 'prop-types';
 
 function GuessesTable({ dense, guessesData }) {
+  const { latestGuess, sortedGuesses } = guessesData;
   return (
     <TableContainer component={Paper} sx={{ marginTop: 1, flexGrow: 1 }}>
       <Table stickyHeader sx={{ minWidth: dense ? 100 : { xs: 100, sm: 400 } }} size="small">
@@ -17,16 +18,28 @@ function GuessesTable({ dense, guessesData }) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {guessesData.map(({ guess, similarity, closenessMsg }, ind) => (
+          {(latestGuess != null) && (sortedGuesses?.length > 1) && (
+          <TableRow
+            key="latest-guess"
+          >
+            <TableCell scope="row" sx={{ marginButton: 1 }}>
+              ( latest )
+            </TableCell>
+            <TableCell align="right" sx={{ color: '#CE93D8' }}>{latestGuess.guess}</TableCell>
+            <TableCell align="right">{latestGuess.similarity.toFixed(3)}</TableCell>
+            <TableCell align="right">{latestGuess.closenessMsg}</TableCell>
+          </TableRow>
+          )}
+          {sortedGuesses.map(({ guess, similarity, closenessMsg }, ind) => (
             <TableRow
               key={guess}
-              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+              sx={{ '& td': { border: 0 } }}
             >
-              <TableCell component="th" scope="row">
+              <TableCell scope="row">
                 {ind}
               </TableCell>
               <TableCell align="right">{guess}</TableCell>
-              <TableCell align="right">{similarity}</TableCell>
+              <TableCell align="right">{similarity.toFixed(3)}</TableCell>
               <TableCell align="right">{closenessMsg}</TableCell>
             </TableRow>
           ))}
@@ -36,12 +49,16 @@ function GuessesTable({ dense, guessesData }) {
   );
 }
 
+const guessShape = PropTypes.shape({
+  guess: PropTypes.string,
+  similarity: PropTypes.number,
+  closenessMsg: PropTypes.string,
+});
 GuessesTable.propTypes = {
-  guessesData: PropTypes.arrayOf(PropTypes.shape({
-    guess: PropTypes.string,
-    similarity: PropTypes.number,
-    closenessMsg: PropTypes.string,
-  })).isRequired,
+  guessesData: PropTypes.shape({
+    latestGuess: guessShape,
+    sortedGuesses: PropTypes.arrayOf(guessShape),
+  }).isRequired,
   dense: PropTypes.bool,
 };
 
