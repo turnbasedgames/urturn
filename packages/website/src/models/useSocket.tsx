@@ -45,10 +45,11 @@ const useSocket = (user: User | undefined): [Socket | undefined, boolean, string
     setSocket(newSocket);
 
     return () => {
+      logger.info('force socket to be disconnected as we are closing it');
+      newSocket.close();
       newSocket.off('connect');
       newSocket.off('disconnect');
       newSocket.off('pong');
-      newSocket.close();
     };
   }, [user]);
 
