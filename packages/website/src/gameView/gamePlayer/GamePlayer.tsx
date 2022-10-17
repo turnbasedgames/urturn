@@ -16,7 +16,7 @@ import {
 import { UserContext } from '../../models/user';
 import logger from '../../logger';
 import { GITHACK_BASE_URL } from '../../util';
-import { socket } from '../../models/util';
+import useSocket from '../../models/useSocket';
 
 const shouldJoinPrivateRoom = (user?: User, room?: Room): boolean => Boolean(
   (room != null)
@@ -55,29 +55,26 @@ function GamePlayer(): React.ReactElement {
     setupRoom().catch(logger.error);
   }, [userContext.user]);
 
+  const [socket] = useSocket(userContext.user);
   const [childClient, setChildClient] = useState<any | null>();
   useEffect(() => {
-    if (childClient == null || room == null || room.game == null) {
+    if (childClient == null || room == null || room.game == null || socket == null) {
       return () => {};
     }
 
-    const curRoom = room;
     function handleNewBoardGame(newBoardGame: any): void {
       childClient.stateChanged(newBoardGame);
       setBoardGame(newBoardGame);
     }
 
-    async function setupRoomSocket(): Promise<void> {
-      socket.on('room:latestState', handleNewBoardGame);
-      socket.emit('watchRoom', { roomId }, (res: null | WatchRoomRes) => {
-        if (res != null) {
-          logger.error('error trying to watch room', res.error);
-        }
-      });
-      handleNewBoardGame(generateBoardGame(curRoom, curRoom.latestState));
-    }
+    socket.on('room:latestState', handleNewBoardGame);
+    socket.emit('watchRoom', { roomId }, (res: null | WatchRoomRes) => {
+      if (res != null) {
+        logger.error('error trying to watch room', res.error);
+      }
+    });
+    handleNewBoardGame(generateBoardGame(room, room.latestState));
 
-    setupRoomSocket().catch(logger.error);
     return () => {
       socket.emit('unwatchRoom', { roomId }, (res: null | UnwatchRoomRes) => {
         if (res != null) {
@@ -86,9 +83,12 @@ function GamePlayer(): React.ReactElement {
       });
       socket.off('room:latestState', handleNewBoardGame);
     };
-  }, [childClient]);
 
-  if (room == null || userContext.user == null) {
+  // TODO: does this socket close whenever we leave the game?
+  // TODO: what happen if you log out on a different tab?
+  }, [childClient, socket]);
+
+  if (room == null || userContext.user == null || socket == null) {
     return (<LinearProgress />);
   }
   if (roomId == null || room.game == null) {
