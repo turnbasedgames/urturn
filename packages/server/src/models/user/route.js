@@ -87,7 +87,7 @@ router.post('/create-payment-intent', auth, asyncHandler(async (req, res) => {
       clientSecret: paymentIntent.client_secret,
     });
   } catch (error) {
-    req.log.error(`An error occurred while hitting stripe's API upon creating payment intent ${error.message}`);
+    req.log.error('An error occurred while hitting stripe\'s API upon creating payment intent', error);
     const err = new Error('internal server error');
     err.status = StatusCodes.INTERNAL_SERVER_ERROR;
     throw err;

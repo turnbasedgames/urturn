@@ -1,6 +1,7 @@
 const { LoggingWinston } = require('@google-cloud/logging-winston');
 const { createLogger, format, transports } = require('winston');
 
+const { APP_NAME } = process.env;
 const loggingWinston = new LoggingWinston();
 
 const consoleOptions = {
@@ -14,7 +15,8 @@ const consoleOptions = {
       }) => {
         const isEmptyObj = JSON.stringify(metadata, null, 2) === '{}';
         const metadataStr = isEmptyObj ? '' : `\n${JSON.stringify(metadata, null, 2)}`;
-        return `${timestamp.replace('T', ' ')} ${level}: ${message}${metadataStr}`;
+        const appNameStr = APP_NAME == null ? '' : ` ${APP_NAME}`;
+        return `${timestamp.replace('T', ' ')}$${appNameStr} ${level}: ${message}${metadataStr}`;
       },
     ),
   ),

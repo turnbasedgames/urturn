@@ -18,7 +18,9 @@ function waitFor(testAsyncFunc, timeoutMs = 10000, bufferMs = 200, errorMsg = 'T
       } catch (err) {
         if (Date.now() > timeoutThreshold) {
           clearInterval(interval);
-          rej(new Error(`${errorMsg} after ${timeoutMs}ms`));
+          const timeoutError = new Error(`${errorMsg} after ${timeoutMs}ms`);
+          timeoutError.error = err;
+          rej(timeoutError);
         }
       }
     }, bufferMs);

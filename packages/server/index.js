@@ -19,13 +19,12 @@ const { setupRedis, pubClient, subClient } = require('./src/setupRedis');
 const PORT = process.env.PORT || 8080;
 
 const main = async () => {
+  logger.info('Starting server...');
   const app = express();
   app.use(await setupHttpLogger());
   const httpServer = http.createServer(app);
   const db = setupDB();
-  const io = socketio(httpServer, {
-    transports: ['websocket'],
-  });
+  const io = socketio(httpServer);
 
   await setupRedis({ io });
   setupSocketio(io);
@@ -52,6 +51,7 @@ const main = async () => {
   app.use(errors());
   app.use(errorHandler);
 
+  logger.info(`attempting to listen on Port ${PORT}`);
   httpServer.listen(PORT, () => {
     logger.info(`listening on Port ${PORT}`);
   });
@@ -75,7 +75,9 @@ const main = async () => {
   };
 };
 
-const cleanupAppPromise = main();
+const cleanupAppPromise = main().catch((err) => {
+  logger.error('error occurred when starting app', err);
+});
 
 ['SIGINT', 'SIGTERM'].forEach((sig) => {
   process.on(sig, () => {

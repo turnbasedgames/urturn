@@ -20,6 +20,9 @@ async function main() {
   if (process.env.STRIPE_WEBHOOK_SECRET) {
     env.STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
   }
+  if (process.env.APP_NAME) {
+    env.APP_NAME = process.env.APP_NAME;
+  }
 
   const [envWithMongo, cleanupMongoDB] = await setupMongoDB();
   const [envWithRedis, cleanupRedis] = await setupRedis();
