@@ -13,8 +13,6 @@ const useSocket = (user: User | undefined): [Socket | undefined, boolean, string
     if (user == null) { return () => {}; }
 
     const newSocket = io(API_URL, {
-      // main-229: we should allow clients to fall back on long polling
-      transports: ['websocket'],
       auth: (cb) => {
         user.firebaseUser.getIdToken().then((token: string) => {
           // disabled because eslint expects callback to be in format cb(error, result)
