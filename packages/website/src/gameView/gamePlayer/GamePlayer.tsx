@@ -83,9 +83,6 @@ function GamePlayer(): React.ReactElement {
       });
       socket.off('room:latestState', handleNewBoardGame);
     };
-
-  // TODO: does this socket close whenever we leave the game?
-  // TODO: what happen if you log out on a different tab?
   }, [childClient, socket]);
 
   if (room == null || userContext.user == null || socket == null) {
