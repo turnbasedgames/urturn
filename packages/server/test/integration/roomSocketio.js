@@ -3,6 +3,7 @@ const { promisify } = require('util');
 const { StatusCodes } = require('http-status-codes');
 const io = require('socket.io-client');
 
+const logger = require('../../src/logger');
 const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
 const {
@@ -23,16 +24,39 @@ const socketConfigs = [{
   config: {},
 }];
 
-async function createSocketAndWatchRoom(baseURL, room, socketConfig) {
+function createSocket(baseURL, socketConfig) {
   const socket = io(baseURL, socketConfig);
-  const emitAsync = promisify(socket.emit).bind(socket);
-  await emitAsync('watchRoom', { roomId: room.id });
-  socket.messageHistory = [];
-  socket.on('room:latestState', (message) => socket.messageHistory.push(message));
+  socket.data = {};
+  socket.data.messageHistory = [];
+  socket.data.connectErrors = [];
+  socket.on('room:latestState', (message) => socket.data.messageHistory.push(message));
+  socket.on('connect_error', (err) => {
+    socket.data.connectErrors.push(err);
+    logger.error('error occurred when trying to open socket connection', err);
+  });
   return socket;
 }
 
-function waitForNextEvent({ messageHistory }) {
+async function createSocketAndWatchRoom(baseURL, room, socketConfig) {
+  const socket = createSocket(baseURL, socketConfig);
+  const emitAsync = promisify(socket.emit).bind(socket);
+  await emitAsync('watchRoom', { roomId: room.id });
+  return socket;
+}
+
+function waitForNextConnectError({ data: { connectErrors } }) {
+  return waitFor(() => {
+    if (connectErrors.length > 0) {
+      return connectErrors.shift();
+    }
+    throw Error('No messages received!');
+  },
+  1000,
+  200,
+  "Didn't get any connect errors");
+}
+
+function waitForNextEvent({ data: { messageHistory } }) {
   return waitFor(() => {
     if (messageHistory.length > 0) {
       return messageHistory.shift();
@@ -76,7 +100,16 @@ socketConfigs.forEach(({ name, config }) => {
     const game = await createGameAndAssert(t, api, userCredOne, userOne);
     const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
     const sockets = await Promise.all(
-      [...Array(10).keys()].map(() => createSocketAndWatchRoom(baseURL, room, config)),
+      [...Array(10).keys()].map((ind) => createSocketAndWatchRoom(baseURL, room, {
+        ...config,
+        auth: (cb) => {
+          const authTokenPromise = (ind % 2 === 0)
+            ? userCredOne.user.getIdToken() : userCredTwo.user.getIdToken();
+          authTokenPromise.then((token) => cb({ token })).catch((err) => {
+            logger.error('unable to get auth token in integration tests:', err);
+          });
+        },
+      })),
     );
 
     const { data: { room: resRoom }, status } = await api.post(`/room/${room.id}/join`, {},
@@ -176,8 +209,22 @@ socketConfigs.forEach(({ name, config }) => {
     const {
       userOne, userTwo, userCredOne, userCredTwo, room,
     } = await startTicTacToeRoom(t);
-    const socket1 = await createSocketAndWatchRoom(baseURL, room, config);
-    const socket2 = await createSocketAndWatchRoom(baseURL, room, config);
+    const socket1 = await createSocketAndWatchRoom(baseURL, room, {
+      ...config,
+      auth: (cb) => {
+        userCredOne.user.getIdToken().then((token) => cb({ token })).catch((err) => {
+          logger.error('unable to get auth token in integration tests:', err);
+        });
+      },
+    });
+    const socket2 = await createSocketAndWatchRoom(baseURL, room, {
+      ...config,
+      auth: (cb) => {
+        userCredTwo.user.getIdToken().then((token) => cb({ token })).catch((err) => {
+          logger.error('unable to get auth token in integration tests:', err);
+        });
+      },
+    });
 
     const { status: statusMove1 } = await api.post(`/room/${room.id}/move`, { x: 0, y: 0 },
       { headers: { authorization: await userCredOne.user.getIdToken() } });
@@ -246,10 +293,18 @@ socketConfigs.forEach(({ name, config }) => {
     const {
       userOne, userTwo, userCredOne, userCredTwo, room,
     } = await startTicTacToeRoom(t);
-    const sockets = await Promise.all([...Array(10).keys()].map((_, index) => {
-      const apps = [app, ...sideApps];
-      return createSocketAndWatchRoom(apps[index % 4].baseURL, room, config);
-    }));
+    const apps = [app, ...sideApps];
+    const sockets = await Promise.all([...Array(10).keys()]
+      .map((_, index) => createSocketAndWatchRoom(apps[index % 4].baseURL, room, {
+        ...config,
+        auth: (cb) => {
+          const authTokenPromise = (index % 2 === 0)
+            ? userCredOne.user.getIdToken() : userCredTwo.user.getIdToken();
+          authTokenPromise.then((token) => cb({ token })).catch((err) => {
+            logger.error('unable to get auth token in integration tests:', err);
+          });
+        },
+      })));
 
     const { status: statusMove1 } = await api.post(`/room/${room.id}/move`, { x: 0, y: 0 },
       { headers: { authorization: await userCredOne.user.getIdToken() } });
@@ -286,5 +341,19 @@ socketConfigs.forEach(({ name, config }) => {
         emptyObject: {},
       },
     });
+  });
+
+  test(`sockets (${name}) gets connect_error if it does not provide auth tokens`, async (t) => {
+    const { baseURL } = t.context.app;
+    const socket = createSocket(baseURL, config);
+    const connectError = await waitForNextConnectError(socket);
+    t.is(connectError.message, 'First argument to verifyIdToken() must be a Firebase ID token string.');
+  });
+
+  test(`sockets (${name}) gets connect_error if providing invalid auth token`, async (t) => {
+    const { baseURL } = t.context.app;
+    const socket = createSocket(baseURL, { ...config, auth: { token: 'invalid-token' } });
+    const connectError = await waitForNextConnectError(socket);
+    t.is(connectError.message, 'Decoding Firebase ID token failed. Make sure you passed the entire string JWT which represents an ID token. See https://firebase.google.com/docs/auth/admin/verify-id-tokens for details on how to retrieve an ID token.');
   });
 });

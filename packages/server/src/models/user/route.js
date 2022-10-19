@@ -6,7 +6,7 @@ const { celebrate, Segments } = require('celebrate');
 const mongoose = require('mongoose');
 
 const Joi = require('../../middleware/joi');
-const auth = require('../../middleware/auth');
+const { expressUserAuthMiddleware } = require('../../middleware/auth');
 const { stripeClient, webhookSecret } = require('../../utils/stripe');
 const User = require('./user');
 const CurrencyToUrbuxTransaction = require('../transaction/currencyToUrbuxTransaction');
@@ -18,7 +18,7 @@ const PATH = '/user';
 const router = express.Router();
 
 router.get('/',
-  auth,
+  expressUserAuthMiddleware,
   celebrate({
     [Segments.PARAMS]: Joi.object().keys({
       includePrivate: Joi.boolean().default(false),
@@ -34,7 +34,7 @@ router.get('/',
     }
   });
 
-router.post('/', auth, asyncHandler(async (req, res) => {
+router.post('/', expressUserAuthMiddleware, asyncHandler(async (req, res) => {
   const { user, decodedToken } = req;
   if (!user) {
     req.log.info('attempting to create user document with firebase id', { firebaseId: decodedToken.uid });
@@ -55,7 +55,7 @@ router.post('/', auth, asyncHandler(async (req, res) => {
 
 // This route handler will handle creating the paymentIntent for the client who initiated
 // this payment intent to then confirm it on the front end.
-router.post('/create-payment-intent', auth, asyncHandler(async (req, res) => {
+router.post('/create-payment-intent', expressUserAuthMiddleware, asyncHandler(async (req, res) => {
   const { user } = req;
   const { body: { amount, currency } } = req;
 
@@ -167,7 +167,7 @@ router.post('/purchase/webhook', express.raw({ type: 'application/json' }), asyn
   res.sendStatus(200);
 }));
 
-router.delete('/', auth, asyncHandler(async (req, res) => {
+router.delete('/', expressUserAuthMiddleware, asyncHandler(async (req, res) => {
   const { decodedToken, user } = req;
   const firebaseId = decodedToken.uid;
 

@@ -5,7 +5,7 @@ const { celebrate, Segments } = require('celebrate');
 const mongoose = require('mongoose');
 
 const Joi = require('../../middleware/joi');
-const auth = require('../../middleware/auth');
+const { expressUserAuthMiddleware } = require('../../middleware/auth');
 const Game = require('../game/game');
 const Room = require('./room');
 const RoomState = require('./roomState');
@@ -38,7 +38,7 @@ function setupRouter({ io }) {
         privateRooms: Joi.boolean(),
       }),
     }),
-    auth,
+    expressUserAuthMiddleware,
     asyncHandler(async (req, res) => {
       const {
         query: {
@@ -91,7 +91,7 @@ function setupRouter({ io }) {
       res.status(StatusCodes.OK).json({ rooms });
     }));
 
-  router.post('/', auth, asyncHandler(async (req, res) => {
+  router.post('/', expressUserAuthMiddleware, asyncHandler(async (req, res) => {
     const { user } = req;
     const player = user.getCreatorDataView();
     const roomRaw = req.body;
@@ -131,7 +131,7 @@ function setupRouter({ io }) {
     [Segments.PARAMS]: Joi.object().keys({
       id: Joi.objectId(),
     }),
-  }), auth, asyncHandler(async (req, res) => {
+  }), expressUserAuthMiddleware, asyncHandler(async (req, res) => {
     const { user } = req;
     const player = user.getCreatorDataView();
     const { id } = req.params;
@@ -167,7 +167,7 @@ function setupRouter({ io }) {
     [Segments.PARAMS]: Joi.object().keys({
       id: Joi.objectId(),
     }),
-  }), auth, asyncHandler(async (req, res) => {
+  }), expressUserAuthMiddleware, asyncHandler(async (req, res) => {
     const { user } = req;
     const player = user.getCreatorDataView();
     const { id } = req.params;
@@ -202,7 +202,7 @@ function setupRouter({ io }) {
     [Segments.PARAMS]: Joi.object().keys({
       id: Joi.objectId(),
     }),
-  }), auth, asyncHandler(async (req, res) => {
+  }), expressUserAuthMiddleware, asyncHandler(async (req, res) => {
     const { user } = req;
     const player = user.getCreatorDataView();
     const { id } = req.params;

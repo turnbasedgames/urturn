@@ -1,8 +1,11 @@
+const { socketioAuthMiddelware } = require('./middleware/auth');
 const logger = require('./logger');
 
 const defaultCb = (...args) => logger.info('callback did not exist, so was not called with args:', args);
 
 function setupSocketio(io) {
+  io.use(socketioAuthMiddelware);
+
   io.on('connection', (socket) => {
     logger.info('new socket connection', { id: socket.id });
 

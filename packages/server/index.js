@@ -24,7 +24,11 @@ const main = async () => {
   app.use(await setupHttpLogger());
   const httpServer = http.createServer(app);
   const db = setupDB();
-  const io = socketio(httpServer);
+  const io = socketio(httpServer, {
+    cors: {
+      origin: '*',
+    },
+  });
 
   await setupRedis({ io });
   setupSocketio(io);

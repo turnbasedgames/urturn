@@ -4,7 +4,7 @@ const asyncHandler = require('express-async-handler');
 const { celebrate, Segments } = require('celebrate');
 
 const Joi = require('../../middleware/joi');
-const auth = require('../../middleware/auth');
+const { expressUserAuthMiddleware } = require('../../middleware/auth');
 const Game = require('./game');
 
 const PATH = '/game';
@@ -41,7 +41,7 @@ router.get('/:id',
     }
   }));
 
-router.post('/', auth, asyncHandler(async (req, res) => {
+router.post('/', expressUserAuthMiddleware, asyncHandler(async (req, res) => {
   const { body: gameRaw, user } = req;
   gameRaw.creator = user.id;
   const game = new Game(gameRaw);
@@ -51,7 +51,7 @@ router.post('/', auth, asyncHandler(async (req, res) => {
 }));
 
 // TODO: validation on the body, oldBody.save() does not catch it
-router.put('/:id', auth,
+router.put('/:id', expressUserAuthMiddleware,
   celebrate({
     [Segments.PARAMS]: Joi.object().keys({
       id: Joi.objectId(),
@@ -85,7 +85,7 @@ router.put('/:id', auth,
 
 // TODO: soft delete
 // TODO: how do we want to handle deleting all game rooms?
-router.delete('/:id', auth,
+router.delete('/:id', expressUserAuthMiddleware,
   celebrate({
     [Segments.PARAMS]: Joi.object().keys({
       id: Joi.objectId(),
