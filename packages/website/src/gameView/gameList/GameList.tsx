@@ -35,7 +35,7 @@ function GameList(): React.ReactElement {
       >
         {games.map((game) => (
           <Card // TODO: separate component
-            sx={{ margin: 1 }}
+            sx={{ margin: 1, width: '170px' }}
             key={`GameCard-${game.id}`}
           >
             <CardActionArea onClick={() => navigate(`/games/${game.id}`)}>
