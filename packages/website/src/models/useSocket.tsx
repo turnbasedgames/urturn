@@ -36,6 +36,10 @@ const useSocket = (user: User | undefined): [Socket | undefined, boolean, string
       setIsConnected(false);
     });
 
+    newSocket.on('connect_error', (err) => {
+      logger.error('error occurred when trying to open socket connection', err);
+    });
+
     newSocket.on('pong', () => {
       setLastPong(new Date().toISOString());
     });
@@ -48,6 +52,7 @@ const useSocket = (user: User | undefined): [Socket | undefined, boolean, string
       newSocket.off('connect');
       newSocket.off('disconnect');
       newSocket.off('pong');
+      newSocket.off('connect_error');
     };
   }, [user]);
 
