@@ -1,50 +1,71 @@
 const { MongoMemoryReplSet } = require('mongodb-memory-server');
 const { RedisMemoryServer } = require('redis-memory-server');
 
-const logger = require('../../src/logger');
-
 function getNested(obj, ...args) {
   return args.reduce((nestedObj, level) => nestedObj && nestedObj[level], obj);
 }
 
-function waitFor(testAsyncFunc, timeoutMs = 10000, bufferMs = 200, errorMsg = 'Test Function did not pass') {
-  const timeoutThreshold = Date.now() + timeoutMs;
+function waitFor(t, testAsyncFunc, timeoutMs = 10000, bufferMs = 200, errorMsg = 'Test Function did not pass') {
+  const startTime = new Date();
+  const timeoutThreshold = startTime.getTime() + timeoutMs;
   return new Promise((res, rej) => {
     const interval = setInterval(async () => {
       try {
-        const result = await testAsyncFunc();
-        clearInterval(interval);
-        res(result);
-      } catch (err) {
-        if (Date.now() > timeoutThreshold) {
-          clearInterval(interval);
-          const timeoutError = new Error(`${errorMsg} after ${timeoutMs}ms`);
-          timeoutError.error = err;
-          rej(timeoutError);
+        let result; let
+          asyncFuncError;
+        try {
+          result = await testAsyncFunc();
+        } catch (error) {
+          asyncFuncError = error;
         }
+        if (asyncFuncError == null) {
+          clearInterval(interval);
+          res(result);
+        } else {
+          const endTime = new Date();
+          if (endTime.getTime() > timeoutThreshold) {
+            t.log({
+              startTime: startTime.toISOString(),
+              endTime: endTime.toISOString(),
+              timeoutMs,
+              error: asyncFuncError,
+            });
+            clearInterval(interval);
+            const timeoutError = new Error(`${errorMsg} after ${timeoutMs}ms`);
+            timeoutError.asyncFuncError = asyncFuncError;
+            rej(timeoutError);
+          }
+        }
+      } catch (error) {
+        t.log({
+          message: 'unexpected error when waiting',
+          error,
+        });
+        clearInterval(interval);
+        rej(error);
       }
     }, bufferMs);
   });
 }
 
 function makePersistentDependencyFn(name, envField, setupFunc) {
-  return async (defaultEnv, forceCreate) => {
+  return async (t, defaultEnv, forceCreate) => {
     if (!forceCreate) {
       if (defaultEnv) {
-        logger.info(`skipping starting local ${name} (using provided default)...`);
+        t.log(`skipping starting local ${name} (using provided default)...`);
         return [defaultEnv,
-          () => { logger.info(`skipping killing local ${name} instance.`); }];
+          () => { t.log(`skipping killing local ${name} instance.`); }];
       }
       if (process.env[envField]) {
-        logger.info(`skipping starting local ${name} (using uri specified in .env)...`);
+        t.log(`skipping starting local ${name} (using uri specified in .env)...`);
         return [{ [envField]: process.env[envField] },
-          () => { logger.info(`skipping killing local ${name} instance.`); }];
+          () => { t.log(`skipping killing local ${name} instance.`); }];
       }
     }
     const [uri, cleanupFunc] = await setupFunc();
-    logger.info(`started local ${name} instance at URI:`, { uri });
+    t.log(`started local ${name} instance at URI:`, { uri });
     return [{ [envField]: uri }, async () => {
-      logger.info(`killing local ${name} instance...`);
+      t.log(`killing local ${name} instance...`);
       await cleanupFunc();
     }];
   };

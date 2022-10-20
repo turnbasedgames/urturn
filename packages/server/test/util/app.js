@@ -4,20 +4,29 @@ const axios = require('axios');
 const getPort = require('get-port');
 
 const { waitFor, setupMongoDB, setupRedis } = require('./util');
-const logger = require('../../src/logger');
 const { testStripeKey, testStripeWebhookSecret } = require('./stripe');
 
-function waitUntilRunning(api, timeout = 30000, buffer = 200) {
-  return waitFor(async () => { await api.get('/readiness'); },
-    timeout, buffer, 'Server was not ready');
+function waitUntilRunning(t, api, timeout = 30000, buffer = 200) {
+  return waitFor(
+    t,
+    async () => { await api.get('/readiness'); },
+    timeout, buffer, 'Server was not ready',
+  );
 }
 
-async function spawnServer(env, api) {
+async function spawnServer(t, env, api) {
   const server = spawn('node', ['index.js'], { env });
-  server.stdout.pipe(process.stdout);
-  server.stderr.pipe(process.stderr);
+  server.stdout.setEncoding('utf8');
+  server.stdout.on('data', (data) => {
+    t.log(`server process (stdout): ${data}`);
+  });
+  server.stderr.setEncoding('utf8');
+  server.stderr.on('data', (data) => {
+    t.log(`server process (stderr): ${data}`);
+  });
+
   try {
-    await waitUntilRunning(api);
+    await waitUntilRunning(t, api);
   } catch (err) {
     server.kill();
     throw err;
@@ -25,7 +34,7 @@ async function spawnServer(env, api) {
   return server;
 }
 
-async function spawnApp(options = {}) {
+async function spawnApp(t, options = {}) {
   const {
     overrideEnv,
     defaultMongoEnv,
@@ -55,17 +64,20 @@ async function spawnApp(options = {}) {
     env.NAMES_GENERATOR_MAX_ITERATIONS = nameIterations;
   }
   const [envWithMongo, cleanupMongoDB] = await setupMongoDB(
-    defaultMongoEnv, forceCreatePersistentDependencies,
+    t, defaultMongoEnv, forceCreatePersistentDependencies,
   );
   const [envWithRedis, cleanupRedis] = await setupRedis(
-    defaultRedisEnv, forceCreatePersistentDependencies,
+    t, defaultRedisEnv, forceCreatePersistentDependencies,
   );
 
   const baseURL = `http://localhost:${env.PORT}`;
   const api = axios.create({ baseURL });
-  const server = await spawnServer({
-    ...env, ...envWithMongo, ...envWithRedis, ...overrideEnv,
-  }, api);
+  const server = await spawnServer(
+    t,
+    {
+      ...env, ...envWithMongo, ...envWithRedis, ...overrideEnv,
+    }, api,
+  );
   return {
     api,
     server,
@@ -78,11 +90,11 @@ async function spawnApp(options = {}) {
       // wait a second because server may be in a cleanup process
       const exitPromise = new Promise((resolve, reject) => {
         server.on('exit', () => {
-          logger.info('server properly exited');
+          t.log('server properly exited');
           resolve();
         });
         setTimeout(() => {
-          logger.error('server timed out waiting to cleanup');
+          t.log('server timed out waiting to cleanup');
           reject(new Error('timeout reached'));
         }, 10000);
       });

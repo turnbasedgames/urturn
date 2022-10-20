@@ -8,7 +8,7 @@ const { createUserCred } = require('../util/firebase');
 const { createGameAndAssert, createUserAndAssert, cleanupTestUsers } = require('../util/api_util');
 
 test.before(async (t) => {
-  const app = await spawnApp();
+  const app = await spawnApp(t);
   /* eslint-disable no-param-reassign */
   t.context.app = app;
   t.context.createdUsers = [];

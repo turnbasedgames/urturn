@@ -9,7 +9,7 @@ const { testStripeClient, testStripeWebhookSecret, createTestWebhookHeader } = r
 const { createOrUpdateSideApps } = require('../util/util');
 
 test.before(async (t) => {
-  const app = await spawnApp();
+  const app = await spawnApp(t);
   /* eslint-disable no-param-reassign */
   t.context.createdUsers = [];
   t.context.app = app;
@@ -84,7 +84,7 @@ test('POST /user returns 409 if one already exists', async (t) => {
 
 test('POST /user returns 500 if username generation fails', async (t) => {
   // create a separate app to force the only possible username to be "test"
-  const customApp = await spawnApp({ nameDictionary: 'test', nameIterations: 0, forceCreatePersistentDependencies: true });
+  const customApp = await spawnApp(t, { nameDictionary: 'test', nameIterations: 0, forceCreatePersistentDependencies: true });
   createOrUpdateSideApps(t, [customApp]);
   const { api } = customApp;
 
@@ -380,7 +380,7 @@ test('POST /user/purchase/webhook with an unhandled event type is ignored and ju
 
 test('POST /user username generator adds random numbers when there is a collision', async (t) => {
   // create a separate app to force possible usernames to be "test" and "test_[0-9]"
-  const customApp = await spawnApp({ nameDictionary: 'test', nameIterations: 1 });
+  const customApp = await spawnApp(t, { nameDictionary: 'test', nameIterations: 1 });
   createOrUpdateSideApps(t, [customApp]);
   const { api } = customApp;
 
@@ -398,14 +398,18 @@ test('POST /user username generator adds random numbers when there is a collisio
 test('Server fails and process exits when required Stripe environment variables are not provided', async (t) => {
   const { app } = t.context;
   const STRIPE_ENV_NAMES = ['STRIPE_KEY', 'STRIPE_WEBHOOK_SECRET'];
-  const startupErrors = await Promise.all(STRIPE_ENV_NAMES.map((envName) => t.throwsAsync(spawnApp({
-    overrideEnv: { [envName]: undefined },
-    defaultMongoEnv: app.envWithMongo,
-    defaultRedisEnv: app.envWithRedis,
-  }))));
+  const startupErrors = await Promise.all(STRIPE_ENV_NAMES.map((envName) => t.throwsAsync(spawnApp(
+    t,
+    {
+      overrideEnv: { [envName]: undefined },
+      defaultMongoEnv: app.envWithMongo,
+      defaultRedisEnv: app.envWithRedis,
+    },
+  ))));
 
   // didn't want to spend time finding a good way to assert error logs, so
   // we are assuming that if there is a startup timeout error than its because the
   // missing STRIPE_KEY
+  // TODO: we can assert on the error logs provided by the server process
   t.true(startupErrors.every(({ message }) => message.includes('Server was not ready after')), `Server startup errors: ${startupErrors.join(',')}`);
 });

@@ -14,12 +14,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: running-test-cases
-        uses: actions/setup-node@v1
+      - name: setup node
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm ci
-      - run: npm run test:check-coverage
+      - name: install npm dependencies
+        run: npm ci
+      - name: run tests
+        run: npm run test:check-coverage
         env:
           FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
           GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
