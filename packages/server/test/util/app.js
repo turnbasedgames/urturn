@@ -7,7 +7,7 @@ const { waitFor, setupMongoDB, setupRedis } = require('./util');
 const logger = require('../../src/logger');
 const { testStripeKey, testStripeWebhookSecret } = require('./stripe');
 
-function waitUntilRunning(api, timeout = 10000, buffer = 200) {
+function waitUntilRunning(api, timeout = 30000, buffer = 200) {
   return waitFor(async () => { await api.get('/readiness'); },
     timeout, buffer, 'Server was not ready');
 }

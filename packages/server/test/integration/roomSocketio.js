@@ -51,7 +51,7 @@ function waitForNextConnectError({ data: { connectErrors } }) {
     }
     throw Error('No messages received!');
   },
-  1000,
+  10000,
   200,
   "Didn't get any connect errors");
 }
