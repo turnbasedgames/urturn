@@ -83,11 +83,11 @@ const config = {
             items: [
               {
                 label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/turnbasedgames',
+                href: 'https://stackoverflow.com/questions/tagged/urturn',
               },
               {
                 label: 'Discord',
-                href: 'https://discordapp.com/invite/turnbasedgames',
+                href: 'https://discord.gg/myWacjdb5S',
               },
             ],
           },
