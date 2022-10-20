@@ -1,6 +1,11 @@
 name: integration-tests
 
-on: [ push ]
+on:
+  push:
+  schedule:
+    # run integration tests every hour
+    - cron:  '0 * * * *'
+
 
 jobs:
   build:
