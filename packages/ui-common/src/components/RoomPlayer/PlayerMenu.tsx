@@ -74,7 +74,10 @@ function PlayerMenu({ quitRoom }: PlayerMenuProps): React.ReactElement {
             onClick={() => {
               quitRoom().catch(logger.error);
             }}
-            sx={{ borderRadius: 1 }}
+            sx={{
+              borderRadius: 1,
+              transform: 'rotate(-180deg)',
+            }}
           >
             <ExitToAppIcon />
           </IconButton>
