@@ -64,10 +64,10 @@ async function spawnApp(t, options = {}) {
     env.NAMES_GENERATOR_MAX_ITERATIONS = nameIterations;
   }
   const [envWithMongo, cleanupMongoDB] = await setupMongoDB(
-    t, defaultMongoEnv, forceCreatePersistentDependencies,
+    t.log, defaultMongoEnv, forceCreatePersistentDependencies,
   );
   const [envWithRedis, cleanupRedis] = await setupRedis(
-    t, defaultRedisEnv, forceCreatePersistentDependencies,
+    t.log, defaultRedisEnv, forceCreatePersistentDependencies,
   );
 
   const baseURL = `http://localhost:${env.PORT}`;

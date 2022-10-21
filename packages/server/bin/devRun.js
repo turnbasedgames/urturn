@@ -21,10 +21,12 @@ async function main() {
     env.STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
   }
 
-  const [envWithMongo, cleanupMongoDB] = await setupMongoDB();
-  const [envWithRedis, cleanupRedis] = await setupRedis();
+  const [envWithMongo, cleanupMongoDB] = await setupMongoDB(logger.info);
+  const [envWithRedis, cleanupRedis] = await setupRedis(logger.info);
 
-  const server = spawn('nodemon', ['index.js'], { env: { ...env, ...envWithMongo, ...envWithRedis } });
+  const serverEnv = { ...env, ...envWithMongo, ...envWithRedis };
+  logger.info('Running server with dev environment', serverEnv);
+  const server = spawn('nodemon', ['index.js'], { env: serverEnv });
   server.stdout.pipe(process.stdout);
   server.stderr.pipe(process.stderr);
 
