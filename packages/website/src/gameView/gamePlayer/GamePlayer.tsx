@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { LinearProgress, Typography } from '@mui/material';
 import {
   BoardGame,
-  Game, Room, RoomUser, UnwatchRoomRes, User, WatchRoomRes,
+  Game, Room, RoomUser, User, WatchRoomRes,
 } from '@urturn/types-common';
 
 import { RoomPlayer } from '@urturn/ui-common';
@@ -56,6 +56,10 @@ function GamePlayer(): React.ReactElement {
   }, [userContext.user]);
 
   const onSocketDisconnect = (reason: string): void => {
+    // client decided to disconnect, no reason to think this was an error
+    if (reason === 'io client disconnect') {
+      return;
+    }
     enqueueSnackbar(`Refresh page. We lost Connection: ${reason}`, {
       variant: 'error',
       persist: true,
@@ -83,11 +87,6 @@ function GamePlayer(): React.ReactElement {
     handleNewBoardGame(generateBoardGame(room, room.latestState));
 
     return () => {
-      socket.emit('unwatchRoom', { roomId }, (res: null | UnwatchRoomRes) => {
-        if (res != null) {
-          logger.error('error trying to unwatch room', res.error);
-        }
-      });
       socket.off('room:latestState', handleNewBoardGame);
     };
   }, [childClient, socket]);

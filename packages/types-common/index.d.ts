@@ -59,9 +59,5 @@ export interface WatchRoomRes {
   error: string
 }
 
-export interface UnwatchRoomRes {
-  error: string
-}
-
 export const DISCORD_URL: string
 export const DOCS_URL: string
