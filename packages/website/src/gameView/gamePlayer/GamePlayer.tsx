@@ -65,6 +65,7 @@ function GamePlayer(): React.ReactElement {
       persist: true,
     });
   };
+
   const [socket, socketConnected] = useSocket(userContext.user, onSocketDisconnect);
 
   const [childClient, setChildClient] = useState<any | null>();
@@ -79,6 +80,8 @@ function GamePlayer(): React.ReactElement {
     }
 
     socket.on('room:latestState', handleNewBoardGame);
+
+    // A socket can only watch one room in it's lifetime
     socket.emit('watchRoom', { roomId }, (res: null | WatchRoomRes) => {
       if (res != null) {
         logger.error('error trying to watch room', res.error);
