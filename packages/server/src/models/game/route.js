@@ -17,11 +17,21 @@ router.get('/',
         .default(25),
       skip: Joi.number().integer().min(0).default(0),
       creator: Joi.objectId().optional(),
+      searchText: Joi.string().optional(),
     }),
   }),
   asyncHandler(async (req, res) => {
     const { query } = req;
-    const { limit, skip, ...mongoQuery } = query;
+    const {
+      limit, skip, searchText, ...mongoQuery
+    } = query;
+
+    if (searchText) {
+      mongoQuery.$text = {
+        $search: searchText,
+      };
+    }
+
     const games = await Game.find(mongoQuery).populate('creator').skip(skip).limit(limit);
     res.status(StatusCodes.OK).json({ games });
   }));

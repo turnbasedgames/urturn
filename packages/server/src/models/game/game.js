@@ -34,7 +34,7 @@ const GameSchema = new Schema({
   },
 }, { timestamps: true });
 
-GameSchema.index({ name: 'text' });
+GameSchema.index({ name: 'text', description: 'text' });
 GameSchema.plugin(uniqueValidator);
 GameSchema.method('toJSON', function toJSON() {
   return {

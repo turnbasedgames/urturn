@@ -32,6 +32,44 @@ test('GET /game returns list of games', async (t) => {
   t.assert(games.length > 0);
 });
 
+test('GET /game with search text returns only games searched for by name', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const user = await createUserAndAssert(t, api, userCred);
+  t.context.createdUsers.push(userCred);
+
+  await createGameAndAssert(t, api, userCred, user, { name: 'Dog Game' });
+  await createGameAndAssert(t, api, userCred, user, { name: 'Dog Cat Game' });
+  await createGameAndAssert(t, api, userCred, user, { name: 'Hello' });
+  await createGameAndAssert(t, api, userCred, user, { name: 'World' });
+  await createGameAndAssert(t, api, userCred, user, { name: 'Dog Urturn 100 Billion Dollars Worth' });
+
+  const searchText = 'Dog';
+  const { data: { games }, status } = await api.get('/game', { params: { searchText } });
+
+  t.is(status, StatusCodes.OK);
+  t.assert(games.length === 3);
+});
+
+test('GET /game with search text returns only games searched for by description', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const user = await createUserAndAssert(t, api, userCred);
+  t.context.createdUsers.push(userCred);
+
+  await createGameAndAssert(t, api, userCred, user, { description: 'Crazy billion dollar game' });
+  await createGameAndAssert(t, api, userCred, user, { description: 'Crazy million dollar game' });
+  await createGameAndAssert(t, api, userCred, user, { description: 'Crazy game in general' });
+  await createGameAndAssert(t, api, userCred, user, { description: 'This game sucks' });
+  await createGameAndAssert(t, api, userCred, user, { description: 'This game is very bad' });
+
+  const searchText = 'Crazy';
+  const { data: { games }, status } = await api.get('/game', { params: { searchText } });
+
+  t.is(status, StatusCodes.OK);
+  t.assert(games.length === 3);
+});
+
 test('GET /game can filter for creator', async (t) => {
   const { api } = t.context.app;
   const userCredOne = await createUserCred();

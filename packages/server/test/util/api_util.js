@@ -10,12 +10,15 @@ function getPublicUserFromUser(user) {
   };
 }
 
-async function createGameAndAssert(t, api, userCred, user) {
+async function createGameAndAssert(t, api, userCred, user, gameOptionalInfo = {}) {
   // TODO: we should switch from using tictactoe to runner/test_app backend where we
   // have more control over the backend behavior. We can force trigger errors, or other behaviors
+  const name = gameOptionalInfo.name ?? `integration-tests-${uuidv4()}`;
+  const description = gameOptionalInfo.description ?? 'test description';
+
   const gameRaw = {
-    name: `integration-tests-${uuidv4()}`,
-    description: 'test description',
+    name,
+    description,
     commitSHA: '0870320e312f711d20e8c8078399d8a6aceb6d46',
     githubURL: 'https://github.com/turnbasedgames/tictactoe',
   };
