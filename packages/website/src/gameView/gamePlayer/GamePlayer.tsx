@@ -55,7 +55,14 @@ function GamePlayer(): React.ReactElement {
     setupRoom().catch(logger.error);
   }, [userContext.user]);
 
-  const [socket] = useSocket(userContext.user);
+  const onSocketDisconnect = (reason: string): void => {
+    enqueueSnackbar(`Refresh page. We lost Connection: ${reason}`, {
+      variant: 'error',
+      persist: true,
+    });
+  };
+  const [socket, socketConnected] = useSocket(userContext.user, onSocketDisconnect);
+
   const [childClient, setChildClient] = useState<any | null>();
   useEffect(() => {
     if (childClient == null || room == null || room.game == null || socket == null) {
@@ -85,7 +92,7 @@ function GamePlayer(): React.ReactElement {
     };
   }, [childClient, socket]);
 
-  if (room == null || userContext.user == null || socket == null) {
+  if (room == null || userContext.user == null || socket == null || !socketConnected) {
     return (<LinearProgress />);
   }
   if (roomId == null || room.game == null) {
