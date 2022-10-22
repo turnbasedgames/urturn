@@ -14,16 +14,20 @@ function GameList(): React.ReactElement {
   const { search } = useLocation();
   const [games, setGames] = useState<Game[]>([]);
   const params = new URLSearchParams(search);
-  const searchText = params.get('searchText');
+
+  const text = params.get('searchText');
+  let searchText: string | undefined;
+  if (text !== null && text !== '') {
+    searchText = text;
+  }
 
   useEffect(() => {
     async function setupGames(): Promise<void> {
       // In this case we prefer undefined over empty strings. So in the case of an empty
-      // string in the serach text we would rather send an 'undefined' value down to the API,
+      // string in the search text we would rather send an 'undefined' value down to the API,
       // to prevent zero results showing up during a search when a user does not enter a value
       // in the search bar and submits.
-      // eslint-disable-next-line
-      const gamesRaw = await getGames({ searchText: searchText || undefined });
+      const gamesRaw = await getGames({ searchText });
       setGames(gamesRaw);
     }
 
@@ -38,7 +42,7 @@ function GameList(): React.ReactElement {
       overflow="auto"
     >
       <Typography color="text.primary">
-        All Games
+        {(searchText === '' || searchText === undefined) ? 'All Games' : ''}
       </Typography>
       <Grid
         container
