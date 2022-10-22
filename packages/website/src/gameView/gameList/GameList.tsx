@@ -3,7 +3,7 @@ import {
   Card, CardActionArea, CardContent, Stack, Typography,
 } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Game } from '@urturn/types-common';
 
 import { getGames } from '../../models/game';
@@ -11,14 +11,24 @@ import CardMediaWithFallback from '../CardMediaWithFallback';
 import logger from '../../logger';
 
 function GameList(): React.ReactElement {
+  const { search } = useLocation();
   const [games, setGames] = useState<Game[]>([]);
+  const params = new URLSearchParams(search);
+  const searchText = params.get('searchText');
+
   useEffect(() => {
     async function setupGames(): Promise<void> {
-      const gamesRaw = await getGames();
+      // In this case we prefer undefined over empty strings. So in the case of an empty
+      // string in the serach text we would rather send an 'undefined' value down to the API,
+      // to prevent zero results showing up during a search when a user does not enter a value
+      // in the search bar and submits.
+      // eslint-disable-next-line
+      const gamesRaw = await getGames({ searchText: searchText || undefined });
       setGames(gamesRaw);
     }
+
     setupGames().catch(logger.error);
-  }, []);
+  }, [searchText]);
   const navigate = useNavigate();
 
   return (
