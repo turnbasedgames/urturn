@@ -4,7 +4,7 @@ import { Typography, Stack } from '@mui/material';
 
 function EndGame({ plrToSecretHash, curPlr }) {
   const otherSecrets = Object.entries(plrToSecretHash)
-    .map(([plrId, secret]) => (curPlr.id === plrId ? secret : undefined))
+    .map(([plrId, secret]) => (curPlr.id !== plrId ? secret : undefined))
     .filter((secret) => secret != null);
   return (
     <Stack>
