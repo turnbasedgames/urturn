@@ -14,24 +14,26 @@ const gameRouter = require('./src/models/game/route');
 const roomRouter = require('./src/models/room/route');
 const errorHandler = require('./src/middleware/errorHandler');
 const setupSocketio = require('./src/setupSocketio');
-const { setupRedis, pubClient, subClient } = require('./src/setupRedis');
+const { setupRedis } = require('./src/setupRedis');
 
 const PORT = process.env.PORT || 8080;
 
 const main = async () => {
   logger.info('Starting server...');
+  const cleanupDB = await setupDB();
+  logger.info('mongodb connection is ready');
+
   const app = express();
   app.use(await setupHttpLogger());
   const httpServer = http.createServer(app);
-  const db = setupDB();
   const io = socketio(httpServer, {
     cors: {
       origin: '*',
     },
   });
 
-  await setupRedis({ io });
-  setupSocketio(io);
+  const cleanupRedis = await setupRedis({ io });
+  const cleanupSocketioServer = setupSocketio(io);
 
   app.use(cors());
   app.use((req, res, next) => {
@@ -48,7 +50,6 @@ const main = async () => {
   app.use(roomRouter.PATH, roomRouter.setupRouter({ io }));
 
   app.get('/readiness', async (req, res) => {
-    await db;
     res.sendStatus(StatusCodes.OK);
   });
 
@@ -62,20 +63,19 @@ const main = async () => {
 
   return () => {
     logger.warn('cleaning up nodejs application');
+    logger.warn('closing http server...');
+    const socketIoCleanupPromise = cleanupSocketioServer();
     httpServer.close(async () => {
-      logger.warn('closed express app');
+      logger.warn('successfully closed http server');
       try {
-        await Promise.all([pubClient.quit(), subClient.quit()]);
-        logger.warn('closed redis clients');
-      } catch {
-        logger.error('failed to close redis clients');
+        await Promise.all([socketIoCleanupPromise, cleanupRedis(), cleanupDB()]);
+        logger.warn('successful graceful shutdown');
+        process.exit(0);
+      } catch (error) {
+        logger.error('failed to do graceful shutdown', error);
+        process.exit(1);
       }
-      process.exit();
     });
-    setTimeout(() => {
-      logger.error('cleanup timed out');
-      process.exit();
-    }, 2000);
   };
 };
 

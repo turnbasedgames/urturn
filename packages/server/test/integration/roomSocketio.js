@@ -25,12 +25,16 @@ const socketConfigs = [{
 
 function createSocket(t, baseURL, socketConfig) {
   const socket = io(baseURL, socketConfig);
+
+  socket.data = {};
   socket.on('connect', () => {
     t.log({
       message: 'socket received connect event',
       socketInfo: { id: socket.id, connected: socket.connected, disconnected: socket.disconnected },
     });
   });
+
+  socket.data.disconnectEvents = [];
   socket.on('disconnect', (reason, details) => {
     t.log({
       message: 'socket received disconnect event',
@@ -38,11 +42,10 @@ function createSocket(t, baseURL, socketConfig) {
       reason,
       details,
     });
+    socket.data.disconnectEvents.push({ reason, details });
   });
 
-  socket.data = {};
   socket.data.messageHistory = [];
-  socket.data.connectErrors = [];
   socket.on('room:latestState', (event) => {
     t.log({
       message: 'socket received room:latestState event',
@@ -51,6 +54,8 @@ function createSocket(t, baseURL, socketConfig) {
     });
     socket.data.messageHistory.push(event);
   });
+
+  socket.data.connectErrors = [];
   socket.on('connect_error', (err) => {
     t.log({
       message: 'socket received connect_error event',
@@ -69,12 +74,43 @@ async function createSocketAndWatchRoom(t, baseURL, room, socketConfig) {
   return socket;
 }
 
-function waitForNextConnectError(t, { data: { connectErrors } }) {
+function waitForConnected(t, socket) {
   return waitFor(
     t,
     () => {
-      if (connectErrors.length > 0) {
-        return connectErrors.shift();
+      if (socket.connected) {
+        return true;
+      }
+      throw Error('Socket not connected');
+    },
+    10000,
+    200,
+    'Socket never got connected',
+  );
+}
+
+function waitForDisconnected(t, socket) {
+  return waitFor(
+    t,
+    () => {
+      if (!socket.connected && socket.data.disconnectEvents.length > 0) {
+        return true;
+      }
+      t.log('Socket not disconnected', socket.data.disconnectEvents, socket.connected);
+      throw Error('Socket not disconnected');
+    },
+    10000,
+    200,
+    'Socket never got disconnected',
+  );
+}
+
+function waitForNextConnectError(t, socket) {
+  return waitFor(
+    t,
+    () => {
+      if (socket.data.connectErrors.length > 0) {
+        return socket.data.connectErrors.shift();
       }
       throw Error('No messages received!');
     },
@@ -84,12 +120,12 @@ function waitForNextConnectError(t, { data: { connectErrors } }) {
   );
 }
 
-function waitForNextEvent(t, { data: { messageHistory } }) {
+function waitForNextEvent(t, socket) {
   return waitFor(
     t,
     () => {
-      if (messageHistory.length > 0) {
-        return messageHistory.shift();
+      if (socket.data.messageHistory.length > 0) {
+        return socket.data.messageHistory.shift();
       }
       throw Error('No messages received!');
     },
@@ -417,5 +453,40 @@ socketConfigs.forEach(({ name, config }) => {
     const socket = createSocket(t, baseURL, { ...config, auth: { token: 'invalid-token' } });
     const connectError = await waitForNextConnectError(t, socket);
     t.is(connectError.message, 'Decoding Firebase ID token failed. Make sure you passed the entire string JWT which represents an ID token. See https://firebase.google.com/docs/auth/admin/verify-id-tokens for details on how to retrieve an ID token.');
+  });
+
+  test(`sockets (${name}) get properly disconnected when server is terminating`, async (t) => {
+    const { app } = t.context;
+    const testApp = await spawnApp(t, {
+      defaultMongoEnv: app.envWithMongo,
+      defaultRedisEnv: app.envWithRedis,
+    });
+    const { api, baseURL } = testApp;
+
+    const userCredOne = await createUserCred();
+    await createUserAndAssert(t, api, userCredOne);
+    const socket = createSocket(
+      t,
+      baseURL,
+      {
+        ...config,
+        auth: (cb) => {
+          userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
+            t.log({
+              message: 'unable to get auth token',
+              error,
+            });
+          });
+        },
+      },
+    );
+
+    t.true(await waitForConnected(t, socket));
+    await testApp.cleanup();
+    t.true(await waitForDisconnected(t, socket));
+    t.is(socket.data.disconnectEvents.length, 1);
+    t.is(socket.data.disconnectEvents[0].reason, 'transport close');
+
+    // TODO: assert sockets are cleaned up from the DB
   });
 });

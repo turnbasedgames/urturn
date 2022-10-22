@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const logger = require('./logger');
 
 const options = {
   autoCreate: true,
@@ -14,8 +15,13 @@ if (process.env.MONGODB_SERVER_SELECTION_TIMEOUT_MS) {
   options.serverSelectionTimeoutMS = process.env.MONGODB_SERVER_SELECTION_TIMEOUT_MS;
 }
 
-function setupDB() {
-  return mongoose.connect(process.env.MONGODB_CONNECTION_URL, options);
+async function setupDB() {
+  await mongoose.connect(process.env.MONGODB_CONNECTION_URL, options);
+  return async () => {
+    logger.warn('closing mongodb connection...');
+    await mongoose.disconnect();
+    logger.warn('successfully closed mongodb connection');
+  };
 }
 
 module.exports = setupDB;

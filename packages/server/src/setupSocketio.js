@@ -30,6 +30,26 @@ function setupSocketio(io) {
         cb({ error: error.toString() });
       }
     });
+
+    socket.on('disconnect', (reason) => {
+      logger.info('socket disconnected', { id: socket.id, reason });
+    });
+  });
+
+  return () => new Promise((res, rej) => {
+    try {
+      logger.warn('cleaning up socketio server...');
+      io.close(() => {
+        logger.warn('successfully closed socketio server, it should not be handling new connections');
+        logger.warn('disconnecting existing sockets...');
+        io.local.disconnectSockets(true);
+        logger.warn('successfully closed existing sockets');
+        logger.warn('successfully cleaned up socketio server');
+        res();
+      });
+    } catch (err) {
+      rej(err);
+    }
   });
 }
 

@@ -18,11 +18,11 @@ async function spawnServer(t, env, api) {
   const server = spawn('node', ['index.js'], { env });
   server.stdout.setEncoding('utf8');
   server.stdout.on('data', (data) => {
-    t.log(`server process (stdout): ${data}`);
+    t.log(`server process (stdout): ${data.trim()}`);
   });
   server.stderr.setEncoding('utf8');
   server.stderr.on('data', (data) => {
-    t.log(`server process (stderr): ${data}`);
+    t.log(`server process (stderr): ${data.trim()}`);
   });
 
   try {
@@ -99,9 +99,8 @@ async function spawnApp(t, options = {}) {
         }, 10000);
       });
       server.kill();
-      await cleanupMongoDB();
-      await cleanupRedis();
-      await exitPromise;
+      await exitPromise; // wait for server to exit before nuking redis and mongoDB
+      await Promise.all([cleanupMongoDB(), cleanupRedis()]);
     },
   };
 }

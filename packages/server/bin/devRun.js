@@ -21,22 +21,30 @@ async function main() {
     env.STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
   }
 
-  const [envWithMongo, cleanupMongoDB] = await setupMongoDB(logger.info);
-  const [envWithRedis, cleanupRedis] = await setupRedis(logger.info);
+  const [envWithMongo] = await setupMongoDB(logger.info);
+  const [envWithRedis] = await setupRedis(logger.info);
 
   const serverEnv = { ...env, ...envWithMongo, ...envWithRedis };
   logger.info('Running server with dev environment', serverEnv);
   const server = spawn('nodemon', ['index.js'], { env: serverEnv });
-  server.stdout.pipe(process.stdout);
-  server.stderr.pipe(process.stderr);
+  const exitPromise = new Promise((resolve) => {
+    server.on('exit', (code) => {
+      logger.warn(`server exited with code: ${code}`);
+      resolve();
+    });
+  });
+  server.stdout.setEncoding('utf8');
+  server.stdout.on('data', (data) => {
+    process.stdout.write(`server: ${data}`);
+  });
+  server.stderr.setEncoding('utf8');
+  server.stderr.on('data', (data) => {
+    process.stderr.write(`server: ${data}`);
+  });
 
   process.on('SIGINT', async () => {
-    logger.info('\ncleaning up local runtime dependencies');
-    logger.info('killing server...');
-    server.kill();
-    await cleanupMongoDB();
-    await cleanupRedis();
-    process.exit();
+    await exitPromise;
+    process.exit(0);
   });
 }
 
