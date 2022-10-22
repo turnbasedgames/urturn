@@ -12,9 +12,19 @@ interface GameListCardProps {
 
 function GameListCard({ game }: GameListCardProps): React.ReactElement {
   const navigate = useNavigate();
+
   return (
     <Card
-      sx={{ margin: 1 }}
+      sx={{
+        // margin: 1,
+        maxWidth: '170px',
+        flexShrink: 0,
+        borderRadius: '16px',
+        transition: '0.2s',
+        '&:hover': {
+          transform: 'scale(1.1)',
+        },
+      }}
       key={`GameCard-${game.id}`}
     >
       <CardActionArea onClick={() => navigate(`/games/${game.id}`)}>
@@ -23,7 +33,7 @@ function GameListCard({ game }: GameListCardProps): React.ReactElement {
           game={game}
         />
         <CardContent sx={{ padding: 1 }}>
-          <Typography noWrap>{game.name}</Typography>
+          <Typography variant="h6" sx={{ textTransform: 'uppercase' }} noWrap>{game.name}</Typography>
           <Typography noWrap variant="caption">
             {`by: ${game.creator.username}`}
           </Typography>

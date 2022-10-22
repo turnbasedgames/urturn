@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Stack, Typography } from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2';
+import {
+  Stack, Typography, Grid,
+} from '@mui/material';
 import { Game } from '@urturn/types-common';
 
 import { getGame, getGames } from '../../models/game';
@@ -46,21 +47,25 @@ function GameList(): React.ReactElement {
       <Typography color="text.primary">
         Featured Games
       </Typography>
-      <Grid
-        container
-        direction="column"
+      <Stack
+        direction="row"
+        spacing={3}
         sx={{
-          overflowX: 'auto',
+          '&::-webkit-scrollbar': {
+            display: 'none',
+          },
         }}
       >
-        {featuredGames.map((game) => (<GameListCard game={game} />
+        {featuredGames.map((game) => (
+          <GameListCard game={game} />
         ))}
-      </Grid>
+      </Stack>
       <Typography color="text.primary">
         All Games
       </Typography>
       <Grid
         container
+      // spacing={3}
       >
         {games.map((game) => (
           <GameListCard game={game} />

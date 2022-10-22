@@ -103,7 +103,7 @@ function ProfileView({ user, setUser }: Props): React.ReactElement {
               >
                 Sign Out
               </Button>
-              )}
+            )}
           />
         </Card>
         <Paper>
@@ -120,7 +120,7 @@ function ProfileView({ user, setUser }: Props): React.ReactElement {
           />
           <Stack>
             {!displayedRoomsLoading && displayedRooms
-            // The game may not exist. We should not display the room.
+              // The game may not exist. We should not display the room.
               .filter((room) => room.game)
               .map((room) => (
                 <Card key={room.id} sx={{ display: 'flex' }} color="">
@@ -141,17 +141,17 @@ function ProfileView({ user, setUser }: Props): React.ReactElement {
                       title={(room.game != null) ? room.game.name : '[Deleted Game]'}
                       subheader={room.id}
                       action={((activeTab === ProfileTab.Active) && (
-                      <Button
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onRoomQuit(room).catch(logger.error);
-                        }}
-                        color="error"
-                        variant="text"
-                        onMouseDown={(event) => event.stopPropagation()}
-                      >
-                        Quit
-                      </Button>
+                        <Button
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onRoomQuit(room).catch(logger.error);
+                          }}
+                          color="error"
+                          variant="text"
+                          onMouseDown={(event) => event.stopPropagation()}
+                        >
+                          Quit
+                        </Button>
                       ))}
                     />
                   </CardActionArea>
