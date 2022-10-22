@@ -1,23 +1,24 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Typography } from '@mui/material';
-import { getOtherPlayer } from './utils';
+import { Typography, Stack } from '@mui/material';
 
-function EndGame({ players, plrToSecretHash, curPlr }) {
-  const otherPlr = getOtherPlayer(players, curPlr);
-  const otherSecret = plrToSecretHash[otherPlr.id];
+function EndGame({ plrToSecretHash, curPlr }) {
+  const otherSecrets = Object.entries(plrToSecretHash)
+    .map(([plrId, secret]) => (curPlr.id === plrId ? secret : undefined))
+    .filter((secret) => secret != null);
   return (
-    <Typography color="text.primary">
-      {`The secret: ${otherSecret}`}
-    </Typography>
+    <Stack>
+      <Typography variants="h5" color="text.primary">we keep secrets from each other but they somehow find a way to be revealed...</Typography>
+      {otherSecrets.map((secret) => (
+        <Typography color="secondary">
+          {secret}
+        </Typography>
+      ))}
+    </Stack>
   );
 }
 
 EndGame.propTypes = {
-  players: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string,
-    username: PropTypes.string,
-  })).isRequired,
   curPlr: PropTypes.shape({ id: PropTypes.string, username: PropTypes.string }).isRequired,
   plrToSecretHash: PropTypes.objectOf(PropTypes.string).isRequired,
 };

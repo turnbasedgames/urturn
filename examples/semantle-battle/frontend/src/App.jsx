@@ -11,7 +11,6 @@ import ChooseSecret from './ChooseSecret';
 import InGame from './InGame';
 import EndGame from './EndGame';
 
-// TODO: remove debug statements
 // TODO: add local caching per session
 // TODO: cool animated background with words bouncing around
 // TODO: add music playlist
@@ -41,8 +40,6 @@ function App() {
     };
     setupCurPlr();
   }, []);
-
-  // TODO: add loading chunks here, to fix the "You should neve see this message on startup"
 
   const [recentErrorMsg, setRecentErrorMsg] = useState(null);
 
@@ -98,7 +95,7 @@ function App() {
                   setRecentErrorMsg={setRecentErrorMsg}
                 />
                 )}
-                {status === 'endGame' && (<EndGame players={players} curPlr={curPlr} plrToSecretHash={plrToSecretHash} />
+                {status === 'endGame' && (<EndGame curPlr={curPlr} plrToSecretHash={plrToSecretHash} />
                 )}
               </Stack>
             )}

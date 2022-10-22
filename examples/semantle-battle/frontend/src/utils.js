@@ -154,7 +154,6 @@ export const getGuessesData = (guessToInfo, secret) => getWordData()
           ? curLatestGuess : curGuess),
         guessEntries[0],
       );
-    console.log({ latestGuess, sortedGuesses });
     return {
       latestGuess,
       sortedGuesses,
