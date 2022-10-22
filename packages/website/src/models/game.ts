@@ -10,6 +10,7 @@ export interface GameReqBody {
 
 export interface GamesQuery {
   creator?: string
+  searchText?: string
 }
 
 export const createGame = async (game: GameReqBody): Promise<Game> => {
