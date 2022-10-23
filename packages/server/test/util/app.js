@@ -14,24 +14,30 @@ function waitUntilRunning(t, api, timeout = 30000, buffer = 200) {
   );
 }
 
-async function spawnServer(t, env, api) {
+async function spawnServer(t, env, api, noWait) {
   const server = spawn('node', ['index.js'], { env });
+  const stdoutMessages = [];
   server.stdout.setEncoding('utf8');
   server.stdout.on('data', (data) => {
     t.log(`server process (stdout): ${data.trim()}`);
+    stdoutMessages.push(data);
   });
+  const stderrMessages = [];
   server.stderr.setEncoding('utf8');
   server.stderr.on('data', (data) => {
     t.log(`server process (stderr): ${data.trim()}`);
+    stderrMessages.push(data);
   });
 
   try {
-    await waitUntilRunning(t, api);
+    if (!noWait) {
+      await waitUntilRunning(t, api);
+    }
   } catch (err) {
     server.kill();
     throw err;
   }
-  return server;
+  return { server, stdoutMessages, stderrMessages };
 }
 
 async function spawnApp(t, options = {}) {
@@ -42,6 +48,7 @@ async function spawnApp(t, options = {}) {
     forceCreatePersistentDependencies,
     nameDictionary,
     nameIterations,
+    noWait = false,
   } = options;
   const env = {
     PATH: process.env.PATH,
@@ -72,15 +79,18 @@ async function spawnApp(t, options = {}) {
 
   const baseURL = `http://localhost:${env.PORT}`;
   const api = axios.create({ baseURL });
-  const server = await spawnServer(
+  const { server, stderrMessages, stdoutMessages } = await spawnServer(
     t,
     {
       ...env, ...envWithMongo, ...envWithRedis, ...overrideEnv,
     }, api,
+    noWait,
   );
   return {
     api,
     server,
+    stderrMessages,
+    stdoutMessages,
     baseURL,
     envWithMongo,
     envWithRedis,

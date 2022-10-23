@@ -4,7 +4,7 @@ const { STRIPE_KEY, STRIPE_WEBHOOK_SECRET } = process.env;
 const stripeClient = stripe(STRIPE_KEY);
 
 if (!STRIPE_KEY) {
-  throw new Error('STRIPE_KEY environment variable not defined');
+  throw new Error('STRIPE_KEY environment variable is not defined');
 }
 
 if (!STRIPE_WEBHOOK_SECRET) {

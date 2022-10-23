@@ -48,6 +48,17 @@ function waitFor(t, testAsyncFunc, timeoutMs = 10000, bufferMs = 200, errorMsg =
   });
 }
 
+function waitForOutput(t, message, listOfOutput, timeoutMs = 10000, bufferMs = 200, errorMsg = 'Test app never logged the expected output') {
+  return waitFor(t,
+    async () => {
+      if (listOfOutput.find(((line) => line.includes(message))) == null) {
+        throw new Error(`Did not find message in output: ${message}`);
+      } else {
+        return true;
+      }
+    }, timeoutMs, bufferMs, errorMsg);
+}
+
 function makePersistentDependencyFn(name, envField, setupFunc) {
   return async (logFn, defaultEnv, forceCreate) => {
     if (!forceCreate) {
@@ -105,6 +116,7 @@ module.exports = {
   createOrUpdateSideApps,
   getNested,
   waitFor,
+  waitForOutput,
   setupMongoDB,
   setupRedis,
 };

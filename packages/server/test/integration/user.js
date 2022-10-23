@@ -394,22 +394,3 @@ test('POST /user username generator adds random numbers when there is a collisio
   t.context.createdUsers.push(userCredTwo);
   t.regex(userTwo.username, /test_[0-9]/);
 });
-
-test('Server fails and process exits when required Stripe environment variables are not provided', async (t) => {
-  const { app } = t.context;
-  const STRIPE_ENV_NAMES = ['STRIPE_KEY', 'STRIPE_WEBHOOK_SECRET'];
-  const startupErrors = await Promise.all(STRIPE_ENV_NAMES.map((envName) => t.throwsAsync(spawnApp(
-    t,
-    {
-      overrideEnv: { [envName]: undefined },
-      defaultMongoEnv: app.envWithMongo,
-      defaultRedisEnv: app.envWithRedis,
-    },
-  ))));
-
-  // didn't want to spend time finding a good way to assert error logs, so
-  // we are assuming that if there is a startup timeout error than its because the
-  // missing STRIPE_KEY
-  // TODO: we can assert on the error logs provided by the server process
-  t.true(startupErrors.every(({ message }) => message.includes('Server was not ready after')), `Server startup errors: ${startupErrors.join(',')}`);
-});
