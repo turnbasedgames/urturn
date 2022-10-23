@@ -54,6 +54,7 @@ function GameList(): React.ReactElement {
         sx={{
           overflowX: 'scroll',
           flexShrink: 0,
+          scrollMarginLeft: '2em',
           '&::-webkit-scrollbar': {
             display: 'none',
           },
