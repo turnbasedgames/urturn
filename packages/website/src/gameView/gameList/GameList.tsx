@@ -41,16 +41,19 @@ function GameList(): React.ReactElement {
   return (
     <Stack
       direction="column"
-      padding={2}
-      overflow="auto"
+      padding={1}
     >
       <Typography color="text.primary">
         Featured Games
       </Typography>
       <Stack
         direction="row"
-        spacing={3}
+        spacing={2}
+        paddingTop={2}
+        paddingBottom={2}
         sx={{
+          overflowX: 'scroll',
+          flexShrink: 0,
           '&::-webkit-scrollbar': {
             display: 'none',
           },
@@ -65,10 +68,15 @@ function GameList(): React.ReactElement {
       </Typography>
       <Grid
         container
-      // spacing={3}
+        columns={2}
+        spacing={2}
+        paddingTop={2}
+        justifyContent="space-evenly"
       >
         {games.map((game) => (
-          <GameListCard game={game} />
+          <Grid item>
+            <GameListCard game={game} />
+          </Grid>
         ))}
       </Grid>
     </Stack>

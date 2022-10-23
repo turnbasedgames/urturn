@@ -16,10 +16,8 @@ function GameListCard({ game }: GameListCardProps): React.ReactElement {
   return (
     <Card
       sx={{
-        // margin: 1,
         maxWidth: '170px',
         flexShrink: 0,
-        borderRadius: '16px',
         transition: '0.2s',
         '&:hover': {
           transform: 'scale(1.1)',
@@ -29,12 +27,12 @@ function GameListCard({ game }: GameListCardProps): React.ReactElement {
     >
       <CardActionArea onClick={() => navigate(`/games/${game.id}`)}>
         <CardMediaWithFallback
-          sx={{ height: '170px', width: '170px' }}
+          sx={{ height: '135px', width: '180px' }}
           game={game}
         />
-        <CardContent sx={{ padding: 1 }}>
-          <Typography variant="h6" sx={{ textTransform: 'uppercase' }} noWrap>{game.name}</Typography>
-          <Typography noWrap variant="caption">
+        <CardContent sx={{ padding: 1.5 }}>
+          <Typography gutterBottom variant="h6" noWrap>{game.name}</Typography>
+          <Typography color="text.secondary" noWrap variant="caption">
             {`by: ${game.creator.username}`}
           </Typography>
         </CardContent>
