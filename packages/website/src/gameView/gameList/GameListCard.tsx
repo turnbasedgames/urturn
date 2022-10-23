@@ -22,7 +22,6 @@ function GameListCard({ game }: GameListCardProps): React.ReactElement {
         '&:hover': {
           transform: 'scale(1.1)',
         },
-        position: 'relative',
       }}
       key={`GameCard-${game.id}`}
     >

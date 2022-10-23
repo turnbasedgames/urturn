@@ -16,7 +16,7 @@ function CardMediaWithFallback({ game, sx }: { game: Game, sx: SxProps }): React
     <CardMedia
       sx={sx}
       component="img"
-      image="https://assets-prd.ignimgs.com/2022/06/23/overwatch-2-button-fin-1656022954568.jpg"
+      image={`https://rawcdn.githack.com/${repoOwner}/${repo}/${game.commitSHA}/thumbnail.png`}
       alt={game.name}
       onError={handleImageError}
     />
