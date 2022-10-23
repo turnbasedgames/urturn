@@ -47,14 +47,18 @@ async function setupServer({ apiPort }) {
     socket.emit('stateChanged', boardGame);
   });
 
-  // setup a watch to detect when we should refresh the backend module
-  watchFile(userBackend, { interval: backendHotReloadIntervalMs }, async () => {
-    console.log('Triggering hot reload due to change detected in:', userBackend);
+  const restartGame = async () => {
     console.log('Resetting game state with new backend.');
     console.log('Closing player tabs.');
     backendModule = await getLatestBackendModule(userBackend);
     boardGame = newBoardGame(backendModule);
     io.sockets.emit('stateChanged', boardGame);
+  };
+
+  // setup a watch to detect when we should refresh the backend module
+  watchFile(userBackend, { interval: backendHotReloadIntervalMs }, () => {
+    console.log('Triggering hot reload due to change detected in:', userBackend);
+    restartGame();
   });
 
   app.use(cors());
@@ -62,6 +66,11 @@ async function setupServer({ apiPort }) {
 
   app.post('/player', (_, res) => {
     let boardGameContender = JSON.parse(JSON.stringify(boardGame));
+    if (!boardGameContender.joinable) {
+      res.status(StatusCodes.BAD_REQUEST).json({ message: `Cannot add player to this room because it is not joinable (boardGame.joinable=${boardGameContender.joinable}).` });
+      return;
+    }
+
     const username = `user_${boardGame.playerIdCounter}`;
     const id = `id_${boardGame.playerIdCounter}`;
     const player = {
@@ -145,9 +154,13 @@ async function setupServer({ apiPort }) {
     res.sendStatus(StatusCodes.OK);
   });
 
-  app.delete('/state', (req, res) => {
-    boardGame = newBoardGame(backendModule);
-    res.sendStatus(StatusCodes.OK);
+  app.put('/state/refresh', (req, res) => {
+    restartGame().then(() => {
+      res.sendStatus(StatusCodes.OK);
+    }).catch((err) => {
+      console.error(err);
+      res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    });
   });
 
   app.use((err, req, res) => {

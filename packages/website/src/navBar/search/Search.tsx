@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { logEvent } from 'firebase/analytics';
 import {
   Paper, IconButton, InputBase, Stack,
@@ -7,11 +8,13 @@ import { Search as SearchIcon } from '@mui/icons-material';
 import { analytics } from '../../firebase/setupFirebase';
 
 function Search(): React.ReactElement {
+  const navigate = useNavigate();
   const [searchText, setSearchText] = useState('');
   const onSearch = (text: string): void => {
     logEvent(analytics, 'search', {
       search_term: text,
     });
+    navigate(`/games?searchText=${text}`);
   };
   return (
     <Paper>
