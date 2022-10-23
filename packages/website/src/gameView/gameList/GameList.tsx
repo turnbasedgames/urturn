@@ -54,7 +54,6 @@ function GameList(): React.ReactElement {
         sx={{
           overflowX: 'scroll',
           flexShrink: 0,
-          scrollMarginLeft: '2em',
           '&::-webkit-scrollbar': {
             display: 'none',
           },
@@ -72,7 +71,7 @@ function GameList(): React.ReactElement {
         columns={2}
         spacing={2}
         paddingTop={2}
-        justifyContent="space-evenly"
+        justifyContent="center"
       >
         {games.map((game) => (
           <Grid item>

@@ -22,16 +22,17 @@ function GameListCard({ game }: GameListCardProps): React.ReactElement {
         '&:hover': {
           transform: 'scale(1.1)',
         },
+        position: 'relative',
       }}
       key={`GameCard-${game.id}`}
     >
       <CardActionArea onClick={() => navigate(`/games/${game.id}`)}>
         <CardMediaWithFallback
-          sx={{ height: '135px', width: '180px' }}
+          sx={{ height: '170px', width: '170px' }}
           game={game}
         />
         <CardContent sx={{ padding: 1.5 }}>
-          <Typography gutterBottom variant="h6" noWrap>{game.name}</Typography>
+          <Typography variant="h6" noWrap>{game.name}</Typography>
           <Typography color="text.secondary" noWrap variant="caption">
             {`by: ${game.creator.username}`}
           </Typography>
