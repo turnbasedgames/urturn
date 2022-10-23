@@ -8,7 +8,7 @@ import { getGame, getGames } from '../../models/game';
 import logger from '../../logger';
 import GameListCard from './GameListCard';
 
-const FEATURED_GAME_IDS = ['626eac7c65667f00160a6b42', '62adfb1b212915000e44e7a8', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42', '626eac7c65667f00160a6b42'];
+const FEATURED_GAME_IDS = ['626eac7c65667f00160a6b42', '62adfb1b212915000e44e7a8', '62f03a69c4b031000ea00bf0', '630ebdef9495d4000ee694cb', '630af4b26c3be1000e26aca4'];
 
 function GameList(): React.ReactElement {
   const [games, setGames] = useState<Game[]>([]);
@@ -60,7 +60,7 @@ function GameList(): React.ReactElement {
         }}
       >
         {featuredGames.map((game) => (
-          <GameListCard game={game} />
+          <GameListCard key={game.id} game={game} />
         ))}
       </Stack>
       <Typography color="text.primary">
@@ -74,7 +74,7 @@ function GameList(): React.ReactElement {
         justifyContent="center"
       >
         {games.map((game) => (
-          <Grid item>
+          <Grid key={game.id} item>
             <GameListCard game={game} />
           </Grid>
         ))}
