@@ -11,6 +11,7 @@ export interface GameReqBody {
 export interface GamesQuery {
   creator?: string
   searchText?: string
+  limit?: number
 }
 
 export const createGame = async (game: GameReqBody): Promise<Game> => {

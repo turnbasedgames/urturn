@@ -9,7 +9,7 @@ import { getGame, getGames } from '../../models/game';
 import logger from '../../logger';
 import GameListCard from './GameListCard';
 
-const FEATURED_GAME_IDS = ['626eac7c65667f00160a6b42', '62adfb1b212915000e44e7a8', '62f03a69c4b031000ea00bf0', '630ebdef9495d4000ee694cb', '630af4b26c3be1000e26aca4'];
+const FEATURED_GAME_IDS = ['63474d0012b461000e15dc96', '62adfb1b212915000e44e7a8', '62f03a69c4b031000ea00bf0', '630ebdef9495d4000ee694cb', '630af4b26c3be1000e26aca4', '626eac7c65667f00160a6b42'];
 
 function GameList(): React.ReactElement {
   const { search } = useLocation();
@@ -28,7 +28,7 @@ function GameList(): React.ReactElement {
       // string in the search text we would rather send an 'undefined' value down to the API,
       // to prevent zero results showing up during a search when a user does not enter a value
       // in the search bar and submits.
-      const gamesRaw = await getGames({ searchText });
+      const gamesRaw = await getGames({ searchText, limit: 30 });
       setGames(gamesRaw);
     }
 
@@ -58,7 +58,7 @@ function GameList(): React.ReactElement {
   return (
     <Stack
       direction="column"
-      padding={1}
+      padding={2}
     >
       {
         !isSearch && (
@@ -69,6 +69,7 @@ function GameList(): React.ReactElement {
             <Stack
               direction="row"
               spacing={2}
+              paddingLeft={1}
               paddingTop={2}
               paddingBottom={2}
               sx={{
