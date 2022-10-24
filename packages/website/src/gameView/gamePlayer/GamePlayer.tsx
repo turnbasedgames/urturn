@@ -15,7 +15,7 @@ import {
 } from '../../models/room';
 import { UserContext } from '../../models/user';
 import logger from '../../logger';
-import { GITHACK_BASE_URL } from '../../util';
+import { GITHACK_BASE_URL, SOCKET_IO_REASON_IO_CLIENT_DISCONNECT } from '../../util';
 import useSocket from '../../models/useSocket';
 
 const shouldJoinPrivateRoom = (user?: User, room?: Room): boolean => Boolean(
@@ -57,7 +57,7 @@ function GamePlayer(): React.ReactElement {
 
   const onSocketDisconnect = (reason: string): void => {
     // client decided to disconnect, no reason to think this was an error
-    if (reason === 'io client disconnect') {
+    if (reason === SOCKET_IO_REASON_IO_CLIENT_DISCONNECT) {
       return;
     }
     enqueueSnackbar(`Refresh page. We lost Connection: ${reason}`, {
