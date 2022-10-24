@@ -27,6 +27,7 @@ async function createGameAndAssert(t, api, userCred, user, gameOptionalInfo = {}
   t.is(status, StatusCodes.CREATED);
   const { urbux, ...publicUser } = user;
   t.deepEqual(game.creator, publicUser);
+  t.is(game.activePlayerCount, 0);
   Object.keys(gameRaw).forEach((key) => {
     t.is(gameRaw[key], game[key]);
   });

@@ -53,14 +53,13 @@ router.get('/:id',
 
 router.post('/', expressUserAuthMiddleware, asyncHandler(async (req, res) => {
   const { body: gameRaw, user } = req;
-  gameRaw.creator = user.id;
   const game = new Game(gameRaw);
-  await game.save();
+  game.creator = user.id;
+  await game.updateByUser(gameRaw);
   await game.populate('creator').execPopulate();
   res.status(StatusCodes.CREATED).json({ game });
 }));
 
-// TODO: validation on the body, oldBody.save() does not catch it
 router.put('/:id', expressUserAuthMiddleware,
   celebrate({
     [Segments.PARAMS]: Joi.object().keys({
@@ -73,11 +72,8 @@ router.put('/:id', expressUserAuthMiddleware,
     const oldGame = await Game.findById(id);
 
     if (oldGame) {
-      if (oldGame.creator.toString() === user.id.toString()) {
-        Object.keys(gameRaw).forEach((key) => {
-          oldGame[key] = gameRaw[key];
-        });
-        await oldGame.save();
+      if (oldGame.creator.equals(user.id)) {
+        await oldGame.updateByUser(gameRaw);
         await oldGame.populate('creator').execPopulate();
         res.status(StatusCodes.OK).json({ game: oldGame });
       } else {

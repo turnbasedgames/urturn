@@ -157,6 +157,24 @@ test('POST /game responds 400 if data is missing fields', async (t) => {
   t.true(message.includes('Game validation failed'), message);
 });
 
+test('POST /game responds 403 if user trying to modify keys they are not allowed to', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  await createUserAndAssert(t, api, userCred);
+  t.context.createdUsers.push(userCred);
+
+  const authToken = await userCred.user.getIdToken();
+  const multipleForbiddenFieldsRes = await t.throwsAsync(api.post('/game', {
+    randomField: 0,
+    otherField: 2,
+    name: 'hello',
+    creator: 'cannotspecifythis',
+    activePlayerCount: 10000,
+  }, { headers: { authorization: authToken } }));
+  t.is(multipleForbiddenFieldsRes.response.status, StatusCodes.FORBIDDEN);
+  t.is(multipleForbiddenFieldsRes.response.data.message, 'Cannot modify keys: randomField, otherField, creator, activePlayerCount');
+});
+
 test('PUT /game/:id updates a game', async (t) => {
   const { api } = t.context.app;
   const userCred = await createUserCred();
@@ -205,6 +223,26 @@ test('PUT /game/:id responds not found if game does not exist', async (t) => {
   const updateDoc = { name: `integration-tests-${uuidv4()}` };
   const { response: { status: statusPut } } = await t.throwsAsync(api.put(`/game/${Types.ObjectId()}`, updateDoc, { headers: { authorization: authToken } }));
   t.is(statusPut, StatusCodes.NOT_FOUND);
+});
+
+test('PUT /game/:id responds 403 if user trying to modify keys they are not allowed to', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const user = await createUserAndAssert(t, api, userCred);
+  t.context.createdUsers.push(userCred);
+
+  const authToken = await userCred.user.getIdToken();
+  const game = await createGameAndAssert(t, api, userCred, user);
+
+  const multipleForbiddenFieldsRes = await t.throwsAsync(api.put(`/game/${game.id}`, {
+    randomField: 0,
+    otherField: 2,
+    name: 'hello',
+    creator: 'cannotspecifythis',
+    activePlayerCount: 10000,
+  }, { headers: { authorization: authToken } }));
+  t.is(multipleForbiddenFieldsRes.response.status, StatusCodes.FORBIDDEN);
+  t.is(multipleForbiddenFieldsRes.response.data.message, 'Cannot modify keys: randomField, otherField, creator, activePlayerCount');
 });
 
 test('DELETE /game/:id deletes a game', async (t) => {

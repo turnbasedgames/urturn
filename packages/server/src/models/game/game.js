@@ -1,9 +1,9 @@
-/* eslint-disable no-underscore-dangle */
 const mongoose = require('mongoose');
-const uniqueValidator = require('mongoose-unique-validator');
+const { StatusCodes } = require('http-status-codes');
 
 const { Schema } = mongoose;
 
+const CREATOR_EDITABLE_KEYS = ['name', 'description', 'githubURL', 'commitSHA'];
 const GameSchema = new Schema({
   name: {
     type: String,
@@ -32,13 +32,43 @@ const GameSchema = new Schema({
     minLength: 1,
     required: true,
   },
+  activePlayerCount: {
+    type: Number,
+    required: true,
+    default: 0,
+    index: true,
+    validate: {
+      validator: (activePlayerCount) => Number
+        .isInteger(activePlayerCount) && activePlayerCount >= 0,
+      message: '{VALUE} is not a non-negative integer value',
+    },
+  },
 }, { timestamps: true });
 
 GameSchema.index({ name: 'text', description: 'text' });
-GameSchema.plugin(uniqueValidator);
+// Sort order is descending for activePlayerCount because queries will search for most active games
+// to less active games.
+GameSchema.index({ activePlayerCount: -1 });
+
+GameSchema.method('updateByUser', async function updateByUser(changes) {
+  const changeKeys = Object.keys(changes);
+  const forbiddenKeys = changeKeys.filter((key) => !CREATOR_EDITABLE_KEYS.includes(key));
+  if (forbiddenKeys.length > 0) {
+    const error = new Error(`Cannot modify keys: ${forbiddenKeys.join(', ')}`);
+    error.status = StatusCodes.FORBIDDEN;
+    throw error;
+  }
+
+  changeKeys.forEach((key) => {
+    this[key] = changes[key];
+  });
+
+  await this.save();
+});
 GameSchema.method('toJSON', function toJSON() {
   return {
     id: this.id,
+    activePlayerCount: this.activePlayerCount,
     name: this.name,
     description: this.description,
     creator: this.creator,

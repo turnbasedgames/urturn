@@ -1,5 +1,5 @@
 const test = require('ava');
-const { waitForOutput } = require('../util/util');
+const { waitForOutput, waitFor } = require('../util/util');
 const { spawnApp } = require('../util/app');
 
 test.before(async (t) => {
@@ -28,6 +28,11 @@ test('Server fails and process exits when required Stripe environment variables 
       },
     );
     t.true(await waitForOutput(t, `${envName} environment variable is not defined`, testApp.stderrMessages));
-    t.is(testApp.server.exitCode, 1);
+    t.is(await waitFor(t, async () => {
+      if (testApp.server.exitCode == null) {
+        throw new Error('server has not terminated yet...');
+      }
+      return testApp.server.exitCode;
+    }), 1);
   }));
 });

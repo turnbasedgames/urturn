@@ -6,7 +6,7 @@ const getPort = require('get-port');
 const { waitFor, setupMongoDB, setupRedis } = require('./util');
 const { testStripeKey, testStripeWebhookSecret } = require('./stripe');
 
-function waitUntilRunning(t, api, timeout = 30000, buffer = 200) {
+function waitUntilRunning(t, api, timeout = 30000, buffer = 1000) {
   return waitFor(
     t,
     async () => { await api.get('/readiness'); },
