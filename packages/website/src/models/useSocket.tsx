@@ -4,7 +4,10 @@ import { io, Socket } from 'socket.io-client';
 import logger from '../logger';
 import { API_URL } from './util';
 
-const useSocket = (user: User | undefined): [Socket | undefined, boolean, string | undefined] => {
+const useSocket = (
+  user: User | undefined,
+  onDisconnect?: (reason: string) => void,
+): [Socket | undefined, boolean, string | undefined] => {
   const [socket, setSocket] = useState<Socket | undefined>();
   const [isConnected, setIsConnected] = useState(false);
   const [lastPong, setLastPong] = useState<string | undefined>();
@@ -34,6 +37,9 @@ const useSocket = (user: User | undefined): [Socket | undefined, boolean, string
     newSocket.on('disconnect', (reason) => {
       logger.info('socket disconnected with reason: ', reason);
       setIsConnected(false);
+      if (onDisconnect != null) {
+        onDisconnect(reason);
+      }
     });
 
     newSocket.on('connect_error', (err) => {

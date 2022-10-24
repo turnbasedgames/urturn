@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { LinearProgress, Typography } from '@mui/material';
 import {
   BoardGame,
-  Game, Room, RoomUser, UnwatchRoomRes, User, WatchRoomRes,
+  Game, Room, RoomUser, User, WatchRoomRes,
 } from '@urturn/types-common';
 
 import { RoomPlayer } from '@urturn/ui-common';
@@ -15,7 +15,7 @@ import {
 } from '../../models/room';
 import { UserContext } from '../../models/user';
 import logger from '../../logger';
-import { GITHACK_BASE_URL } from '../../util';
+import { GITHACK_BASE_URL, SOCKET_IO_REASON_IO_CLIENT_DISCONNECT } from '../../util';
 import useSocket from '../../models/useSocket';
 
 const shouldJoinPrivateRoom = (user?: User, room?: Room): boolean => Boolean(
@@ -55,7 +55,19 @@ function GamePlayer(): React.ReactElement {
     setupRoom().catch(logger.error);
   }, [userContext.user]);
 
-  const [socket] = useSocket(userContext.user);
+  const onSocketDisconnect = (reason: string): void => {
+    // client decided to disconnect, no reason to think this was an error
+    if (reason === SOCKET_IO_REASON_IO_CLIENT_DISCONNECT) {
+      return;
+    }
+    enqueueSnackbar(`Refresh page. We lost Connection: ${reason}`, {
+      variant: 'error',
+      persist: true,
+    });
+  };
+
+  const [socket, socketConnected] = useSocket(userContext.user, onSocketDisconnect);
+
   const [childClient, setChildClient] = useState<any | null>();
   useEffect(() => {
     if (childClient == null || room == null || room.game == null || socket == null) {
@@ -68,6 +80,8 @@ function GamePlayer(): React.ReactElement {
     }
 
     socket.on('room:latestState', handleNewBoardGame);
+
+    // A socket can only watch one room in it's lifetime
     socket.emit('watchRoom', { roomId }, (res: null | WatchRoomRes) => {
       if (res != null) {
         logger.error('error trying to watch room', res.error);
@@ -76,16 +90,11 @@ function GamePlayer(): React.ReactElement {
     handleNewBoardGame(generateBoardGame(room, room.latestState));
 
     return () => {
-      socket.emit('unwatchRoom', { roomId }, (res: null | UnwatchRoomRes) => {
-        if (res != null) {
-          logger.error('error trying to unwatch room', res.error);
-        }
-      });
       socket.off('room:latestState', handleNewBoardGame);
     };
   }, [childClient, socket]);
 
-  if (room == null || userContext.user == null || socket == null) {
+  if (room == null || userContext.user == null || socket == null || !socketConnected) {
     return (<LinearProgress />);
   }
   if (roomId == null || room.game == null) {
