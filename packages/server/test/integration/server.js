@@ -1,5 +1,5 @@
 const test = require('ava');
-const { waitForOutput, waitFor } = require('../util/util');
+const { waitForOutput, waitFor, setupGlobalLogContext } = require('../util/util');
 const { spawnApp } = require('../util/app');
 
 test.before(async (t) => {
@@ -9,6 +9,8 @@ test.before(async (t) => {
   t.context.app = app;
   /* eslint-enable no-param-reassign */
 });
+
+setupGlobalLogContext(test);
 
 test.after.always(async (t) => {
   await t.context.app.cleanup();

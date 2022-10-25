@@ -10,7 +10,7 @@ const {
   getPublicUserFromUser, createUserAndAssert, createGameAndAssert, createRoomAndAssert,
   startTicTacToeRoom,
 } = require('../util/api_util');
-const { waitFor, createOrUpdateSideApps } = require('../util/util');
+const { waitFor, createOrUpdateSideApps, setupGlobalLogContext } = require('../util/util');
 
 const socketConfigs = [{
   name: 'http polling only',
@@ -29,7 +29,7 @@ function createSocket(t, baseURL, socketConfig) {
   socket.data = {};
   socket.data.socketConfig = socketConfig;
   socket.on('connect', () => {
-    t.log({
+    t.context.log({
       message: 'socket received connect event',
       socketInfo: { id: socket.id, connected: socket.connected, disconnected: socket.disconnected },
     });
@@ -37,7 +37,7 @@ function createSocket(t, baseURL, socketConfig) {
 
   socket.data.disconnectEvents = [];
   socket.on('disconnect', (reason, details) => {
-    t.log({
+    t.context.log({
       message: 'socket received disconnect event',
       socketInfo: { id: socket.id, connected: socket.connected, disconnected: socket.disconnected },
       reason,
@@ -48,7 +48,7 @@ function createSocket(t, baseURL, socketConfig) {
 
   socket.data.messageHistory = [];
   socket.on('room:latestState', (event) => {
-    t.log({
+    t.context.log({
       message: 'socket received room:latestState event',
       socketInfo: { id: socket.id, connected: socket.connected, disconnected: socket.disconnected },
       version: event.version,
@@ -58,7 +58,7 @@ function createSocket(t, baseURL, socketConfig) {
 
   socket.data.connectErrors = [];
   socket.on('connect_error', (err) => {
-    t.log({
+    t.context.log({
       message: 'socket received connect_error event',
       socketInfo: { id: socket.id, connected: socket.connected, disconnected: socket.disconnected },
       err,
@@ -87,7 +87,7 @@ async function watchRoom(t, socket, room, assert = true) {
     errorObj.socketId = socket.id;
     errorObj.roomid = room.id;
     errorObj.socketData = socket.data;
-    t.log('error watching room:', errorObj);
+    t.context.log('error watching room:', errorObj);
     throw errorObj;
   }
 }
@@ -120,7 +120,7 @@ function waitForDisconnected(t, socket) {
       if (!socket.connected && socket.data.disconnectEvents.length > 0) {
         return true;
       }
-      t.log('Socket not disconnected', socket.data.disconnectEvents, socket.connected);
+      t.context.log('Socket not disconnected', socket.data.disconnectEvents, socket.connected);
       throw Error('Socket not disconnected');
     },
     10000,
@@ -184,6 +184,8 @@ test.before(async (t) => {
   t.context.app = await spawnApp(t);
 });
 
+setupGlobalLogContext(test);
+
 test.after.always(async (t) => {
   const { app, sideApps } = t.context;
   await app.cleanup();
@@ -212,7 +214,7 @@ socketConfigs.forEach(({ name, config }) => {
             const authTokenPromise = (ind % 2 === 0)
               ? userCredOne.user.getIdToken() : userCredTwo.user.getIdToken();
             authTokenPromise.then((token) => cb({ token })).catch((error) => {
-              t.log({
+              t.context.log({
                 message: 'unable to get auth token',
                 error,
               });
@@ -333,7 +335,7 @@ socketConfigs.forEach(({ name, config }) => {
         ...config,
         auth: (cb) => {
           userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
-            t.log({
+            t.context.log({
               message: 'unable to get auth token',
               error,
             });
@@ -355,7 +357,7 @@ socketConfigs.forEach(({ name, config }) => {
       ...config,
       auth: (cb) => {
         userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
-          t.log({
+          t.context.log({
             message: 'unable to get auth token',
             error,
           });
@@ -405,7 +407,7 @@ socketConfigs.forEach(({ name, config }) => {
             const authTokenPromise = (index % 2 === 0)
               ? userCredOne.user.getIdToken() : userCredTwo.user.getIdToken();
             authTokenPromise.then((token) => cb({ token })).catch((error) => {
-              t.log({
+              t.context.log({
                 message: 'unable to get auth token',
                 error,
               });
@@ -484,7 +486,7 @@ socketConfigs.forEach(({ name, config }) => {
         ...config,
         auth: (cb) => {
           userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
-            t.log({
+            t.context.log({
               message: 'unable to get auth token',
               error,
             });
@@ -525,7 +527,7 @@ socketConfigs.forEach(({ name, config }) => {
       {
         ...config,
         auth: (cb) => userCred.user.getIdToken().then((token) => cb({ token })).catch(((error) => {
-          t.log({
+          t.context.log({
             message: 'unable to get auth token',
             error,
           });
@@ -554,7 +556,7 @@ socketConfigs.forEach(({ name, config }) => {
       if (count === 0) {
         return true;
       }
-      t.log({ gameId: game.id, count });
+      t.context.log({ gameId: game.id, count });
       throw new Error('Active player count never went to 0');
     });
     const { mongoClientDatabase } = t.context.app;

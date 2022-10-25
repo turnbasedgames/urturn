@@ -12,9 +12,12 @@ const consoleOptions = {
       ({
         level, message, timestamp, metadata,
       }) => {
-        const isEmptyObj = JSON.stringify(metadata, null, 2) === '{}';
-        const metadataStr = isEmptyObj ? '' : `\n${JSON.stringify(metadata, null, 2)}`;
-        return `${timestamp.replace('T', ' ')} ${level}: ${message}${metadataStr}`;
+        const { requestId, correlationId, ...otherMetadata } = metadata;
+        const isEmptyObj = JSON.stringify(otherMetadata, null, 2) === '{}';
+        const metadataStr = isEmptyObj ? '' : `\n${JSON.stringify(otherMetadata, null, 2)}`;
+        const isReqLog = requestId != null;
+        const requestStr = isReqLog ? ` ${[requestId, correlationId].join(' ')} ` : ' ';
+        return `${timestamp.replace('T', ' ')}${requestStr}${level}: ${message}${metadataStr}`;
       },
     ),
   ),

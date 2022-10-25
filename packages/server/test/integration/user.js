@@ -6,7 +6,7 @@ const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
 const { createUserAndAssert, cleanupTestUsers } = require('../util/api_util');
 const { testStripeClient, testStripeWebhookSecret, createTestWebhookHeader } = require('../util/stripe');
-const { createOrUpdateSideApps } = require('../util/util');
+const { createOrUpdateSideApps, setupGlobalLogContext } = require('../util/util');
 
 test.before(async (t) => {
   const app = await spawnApp(t);
@@ -15,6 +15,8 @@ test.before(async (t) => {
   t.context.app = app;
   /* eslint-enable no-param-reassign */
 });
+
+setupGlobalLogContext(test);
 
 test.after.always(async (t) => {
   await cleanupTestUsers(t);

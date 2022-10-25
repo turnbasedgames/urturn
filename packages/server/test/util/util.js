@@ -1,6 +1,7 @@
 const { MongoMemoryReplSet } = require('mongodb-memory-server');
 const { RedisMemoryServer } = require('redis-memory-server');
 const { MongoClient } = require('mongodb');
+const { v4: uuidv4 } = require('uuid');
 
 function getNested(obj, ...args) {
   return args.reduce((nestedObj, level) => nestedObj && nestedObj[level], obj);
@@ -64,20 +65,20 @@ function makePersistentDependencyFn(name, envField, setupFunc) {
   return async (logFn, defaultEnv, forceCreate) => {
     if (!forceCreate) {
       if (defaultEnv) {
-        logFn(`skipping starting local ${name} (using provided default)...`);
+        logFn({ log: `skipping starting local ${name} (using provided default)...` });
         return [defaultEnv,
-          () => { logFn(`skipping killing local ${name} instance.`); }];
+          () => { logFn({ log: `skipping killing local ${name} instance.` }); }];
       }
       if (process.env[envField]) {
-        logFn(`skipping starting local ${name} (using uri specified in .env)...`);
+        logFn({ log: `skipping starting local ${name} (using uri specified in .env)...` });
         return [{ [envField]: process.env[envField] },
-          () => { logFn(`skipping killing local ${name} instance.`); }];
+          () => { logFn({ log: `skipping killing local ${name} instance.` }); }];
       }
     }
     const [uri, cleanupFunc, client] = await setupFunc();
-    logFn(`started local ${name} instance at URI:`, { uri });
+    logFn({ log: `started local ${name} instance at URI: ${uri}` });
     return [{ [envField]: uri }, async () => {
-      logFn(`killing local ${name} instance...`);
+      logFn({ log: `killing local ${name} instance...` });
       await cleanupFunc();
     }, client];
   };
@@ -118,6 +119,58 @@ const setupRedis = makePersistentDependencyFn('Redis', 'REDIS_URL',
     return [uri, async () => { await redisServer.stop(); }];
   });
 
+function setupGlobalLogContext(test) {
+  // ava guarantees that title is unique across test object (test file)
+  const globalLogContext = new Map();
+
+  test.beforeEach((t) => {
+    const { app } = t.context;
+    const cid = `test-${uuidv4()}`;
+    // TODO: modify socket client to pass around this cid
+
+    // pass a custom logger
+    const logs = [];
+    globalLogContext.set(t.title, logs);
+
+    // eslint-disable-next-line no-param-reassign
+    t.context.log = (...args) => {
+      logs.push([new Date().toISOString(), ...args]);
+    };
+
+    function tapFn({ serviceId, type, log }) {
+      logs.push([new Date().toISOString(), serviceId, type, log]);
+    }
+
+    // add filtered tap to the helper app that is shared across tests
+    if (app != null) {
+      const { addTap, api } = app;
+      api.defaults.headers.common['x-correlation-id'] = cid;
+      addTap((evt) => {
+        if (evt.log?.includes(cid)) {
+          tapFn(evt);
+        }
+      });
+    }
+
+    // expose tapFn so if the test creates other sideApps they can push
+    // eslint-disable-next-line no-param-reassign
+    t.context.logTapFn = tapFn;
+  });
+
+  test.after.always((t) => {
+    globalLogContext.forEach((logs, testTitle) => {
+      if (logs.length > 0) {
+        t.log('');
+        t.log(`Output for: ${testTitle}`);
+        logs.forEach((log) => {
+          t.log(...log);
+        });
+        t.log('');
+      }
+    });
+  });
+}
+
 module.exports = {
   createOrUpdateSideApps,
   getNested,
@@ -125,4 +178,5 @@ module.exports = {
   waitForOutput,
   setupMongoDB,
   setupRedis,
+  setupGlobalLogContext,
 };

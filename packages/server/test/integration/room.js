@@ -12,7 +12,7 @@ const {
   cleanupTestUsers,
   startTicTacToeRoom,
 } = require('../util/api_util');
-const { createOrUpdateSideApps } = require('../util/util');
+const { createOrUpdateSideApps, setupGlobalLogContext } = require('../util/util');
 
 async function testOperationOnFinishedRoom(t, operation) {
   const { userCredOne, userCredTwo, room } = await startTicTacToeRoom(t);
@@ -37,6 +37,8 @@ test.before(async (t) => {
   t.context.createdUsers = [];
   /* eslint-enable no-param-reassign */
 });
+
+setupGlobalLogContext(test);
 
 test.after.always(async (t) => {
   const { app, sideApps } = t.context;

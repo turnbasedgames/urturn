@@ -2,6 +2,7 @@ require('dotenv').config();
 const { spawn } = require('child_process');
 const axios = require('axios');
 const getPort = require('get-port');
+const { v4: uuidv4 } = require('uuid');
 
 const { waitFor, setupMongoDB, setupRedis } = require('./util');
 const { testStripeKey, testStripeWebhookSecret } = require('./stripe');
@@ -14,20 +15,31 @@ function waitUntilRunning(t, api, timeout = 30000, buffer = 1000) {
   );
 }
 
+function makeOnProcessDataFn(t, serviceId, type, taps, messages) {
+  return (data) => {
+    const trimmedLog = data.trim();
+    const logEv = { serviceId, type, log: trimmedLog };
+    taps.forEach((tap) => tap(logEv));
+
+    if (t.context.logTapFn != null) {
+      t.context.logTapFn(logEv);
+    } else {
+      t.log(`server process (${type}): ${trimmedLog}`);
+    }
+    messages.push(trimmedLog);
+  };
+}
+
 async function spawnServer(t, env, api, noWait) {
+  const serviceId = `service-${uuidv4()}`;
   const server = spawn('node', ['index.js'], { env });
+  const taps = new Set();
   const stdoutMessages = [];
   server.stdout.setEncoding('utf8');
-  server.stdout.on('data', (data) => {
-    t.log(`server process (stdout): ${data.trim()}`);
-    stdoutMessages.push(data);
-  });
+  server.stdout.on('data', makeOnProcessDataFn(t, serviceId, 'stdout', taps, stdoutMessages));
   const stderrMessages = [];
   server.stderr.setEncoding('utf8');
-  server.stderr.on('data', (data) => {
-    t.log(`server process (stderr): ${data.trim()}`);
-    stderrMessages.push(data);
-  });
+  server.stderr.on('data', makeOnProcessDataFn(t, serviceId, 'stderr', taps, stderrMessages));
 
   try {
     if (!noWait) {
@@ -37,7 +49,13 @@ async function spawnServer(t, env, api, noWait) {
     server.kill();
     throw err;
   }
-  return { server, stdoutMessages, stderrMessages };
+  return {
+    server,
+    stdoutMessages,
+    stderrMessages,
+    addTap: (tapFn) => taps.add(tapFn),
+    removeTap: (tapFn) => taps.delete(tapFn),
+  };
 }
 
 async function spawnApp(t, options = {}) {
@@ -70,16 +88,19 @@ async function spawnApp(t, options = {}) {
   if (nameIterations !== undefined) {
     env.NAMES_GENERATOR_MAX_ITERATIONS = nameIterations;
   }
+  const logFn = t.context.logTapFn ?? t.log;
   const [envWithMongo, cleanupMongoDB, mongoClientDatabase] = await setupMongoDB(
-    t.log, defaultMongoEnv, forceCreatePersistentDependencies,
+    logFn, defaultMongoEnv, forceCreatePersistentDependencies,
   );
   const [envWithRedis, cleanupRedis] = await setupRedis(
-    t.log, defaultRedisEnv, forceCreatePersistentDependencies,
+    logFn, defaultRedisEnv, forceCreatePersistentDependencies,
   );
 
   const baseURL = `http://localhost:${env.PORT}`;
   const api = axios.create({ baseURL });
-  const { server, stderrMessages, stdoutMessages } = await spawnServer(
+  const {
+    server, stderrMessages, stdoutMessages, addTap, removeTap,
+  } = await spawnServer(
     t,
     {
       ...env, ...envWithMongo, ...envWithRedis, ...overrideEnv,
@@ -88,6 +109,8 @@ async function spawnApp(t, options = {}) {
   );
   return {
     api,
+    addTap,
+    removeTap,
     server,
     stderrMessages,
     stdoutMessages,
@@ -101,11 +124,11 @@ async function spawnApp(t, options = {}) {
       // wait a second because server may be in a cleanup process
       const exitPromise = new Promise((resolve, reject) => {
         server.on('exit', () => {
-          t.log('server properly exited');
+          logFn({ log: 'server properly exited' });
           resolve();
         });
         setTimeout(() => {
-          t.log('server timed out waiting to cleanup');
+          logFn({ log: 'server timed out waiting to cleanup' });
           reject(new Error('timeout reached'));
         }, 10000);
       });
