@@ -68,7 +68,9 @@ const main = async () => {
     httpServer.close(async () => {
       logger.warn('successfully closed http server');
       try {
-        await Promise.all([socketIoCleanupPromise, cleanupRedis(), cleanupDB()]);
+        // wait for socketIo to cleanup first as it relies on the db working
+        await socketIoCleanupPromise;
+        await Promise.all([cleanupRedis(), cleanupDB()]);
         logger.warn('successful graceful shutdown');
         process.exit(0);
       } catch (error) {
@@ -83,11 +85,17 @@ const cleanupAppPromise = main().catch((err) => {
   logger.error('error occurred when starting app', err);
 });
 
-['SIGINT', 'SIGTERM'].forEach((sig) => {
+let cleaningUp = false;
+['SIGINT', 'SIGTERM', 'SIGUSR2'].forEach((sig) => {
   process.on(sig, () => {
     logger.warn(`signal received to terminate process: ${sig}`);
-    cleanupAppPromise.then((cleanupApp) => {
-      cleanupApp();
-    });
+    if (cleaningUp) {
+      logger.warn('already triggered cleanup, ignoring signal');
+    } else {
+      cleaningUp = true;
+      cleanupAppPromise.then((cleanupApp) => {
+        cleanupApp();
+      });
+    }
   });
 });

@@ -1,5 +1,6 @@
 const { MongoMemoryReplSet } = require('mongodb-memory-server');
 const { RedisMemoryServer } = require('redis-memory-server');
+const { MongoClient } = require('mongodb');
 
 function getNested(obj, ...args) {
   return args.reduce((nestedObj, level) => nestedObj && nestedObj[level], obj);
@@ -73,12 +74,12 @@ function makePersistentDependencyFn(name, envField, setupFunc) {
           () => { logFn(`skipping killing local ${name} instance.`); }];
       }
     }
-    const [uri, cleanupFunc] = await setupFunc();
+    const [uri, cleanupFunc, client] = await setupFunc();
     logFn(`started local ${name} instance at URI:`, { uri });
     return [{ [envField]: uri }, async () => {
       logFn(`killing local ${name} instance...`);
       await cleanupFunc();
-    }];
+    }, client];
   };
 }
 
@@ -100,7 +101,12 @@ const setupMongoDB = makePersistentDependencyFn('MongoDB', 'MONGODB_CONNECTION_U
     // use MongoMemoryReplSet instead of MongoMemoryServer because the app requires transactions
     const mongod = await MongoMemoryReplSet.create({ replSet: { count: 4 } });
     const uri = mongod.getUri();
-    return [uri, async () => { await mongod.stop(); }];
+    const mongoClient = new MongoClient(uri);
+    return [uri, async () => {
+      await mongoClient.close();
+      await mongod.stop();
+    },
+    mongoClient.db('test')];
   });
 
 const setupRedis = makePersistentDependencyFn('Redis', 'REDIS_URL',

@@ -70,7 +70,7 @@ async function spawnApp(t, options = {}) {
   if (nameIterations !== undefined) {
     env.NAMES_GENERATOR_MAX_ITERATIONS = nameIterations;
   }
-  const [envWithMongo, cleanupMongoDB] = await setupMongoDB(
+  const [envWithMongo, cleanupMongoDB, mongoClientDatabase] = await setupMongoDB(
     t.log, defaultMongoEnv, forceCreatePersistentDependencies,
   );
   const [envWithRedis, cleanupRedis] = await setupRedis(
@@ -96,6 +96,7 @@ async function spawnApp(t, options = {}) {
     envWithRedis,
     cleanupRedis,
     cleanupMongoDB,
+    mongoClientDatabase,
     cleanup: async () => {
       // wait a second because server may be in a cleanup process
       const exitPromise = new Promise((resolve, reject) => {

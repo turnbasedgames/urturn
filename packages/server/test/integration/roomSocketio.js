@@ -2,6 +2,7 @@ const test = require('ava');
 const { promisify } = require('util');
 const { StatusCodes } = require('http-status-codes');
 const io = require('socket.io-client');
+const mongoose = require('mongoose');
 
 const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
@@ -25,8 +26,8 @@ const socketConfigs = [{
 
 function createSocket(t, baseURL, socketConfig) {
   const socket = io(baseURL, socketConfig);
-
   socket.data = {};
+  socket.data.socketConfig = socketConfig;
   socket.on('connect', () => {
     t.log({
       message: 'socket received connect event',
@@ -67,10 +68,33 @@ function createSocket(t, baseURL, socketConfig) {
   return socket;
 }
 
+async function watchRoom(t, socket, room, assert = true) {
+  const emitAsync = promisify(socket.emit).bind(socket);
+  try {
+    await emitAsync('watchRoom', { roomId: room.id });
+    if (assert) {
+      const { mongoClientDatabase } = t.context.app;
+      const userSockets = await mongoClientDatabase.collection('usersockets').find({ socketId: socket.id }).toArray();
+      t.is(userSockets.length, 1);
+      t.is(userSockets[0].socketId, socket.id);
+      t.is(userSockets[0].user.toString(), socket.data.socketConfig.user.id);
+      t.is(userSockets[0].room.toString(), room.id);
+      t.is(userSockets[0].game.toString(), room.game.id);
+    }
+  } catch (err) {
+    const errorObj = new Error('Error while watching room');
+    errorObj.message = err.error;
+    errorObj.socketId = socket.id;
+    errorObj.roomid = room.id;
+    errorObj.socketData = socket.data;
+    t.log('error watching room:', errorObj);
+    throw errorObj;
+  }
+}
+
 async function createSocketAndWatchRoom(t, baseURL, room, socketConfig) {
   const socket = createSocket(t, baseURL, socketConfig);
-  const emitAsync = promisify(socket.emit).bind(socket);
-  await emitAsync('watchRoom', { roomId: room.id });
+  await watchRoom(t, socket, room);
   return socket;
 }
 
@@ -144,6 +168,17 @@ function assertNextSocketLatestState(t, sockets, expectedState) {
   return Promise.all(sockets.map((socket) => assertNextLatestState(t, socket, expectedState)));
 }
 
+async function getActivePlayerCountAndAssert(t, gameId) {
+  const { api } = t.context.app;
+  const { status, data: { game: gameWithSocketsConnected } } = await api.get(`/game/${gameId}`);
+  t.is(status, StatusCodes.OK);
+  return gameWithSocketsConnected.activePlayerCount;
+}
+
+async function assertActivePlayerCount(t, gameId, count) {
+  t.is(await getActivePlayerCountAndAssert(t, gameId), count);
+}
+
 test.before(async (t) => {
   // eslint-disable-next-line no-param-reassign
   t.context.app = await spawnApp(t);
@@ -183,16 +218,21 @@ socketConfigs.forEach(({ name, config }) => {
               });
             });
           },
+          user: (ind % 2 === 0) ? userOne : userTwo,
         },
       )),
     );
+
+    // only 2 unique players watching room, so even though there are 6 sockets, activePlayerCount
+    // should be 2
+    await assertActivePlayerCount(t, game.id, 2);
 
     const { data: { room: resRoom }, status } = await api.post(`/room/${room.id}/join`, {},
       { headers: { authorization: await userCredTwo.user.getIdToken() } });
     t.is(status, StatusCodes.OK);
     t.deepEqual(resRoom, {
       id: room.id,
-      game,
+      game: { ...game, activePlayerCount: 2 },
       joinable: false,
       finished: false,
       latestState: {
@@ -240,6 +280,7 @@ socketConfigs.forEach(({ name, config }) => {
         emptyObject: {},
       },
     });
+    await assertActivePlayerCount(t, game.id, 2);
 
     const { status: statusMove1 } = await api.post(`/room/${room.id}/move`, { x: 0, y: 0 },
       { headers: { authorization: await userCredOne.user.getIdToken() } });
@@ -257,6 +298,7 @@ socketConfigs.forEach(({ name, config }) => {
         emptyObject: {},
       },
     });
+    await assertActivePlayerCount(t, game.id, 2);
 
     const { status: statusMove2 } = await api.post(`/room/${room.id}/move`, { x: 0, y: 1 },
       { headers: { authorization: await userCredTwo.user.getIdToken() } });
@@ -277,12 +319,13 @@ socketConfigs.forEach(({ name, config }) => {
     });
   });
 
-  test(`sockets (${name}) can unwatch a room to no longer receive room:latestState events when state changes`, async (t) => {
+  test(`sockets (${name}) that emit watchRoom with a room id cannot watch another room`, async (t) => {
     const { api, baseURL } = t.context.app;
-    const {
-      userOne, userTwo, userCredOne, userCredTwo, room,
-    } = await startTicTacToeRoom(t);
-    const socket1 = await createSocketAndWatchRoom(
+    const userCredOne = await createUserCred();
+    const userOne = await createUserAndAssert(t, api, userCredOne);
+    const game = await createGameAndAssert(t, api, userCredOne, userOne);
+    const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
+    const socket = await createSocketAndWatchRoom(
       t,
       baseURL,
       room,
@@ -296,75 +339,42 @@ socketConfigs.forEach(({ name, config }) => {
             });
           });
         },
+        user: userOne,
       },
     );
-    const socket2 = await createSocketAndWatchRoom(
-      t,
-      baseURL,
-      room,
-      {
-        ...config,
-        auth: (cb) => {
-          userCredTwo.user.getIdToken().then((token) => cb({ token })).catch((error) => {
-            t.log({
-              message: 'unable to get auth token',
-              error,
-            });
+
+    const error = await t.throwsAsync(watchRoom(t, socket, room, false));
+    t.is(error.message, `Error: Socket already connected to a room: ${room.id}`);
+  });
+
+  test(`sockets (${name}) that emit watchRoom with an invalid room id will get an error`, async (t) => {
+    const { api, baseURL } = t.context.app;
+    const userCredOne = await createUserCred();
+    await createUserAndAssert(t, api, userCredOne);
+    const socket = createSocket(t, baseURL, {
+      ...config,
+      auth: (cb) => {
+        userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
+          t.log({
+            message: 'unable to get auth token',
+            error,
           });
-        },
-      },
-    );
-
-    const { status: statusMove1 } = await api.post(`/room/${room.id}/move`, { x: 0, y: 0 },
-      { headers: { authorization: await userCredOne.user.getIdToken() } });
-    t.is(statusMove1, StatusCodes.OK);
-
-    await assertNextSocketLatestState(t, [socket1, socket2], {
-      finished: false,
-      joinable: false,
-      players: [userOne, userTwo].map(getPublicUserFromUser),
-      version: 2,
-      state: {
-        board: [['X', null, null], [null, null, null], [null, null, null]],
-        status: 'inGame',
-        plrToMoveIndex: 1,
-        winner: null,
-        emptyObject: {},
+        });
       },
     });
 
-    socket2.emit('unwatchRoom', { roomId: room.id });
+    const nonExistentId = new mongoose.Types.ObjectId();
+    const nonExistentError = await t.throwsAsync(watchRoom(
+      t,
+      socket,
+      { id: nonExistentId.toString() },
+      false,
+    ));
+    t.is(nonExistentError.message, 'Error: Room does not exist');
 
-    const { status: statusMove2 } = await api.post(`/room/${room.id}/move`, { x: 0, y: 1 },
-      { headers: { authorization: await userCredTwo.user.getIdToken() } });
-    t.is(statusMove2, StatusCodes.OK);
-
-    await assertNextLatestState(t, socket1, {
-      finished: false,
-      joinable: false,
-      players: [userOne, userTwo].map(getPublicUserFromUser),
-      version: 3,
-      state: {
-        board: [['X', 'O', null], [null, null, null], [null, null, null]],
-        plrToMoveIndex: 0,
-        status: 'inGame',
-        winner: null,
-        emptyObject: {},
-      },
-    });
-
-    const error = await t.throwsAsync(assertNextLatestState(t, socket2, {
-      room: room.id,
-      version: 3,
-      state: {
-        board: [['X', 'O', null], [null, null, null], [null, null, null]],
-        plrToMoveIndex: 0,
-        status: 'inGame',
-        winner: null,
-        emptyObject: {},
-      },
-    }));
-    t.is(error.asyncFuncError.message, 'No messages received!');
+    const invalidId = undefined;
+    const invalidIdError = await t.throwsAsync(watchRoom(t, socket, { id: invalidId }, false));
+    t.is(invalidIdError.message, 'Error: Room does not exist');
   });
 
   test(`sockets (${name}) can be connected to different nodejs instances and receive events for room:latestState`, async (t) => {
@@ -401,6 +411,7 @@ socketConfigs.forEach(({ name, config }) => {
               });
             });
           },
+          user: (index % 2 === 0) ? userOne : userTwo,
         },
       )));
 
@@ -462,9 +473,10 @@ socketConfigs.forEach(({ name, config }) => {
       defaultRedisEnv: app.envWithRedis,
     });
     const { api, baseURL } = testApp;
+    const { mongoClientDatabase } = app;
 
     const userCredOne = await createUserCred();
-    await createUserAndAssert(t, api, userCredOne);
+    const userOne = await createUserAndAssert(t, api, userCredOne);
     const socket = createSocket(
       t,
       baseURL,
@@ -487,6 +499,66 @@ socketConfigs.forEach(({ name, config }) => {
     t.is(socket.data.disconnectEvents.length, 1);
     t.is(socket.data.disconnectEvents[0].reason, 'transport close');
 
-    // TODO: assert sockets are cleaned up from the DB
+    const userSockets = await mongoClientDatabase.collection('usersockets').find({ user: userOne.id }).toArray();
+    t.is(userSockets.length, 0);
+  });
+
+  test(`sockets (${name}) across several rooms for the same game still get counted as 1 unique player in activePlayerCount`, async (t) => {
+    const { api, baseURL } = t.context.app;
+    const userCredOne = await createUserCred();
+    const userCredTwo = await createUserCred();
+    const userCredThree = await createUserCred();
+    const userOne = await createUserAndAssert(t, api, userCredOne);
+    const userTwo = await createUserAndAssert(t, api, userCredTwo);
+    const userThree = await createUserAndAssert(t, api, userCredThree);
+    const game = await createGameAndAssert(t, api, userCredOne, userOne);
+
+    // three rooms, two created by userOne, and the last created by userTwo
+    const rooms = await Promise.all([
+      createRoomAndAssert(t, api, userCredOne, game, userOne),
+      createRoomAndAssert(t, api, userCredOne, game, userOne),
+      createRoomAndAssert(t, api, userCredTwo, game, userTwo),
+      createRoomAndAssert(t, api, userCredThree, game, userThree),
+    ]);
+
+    const createSocketPromise = (userCred, user, room) => createSocketAndWatchRoom(t, baseURL, room,
+      {
+        ...config,
+        auth: (cb) => userCred.user.getIdToken().then((token) => cb({ token })).catch(((error) => {
+          t.log({
+            message: 'unable to get auth token',
+            error,
+          });
+        })),
+        user,
+      });
+
+    // create 6 sockets per room (6 sockets * 4 rooms = 24 total sockets)
+    // testing high concurrent sockets to make sure we are free of race conditions in our
+    // transaction handling
+    const sockets = await Promise.all(rooms
+      .reduce((curSocketPromises, room) => [
+        ...curSocketPromises,
+        createSocketPromise(userCredOne, userOne, room),
+        createSocketPromise(userCredOne, userOne, room),
+        createSocketPromise(userCredOne, userOne, room),
+        createSocketPromise(userCredTwo, userTwo, room),
+        createSocketPromise(userCredTwo, userTwo, room),
+        createSocketPromise(userCredThree, userThree, room),
+      ], []));
+
+    await assertActivePlayerCount(t, game.id, 3);
+    sockets.forEach((socket) => socket.disconnect());
+    await waitFor(t, async () => {
+      const count = await getActivePlayerCountAndAssert(t, game.id);
+      if (count === 0) {
+        return true;
+      }
+      t.log({ gameId: game.id, count });
+      throw new Error('Active player count never went to 0');
+    });
+    const { mongoClientDatabase } = t.context.app;
+    const userSockets = await mongoClientDatabase.collection('usersockets').find({ game: game.id }).toArray();
+    t.is(userSockets.length, 0);
   });
 });
