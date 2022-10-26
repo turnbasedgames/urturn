@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const uniqueValidator = require('mongoose-unique-validator');
 const { USD_TO_URBUX } = require('./util');
 
 const { Schema } = mongoose;
@@ -49,7 +48,6 @@ const CurrencyToUrbuxTransactionSchema = new Schema({
   },
 }, { timestamps: true });
 
-CurrencyToUrbuxTransactionSchema.plugin(uniqueValidator);
 CurrencyToUrbuxTransactionSchema.index({ user: 1, paymentIntentId: 1 });
 
 module.exports = mongoose.model('CurrencyToUrbuxTransaction', CurrencyToUrbuxTransactionSchema);
