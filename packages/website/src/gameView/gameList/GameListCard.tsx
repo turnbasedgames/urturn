@@ -13,7 +13,6 @@ interface GameListCardProps {
 
 function GameListCard({ game }: GameListCardProps): React.ReactElement {
   const navigate = useNavigate();
-  console.log(game);
 
   return (
     <Card
