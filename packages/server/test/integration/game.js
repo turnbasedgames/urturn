@@ -6,7 +6,7 @@ const { Types } = require('mongoose');
 const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
 const { createGameAndAssert, createUserAndAssert, cleanupTestUsers } = require('../util/api_util');
-const { setupGlobalLogContext } = require('../util/util');
+const { setupTestFileLogContext } = require('../util/util');
 
 test.before(async (t) => {
   const app = await spawnApp(t);
@@ -16,7 +16,7 @@ test.before(async (t) => {
   /* eslint-enable no-param-reassign */
 });
 
-setupGlobalLogContext(test);
+setupTestFileLogContext(test);
 
 test.after.always(async (t) => {
   await cleanupTestUsers(t);

@@ -7,7 +7,7 @@ function getNested(obj, ...args) {
   return args.reduce((nestedObj, level) => nestedObj && nestedObj[level], obj);
 }
 
-function waitFor(t, testAsyncFunc, timeoutMs = 10000, bufferMs = 200, errorMsg = 'Test Function did not pass') {
+function waitFor(logFn, testAsyncFunc, timeoutMs = 10000, bufferMs = 200, errorMsg = 'Test Function did not pass') {
   const startTime = new Date();
   const timeoutThreshold = startTime.getTime() + timeoutMs;
   return new Promise((res, rej) => {
@@ -26,7 +26,7 @@ function waitFor(t, testAsyncFunc, timeoutMs = 10000, bufferMs = 200, errorMsg =
         } else {
           const endTime = new Date();
           if (endTime.getTime() > timeoutThreshold) {
-            t.log({
+            logFn({
               startTime: startTime.toISOString(),
               endTime: endTime.toISOString(),
               timeoutMs,
@@ -39,7 +39,7 @@ function waitFor(t, testAsyncFunc, timeoutMs = 10000, bufferMs = 200, errorMsg =
           }
         }
       } catch (error) {
-        t.log({
+        logFn({
           message: 'unexpected error when waiting',
           error,
         });
@@ -50,8 +50,8 @@ function waitFor(t, testAsyncFunc, timeoutMs = 10000, bufferMs = 200, errorMsg =
   });
 }
 
-function waitForOutput(t, message, listOfOutput, timeoutMs = 10000, bufferMs = 200, errorMsg = 'Test app never logged the expected output') {
-  return waitFor(t,
+function waitForOutput(logFn, message, listOfOutput, timeoutMs = 10000, bufferMs = 200, errorMsg = 'Test app never logged the expected output') {
+  return waitFor(logFn,
     async () => {
       if (listOfOutput.find(((line) => line.includes(message))) == null) {
         throw new Error(`Did not find message in output: ${message}`);
@@ -119,27 +119,16 @@ const setupRedis = makePersistentDependencyFn('Redis', 'REDIS_URL',
     return [uri, async () => { await redisServer.stop(); }];
   });
 
-function setupGlobalLogContext(test) {
+function setupTestFileLogContext(test) {
   // ava guarantees that title is unique across test object (test file)
-  const globalLogContext = new Map();
+  const testFileLogContext = new Map();
 
   test.beforeEach((t) => {
     const { app } = t.context;
     const cid = `test-${uuidv4()}`;
-    // TODO: modify socket client to pass around this cid
 
-    // pass a custom logger
     const logs = [];
-    globalLogContext.set(t.title, logs);
-
-    // eslint-disable-next-line no-param-reassign
-    t.context.log = (...args) => {
-      logs.push([new Date().toISOString(), ...args]);
-    };
-
-    function tapFn({ serviceId, type, log }) {
-      logs.push([new Date().toISOString(), serviceId, type, log]);
-    }
+    testFileLogContext.set(t.title, logs);
 
     // add filtered tap to the helper app that is shared across tests
     if (app != null) {
@@ -147,18 +136,24 @@ function setupGlobalLogContext(test) {
       api.defaults.headers.common['x-correlation-id'] = cid;
       addTap((evt) => {
         if (evt.log?.includes(cid)) {
-          tapFn(evt);
+          const { serviceId, type, log } = evt;
+          logs.push([new Date().toISOString(), serviceId, type, log]);
         }
       });
     }
 
-    // expose tapFn so if the test creates other sideApps they can push
-    // eslint-disable-next-line no-param-reassign
-    t.context.logTapFn = tapFn;
+    /* eslint-disable no-param-reassign */
+    t.context.log = (...args) => {
+      logs.push([new Date().toISOString(), ...args]);
+    };
+    t.context.cid = cid;
+    /* eslint-enable no-param-reassign */
   });
 
+  // after a test file runs we should print out all the logs organized by test title
+  // and in chronological order
   test.after.always((t) => {
-    globalLogContext.forEach((logs, testTitle) => {
+    testFileLogContext.forEach((logs, testTitle) => {
       if (logs.length > 0) {
         t.log('');
         t.log(`Output for: ${testTitle}`);
@@ -178,5 +173,5 @@ module.exports = {
   waitForOutput,
   setupMongoDB,
   setupRedis,
-  setupGlobalLogContext,
+  setupTestFileLogContext,
 };

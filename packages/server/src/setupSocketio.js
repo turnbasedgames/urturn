@@ -2,10 +2,9 @@ const mongoose = require('mongoose');
 const UserSocket = require('./models/user/userSocket');
 const Room = require('./models/room/room');
 const Game = require('./models/game/game');
+const { socketioLoggerMiddleware } = require('./middleware/httpLogger');
 const { socketioAuthMiddelware } = require('./middleware/auth');
 const logger = require('./logger');
-
-const defaultCb = (...args) => logger.info('callback did not exist, so was not called with args:', args);
 
 async function createUserSocket(socket, room) {
   // Don't need to query for room in transaction because the gameId does not change and thus,
@@ -69,7 +68,7 @@ async function deleteUserSocket(socket) {
       ).session(session).exec());
     }
     await Promise.all(operationPromises);
-    logger.info('wrapping up delete userSocket transaction',
+    socket.logger.info('wrapping up delete userSocket transaction',
       {
         socketId: socket.id,
         userId: socket.data.user.id,
@@ -80,7 +79,7 @@ async function deleteUserSocket(socket) {
 
 async function handleSocketDisconnect(socket, reason) {
   try {
-    logger.info('handling socket disconnect', {
+    socket.logger.info('handling socket disconnect', {
       id: socket.id,
       userId: socket.data.user.id,
       roomId: socket.data.roomId,
@@ -89,11 +88,11 @@ async function handleSocketDisconnect(socket, reason) {
     if (socket.data.roomId != null) {
       await deleteUserSocket(socket);
     } else {
-      logger.info('socket was not watching a room when disconnecting');
+      socket.logger.info('socket was not watching a room when disconnecting');
     }
-    logger.info('finished handling socket disconnect');
+    socket.logger.info('finished handling socket disconnect');
   } catch (error) {
-    logger.error('handling socket disconnect failed', {
+    socket.logger.error('handling socket disconnect failed', {
       id: socket.id,
       error: { name: error.name, message: error.message, stack: error.stack },
     });
@@ -101,16 +100,18 @@ async function handleSocketDisconnect(socket, reason) {
 }
 
 function setupSocketio(io) {
+  io.use(socketioLoggerMiddleware);
   io.use(socketioAuthMiddelware);
 
   // We maintain that sockets can only be associated with one room in its lifetime.
   // If a client wants to watch another room, it needs to create a new socket connection.
   io.on('connection', (socket) => {
-    logger.info('new socket connection', { id: socket.id });
+    socket.logger.info('new socket connection', { id: socket.id });
 
+    const defaultCb = (...args) => socket.logger.info('callback did not exist, so was not called with args:', args);
     socket.on('watchRoom', async ({ roomId }, cb = defaultCb) => {
       try {
-        logger.info('attempting to watch room', { id: socket.id, roomId, userId: socket.data.user.id });
+        socket.logger.info('attempting to watch room', { id: socket.id, roomId, userId: socket.data.user.id });
         if (socket.data.roomId != null) {
           throw new Error(`Socket already connected to a room: ${roomId}`);
         }
@@ -121,9 +122,9 @@ function setupSocketio(io) {
         await createUserSocket(socket, room);
         await socket.join(roomId);
         cb();
-        logger.info('watching room', { id: socket.id, roomId });
+        socket.logger.info('watching room', { id: socket.id, roomId });
       } catch (error) {
-        logger.error('error when watching room', {
+        socket.logger.error('error when watching room', {
           id: socket.id,
           error: { name: error.name, message: error.message, stack: error.stack },
         });

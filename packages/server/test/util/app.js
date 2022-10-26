@@ -7,43 +7,41 @@ const { v4: uuidv4 } = require('uuid');
 const { waitFor, setupMongoDB, setupRedis } = require('./util');
 const { testStripeKey, testStripeWebhookSecret } = require('./stripe');
 
-function waitUntilRunning(t, api, timeout = 30000, buffer = 1000) {
+function waitUntilRunning(logFn, api, timeout = 30000, buffer = 1000) {
   return waitFor(
-    t,
+    logFn,
     async () => { await api.get('/readiness'); },
     timeout, buffer, 'Server was not ready',
   );
 }
 
-function makeOnProcessDataFn(t, serviceId, type, taps, messages) {
+function makeOnProcessDataFn(logFn, serviceId, type, taps, messages) {
   return (data) => {
     const trimmedLog = data.trim();
     const logEv = { serviceId, type, log: trimmedLog };
+    logFn(logEv);
     taps.forEach((tap) => tap(logEv));
-
-    if (t.context.logTapFn != null) {
-      t.context.logTapFn(logEv);
-    } else {
-      t.log(`server process (${type}): ${trimmedLog}`);
-    }
     messages.push(trimmedLog);
   };
 }
 
-async function spawnServer(t, env, api, noWait) {
+async function spawnServer(logFn, env, api, noWait) {
   const serviceId = `service-${uuidv4()}`;
+  logFn(`spawning server ${serviceId}`);
   const server = spawn('node', ['index.js'], { env });
   const taps = new Set();
   const stdoutMessages = [];
   server.stdout.setEncoding('utf8');
-  server.stdout.on('data', makeOnProcessDataFn(t, serviceId, 'stdout', taps, stdoutMessages));
+  server.stdout.on('data', makeOnProcessDataFn(logFn, serviceId, 'stdout', taps, stdoutMessages));
   const stderrMessages = [];
   server.stderr.setEncoding('utf8');
-  server.stderr.on('data', makeOnProcessDataFn(t, serviceId, 'stderr', taps, stderrMessages));
+  server.stderr.on('data', makeOnProcessDataFn(logFn, serviceId, 'stderr', taps, stderrMessages));
 
   try {
     if (!noWait) {
-      await waitUntilRunning(t, api);
+      logFn(`waiting until service ${serviceId} is running`);
+      await waitUntilRunning(logFn, api);
+      logFn(`service ${serviceId} is running`);
     }
   } catch (err) {
     server.kill();
@@ -88,7 +86,9 @@ async function spawnApp(t, options = {}) {
   if (nameIterations !== undefined) {
     env.NAMES_GENERATOR_MAX_ITERATIONS = nameIterations;
   }
-  const logFn = t.context.logTapFn ?? t.log;
+
+  // prefer custom logger over default log
+  const logFn = t.context.log ?? t.log;
   const [envWithMongo, cleanupMongoDB, mongoClientDatabase] = await setupMongoDB(
     logFn, defaultMongoEnv, forceCreatePersistentDependencies,
   );
@@ -101,7 +101,7 @@ async function spawnApp(t, options = {}) {
   const {
     server, stderrMessages, stdoutMessages, addTap, removeTap,
   } = await spawnServer(
-    t,
+    logFn,
     {
       ...env, ...envWithMongo, ...envWithRedis, ...overrideEnv,
     }, api,

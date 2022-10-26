@@ -1,5 +1,5 @@
 const test = require('ava');
-const { waitForOutput, waitFor, setupGlobalLogContext } = require('../util/util');
+const { waitForOutput, waitFor, setupTestFileLogContext } = require('../util/util');
 const { spawnApp } = require('../util/app');
 
 test.before(async (t) => {
@@ -10,7 +10,7 @@ test.before(async (t) => {
   /* eslint-enable no-param-reassign */
 });
 
-setupGlobalLogContext(test);
+setupTestFileLogContext(test);
 
 test.after.always(async (t) => {
   await t.context.app.cleanup();
@@ -29,8 +29,8 @@ test('Server fails and process exits when required Stripe environment variables 
         noWait: true,
       },
     );
-    t.true(await waitForOutput(t, `${envName} environment variable is not defined`, testApp.stderrMessages));
-    t.is(await waitFor(t, async () => {
+    t.true(await waitForOutput(t.context.log, `${envName} environment variable is not defined`, testApp.stderrMessages));
+    t.is(await waitFor(t.context.log, async () => {
       if (testApp.server.exitCode == null) {
         throw new Error('server has not terminated yet...');
       }

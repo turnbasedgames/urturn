@@ -6,7 +6,7 @@ const { StatusCodes } = require('http-status-codes');
 const socketio = require('socket.io');
 
 require('./src/setupFirebase');
-const setupHttpLogger = require('./src/middleware/setupHttpLogger');
+const { setupExpressLoggerMiddleware } = require('./src/middleware/httpLogger');
 const logger = require('./src/logger');
 const setupDB = require('./src/setupDB');
 const userRouter = require('./src/models/user/route');
@@ -24,7 +24,7 @@ const main = async () => {
   logger.info('mongodb connection is ready');
 
   const app = express();
-  app.use(await setupHttpLogger());
+  app.use(await setupExpressLoggerMiddleware());
   const httpServer = http.createServer(app);
   const io = socketio(httpServer, {
     cors: {

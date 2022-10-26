@@ -3,7 +3,6 @@ const { StatusCodes } = require('http-status-codes');
 const admin = require('firebase-admin');
 
 const User = require('../models/user/user');
-const defaultLogger = require('../logger');
 
 const rawAuthMiddleware = async (logger, token, setUser, sendUnAuthorizedError, next) => {
   let decodedToken;
@@ -29,8 +28,7 @@ module.exports = {
   // https://socket.io/docs/v3/middlewares/#compatibility-with-express-middleware
   socketioAuthMiddelware: (socket, next) => {
     rawAuthMiddleware(
-      // main-234: socketio logging middleware will provide a custom logger instead of the default
-      defaultLogger,
+      socket.logger,
       socket.handshake.auth.token,
       (user, decodedToken) => {
         // disabled because we have to modify the socket properties to attach the associated user

@@ -10,7 +10,7 @@ const {
   getPublicUserFromUser, createUserAndAssert, createGameAndAssert, createRoomAndAssert,
   startTicTacToeRoom,
 } = require('../util/api_util');
-const { waitFor, createOrUpdateSideApps, setupGlobalLogContext } = require('../util/util');
+const { waitFor, createOrUpdateSideApps, setupTestFileLogContext } = require('../util/util');
 
 const socketConfigs = [{
   name: 'http polling only',
@@ -24,7 +24,9 @@ const socketConfigs = [{
   config: {},
 }];
 
-function createSocket(t, baseURL, socketConfig) {
+function createSocket(t, baseURL, baseConfig) {
+  const socketConfig = { extraHeaders: {}, ...baseConfig };
+  socketConfig.extraHeaders['x-correlation-id'] = t.context.cid;
   const socket = io(baseURL, socketConfig);
   socket.data = {};
   socket.data.socketConfig = socketConfig;
@@ -98,9 +100,9 @@ async function createSocketAndWatchRoom(t, baseURL, room, socketConfig) {
   return socket;
 }
 
-function waitForConnected(t, socket) {
+function waitForConnected(logFn, socket) {
   return waitFor(
-    t,
+    logFn,
     () => {
       if (socket.connected) {
         return true;
@@ -113,14 +115,14 @@ function waitForConnected(t, socket) {
   );
 }
 
-function waitForDisconnected(t, socket) {
+function waitForDisconnected(logFn, socket) {
   return waitFor(
-    t,
+    logFn,
     () => {
       if (!socket.connected && socket.data.disconnectEvents.length > 0) {
         return true;
       }
-      t.context.log('Socket not disconnected', socket.data.disconnectEvents, socket.connected);
+      logFn('Socket not disconnected', socket.data.disconnectEvents, socket.connected);
       throw Error('Socket not disconnected');
     },
     10000,
@@ -129,9 +131,9 @@ function waitForDisconnected(t, socket) {
   );
 }
 
-function waitForNextConnectError(t, socket) {
+function waitForNextConnectError(logFn, socket) {
   return waitFor(
-    t,
+    logFn,
     () => {
       if (socket.data.connectErrors.length > 0) {
         return socket.data.connectErrors.shift();
@@ -144,9 +146,9 @@ function waitForNextConnectError(t, socket) {
   );
 }
 
-function waitForNextEvent(t, socket) {
+function waitForNextEvent(logFn, socket) {
   return waitFor(
-    t,
+    logFn,
     () => {
       if (socket.data.messageHistory.length > 0) {
         return socket.data.messageHistory.shift();
@@ -160,7 +162,7 @@ function waitForNextEvent(t, socket) {
 }
 
 async function assertNextLatestState(t, socket, expectedState) {
-  const state = await waitForNextEvent(t, socket);
+  const state = await waitForNextEvent(t.context.log, socket);
   t.deepEqual(state, expectedState);
 }
 
@@ -184,7 +186,7 @@ test.before(async (t) => {
   t.context.app = await spawnApp(t);
 });
 
-setupGlobalLogContext(test);
+setupTestFileLogContext(test);
 
 test.after.always(async (t) => {
   const { app, sideApps } = t.context;
@@ -457,14 +459,14 @@ socketConfigs.forEach(({ name, config }) => {
   test(`sockets (${name}) gets connect_error if it does not provide auth tokens`, async (t) => {
     const { baseURL } = t.context.app;
     const socket = createSocket(t, baseURL, config);
-    const connectError = await waitForNextConnectError(t, socket);
+    const connectError = await waitForNextConnectError(t.context.log, socket);
     t.is(connectError.message, 'First argument to verifyIdToken() must be a Firebase ID token string.');
   });
 
   test(`sockets (${name}) gets connect_error if providing invalid auth token`, async (t) => {
     const { baseURL } = t.context.app;
     const socket = createSocket(t, baseURL, { ...config, auth: { token: 'invalid-token' } });
-    const connectError = await waitForNextConnectError(t, socket);
+    const connectError = await waitForNextConnectError(t.context.log, socket);
     t.is(connectError.message, 'Decoding Firebase ID token failed. Make sure you passed the entire string JWT which represents an ID token. See https://firebase.google.com/docs/auth/admin/verify-id-tokens for details on how to retrieve an ID token.');
   });
 
@@ -495,9 +497,9 @@ socketConfigs.forEach(({ name, config }) => {
       },
     );
 
-    t.true(await waitForConnected(t, socket));
+    t.true(await waitForConnected(t.context.log, socket));
     await testApp.cleanup();
-    t.true(await waitForDisconnected(t, socket));
+    t.true(await waitForDisconnected(t.context.log, socket));
     t.is(socket.data.disconnectEvents.length, 1);
     t.is(socket.data.disconnectEvents[0].reason, 'transport close');
 
