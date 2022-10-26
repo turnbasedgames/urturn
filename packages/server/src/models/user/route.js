@@ -3,14 +3,12 @@ const admin = require('firebase-admin');
 const { StatusCodes } = require('http-status-codes');
 const asyncHandler = require('express-async-handler');
 const { celebrate, Segments } = require('celebrate');
-const mongoose = require('mongoose');
 
 const Joi = require('../../middleware/joi');
 const { expressUserAuthMiddleware } = require('../../middleware/auth');
 const { stripeClient, webhookSecret } = require('../../utils/stripe');
 const User = require('./user');
-const CurrencyToUrbuxTransaction = require('../transaction/currencyToUrbuxTransaction');
-const { generateRandomUniqueUsername } = require('./util');
+const { generateRandomUniqueUsername, handlePaymentTransaction } = require('./util');
 const { UserNotFoundError } = require('./errors');
 const { ALLOWED_CURRENCIES_SET, USD_TO_URBUX, convertAmountToUrbux } = require('../transaction/util');
 
@@ -131,38 +129,9 @@ router.post('/purchase/webhook', express.raw({ type: 'application/json' }), asyn
     throw err;
   }
 
-  await mongoose.connection.transaction(async (session) => {
-    const currencyToUrbuxTransaction = await CurrencyToUrbuxTransaction.findOne({
-      paymentIntentId: succeededPaymentIntent.id,
-    }).session(session).exec();
-    if (currencyToUrbuxTransaction) {
-      req.log.info('duplicate transaction found', { succeededPaymentIntent });
-      // If the transaction document already exist with the same paymentIntentId, then we have
-      // already processed it and given the user their urbux. Because Stripe retries a webhook
-      // indefinitely when there are failures, we will respond with a 200 status code so it does
-      // not attempt to retry again. This makes this endpoint operation idempotent.
-      return;
-    }
-
-    const user = await User.findById(userId).session(session);
-    if (user == null) {
-      const err = new Error(`Could not find user with provided userId (userId=${userId})`);
-      err.status = StatusCodes.NOT_FOUND;
-      throw err;
-    }
-
-    user.urbux += urbuxAmount;
-    await user.save({ session });
-
-    const newCurrencyToUrbuxTransaction = new CurrencyToUrbuxTransaction({
-      paymentIntentId: succeededPaymentIntent.id,
-      user: userId,
-      urbux: paymentAmount,
-      paymentIntent: succeededPaymentIntent,
-    });
-
-    await newCurrencyToUrbuxTransaction.save({ session });
-  });
+  await handlePaymentTransaction(
+    req.log, userId, urbuxAmount, paymentAmount, succeededPaymentIntent,
+  );
 
   res.sendStatus(200);
 }));

@@ -3,9 +3,11 @@ const {
   adjectives,
   animals,
 } = require('unique-names-generator');
-
+const mongoose = require('mongoose');
+const { StatusCodes } = require('http-status-codes');
 const User = require('./user');
 const { UsernameGenerationError } = require('./errors');
+const CurrencyToUrbuxTransaction = require('../transaction/currencyToUrbuxTransaction');
 
 const NAMES_GENERATOR_CONFIG = {
   dictionaries: [adjectives, animals],
@@ -44,4 +46,43 @@ const generateRandomUniqueUsername = async (uid, count = 0, proposedUsernames = 
   return proposedUsername;
 };
 
-module.exports = { generateRandomUniqueUsername };
+const handlePaymentTransaction = (
+  logger, userId, urbuxAmount, paymentAmount, succeededPaymentIntent,
+) => mongoose.connection.transaction(async (session) => {
+  // we have to make a ghost edit to avoid possible stale reads
+  // https://www.mongodb.com/docs/manual/core/transactions-production-consideration/#in-progress-transactions-and-stale-reads
+  const currencyToUrbuxTransaction = await CurrencyToUrbuxTransaction.findOneAndUpdate({
+    paymentIntentId: succeededPaymentIntent.id,
+  }, {
+    paymentIntentId: succeededPaymentIntent.id,
+  }).session(session).exec();
+  if (currencyToUrbuxTransaction) {
+    logger.info('duplicate transaction found', { succeededPaymentIntent });
+    // If the transaction document already exist with the same paymentIntentId, then we have
+    // already processed it and given the user their urbux. Because Stripe retries a webhook
+    // indefinitely when there are failures, we will respond with a 200 status code so it does
+    // not attempt to retry again. This makes this endpoint operation idempotent.
+    return;
+  }
+
+  const user = await User.findById(userId).session(session);
+  if (user == null) {
+    const err = new Error(`Could not find user with provided userId (userId=${userId})`);
+    err.status = StatusCodes.NOT_FOUND;
+    throw err;
+  }
+
+  user.urbux += urbuxAmount;
+  await user.save({ session });
+
+  const newCurrencyToUrbuxTransaction = new CurrencyToUrbuxTransaction({
+    paymentIntentId: succeededPaymentIntent.id,
+    user: userId,
+    urbux: paymentAmount,
+    paymentIntent: succeededPaymentIntent,
+  });
+
+  await newCurrencyToUrbuxTransaction.save({ session });
+});
+
+module.exports = { generateRandomUniqueUsername, handlePaymentTransaction };

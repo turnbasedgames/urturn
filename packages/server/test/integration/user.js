@@ -327,7 +327,7 @@ test('POST /user/purchase/webhook duplicate transactions (paymentIntent.id gets 
   };
 
   const header = createTestWebhookHeader(testStripeClient, payload, testStripeWebhookSecret);
-  const numRequests = 10;
+  const numRequests = 100;
   const requests = Array(numRequests).fill(null).map(() => api.post('/user/purchase/webhook', payload, { headers: { 'Stripe-Signature': header } }));
   const responses = await Promise.all(requests);
 
