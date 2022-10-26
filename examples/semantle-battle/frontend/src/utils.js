@@ -121,13 +121,11 @@ export const getSimilarityScore = (wordToVec, word1, word2) => {
   }, 0);
 };
 
-export const getGettingCloseMsg = (wordToNearestWordPairs, secret, guess) => {
+export const getClosenessObj = (wordToNearestWordPairs, secret, guess) => {
   const similarPairs = wordToNearestWordPairs.get(secret);
   const index = similarPairs.findIndex(([, word]) => word === guess);
-  if (index >= 0) {
-    return `${index + 1}/${similarPairs.length}`;
-  }
-  return 'cold';
+  const message = index >= 0 ? `${index + 1}/${similarPairs.length}` : 'cold';
+  return { message, topPosition: index };
 };
 
 export const getOtherPlayer = (players, curPlr) => players.find(({ id }) => id !== curPlr.id);
@@ -142,7 +140,7 @@ export const getGuessesData = (guessToInfo, secret) => getWordData()
         count,
         lastUpdateTime,
         similarity: getSimilarityScore(wordToVec, guess, secret),
-        closenessMsg: getGettingCloseMsg(wordToNearestWordPairs, secret, guess),
+        ...getClosenessObj(wordToNearestWordPairs, secret, guess),
       }),
     ).sort((a, b) => b.similarity - a.similarity);
     const latestGuess = sortedGuesses

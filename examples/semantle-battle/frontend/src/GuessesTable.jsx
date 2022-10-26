@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Paper, TableContainer, Table, TableRow, TableHead, TableCell, TableBody,
+  Paper, TableContainer, Table, TableRow, TableHead, TableCell, TableBody, LinearProgress,
 } from '@mui/material';
 import PropTypes from 'prop-types';
 
@@ -26,11 +26,15 @@ function GuessesTable({ dense, guessesData }) {
               ( latest )
             </TableCell>
             <TableCell align="right" sx={{ color: '#CE93D8' }}>{latestGuess.guess}</TableCell>
-            <TableCell align="right">{latestGuess.similarity.toFixed(3)}</TableCell>
-            <TableCell align="right">{latestGuess.closenessMsg}</TableCell>
+            <TableCell align="right">
+              {latestGuess.similarity.toFixed(3)}
+            </TableCell>
+            <TableCell align="right">{latestGuess.message}</TableCell>
           </TableRow>
           )}
-          {sortedGuesses.map(({ guess, similarity, closenessMsg }, ind) => (
+          {sortedGuesses.map(({
+            guess, similarity, message, topPosition,
+          }, ind) => (
             <TableRow
               key={guess}
               sx={{ '& td': { border: 0 } }}
@@ -40,7 +44,10 @@ function GuessesTable({ dense, guessesData }) {
               </TableCell>
               <TableCell align="right">{guess}</TableCell>
               <TableCell align="right">{similarity.toFixed(3)}</TableCell>
-              <TableCell align="right">{closenessMsg}</TableCell>
+              <TableCell align="right">
+                {message}
+                <LinearProgress variant="determinate" value={topPosition} />
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -52,7 +59,8 @@ function GuessesTable({ dense, guessesData }) {
 const guessShape = PropTypes.shape({
   guess: PropTypes.string,
   similarity: PropTypes.number,
-  closenessMsg: PropTypes.string,
+  message: PropTypes.string,
+  topPosition: PropTypes.number,
 });
 GuessesTable.propTypes = {
   guessesData: PropTypes.shape({
