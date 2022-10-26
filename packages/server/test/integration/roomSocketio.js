@@ -8,9 +8,18 @@ const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
 const {
   getPublicUserFromUser, createUserAndAssert, createGameAndAssert, createRoomAndAssert,
-  startTicTacToeRoom,
+  startTicTacToeRoom, getRoomAndAssert,
 } = require('../util/api_util');
-const { waitFor, createOrUpdateSideApps, setupTestFileLogContext } = require('../util/util');
+const {
+  waitFor, createOrUpdateSideApps, setupTestFileLogContext, sleep,
+} = require('../util/util');
+
+const disconnectTimeoutSecs = 30;
+const disconnectAssertionBufferSecs = 10;
+const rightBeforeDisconnectTimeoutMs = (disconnectTimeoutSecs - disconnectAssertionBufferSecs)
+ * 1000;
+const timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs = disconnectAssertionBufferSecs
+ * 2 * 1000;
 
 const socketConfigs = [{
   name: 'http polling only',
@@ -564,5 +573,218 @@ socketConfigs.forEach(({ name, config }) => {
     const { mongoClientDatabase } = t.context.app;
     const userSockets = await mongoClientDatabase.collection('usersockets').find({ game: game.id }).toArray();
     t.is(userSockets.length, 0);
+  });
+
+  test(`sockets (${name}) disconnected kicks player if they don't have a socket connection after 30 seconds`, async (t) => {
+    const { api, baseURL } = t.context.app;
+    const userCredOne = await createUserCred();
+    const userOne = await createUserAndAssert(t, api, userCredOne);
+    const game = await createGameAndAssert(t, api, userCredOne, userOne);
+    const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
+    const socket = await createSocketAndWatchRoom(
+      t,
+      baseURL,
+      room,
+      {
+        ...config,
+        auth: (cb) => {
+          userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
+            t.context.log({
+              message: 'unable to get auth token',
+              error,
+            });
+          });
+        },
+        user: userOne,
+      },
+    );
+
+    t.context.log(`disconnected socket at: ${new Date().toISOString()}`);
+    socket.disconnect();
+
+    // user should still be in room right before the disconnectTimeout
+    await sleep(rightBeforeDisconnectTimeoutMs);
+    const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
+    t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
+    t.deepEqual(roomRightBeforeDisconnectTimeout, room);
+
+    // user should no longer be in room after disconnectTimeout
+    await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
+    const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
+    t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
+    t.is(roomRightAfterDisconnectTimeout.id, room.id);
+    t.is(roomRightAfterDisconnectTimeout.latestState.version, room.latestState.version + 1);
+    t.is(roomRightAfterDisconnectTimeout.players.length, 0);
+  });
+
+  test(`sockets (${name}) multiple disconnections kicks player if they don't have a socket connection after 30 seconds`, async (t) => {
+    const { api, baseURL } = t.context.app;
+    const userCredOne = await createUserCred();
+    const userOne = await createUserAndAssert(t, api, userCredOne);
+    const game = await createGameAndAssert(t, api, userCredOne, userOne);
+    const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
+    const sockets = await Promise.all([...Array(3).keys()].map(() => createSocketAndWatchRoom(
+      t,
+      baseURL,
+      room,
+      {
+        ...config,
+        auth: (cb) => {
+          userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
+            t.context.log({
+              message: 'unable to get auth token',
+              error,
+            });
+          });
+        },
+        user: userOne,
+      },
+    )));
+
+    t.context.log(`disconnecting sockets at: ${new Date().toISOString()}`);
+    sockets.forEach((socket) => socket.disconnect());
+
+    // user should still be in room right before the disconnectTimeout
+    await sleep(rightBeforeDisconnectTimeoutMs);
+    const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
+    t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
+    t.deepEqual(roomRightBeforeDisconnectTimeout, room);
+
+    // user should no longer be in room after disconnectTimeout
+    await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
+    const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
+    t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
+    t.is(roomRightAfterDisconnectTimeout.id, room.id);
+    t.is(roomRightAfterDisconnectTimeout.latestState.version, room.latestState.version + 1);
+    t.is(roomRightAfterDisconnectTimeout.players.length, 0);
+  });
+
+  test(`sockets (${name}) disconnected does not kick player if they have a socket connection after 30 seconds`, async (t) => {
+    const { api, baseURL } = t.context.app;
+    const userCredOne = await createUserCred();
+    const userOne = await createUserAndAssert(t, api, userCredOne);
+    const game = await createGameAndAssert(t, api, userCredOne, userOne);
+    const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
+    const createNewSocket = () => createSocketAndWatchRoom(
+      t,
+      baseURL,
+      room,
+      {
+        ...config,
+        auth: (cb) => {
+          userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
+            t.context.log({
+              message: 'unable to get auth token',
+              error,
+            });
+          });
+        },
+        user: userOne,
+      },
+    );
+    const socket = await createNewSocket();
+    const roomAfterFirstSocket = await getRoomAndAssert(t, room.id);
+
+    t.context.log(`disconnected socket at: ${new Date().toISOString()}`);
+    socket.disconnect();
+
+    // user should still be in room right before the disconnectTimeout
+    await sleep(rightBeforeDisconnectTimeoutMs);
+    const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
+    t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
+    t.deepEqual(roomRightBeforeDisconnectTimeout, room);
+
+    // user reconnects with new socket before timeout
+    await createNewSocket();
+
+    // user should still in room after disconnectTimeout because we just connected a new socket
+    await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
+    const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
+    t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
+    t.deepEqual(roomRightAfterDisconnectTimeout, roomAfterFirstSocket);
+  });
+
+  test(`sockets (${name}) disconnected does not kick player if room is private`, async (t) => {
+    const { api, baseURL } = t.context.app;
+    const userCredOne = await createUserCred();
+    const userOne = await createUserAndAssert(t, api, userCredOne);
+    const game = await createGameAndAssert(t, api, userCredOne, userOne);
+    const room = await createRoomAndAssert(t, api, userCredOne, game, userOne, true);
+    const socket = await createSocketAndWatchRoom(
+      t,
+      baseURL,
+      room,
+      {
+        ...config,
+        auth: (cb) => {
+          userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
+            t.context.log({
+              message: 'unable to get auth token',
+              error,
+            });
+          });
+        },
+        user: userOne,
+      },
+    );
+
+    t.context.log(`disconnected socket at: ${new Date().toISOString()}`);
+    socket.disconnect();
+
+    // user should still be in room right before the disconnectTimeout
+    await sleep(rightBeforeDisconnectTimeoutMs);
+    const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
+    t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
+    t.deepEqual(roomRightBeforeDisconnectTimeout, room);
+
+    // user should no longer be in room after disconnectTimeout
+    await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
+    const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
+    t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
+    t.deepEqual(roomRightAfterDisconnectTimeout, room);
+  });
+
+  test(`sockets (${name}) disconnected does not kick player if room is finished`, async (t) => {
+    const { api, baseURL } = t.context.app;
+    const {
+      userCredOne, userOne, userCredTwo, room,
+    } = await startTicTacToeRoom(t);
+
+    // quit room which will force the room to be in finished state
+    await api.post(`/room/${room.id}/quit`, undefined,
+      { headers: { authorization: await userCredTwo.user.getIdToken() } });
+    const roomAfterQuit = await getRoomAndAssert(t, room.id);
+
+    const socket = await createSocketAndWatchRoom(
+      t,
+      baseURL,
+      room,
+      {
+        ...config,
+        auth: (cb) => {
+          userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
+            t.context.log({
+              message: 'unable to get auth token',
+              error,
+            });
+          });
+        },
+        user: userOne,
+      },
+    );
+    t.context.log(`disconnected socket at: ${new Date().toISOString()}`);
+    socket.disconnect();
+
+    // user should still be in room right before the disconnectTimeout
+    await sleep(rightBeforeDisconnectTimeoutMs);
+    const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
+    t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
+    t.deepEqual(roomRightBeforeDisconnectTimeout, roomAfterQuit);
+
+    // user should no longer be in room after disconnectTimeout
+    await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
+    const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
+    t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
+    t.deepEqual(roomRightAfterDisconnectTimeout, roomAfterQuit);
   });
 });

@@ -10,6 +10,15 @@ function getPublicUserFromUser(user) {
   };
 }
 
+async function getRoomAndAssert(t, roomId) {
+  const { api } = t.context.app;
+  const { status, data: { room } } = await api.get(
+    `/room/${roomId}`,
+  );
+  t.is(status, StatusCodes.OK);
+  return room;
+}
+
 async function createGameAndAssert(t, api, userCred, user, gameOptionalInfo = {}) {
   // TODO: we should switch from using tictactoe to runner/test_app backend where we
   // have more control over the backend behavior. We can force trigger errors, or other behaviors
@@ -139,4 +148,5 @@ module.exports = {
   createUserAndAssert,
   cleanupTestUsers,
   startTicTacToeRoom,
+  getRoomAndAssert,
 };

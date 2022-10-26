@@ -7,6 +7,10 @@ function getNested(obj, ...args) {
   return args.reduce((nestedObj, level) => nestedObj && nestedObj[level], obj);
 }
 
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 function waitFor(logFn, testAsyncFunc, timeoutMs = 10000, bufferMs = 200, errorMsg = 'Test Function did not pass') {
   const startTime = new Date();
   const timeoutThreshold = startTime.getTime() + timeoutMs;
@@ -173,5 +177,6 @@ module.exports = {
   waitForOutput,
   setupMongoDB,
   setupRedis,
+  sleep,
   setupTestFileLogContext,
 };

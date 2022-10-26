@@ -13,7 +13,7 @@ const UserCode = require('./runner');
 const {
   RoomNotJoinableError, RoomFinishedError, UserNotInRoomError, CreatorError, UserAlreadyInRoomError,
 } = require('./errors');
-const { applyCreatorResult, handlePostRoomOperation } = require('./util');
+const { applyCreatorResult, handlePostRoomOperation, quitRoomTransaction } = require('./util');
 
 const PATH = '/room';
 const router = express.Router();
@@ -204,22 +204,10 @@ function setupRouter({ io }) {
     }),
   }), expressUserAuthMiddleware, asyncHandler(async (req, res) => {
     const { user } = req;
-    const player = user.getCreatorDataView();
-    const { id } = req.params;
-
+    const { id: roomId } = req.params;
     try {
-      let room;
-      let newRoomState;
-      await mongoose.connection.transaction(async (session) => {
-        room = await Room.findById(id).populate('game').populate('players').populate('latestState')
-          .session(session);
-        room.playerQuit(user);
-        const prevRoomState = room.latestState;
-        const userCode = await UserCode.fromGame(req.log, room.game);
-        const creatorQuitRoomState = userCode.playerQuit(player, room, prevRoomState);
-        newRoomState = await applyCreatorResult(prevRoomState, room, creatorQuitRoomState, session);
-      });
-      await handlePostRoomOperation(res, io, room, newRoomState);
+      const { room, roomState } = await quitRoomTransaction(req.log, user, roomId);
+      await handlePostRoomOperation(res, io, room, roomState);
     } catch (err) {
       if (err instanceof RoomFinishedError) {
         err.status = StatusCodes.BAD_REQUEST;

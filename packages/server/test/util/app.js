@@ -7,7 +7,7 @@ const { v4: uuidv4 } = require('uuid');
 const { waitFor, setupMongoDB, setupRedis } = require('./util');
 const { testStripeKey, testStripeWebhookSecret } = require('./stripe');
 
-function waitUntilRunning(logFn, api, timeout = 30000, buffer = 1000) {
+function waitUntilRunning(logFn, api, timeout = 60000, buffer = 1000) {
   return waitFor(
     logFn,
     async () => { await api.get('/readiness'); },

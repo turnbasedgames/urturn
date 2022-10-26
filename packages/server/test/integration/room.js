@@ -11,6 +11,7 @@ const {
   createRoomAndAssert,
   cleanupTestUsers,
   startTicTacToeRoom,
+  getRoomAndAssert,
 } = require('../util/api_util');
 const { createOrUpdateSideApps, setupTestFileLogContext } = require('../util/util');
 
@@ -391,10 +392,9 @@ test('POST /room/:id/move invokes creator backend to modify the game state', asy
     { headers: { authorization: authToken } });
   t.is(status, StatusCodes.OK);
   const {
-    data: { room: { latestState: { state: { board } }, joinable, players } },
-    status: getStatus,
-  } = await api.get(`/room/${room.id}`);
-  t.is(getStatus, StatusCodes.OK);
+    latestState: { state: { board } },
+    joinable, players,
+  } = await getRoomAndAssert(t, room.id);
   t.is(joinable, room.joinable);
   t.deepEqual(players, room.players);
   t.deepEqual([
@@ -481,14 +481,9 @@ test('POST /room/:id/quit user is no longer in the room, and is in inactivePlaye
     { headers: { authorization: authToken } });
   t.is(status, StatusCodes.OK);
   const {
-    data: {
-      room: {
-        latestState: { state: { board, winner } }, joinable, players, inactivePlayers, finished,
-      },
-    },
-    status: getStatus,
-  } = await api.get(`/room/${room.id}`);
-  t.is(getStatus, StatusCodes.OK);
+    latestState: { state: { board, winner } },
+    joinable, players, inactivePlayers, finished,
+  } = await getRoomAndAssert(t, room.id);
   t.is(joinable, false);
   t.is(finished, true);
   t.deepEqual(winner, getPublicUserFromUser(userTwo));
@@ -538,8 +533,6 @@ test('GET /room/:id returns a room', async (t) => {
 
   const game = await createGameAndAssert(t, api, userCred, user);
   const room = await createRoomAndAssert(t, api, userCred, game, user);
-  const { status } = await api.get(
-    `/room/${room.id}`,
-  );
-  t.is(status, StatusCodes.OK);
+  const roomRes = await getRoomAndAssert(t, room.id);
+  t.is(roomRes.id, room.id);
 });
