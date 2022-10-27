@@ -23,9 +23,10 @@ function GameListCard({ game }: GameListCardProps): React.ReactElement {
           transform: 'scale(1.1)',
         },
       }}
+      onClick={() => navigate(`/games/${game.id}`)}
       key={`GameCard-${game.id}`}
     >
-      <CardActionArea onClick={() => navigate(`/games/${game.id}`)}>
+      <CardActionArea href={`/games/${game.id}`} onClick={() => navigate(`/games/${game.id}`)}>
         <CardMediaWithFallback
           sx={{ height: '170px', width: '170px' }}
           game={game}
