@@ -1,6 +1,9 @@
 {
   "name": "root",
   "private": true,
+  "scripts": {
+    "prepublishOnly": "npx lerna run build"
+  },
   "workspaces": [
     "packages/*",
     "docs"

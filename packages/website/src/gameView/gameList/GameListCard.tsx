@@ -4,7 +4,8 @@ import {
 import { Game } from '@urturn/types-common';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import CardMediaWithFallback from '../CardMediaWithFallback';
+import CardMediaWithFallback from '../gameCard/CardMediaWithFallback';
+import ActiveUsersOverlay from '../gameCard/ActiveUsersOverlay';
 
 interface GameListCardProps {
   game: Game
@@ -26,10 +27,16 @@ function GameListCard({ game }: GameListCardProps): React.ReactElement {
       key={`GameCard-${game.id}`}
     >
       <CardActionArea href={`/games/${game.id}`} onClick={() => navigate(`/games/${game.id}`)}>
-        <CardMediaWithFallback
-          sx={{ height: '170px', width: '170px' }}
-          game={game}
-        />
+        <div>
+          {
+            game.activePlayerCount !== 0
+            && <ActiveUsersOverlay activePlayerCount={game.activePlayerCount} />
+          }
+          <CardMediaWithFallback
+            sx={{ height: '170px', width: '170px' }}
+            game={game}
+          />
+        </div>
         <CardContent sx={{ padding: 1.5 }}>
           <Typography variant="h6" noWrap>{game.name}</Typography>
           <Typography color="text.secondary" noWrap variant="caption">

@@ -3,7 +3,7 @@ import {
 } from '@mui/material';
 import React from 'react';
 import { Game } from '@urturn/types-common';
-import CardMediaWithFallback from '../gameView/CardMediaWithFallback';
+import CardMediaWithFallback from '../gameView/gameCard/CardMediaWithFallback';
 
 import GameCardActions from './GameCardActions';
 

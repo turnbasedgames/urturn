@@ -53,6 +53,7 @@ export interface Game {
   creator: User
   githubURL: string
   commitSHA: string
+  activePlayerCount: Number
 }
 
 export interface WatchRoomRes {
