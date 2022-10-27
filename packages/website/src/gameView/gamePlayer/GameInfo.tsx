@@ -92,7 +92,7 @@ function GameInfo(): React.ReactElement {
               }}
             >
               <CardMediaWithFallback
-                sx={{ width: '60%', aspectRatio: '1920/1080', flexShrink: 0 }}
+                sx={{ width: '60%', aspectRatio: '1/1', flexShrink: 0 }}
                 game={game}
               />
               <Stack sx={{ overflow: 'hidden' }} flexGrow="1" direction="column" justifyContent="space-between">

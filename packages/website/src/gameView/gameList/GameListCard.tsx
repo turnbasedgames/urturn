@@ -26,7 +26,7 @@ function GameListCard({ game }: GameListCardProps): React.ReactElement {
       }}
       key={`GameCard-${game.id}`}
     >
-      <CardActionArea onClick={() => navigate(`/games/${game.id}`)}>
+      <CardActionArea href={`/games/${game.id}`} onClick={() => navigate(`/games/${game.id}`)}>
         <div>
           {
             game.activePlayerCount !== 0

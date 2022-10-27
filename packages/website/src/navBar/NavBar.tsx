@@ -4,6 +4,7 @@ import {
   Link,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
+import ArticleIcon from '@mui/icons-material/Article';
 import { useNavigate } from 'react-router-dom';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { GiTwoCoins } from 'react-icons/gi';
@@ -107,12 +108,16 @@ function NavBar({ user }: Props): React.ReactElement {
               direction="row"
               justifyContent="flex-start"
               alignItems="center"
+              spacing={1}
             >
               <Link href="/" color="textPrimary" underline="hover">
                 <Typography sx={{ display: { xs: 'none', sm: 'flex' } }}>
                   UrTurn
                 </Typography>
               </Link>
+              <IconButton href="https://docs.urturn.app/" target="_blank" rel="noopener noreferrer">
+                <ArticleIcon />
+              </IconButton>
             </Stack>
             <Search />
             <Stack
