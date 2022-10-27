@@ -21,16 +21,12 @@ const processChunks = async (lines, func) => {
   }
 };
 
-const wordToNearestWordPairsPromise = fetch(`data/similarity-pairs${process.env.REACT_APP_DEV === 'true' ? '-test' : ''}.txt`)
+const wordToNearestWordsPromise = fetch(`data/word-to-similar${process.env.REACT_APP_DEV === 'true' ? '-test' : ''}.txt`)
   .then((res) => res.text()).then((rawData) => {
     const wordToNearestWordPairs = new Map();
     rawData.split(/\r?\n/).forEach((line) => {
-      const [word, ...similarWordPairs] = line.split(' ');
-      wordToNearestWordPairs.set(word, similarWordPairs
-        .reduce((result, value, index, array) => {
-          if (index % 2 === 0) { result.push(array.slice(index, index + 2)); }
-          return result;
-        }, []));
+      const similarWords = line.split(' ');
+      wordToNearestWordPairs.set(similarWords.at(-1), similarWords);
     });
     return wordToNearestWordPairs;
   });
@@ -44,12 +40,12 @@ const wordToVecPromise = fetch(`data/word-to-vec${process.env.REACT_APP_DEV === 
   }).then(() => wordToVec);
 });
 
-export const getWordToNearestWordPairs = async () => wordToNearestWordPairsPromise;
+const getWordToNearestWords = async () => wordToNearestWordsPromise;
 
-export const getWordToVec = async () => wordToVecPromise;
+const getWordToVec = async () => wordToVecPromise;
 
 export const getWordData = () => Promise.all(
-  [getWordToNearestWordPairs(), getWordToVec()],
+  [getWordToNearestWords(), getWordToVec()],
 );
 
 export const getStatusMsg = ({
@@ -121,17 +117,17 @@ export const getSimilarityScore = (wordToVec, word1, word2) => {
   }, 0);
 };
 
-export const getClosenessObj = (wordToNearestWordPairs, secret, guess) => {
-  const similarPairs = wordToNearestWordPairs.get(secret);
-  const index = similarPairs.findIndex(([, word]) => word === guess);
-  const message = index >= 0 ? `${index + 1}/${similarPairs.length}` : 'cold';
+export const getClosenessObj = (wordToNearestWords, secret, guess) => {
+  const nearestWords = wordToNearestWords.get(secret);
+  const index = nearestWords.indexOf(guess);
+  const message = index >= 0 ? `${index + 1}/${nearestWords.length}` : 'cold';
   return { message, topPosition: index };
 };
 
 export const getOtherPlayer = (players, curPlr) => players.find(({ id }) => id !== curPlr.id);
 
 export const getGuessesData = (guessToInfo, secret) => getWordData()
-  .then(([wordToNearestWordPairs, wordToVec]) => {
+  .then(([wordToNearestWords, wordToVec]) => {
     const guessEntries = Object.entries(guessToInfo);
 
     const sortedGuesses = guessEntries.map(
@@ -140,7 +136,7 @@ export const getGuessesData = (guessToInfo, secret) => getWordData()
         count,
         lastUpdateTime,
         similarity: getSimilarityScore(wordToVec, guess, secret),
-        ...getClosenessObj(wordToNearestWordPairs, secret, guess),
+        ...getClosenessObj(wordToNearestWords, secret, guess),
       }),
     ).sort((a, b) => b.similarity - a.similarity);
     const latestGuess = sortedGuesses
