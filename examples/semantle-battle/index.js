@@ -11,8 +11,7 @@ const MAX_WORD_LENGTH = 6;
 const MAX_HINT_INDEX = 70;
 
 function hashSecret(secret) {
-  // TODO: setup an md5 hashing one-way function
-  return secret;
+  return Buffer.from(secret).toString('base64');
 }
 
 function isValidWord(word) {

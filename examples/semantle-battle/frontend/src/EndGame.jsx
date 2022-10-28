@@ -1,17 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Typography, Stack } from '@mui/material';
+import { Buffer } from 'buffer';
 
 function EndGame({ plrToSecretHash, curPlr }) {
   const otherSecrets = Object.entries(plrToSecretHash)
-    .map(([plrId, secret]) => (curPlr.id !== plrId ? secret : undefined))
-    .filter((secret) => secret != null);
+    .map(([plrId, secretHash]) => (curPlr.id !== plrId ? secretHash : undefined))
+    .filter((secretHash) => secretHash != null);
   return (
     <Stack>
       <Typography variants="h5" color="text.primary">we keep secrets from each other but they somehow find a way to be revealed...</Typography>
-      {otherSecrets.map((secret) => (
+      {otherSecrets.map((secretHash) => (
         <Typography color="secondary">
-          {secret}
+          {Buffer.from(secretHash, 'base64').toString('ascii')}
         </Typography>
       ))}
     </Stack>

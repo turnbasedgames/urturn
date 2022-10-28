@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer';
 import React, { useEffect, useState } from 'react';
 import { Stack, Typography, Toolbar } from '@mui/material';
 import PropTypes from 'prop-types';
@@ -13,11 +14,11 @@ function InGame({
   plrToRejectHintResponse, hintIndex,
 }) {
   const guessToInfo = plrToGuessToInfo[curPlr.id];
-  const secret = plrToSecretHash[curPlr.id];
+  const secret = Buffer.from(plrToSecretHash[curPlr.id], 'base64').toString('ascii');
   const [guessesData, setGuessesData] = useState({ sortedGuesses: [] });
 
   const otherPlr = getOtherPlayer(players, curPlr);
-  const otherSecret = plrToSecretHash[otherPlr.id];
+  const otherSecret = Buffer.from(plrToSecretHash[otherPlr.id], 'base64').toString('ascii');
   const otherGuessToInfo = plrToGuessToInfo[otherPlr.id];
   const [otherGuessesData, setOtherGuessesData] = useState({ sortedGuesses: [] });
 
