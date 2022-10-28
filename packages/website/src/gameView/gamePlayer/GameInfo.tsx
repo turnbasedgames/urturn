@@ -59,7 +59,6 @@ function GameInfo(): React.ReactElement {
       autoHideDuration: 3000,
     });
   }
-
   return (
     <>
       <LinearProgress sx={{
@@ -173,7 +172,15 @@ function GameInfo(): React.ReactElement {
         </Paper>
         <Paper sx={{ padding: 1 }}>
           <Typography gutterBottom variant="h6">Description</Typography>
-          <Typography gutterBottom variant="body2">{game?.description}</Typography>
+          <Typography
+            sx={{
+              whiteSpace: 'pre-wrap', // display multiline text
+            }}
+            gutterBottom
+            variant="body2"
+          >
+            {game?.description}
+          </Typography>
         </Paper>
       </Stack>
     </>
