@@ -63,9 +63,14 @@ async function cleanupTestUsers(t) {
   return Promise.all(createdUsers.map((cred) => deleteUserAndAssert(t, api, cred)));
 }
 
-async function createRoomAndAssert(t, api, userCred, game, user, makePrivate = false) {
+async function createRoomAndAssert(t, api, userCred, game, user, makePrivate = false, method = 'post') {
   const authToken = await userCred.user.getIdToken();
-  const { data: { room }, status } = await api.post('/room',
+
+  let apiRequestFunc = api.post;
+  if (method === 'put') {
+    apiRequestFunc = api.put;
+  }
+  const { data: { room }, status } = await apiRequestFunc('/room',
     { game: game.id, private: makePrivate },
     { headers: { authorization: authToken } });
   t.is(status, StatusCodes.CREATED);

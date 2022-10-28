@@ -91,22 +91,22 @@ function setupRouter({ io }) {
       res.status(StatusCodes.OK).json({ rooms });
     }));
 
-  router.post('/', expressUserAuthMiddleware, asyncHandler(async (req, res) => {
-    const { user } = req;
+  async function createRoomHelper(user, logger, roomBody) {
+    const room = new Room(roomBody);
+    room.players = [user];
     const player = user.getCreatorDataView();
-    const roomRaw = req.body;
-    const room = new Room(roomRaw);
-    room.players = [req.user];
+
+    let error;
 
     const gameCount = await Game.countDocuments({ _id: room.game });
     if (gameCount === 0) {
-      const err = new Error('room.game must exist!');
-      err.status = StatusCodes.BAD_REQUEST;
-      throw err;
+      error = new Error('room.game must exist!');
+      error.status = StatusCodes.BAD_REQUEST;
+      return { room: undefined, error };
     }
 
     await room.populate('players').populate('game').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
-    const userCode = await UserCode.fromGame(req.log, room.game);
+    const userCode = await UserCode.fromGame(logger, room.game);
     const creatorInitRoomState = userCode.startRoom();
     const roomState = new RoomState({
       room: room.id,
@@ -117,6 +117,7 @@ function setupRouter({ io }) {
     roomState.applyCreatorData(creatorJoinRoomState);
     room.applyCreatorRoomState(creatorJoinRoomState);
     room.latestState = roomState.id;
+
     await mongoose.connection.transaction(async (session) => {
       await room.save({ session });
       await roomState.save({ session });
@@ -124,31 +125,30 @@ function setupRouter({ io }) {
 
     io.to(room.id).emit('room:latestState', UserCode.getCreatorRoomState(room, roomState));
     await room.populate('latestState').execPopulate();
-    res.status(StatusCodes.CREATED).json({ room });
-  }));
 
-  router.post('/:id/join', celebrate({
-    [Segments.PARAMS]: Joi.object().keys({
-      id: Joi.objectId(),
-    }),
-  }), expressUserAuthMiddleware, asyncHandler(async (req, res) => {
-    const { user } = req;
+    return { room, error };
+  }
+
+  async function joinRoomHelper(user, logger, room) {
     const player = user.getCreatorDataView();
-    const { id } = req.params;
 
-    let room;
+    let error;
     let newRoomState;
     try {
       await mongoose.connection.transaction(async (session) => {
-        room = await Room.findById(id).populate('game').populate('players').populate('latestState')
-          .session(session);
         room.playerJoin(user);
         const prevRoomState = room.latestState;
-        const userCode = await UserCode.fromGame(req.log, room.game);
+        const userCode = await UserCode.fromGame(logger, room.game);
         const creatorJoinRoomState = userCode.playerJoin(player, room, prevRoomState);
-        newRoomState = await applyCreatorResult(prevRoomState, room, creatorJoinRoomState, session);
+        newRoomState = await applyCreatorResult(
+          prevRoomState,
+          room,
+          creatorJoinRoomState,
+          session,
+        );
       });
-      await handlePostRoomOperation(res, io, room, newRoomState);
+
+      return { room, newRoomState, error };
     } catch (err) {
       if (err instanceof RoomFinishedError) {
         err.status = StatusCodes.BAD_REQUEST;
@@ -159,8 +159,96 @@ function setupRouter({ io }) {
       } else if (err instanceof UserAlreadyInRoomError) {
         err.status = StatusCodes.BAD_REQUEST;
       }
-      throw err;
+
+      return { room: undefined, newRoomState, error: err };
     }
+  }
+
+  router.put('/',
+    celebrate({
+      [Segments.BODY]: Joi.object().keys({
+        private: Joi.boolean().default(false),
+        game: Joi.objectId(),
+      }),
+    }),
+    expressUserAuthMiddleware,
+    asyncHandler(async (req, res) => {
+    // The functionality of this endpoint goes in the following order:
+    //    1. If the user is trying to create a private room, create it and exit handler.
+    //    2. If there exists rooms for the user to join, join the user to the room and exit handler.
+    //    3. The first two aformentioned conditions were not true, so create public room.
+      const { user } = req;
+      const { private: isPrivate, game } = req.body;
+
+      if (isPrivate) {
+        const { room, error } = await createRoomHelper(user, req.log, { game, private: isPrivate });
+        if (error) {
+          throw error;
+        }
+
+        res.status(StatusCodes.CREATED).json({ room });
+        return;
+      }
+
+      const roomToJoin = await Room.findOne({
+        joinable: true,
+        game,
+        finished: false,
+        players: {
+          $ne: user.id,
+        },
+      }).populate('game')
+        .populate('players')
+        .populate('latestState')
+        .exec();
+
+      if (roomToJoin) {
+        const { room, newRoomState, error } = await joinRoomHelper(user, req.log, roomToJoin);
+        if (error) {
+          throw error;
+        }
+
+        await handlePostRoomOperation(res, io, room, newRoomState);
+        return;
+      }
+
+      const { room, error } = await createRoomHelper(user, req.log, { game });
+      if (error) {
+        throw error;
+      }
+
+      res.status(StatusCodes.CREATED).json({ room });
+    }));
+
+  router.post('/', expressUserAuthMiddleware, asyncHandler(async (req, res) => {
+    const { user } = req;
+
+    const roomRaw = req.body;
+    const { room, error } = await createRoomHelper(user, req.log, roomRaw);
+    if (error) {
+      throw error;
+    }
+
+    res.status(StatusCodes.CREATED).json({ room });
+  }));
+
+  router.post('/:id/join', celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+      id: Joi.objectId(),
+    }),
+  }), expressUserAuthMiddleware, asyncHandler(async (req, res) => {
+    const { user } = req;
+    const { id } = req.params;
+
+    const roomToJoin = await Room.findById(id).populate('game').populate('players').populate('latestState')
+      .exec();
+
+    const { room, newRoomState, error } = await joinRoomHelper(user, req.log, roomToJoin);
+    if (error) {
+      throw error;
+    }
+
+    await handlePostRoomOperation(res, io, room, newRoomState);
   }));
 
   router.post('/:id/move', celebrate({

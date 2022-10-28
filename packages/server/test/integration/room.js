@@ -297,6 +297,120 @@ test('GET /room supports query by "containsInactivePlayer"', async (t) => {
   t.assert(roomsUserTwoQuit[0].id === room.id);
 });
 
+test('PUT /room fails if joinable is provided', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const user = await createUserAndAssert(t, api, userCred);
+  const authToken = await userCred.user.getIdToken();
+  t.context.createdUsers.push(userCred);
+
+  const game = await createGameAndAssert(t, api, userCred, user);
+  const { response } = await t.throwsAsync(
+    api.put('/room', {
+      game: game.id,
+      joinable: false,
+    }, { headers: { authorization: authToken } }),
+  );
+
+  t.is(response.status, StatusCodes.BAD_REQUEST);
+});
+
+test('PUT /room fails if finished is provided', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const user = await createUserAndAssert(t, api, userCred);
+  const authToken = await userCred.user.getIdToken();
+  t.context.createdUsers.push(userCred);
+
+  const game = await createGameAndAssert(t, api, userCred, user);
+  const { response } = await t.throwsAsync(
+    api.put('/room', {
+      game: game.id,
+      finished: false,
+    }, { headers: { authorization: authToken } }),
+  );
+
+  t.is(response.status, StatusCodes.BAD_REQUEST);
+});
+
+test('PUT /room fails if latestState is provided', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const user = await createUserAndAssert(t, api, userCred);
+  const authToken = await userCred.user.getIdToken();
+  t.context.createdUsers.push(userCred);
+
+  const game = await createGameAndAssert(t, api, userCred, user);
+  const { response } = await t.throwsAsync(
+    api.put('/room', {
+      game: game.id,
+      latestState: 'this is the latest state',
+    }, { headers: { authorization: authToken } }),
+  );
+
+  t.is(response.status, StatusCodes.BAD_REQUEST);
+});
+
+test('PUT /room creates a room for the user if a private field is specified', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const user = await createUserAndAssert(t, api, userCred);
+  t.context.createdUsers.push(userCred);
+
+  const game = await createGameAndAssert(t, api, userCred, user);
+  await createRoomAndAssert(t, api, userCred, game, user, true, 'put');
+});
+
+test('PUT /room creates a room for the user if user is not able to join any rooms', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const user = await createUserAndAssert(t, api, userCred);
+  t.context.createdUsers.push(userCred);
+
+  const game = await createGameAndAssert(t, api, userCred, user);
+  await createRoomAndAssert(t, api, userCred, game, user, false, 'put');
+});
+
+test('PUT /room creates a private room for a user even if they have created a public room', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred();
+  const user = await createUserAndAssert(t, api, userCred);
+  t.context.createdUsers.push(userCred);
+
+  const game = await createGameAndAssert(t, api, userCred, user);
+  const createdRoom = await createRoomAndAssert(t, api, userCred, game, user, false, 'put');
+
+  const authToken = await userCred.user.getIdToken();
+  const { status, data: { room } } = await api.put('/room', {
+    game: game.id,
+    private: true,
+  }, { headers: { authorization: authToken } });
+
+  t.is(status, StatusCodes.CREATED);
+  t.true(room.id !== createdRoom.id);
+});
+
+test('PUT /room joins a user to a room if there exist a room for the user to join', async (t) => {
+  const { api } = t.context.app;
+  const userCredOne = await createUserCred();
+  const userCredTwo = await createUserCred();
+  const userOne = await createUserAndAssert(t, api, userCredOne);
+  await createUserAndAssert(t, api, userCredTwo);
+  t.context.createdUsers.push(userCredOne);
+  t.context.createdUsers.push(userCredTwo);
+
+  const game = await createGameAndAssert(t, api, userCredOne, userOne);
+  await createRoomAndAssert(t, api, userCredOne, game, userOne, false, 'put');
+
+  const authTokenTwo = await userCredTwo.user.getIdToken();
+  const { status, data: { room } } = await api.put('/room', {
+    game: game.id,
+  }, { headers: { authorization: authTokenTwo } });
+
+  t.is(status, StatusCodes.OK);
+  t.is(room.players.length, 2);
+});
+
 test('POST /room creates a room', async (t) => {
   const { api } = t.context.app;
   const userCred = await createUserCred();
