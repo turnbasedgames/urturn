@@ -103,6 +103,9 @@ export const getSimilarityScore = (wordToVec, word1, word2) => {
   // this operation satisfies the commutative property
   const vec1 = wordToVec.get(word1);
   const vec2 = wordToVec.get(word2);
+  if (vec1 == null || vec2 == null) {
+    return 0;
+  }
   const mag1 = getMagnitudeOfVector(vec1);
   const mag2 = getMagnitudeOfVector(vec2);
   // upscale by 100 so that similarities are between -100 and 100 instead of -1 and 1
@@ -126,12 +129,29 @@ export const getClosenessObj = (wordToNearestWords, secret, guess) => {
 
 export const getOtherPlayer = (players, curPlr) => players.find(({ id }) => id !== curPlr.id);
 
-export const getGuessesData = (guessToInfo, secret) => getWordData()
+export const getGuessesData = (guessToInfo, secret, hintIndex) => getWordData()
   .then(([wordToNearestWords, wordToVec]) => {
-    const guessEntries = Object.entries(guessToInfo);
+    const guessToInfoCopy = { ...guessToInfo };
+    if (hintIndex >= 0) {
+      const nearestWords = wordToNearestWords.get(secret);
+      nearestWords
+        .slice(0, hintIndex + 1)
+        .forEach((nearestWord) => {
+          if (guessToInfo[nearestWord]) {
+            guessToInfoCopy[nearestWord].hint = true;
+          } else {
+            guessToInfoCopy[nearestWord] = {
+              count: 1,
+              hint: true,
+            };
+          }
+        });
+    }
+    const guessEntries = Object.entries(guessToInfoCopy);
 
     const sortedGuesses = guessEntries.map(
-      ([guess, { count, lastUpdateTime }]) => ({
+      ([guess, { hint, count, lastUpdateTime }]) => ({
+        hint,
         guess,
         count,
         lastUpdateTime,
@@ -144,9 +164,17 @@ export const getGuessesData = (guessToInfo, secret) => getWordData()
         (
           curLatestGuess,
           curGuess,
-        ) => (curLatestGuess.lastUpdateTime > curGuess.lastUpdateTime
-          ? curLatestGuess : curGuess),
-        guessEntries[0],
+        ) => {
+          if (curGuess.hint) {
+            return curLatestGuess;
+          }
+          if (curLatestGuess == null) {
+            return curGuess;
+          }
+          return (curLatestGuess.lastUpdateTime > curGuess.lastUpdateTime
+            ? curLatestGuess : curGuess);
+        },
+        undefined,
       );
     return {
       latestGuess,

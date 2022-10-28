@@ -3,13 +3,14 @@ import { Stack, Typography, Toolbar } from '@mui/material';
 import PropTypes from 'prop-types';
 import SubmitWord from './SubmitWord';
 import GuessesTable from './GuessesTable';
-import RevealSecret from './RevealSecret';
+import InGameMenu from './InGameMenu';
 import {
   getGuessesData, getOtherPlayer,
 } from './utils';
 
 function InGame({
-  players, curPlr, setRecentErrorMsg, plrToSecretHash, plrToGuessToInfo,
+  players, curPlr, setRecentErrorMsg, plrToSecretHash, plrToGuessToInfo, plrToHintRequest,
+  plrToRejectHintResponse, hintIndex,
 }) {
   const guessToInfo = plrToGuessToInfo[curPlr.id];
   const secret = plrToSecretHash[curPlr.id];
@@ -21,11 +22,15 @@ function InGame({
   const [otherGuessesData, setOtherGuessesData] = useState({ sortedGuesses: [] });
 
   useEffect(() => {
-    getGuessesData(guessToInfo, otherSecret).then(setGuessesData).catch(console.error);
+    getGuessesData(guessToInfo, otherSecret, hintIndex)
+      .then(setGuessesData)
+      .catch(console.error);
   }, [guessToInfo]);
 
   useEffect(() => {
-    getGuessesData(otherGuessToInfo, secret).then(setOtherGuessesData).catch(console.error);
+    getGuessesData(otherGuessToInfo, secret, hintIndex)
+      .then(setOtherGuessesData)
+      .catch(console.error);
   }, [otherGuessToInfo]);
 
   return (
@@ -49,7 +54,15 @@ function InGame({
           textFieldDefault="guess"
           dense
         />
-        <RevealSecret secret={secret} />
+        <InGameMenu
+          setRecentErrorMsg={setRecentErrorMsg}
+          secret={secret}
+          plrToHintRequest={plrToHintRequest}
+          plrToRejectHintResponse={plrToRejectHintResponse}
+          hintIndex={hintIndex}
+          curPlr={curPlr}
+          otherPlr={otherPlr}
+        />
         <GuessesTable guessesData={guessesData} />
       </Stack>
     </Stack>
@@ -57,6 +70,9 @@ function InGame({
 }
 
 InGame.propTypes = {
+  plrToHintRequest: PropTypes.objectOf(PropTypes.bool).isRequired,
+  plrToRejectHintResponse: PropTypes.objectOf(PropTypes.string).isRequired,
+  hintIndex: PropTypes.number.isRequired,
   players: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string,
     username: PropTypes.string,

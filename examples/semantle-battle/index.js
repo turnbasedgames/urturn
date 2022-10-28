@@ -8,6 +8,7 @@ const Status = Object.freeze({
   EndGame: 'endGame',
 });
 const MAX_WORD_LENGTH = 6;
+const MAX_HINT_INDEX = 70;
 
 function hashSecret(secret) {
   // TODO: setup an md5 hashing one-way function
@@ -27,6 +28,11 @@ function onRoomStart() {
     state: {
       plrToSecretHash: {},
       plrToGuessToInfo: {},
+      // plrToHintRequest: {[plr.id]: boolean}
+      plrToHintRequest: {},
+      // plrToRejectHintResponse: {[plr.id]: ISO timestamp string}
+      plrToRejectHintResponse: {},
+      hintIndex: -1,
       status: Status.PreGame,
       winner: null,
     },
@@ -79,15 +85,55 @@ function onPlayerMovePreGame(plr, move, boardGame) {
   return { state };
 }
 
+function grantHint(state) {
+  /* eslint-disable no-param-reassign */
+  state.hintIndex += 1;
+  state.plrToHintRequest = {};
+  state.plrToRejectHintResponse = {};
+  /* eslint-enable no-param-reassign */
+}
+
 function onPlayerMoveInGame(plr, move, boardGame) {
   // TODO: implement time control limits
-  const { guess } = move;
+  const { guess, hintRequest, acceptHint } = move;
   const { players, state } = boardGame;
   const { plrToSecretHash } = state;
   const otherPlayer = players.find(({ id }) => id !== plr.id);
 
   if (otherPlayer == null) {
     throw new Error('This should be impossible. Contact Developers.');
+  }
+
+  if (acceptHint != null) {
+    const otherPlayerHintRequest = state.plrToHintRequest[otherPlayer.id];
+    if (otherPlayerHintRequest == null) {
+      throw new Error('Other player did not request for a hint.');
+    }
+    if (acceptHint) {
+      grantHint(state);
+    } else {
+      state.plrToRejectHintResponse[plr.id] = new Date().toISOString();
+    }
+    state.plrToHintRequest = {};
+    return { state };
+  }
+
+  if (hintRequest != null) {
+    if (hintRequest) {
+      if (state.hintIndex > MAX_HINT_INDEX) {
+        throw new Error('Cannot get anymore hints.');
+      }
+      state.plrToHintRequest[plr.id] = true;
+
+      if (state.plrToHintRequest[otherPlayer.id]) {
+        // both requested hint so grant hint
+        grantHint(state);
+      }
+
+      return { state };
+    }
+    delete state.plrToHintRequest[plr.id];
+    return { state };
   }
 
   if (!isValidWord(guess)) {

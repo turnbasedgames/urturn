@@ -33,14 +33,14 @@ function GuessesTable({ dense, guessesData }) {
           </TableRow>
           )}
           {sortedGuesses.map(({
-            guess, similarity, message, topPosition,
+            guess, similarity, message, topPosition, hint,
           }, ind) => (
             <TableRow
               key={guess}
               sx={{ '& td': { border: 0 } }}
             >
               <TableCell scope="row">
-                {ind}
+                {`${ind}${hint ? ' (hint)' : ''}`}
               </TableCell>
               <TableCell align="right">{guess}</TableCell>
               <TableCell align="right">{similarity.toFixed(3)}</TableCell>

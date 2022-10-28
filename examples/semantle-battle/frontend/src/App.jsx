@@ -47,6 +47,9 @@ function App() {
     state: {
       plrToSecretHash = {},
       plrToGuessToInfo,
+      plrToHintRequest,
+      plrToRejectHintResponse,
+      hintIndex,
       status,
       winner,
     } = {},
@@ -87,16 +90,18 @@ function App() {
                   </>
                 )}
                 {status === 'inGame' && (
-                <InGame
-                  players={players}
-                  curPlr={curPlr}
-                  plrToSecretHash={plrToSecretHash}
-                  plrToGuessToInfo={plrToGuessToInfo}
-                  setRecentErrorMsg={setRecentErrorMsg}
-                />
+                  <InGame
+                    players={players}
+                    curPlr={curPlr}
+                    plrToSecretHash={plrToSecretHash}
+                    plrToGuessToInfo={plrToGuessToInfo}
+                    setRecentErrorMsg={setRecentErrorMsg}
+                    plrToHintRequest={plrToHintRequest}
+                    plrToRejectHintResponse={plrToRejectHintResponse}
+                    hintIndex={hintIndex}
+                  />
                 )}
-                {status === 'endGame' && (<EndGame curPlr={curPlr} plrToSecretHash={plrToSecretHash} />
-                )}
+                {status === 'endGame' && (<EndGame curPlr={curPlr} plrToSecretHash={plrToSecretHash} />)}
               </Stack>
             )}
         </Stack>
