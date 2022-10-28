@@ -3,6 +3,7 @@ import { Stack, Typography, Toolbar } from '@mui/material';
 import PropTypes from 'prop-types';
 import SubmitWord from './SubmitWord';
 import GuessesTable from './GuessesTable';
+import RevealSecret from './RevealSecret';
 import {
   getGuessesData, getOtherPlayer,
 } from './utils';
@@ -40,7 +41,7 @@ function InGame({
           guessesData={otherGuessesData}
         />
       </Stack>
-      <Stack>
+      <Stack spacing={1}>
         <SubmitWord
           setRecentErrorMsg={setRecentErrorMsg}
           createMoveFn={((word) => ({ guess: word }))}
@@ -48,6 +49,7 @@ function InGame({
           textFieldDefault="guess"
           dense
         />
+        <RevealSecret secret={secret} />
         <GuessesTable guessesData={guessesData} />
       </Stack>
     </Stack>

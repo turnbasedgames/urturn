@@ -6,6 +6,7 @@
   "dependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
+    "@mui/icons-material": "^5.10.9",
     "@mui/material": "^5.2.8",
     "@urturn/client": "0.1.1",
     "prop-types": "^15.8.1",
