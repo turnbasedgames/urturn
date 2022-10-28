@@ -115,7 +115,7 @@ function NavBar({ user }: Props): React.ReactElement {
                   UrTurn
                 </Typography>
               </Link>
-              <IconButton href="https://docs.urturn.app/" target="_blank" rel="noopener noreferrer">
+              <IconButton href="https://docs.urturn.app/" target="_blank" rel="noopener">
                 <ArticleIcon />
               </IconButton>
             </Stack>

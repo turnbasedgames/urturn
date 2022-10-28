@@ -3,6 +3,7 @@ import {
   AppBar, Toolbar, Typography, Stack, Button, IconButton,
   Paper, MenuItem, MenuList, LinearProgress, Snackbar, Alert, Fade,
 } from '@mui/material';
+import ArticleIcon from '@mui/icons-material/Article';
 import ClearIcon from '@mui/icons-material/Clear';
 import ReactJson from 'react-json-view';
 import Editor from '@monaco-editor/react';
@@ -61,6 +62,9 @@ function GameManager() {
             Current Game State
           </Typography>
           <Stack spacing={1} direction="row">
+            <IconButton size="small" href="https://docs.urturn.app/" target="_blank" rel="noopener">
+              <ArticleIcon />
+            </IconButton>
             {!editMode && (
             <Button
               size="small"
@@ -194,15 +198,6 @@ function GameManager() {
                   </MenuItem>
                 ))}
               </MenuList>
-              <Button
-                size="small"
-                variant="outlined"
-                target="_blank"
-                href="https://docs.urturn.app/docs/backend#boardgame"
-                sx={{ position: 'fixed', bottom: 15, width: 120 }}
-              >
-                Docs
-              </Button>
             </Stack>
           </Paper>
         </Stack>
