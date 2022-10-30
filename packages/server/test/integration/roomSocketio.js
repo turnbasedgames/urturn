@@ -617,6 +617,64 @@ socketConfigs.forEach(({ name, config }) => {
     t.is(roomRightAfterDisconnectTimeout.players.length, 0);
   });
 
+  test(`sockets (${name}) with other players notifies clients of user disconnect timeout`, async (t) => {
+    const { baseURL } = t.context.app;
+    const {
+      room, userCredOne, userCredTwo, userOne, userTwo,
+    } = await startTicTacToeRoom(t);
+    const createTempSocket = (userCred, user) => createSocketAndWatchRoom(
+      t,
+      baseURL,
+      room,
+      {
+        ...config,
+        auth: (cb) => {
+          userCred.user.getIdToken().then((token) => cb({ token })).catch((error) => {
+            t.context.log({
+              message: 'unable to get auth token',
+              error,
+            });
+          });
+        },
+        user,
+      },
+    );
+    const userOneSocket = await createTempSocket(userCredOne, userOne);
+    const userTwoSocket = await createTempSocket(userCredTwo, userTwo);
+    t.context.log(`disconnected socket at: ${new Date().toISOString()}`);
+    userOneSocket.disconnect();
+
+    // user should still be in room right before the disconnectTimeout
+    await sleep(rightBeforeDisconnectTimeoutMs);
+    const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
+    t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
+    t.deepEqual(roomRightBeforeDisconnectTimeout, {
+      ...room,
+      game: { ...room.game, activePlayerCount: 1 },
+    });
+
+    // user should no longer be in room after disconnectTimeout
+    await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
+    const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
+    t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
+    t.is(roomRightAfterDisconnectTimeout.id, room.id);
+    t.is(roomRightAfterDisconnectTimeout.latestState.version, room.latestState.version + 1);
+    t.is(roomRightAfterDisconnectTimeout.players.length, 0);
+    await assertNextLatestState(t, userTwoSocket, {
+      finished: true,
+      joinable: false,
+      players: [],
+      version: room.latestState.version + 1,
+      state: {
+        board: [[null, null, null], [null, null, null], [null, null, null]],
+        plrToMoveIndex: 0,
+        status: 'endGame',
+        winner: getPublicUserFromUser(userTwo),
+        emptyObject: {},
+      },
+    });
+  });
+
   test(`sockets (${name}) multiple disconnections kicks player if they don't have a socket connection after 30 seconds`, async (t) => {
     const { api, baseURL } = t.context.app;
     const userCredOne = await createUserCred();

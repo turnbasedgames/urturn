@@ -17,11 +17,15 @@ async function applyCreatorResult(prevRoomState, room, creatorRoomState, session
   return newRoomState;
 }
 
+async function populateRoomAndNotify(io, room, roomState) {
+  await room.populate('players').populate('latestState').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
+  io.to(room.id).emit('room:latestState', UserCode.getCreatorRoomState(room, roomState));
+}
+
 async function handlePostRoomOperation(res, io, room, roomState) {
   // publishing message is not part of the transaction because subscribers can
   // receive the message before mongodb updates the database
-  await room.populate('players').populate('latestState').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
-  io.to(room.id).emit('room:latestState', UserCode.getCreatorRoomState(room, roomState));
+  await populateRoomAndNotify(io, room, roomState);
   res.status(StatusCodes.OK).json({ room });
 }
 
@@ -47,4 +51,5 @@ module.exports = {
   applyCreatorResult,
   handlePostRoomOperation,
   quitRoomTransaction,
+  populateRoomAndNotify,
 };

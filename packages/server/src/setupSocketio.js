@@ -5,7 +5,7 @@ const Game = require('./models/game/game');
 const { socketioLoggerMiddleware } = require('./middleware/httpLogger');
 const { socketioAuthMiddelware } = require('./middleware/auth');
 const logger = require('./logger');
-const { quitRoomTransaction } = require('./models/room/util');
+const { quitRoomTransaction, populateRoomAndNotify } = require('./models/room/util');
 
 const DEFAULT_DISCONNECT_TIMEOUT_SECS = 30;
 
@@ -44,7 +44,7 @@ async function createUserSocket(socket, room) {
   });
 }
 
-async function deleteUserSocket(socket) {
+async function deleteUserSocket(io, socket) {
   const room = await Room.findById(socket.data.roomId);
   if (room == null) {
     throw new Error('Room does not exist');
@@ -117,7 +117,10 @@ async function deleteUserSocket(socket) {
       if (existingUserGameSocketPair == null) {
         try {
           socket.logger.info('started kicking user from room');
-          await quitRoomTransaction(logger, socket.data.user, room.id);
+          const { room: roomRes, roomState } = await quitRoomTransaction(
+            logger, socket.data.user, room.id,
+          );
+          await populateRoomAndNotify(io, roomRes, roomState);
           socket.logger.info('finished kicking user from room');
         } catch (error) {
           socket.logger.error('error while trying to kick player', error);
@@ -129,7 +132,7 @@ async function deleteUserSocket(socket) {
   }
 }
 
-async function handleSocketDisconnect(socket, reason) {
+async function handleSocketDisconnect(io, socket, reason) {
   try {
     socket.logger.info('handling socket disconnect', {
       id: socket.id,
@@ -138,7 +141,7 @@ async function handleSocketDisconnect(socket, reason) {
       reason,
     });
     if (socket.data.roomId != null) {
-      await deleteUserSocket(socket);
+      await deleteUserSocket(io, socket);
     } else {
       socket.logger.info('socket was not watching a room when disconnecting');
     }
@@ -186,7 +189,7 @@ function setupSocketio(io) {
 
     socket.on('disconnect', (reason) => {
       // eslint-disable-next-line no-param-reassign
-      socket.data.disconnectHandledPromise = handleSocketDisconnect(socket, reason);
+      socket.data.disconnectHandledPromise = handleSocketDisconnect(io, socket, reason);
     });
   });
 
