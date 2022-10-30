@@ -3,6 +3,7 @@ import {
   Paper, TableContainer, Table, TableRow, TableHead, TableCell, TableBody, LinearProgress,
 } from '@mui/material';
 import PropTypes from 'prop-types';
+import { getClosenessMessage } from './utils';
 
 function GuessesTable({ dense, guessesData }) {
   const { latestGuess, sortedGuesses } = guessesData;
@@ -18,7 +19,7 @@ function GuessesTable({ dense, guessesData }) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {(latestGuess != null) && (sortedGuesses?.length > 1) && (
+          {(latestGuess != null) && (sortedGuesses?.length > 0) && (
           <TableRow
             key="latest-guess"
           >
@@ -29,24 +30,29 @@ function GuessesTable({ dense, guessesData }) {
             <TableCell align="right">
               {latestGuess.similarity.toFixed(3)}
             </TableCell>
-            <TableCell align="right">{latestGuess.message}</TableCell>
+            <TableCell align="right">
+              {getClosenessMessage(latestGuess.index)}
+              {latestGuess.index >= 0
+                 && <LinearProgress variant="determinate" value={latestGuess.index} />}
+            </TableCell>
           </TableRow>
           )}
           {sortedGuesses.map(({
-            guess, similarity, message, topPosition, hint,
-          }, ind) => (
+            guess, similarity, index, hint,
+          }, sortedIndex) => (
             <TableRow
               key={guess}
               sx={{ '& td': { border: 0 } }}
             >
               <TableCell scope="row">
-                {`${ind}${hint ? ' (hint)' : ''}`}
+                {`${sortedIndex}${hint ? ' (hint)' : ''}`}
               </TableCell>
               <TableCell align="right">{guess}</TableCell>
               <TableCell align="right">{similarity.toFixed(3)}</TableCell>
               <TableCell align="right">
-                {message}
-                <LinearProgress variant="determinate" value={topPosition} />
+                {getClosenessMessage(index)}
+                {index >= 0
+                 && <LinearProgress variant="determinate" value={index} />}
               </TableCell>
             </TableRow>
           ))}
@@ -57,10 +63,12 @@ function GuessesTable({ dense, guessesData }) {
 }
 
 const guessShape = PropTypes.shape({
+  lastUpdateTime: PropTypes.string,
   guess: PropTypes.string,
+  count: PropTypes.number,
+  hint: PropTypes.bool,
+  index: PropTypes.number,
   similarity: PropTypes.number,
-  message: PropTypes.string,
-  topPosition: PropTypes.number,
 });
 GuessesTable.propTypes = {
   guessesData: PropTypes.shape({

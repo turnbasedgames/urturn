@@ -1,26 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ThemeProvider, Typography, Stack, Snackbar, Alert, Fade, LinearProgress,
+  ThemeProvider, Typography, Stack, Snackbar, Alert, LinearProgress,
 } from '@mui/material';
 
 import client, { events } from '@urturn/client';
 import theme from './theme';
-import { getStatusMsg, getWordData } from './utils';
+import { getStatusMsg } from './utils';
 import PlayerList from './PlayerList';
 import ChooseSecret from './ChooseSecret';
 import InGame from './InGame';
 import EndGame from './EndGame';
 
-// TODO: add local caching per session
 // TODO: cool animated background with words bouncing around
 // TODO: add music playlist
 function App() {
-  // loading in word data
-  const [loadingWordData, setLoadingWordData] = useState(true);
-  useEffect(() => {
-    getWordData().then(() => setLoadingWordData(false)).catch(console.error);
-  });
-
   const [boardGame, setBoardGame] = useState(client.getBoardGame() || {});
   useEffect(() => {
     const onStateChanged = (newBoardGame) => {
@@ -55,9 +48,9 @@ function App() {
     } = {},
   } = boardGame;
   const { players = [], finished } = boardGame;
-  const dataLoading = boardGame == null || curPlr == null || loadingWordData;
+  const dataLoading = boardGame == null || curPlr == null;
   const generalStatus = getStatusMsg({
-    status, winner, finished, curPlr, players, plrToSecretHash, dataLoading,
+    status, winner, finished, curPlr, players, plrToSecretHash,
   });
   const plrToStatus = players.reduce((prev, cur) => {
     if (status === 'preGame' && plrToSecretHash[cur.id] != null) {
@@ -118,7 +111,6 @@ function App() {
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         open={recentErrorMsg !== null}
         onClose={() => { setRecentErrorMsg(null); }}
-        TransationComponent={Fade}
       >
         <Alert severity="error" sx={{ width: '100%' }}>
           {recentErrorMsg}

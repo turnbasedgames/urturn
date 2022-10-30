@@ -18,7 +18,12 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 16.x
-    - name: npm install and build
+    - name: build index.js
+      run: |
+        npm install
+        sed -i 's/\/index.js/# \/index.js/g' .gitignore
+        CI=false npm run build
+    - name: build frontend
       run: |
         cd frontend
         npm install

@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Stack, Typography, Toolbar } from '@mui/material';
 import PropTypes from 'prop-types';
 import SubmitWord from './SubmitWord';
@@ -15,24 +15,11 @@ function InGame({
 }) {
   const guessToInfo = plrToGuessToInfo[curPlr.id];
   const secret = Buffer.from(plrToSecretHash[curPlr.id], 'base64').toString('ascii');
-  const [guessesData, setGuessesData] = useState({ sortedGuesses: [] });
+  const guessesData = getGuessesData(guessToInfo);
 
   const otherPlr = getOtherPlayer(players, curPlr);
-  const otherSecret = Buffer.from(plrToSecretHash[otherPlr.id], 'base64').toString('ascii');
   const otherGuessToInfo = plrToGuessToInfo[otherPlr.id];
-  const [otherGuessesData, setOtherGuessesData] = useState({ sortedGuesses: [] });
-
-  useEffect(() => {
-    getGuessesData(guessToInfo, otherSecret, hintIndex)
-      .then(setGuessesData)
-      .catch(console.error);
-  }, [guessToInfo]);
-
-  useEffect(() => {
-    getGuessesData(otherGuessToInfo, secret, hintIndex)
-      .then(setOtherGuessesData)
-      .catch(console.error);
-  }, [otherGuessToInfo]);
+  const otherGuessesData = getGuessesData(otherGuessToInfo);
 
   return (
     <Stack direction="row" spacing={2}>
