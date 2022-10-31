@@ -60,7 +60,10 @@ function GameInfo(): React.ReactElement {
         autoHideDuration: 3000,
       });
     } catch (error) {
-      console.error(error);
+      enqueueSnackbar('Share browser link with other players.', {
+        variant: 'info',
+        autoHideDuration: 3000,
+      });
     }
   }
   return (
