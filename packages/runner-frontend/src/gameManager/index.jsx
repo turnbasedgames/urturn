@@ -70,7 +70,11 @@ function GameManager() {
               size="small"
               variant="outlined"
               color="warning"
-              onClick={() => { refreshGameState(); }}
+              onClick={() => {
+                refreshGameState().catch((error) => {
+                  setRecentErrorMsg(`ERROR: ${error.response.data.message}`);
+                });
+              }}
             >
               Restart
             </Button>

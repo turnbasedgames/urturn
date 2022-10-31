@@ -14,29 +14,30 @@ import requireUtil from './requireUtil.cjs';
 const backendHotReloadIntervalMs = 100;
 
 const getLatestBackendModule = async (backendPath) => {
-  // Nodejs doesn't support cache busting interface yet for esm https://github.com/nodejs/help/issues/2806
-  // This is a workaround to get a completely fresh backendModule, as the query
-  // will be new every millisecond. When the issue gets resolved we should use the
-  // interface to delete old cache entries. This workaround causes a memory leak where
-  // old cached modules never cleaned up.
-  const cacheBustingModulePath = `${backendPath}?update=${Date.now()}`;
-  const { default: backendModule } = await import(cacheBustingModulePath);
+  try {
+    // Nodejs doesn't support cache busting interface yet for esm https://github.com/nodejs/help/issues/2806
+    // This is a workaround to get a completely fresh backendModule, as the query
+    // will be new every millisecond. When the issue gets resolved we should use the
+    // interface to delete old cache entries. This workaround causes a memory leak where
+    // old cached modules never cleaned up.
+    const cacheBustingModulePath = `${backendPath}?update=${Date.now()}`;
+    const { default: backendModule } = await import(cacheBustingModulePath);
 
-  // the cacheBusting workaround for esm modules does not work for commonjs
-  requireUtil.cleanupCommonJSModule(backendPath);
+    // the cacheBusting workaround for esm modules does not work for commonjs
+    requireUtil.cleanupCommonJSModule(backendPath);
 
-  return backendModule;
+    return backendModule;
+  } catch (err) {
+    console.log(err);
+    return undefined;
+  }
 };
 
 async function setupServer({ apiPort }) {
-  let backendModule = await getLatestBackendModule(userBackend);
-
-  // State that is being tracked for any operation (e.g. make move, add player)
-  let boardGame = newBoardGame(backendModule);
-
   const app = express();
   const httpServer = createServer(app);
-
+  let boardGame;
+  let backendModule;
   const io = new Server(httpServer, {
     serveClient: false,
     cors: {
@@ -47,12 +48,19 @@ async function setupServer({ apiPort }) {
     socket.emit('stateChanged', boardGame);
   });
 
+  const startGame = async () => {
+    backendModule = await getLatestBackendModule(userBackend);
+    if (backendModule == null) {
+      return;
+    }
+    boardGame = newBoardGame(backendModule);
+    io.sockets.emit('stateChanged', boardGame);
+  };
+
   const restartGame = async () => {
     console.log('Resetting game state with new backend.');
     console.log('Closing player tabs.');
-    backendModule = await getLatestBackendModule(userBackend);
-    boardGame = newBoardGame(backendModule);
-    io.sockets.emit('stateChanged', boardGame);
+    await startGame();
   };
 
   // setup a watch to detect when we should refresh the backend module
@@ -63,6 +71,12 @@ async function setupServer({ apiPort }) {
 
   app.use(cors());
   app.use(express.json());
+  app.use((req, res, next) => {
+    if (backendModule == null) {
+      throw new Error(`Could not load backend module for: ${userBackend}`);
+    }
+    next();
+  });
 
   app.post('/player', (_, res) => {
     let boardGameContender = JSON.parse(JSON.stringify(boardGame));
@@ -163,16 +177,19 @@ async function setupServer({ apiPort }) {
     });
   });
 
-  app.use((err, req, res) => {
+  app.use((err, _, res, next) => {
     // log error for developers so they can see any potential errors on the backendModule for
     // functions related to onRoomStart, onPlayerJoin, and onPlayerQuit
-    console.error(err);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(err);
+    const { message = 'Error: unknown message' } = err;
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message });
+    next();
   });
 
   const server = httpServer.listen(apiPort);
   const url = `http://localhost:${apiPort}`;
   console.log(`api server at ${url}`);
+
+  startGame();
   return () => server.close();
 }
 
