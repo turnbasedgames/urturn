@@ -1,8 +1,6 @@
 import axios from 'axios';
 import { BoardGame, Room, RoomState } from '@urturn/types-common';
 
-import logger from '../logger';
-
 export enum Errors {
   RoomNotJoinable = 'RoomNotJoinable',
   CreatorError = 'CreatorError',
@@ -41,8 +39,8 @@ export interface CreateRoomReqBody {
   game: string
 }
 
-export const createRoom = async (room: CreateRoomReqBody): Promise<Room> => {
-  const res = await axios.post('room', room);
+export const queueUpRoom = async (room: CreateRoomReqBody): Promise<Room> => {
+  const res = await axios.put('room', room);
   return res.data.room;
 };
 
@@ -66,54 +64,7 @@ export const getRoom = async (roomId: string): Promise<Room> => {
   return res.data.room;
 };
 
-export const createPrivateRoom = async (gameId: string): Promise<Room> => createRoom({
+export const queueUpPrivateRoom = async (gameId: string): Promise<Room> => queueUpRoom({
   game: gameId,
   private: true,
 });
-
-// TODO: should this just be a part of join endpoint?
-export const joinOrCreateRoom = async (gameId: string, userId: string): Promise<Room> => {
-  const maxRetries = 10;
-  let tries = 0;
-  let lastErr;
-
-  /* eslint-disable no-await-in-loop */
-  while (tries < maxRetries) {
-    try {
-      const [roomsAlreadyJoinedRaw, availableRooms] = await Promise.all([
-        getRooms({ gameId, finished: false, containsPlayer: userId }),
-        getRooms({
-          gameId, joinable: true, omitPlayer: userId, privateRooms: false,
-        }),
-      ]);
-
-      if (roomsAlreadyJoinedRaw.length > 0) {
-        const [alreadyJoinedRoom] = roomsAlreadyJoinedRaw;
-        return alreadyJoinedRoom;
-      }
-
-      let roomToJoin;
-
-      if (availableRooms.length > 0) {
-        [roomToJoin] = availableRooms;
-      } else {
-        const newRoom = await createRoom({ game: gameId });
-        return newRoom;
-      }
-
-      const newRoom = await joinRoom(roomToJoin.id);
-      return newRoom;
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        if ((err.response != null) && err.response.data.name === Errors.RoomNotJoinable) {
-          logger.log(err.response.data.message);
-        }
-      }
-      tries += 1;
-      lastErr = err;
-    }
-  }
-  /* eslint-enable no-await-in-loop */
-
-  throw lastErr;
-};

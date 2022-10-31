@@ -8,10 +8,10 @@ import {
   useParams,
 } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
-import { Game, User } from '@urturn/types-common';
+import { Game } from '@urturn/types-common';
 
 import { getGame } from '../../models/game';
-import { joinOrCreateRoom, createPrivateRoom } from '../../models/room';
+import { queueUpRoom, queueUpPrivateRoom } from '../../models/room';
 import GameCardActions from '../../creatorView/GameCardActions';
 import { UserContext } from '../../models/user';
 import CardMediaWithFallback from '../gameCard/CardMediaWithFallback';
@@ -35,12 +35,12 @@ function GameInfo(): React.ReactElement {
     setupGame().catch(logger.error);
   }, [gameId]);
 
-  async function onPlay(user: User): Promise<void> {
+  async function onPlay(): Promise<void> {
     if (game == null) {
       throw new Error("game is null and probably still loading, can't play game");
     }
     setLoadingRoom(true);
-    const room = await joinOrCreateRoom(game.id, user.id);
+    const room = await queueUpRoom({ game: game.id });
     setLoadingRoom(false);
     navigate(`room/${room.id}`);
   }
@@ -50,7 +50,7 @@ function GameInfo(): React.ReactElement {
       throw new Error("game is null and probably still loading, can't play game");
     }
     setloadingPrivateRoom(true);
-    const room = await createPrivateRoom(game.id);
+    const room = await queueUpPrivateRoom(game.id);
     setloadingPrivateRoom(false);
     navigate(`room/${room.id}`);
     try {
@@ -138,7 +138,7 @@ function GameInfo(): React.ReactElement {
                             disabled={loadingRoom}
                             onClick={(ev) => {
                               ev.preventDefault();
-                              onPlay(user).catch((error) => {
+                              onPlay().catch((error) => {
                                 setLoadingRoom(false);
                                 enqueueSnackbar('Failed to start game: Contact Developers.', {
                                   variant: 'error',
