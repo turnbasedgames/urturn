@@ -53,11 +53,15 @@ function GameInfo(): React.ReactElement {
     const room = await createPrivateRoom(game.id);
     setloadingPrivateRoom(false);
     navigate(`room/${room.id}`);
-    await navigator.clipboard.writeText(window.location.href);
-    enqueueSnackbar('Copied URL To Clipboard!', {
-      variant: 'success',
-      autoHideDuration: 3000,
-    });
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      enqueueSnackbar('Copied URL To Clipboard!', {
+        variant: 'success',
+        autoHideDuration: 3000,
+      });
+    } catch (error) {
+      console.error(error);
+    }
   }
   return (
     <>
