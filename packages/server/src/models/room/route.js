@@ -101,7 +101,7 @@ function setupRouter({ io }) {
 
     const gameCount = await Game.countDocuments({ _id: room.game });
     if (gameCount === 0) {
-      error = new Error('room.game must exist!');
+      error = new Error('game must exist!');
       error.status = StatusCodes.BAD_REQUEST;
       return { room: undefined, error };
     }
@@ -220,18 +220,6 @@ function setupRouter({ io }) {
 
       res.status(StatusCodes.CREATED).json({ room });
     }));
-
-  router.post('/', expressUserAuthMiddleware, asyncHandler(async (req, res) => {
-    const { user } = req;
-
-    const roomRaw = req.body;
-    const { room, error } = await createRoomHelper(user, req.log, roomRaw);
-    if (error) {
-      throw error;
-    }
-
-    res.status(StatusCodes.CREATED).json({ room });
-  }));
 
   router.post('/:id/join', celebrate({
     [Segments.PARAMS]: Joi.object().keys({

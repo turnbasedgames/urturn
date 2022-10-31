@@ -63,14 +63,9 @@ async function cleanupTestUsers(t) {
   return Promise.all(createdUsers.map((cred) => deleteUserAndAssert(t, api, cred)));
 }
 
-async function createRoomAndAssert(t, api, userCred, game, user, makePrivate = false, method = 'post') {
+async function createRoomAndAssert(t, api, userCred, game, user, makePrivate = false) {
   const authToken = await userCred.user.getIdToken();
-
-  let apiRequestFunc = api.post;
-  if (method === 'put') {
-    apiRequestFunc = api.put;
-  }
-  const { data: { room }, status } = await apiRequestFunc('/room',
+  const { data: { room }, status } = await api.put('/room',
     { game: game.id, private: makePrivate },
     { headers: { authorization: authToken } });
   t.is(status, StatusCodes.CREATED);
@@ -112,9 +107,12 @@ async function startTicTacToeRoom(t) {
   const authTokenTwo = await userCredTwo.user.getIdToken();
   const game = await createGameAndAssert(t, api, userCredOne, userOne);
   const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
-  const { data: { room: resRoom }, status } = await api.post(`/room/${room.id}/join`, {},
+  const { data: { room: resRoom }, status } = await api.put('/room', { game: game.id },
     { headers: { authorization: authTokenTwo } });
   t.is(status, StatusCodes.OK);
+  // a second PUT /room request should add the player to the previous joinable room that was just
+  // created
+  t.is(resRoom.id, room.id);
   t.deepEqual(resRoom.game, game);
   t.is(resRoom.joinable, false);
   t.deepEqual(resRoom.players, [userOne, userTwo].map(getPublicUserFromUser));

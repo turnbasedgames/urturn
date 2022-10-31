@@ -351,6 +351,27 @@ test('PUT /room fails if latestState is provided', async (t) => {
   t.is(response.status, StatusCodes.BAD_REQUEST);
 });
 
+test('PUT /room returns \'room.game must exist\' if no room', async (t) => {
+  const { api } = t.context.app;
+  const gameId = Types.ObjectId(); // this game does not exist in database
+
+  const userCred = await createUserCred();
+  await createUserAndAssert(t, api, userCred);
+  t.context.createdUsers.push(userCred);
+
+  const authToken = await userCred.user.getIdToken();
+  const privateValues = [true, false, undefined];
+  await Promise.all(privateValues.map(async (privateValue) => {
+    const { response: { status, data } } = await t.throwsAsync(
+      api.put('/room',
+        { game: gameId, private: privateValue },
+        { headers: { authorization: authToken } }),
+    );
+    t.is(status, StatusCodes.BAD_REQUEST);
+    t.is(data.message, 'game must exist!');
+  }));
+});
+
 test('PUT /room creates a room for the user if a private field is specified', async (t) => {
   const { api } = t.context.app;
   const userCred = await createUserCred();
@@ -358,7 +379,7 @@ test('PUT /room creates a room for the user if a private field is specified', as
   t.context.createdUsers.push(userCred);
 
   const game = await createGameAndAssert(t, api, userCred, user);
-  await createRoomAndAssert(t, api, userCred, game, user, true, 'put');
+  await createRoomAndAssert(t, api, userCred, game, user, true);
 });
 
 test('PUT /room creates a room for the user if user is not able to join any rooms', async (t) => {
@@ -368,7 +389,7 @@ test('PUT /room creates a room for the user if user is not able to join any room
   t.context.createdUsers.push(userCred);
 
   const game = await createGameAndAssert(t, api, userCred, user);
-  await createRoomAndAssert(t, api, userCred, game, user, false, 'put');
+  await createRoomAndAssert(t, api, userCred, game, user, false);
 });
 
 test('PUT /room creates a private room for a user even if they have created a public room', async (t) => {
@@ -378,7 +399,7 @@ test('PUT /room creates a private room for a user even if they have created a pu
   t.context.createdUsers.push(userCred);
 
   const game = await createGameAndAssert(t, api, userCred, user);
-  const createdRoom = await createRoomAndAssert(t, api, userCred, game, user, false, 'put');
+  const createdRoom = await createRoomAndAssert(t, api, userCred, game, user, false);
 
   const authToken = await userCred.user.getIdToken();
   const { status, data: { room } } = await api.put('/room', {
@@ -400,7 +421,7 @@ test('PUT /room joins a user to a room if there exist a room for the user to joi
   t.context.createdUsers.push(userCredTwo);
 
   const game = await createGameAndAssert(t, api, userCredOne, userOne);
-  await createRoomAndAssert(t, api, userCredOne, game, userOne, false, 'put');
+  await createRoomAndAssert(t, api, userCredOne, game, userOne, false);
 
   const authTokenTwo = await userCredTwo.user.getIdToken();
   const { status, data: { room } } = await api.put('/room', {
@@ -409,41 +430,6 @@ test('PUT /room joins a user to a room if there exist a room for the user to joi
 
   t.is(status, StatusCodes.OK);
   t.is(room.players.length, 2);
-});
-
-test('POST /room creates a room', async (t) => {
-  const { api } = t.context.app;
-  const userCred = await createUserCred();
-  const user = await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
-
-  const game = await createGameAndAssert(t, api, userCred, user);
-  await createRoomAndAssert(t, api, userCred, game, user);
-});
-
-test('POST /room supports creating a private room', async (t) => {
-  const { api } = t.context.app;
-  const userCred = await createUserCred();
-  const user = await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
-
-  const game = await createGameAndAssert(t, api, userCred, user);
-  await createRoomAndAssert(t, api, userCred, game, user, true);
-});
-
-test('POST /room returns \'room.game must exist\' if no room', async (t) => {
-  const { api } = t.context.app;
-  const userCred = await createUserCred();
-  await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
-
-  const authToken = await userCred.user.getIdToken();
-  const { response: { status } } = await t.throwsAsync(
-    api.post('/room', {
-      game: Types.ObjectId(),
-    }, { headers: { authorization: authToken } }),
-  );
-  t.is(status, StatusCodes.BAD_REQUEST);
 });
 
 test('POST /room/:id/join joins a game', async (t) => {
