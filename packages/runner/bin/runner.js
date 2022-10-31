@@ -8,8 +8,7 @@ import { isInteger, clearConsole } from '../src/util.js';
 import setupFrontends from '../src/setupFrontends.js';
 import setupServer from '../src/setupServer.js';
 
-// TODO: MAIN-83 setup dev environment option for a local dummy user frontend and backend
-(async () => {
+async function main() {
   program
     // hide UrTurn dev only options
     .addOption(new Option('--dev').hideHelp())
@@ -66,7 +65,10 @@ import setupServer from '../src/setupServer.js';
         runnerFrontendProcess.kill();
       }
 
+      console.warn('exiting runner');
       process.exit();
     });
   });
-})();
+}
+
+main();
