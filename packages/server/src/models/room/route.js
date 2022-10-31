@@ -9,7 +9,8 @@ const { expressUserAuthMiddleware } = require('../../middleware/auth');
 const Game = require('../game/game');
 const Room = require('./room');
 const RoomState = require('./roomState');
-const UserCode = require('./runner');
+const UserCode = require('./userCode');
+const fetchUserCodeFromGame = require('./runner');
 const {
   RoomNotJoinableError, RoomFinishedError, UserNotInRoomError, CreatorError, UserAlreadyInRoomError,
 } = require('./errors');
@@ -106,7 +107,7 @@ function setupRouter({ io }) {
     }
 
     await room.populate('players').populate('game').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
-    const userCode = await UserCode.fromGame(logger, room.game);
+    const userCode = await fetchUserCodeFromGame(logger, room.game);
     const creatorInitRoomState = userCode.startRoom();
     const roomState = new RoomState({
       room: room.id,
@@ -138,7 +139,7 @@ function setupRouter({ io }) {
       await mongoose.connection.transaction(async (session) => {
         room.playerJoin(user);
         const prevRoomState = room.latestState;
-        const userCode = await UserCode.fromGame(logger, room.game);
+        const userCode = await fetchUserCodeFromGame(logger, room.game);
         const creatorJoinRoomState = userCode.playerJoin(player, room, prevRoomState);
         newRoomState = await applyCreatorResult(
           prevRoomState,
@@ -269,7 +270,7 @@ function setupRouter({ io }) {
           .session(session);
         room.playerMove(player);
         const prevRoomState = room.latestState;
-        const userCode = await UserCode.fromGame(req.log, room.game);
+        const userCode = await fetchUserCodeFromGame(req.log, room.game);
         const creatorMoveRoomState = userCode.playerMove(player, move, room, prevRoomState);
         newRoomState = await applyCreatorResult(prevRoomState, room, creatorMoveRoomState, session);
       });

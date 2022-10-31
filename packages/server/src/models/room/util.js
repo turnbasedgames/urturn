@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const { StatusCodes } = require('http-status-codes');
 const Room = require('./room');
-const UserCode = require('./runner');
+const UserCode = require('./userCode');
+const fetchUserCodeFromGame = require('./runner');
 
 async function applyCreatorResult(prevRoomState, room, creatorRoomState, session) {
   const newRoomState = prevRoomState;
@@ -38,7 +39,7 @@ async function quitRoomTransaction(logger, user, roomId) {
       .session(session);
     room.playerQuit(user);
     const prevRoomState = room.latestState;
-    const userCode = await UserCode.fromGame(logger, room.game);
+    const userCode = await fetchUserCodeFromGame(logger, room.game);
     const creatorQuitRoomState = userCode.playerQuit(player, room, prevRoomState);
     roomState = await applyCreatorResult(
       prevRoomState, room, creatorQuitRoomState, session,
