@@ -17,7 +17,7 @@ tags: [semantle-battle, semantle, tournament, game]
 
 ### Where
 
-Always [Discord](https://discord.gg/myWacjdb5S).
+Always [Discord](https://discord.gg/9hpzbEba?event=1037129035651751997).
 
 ### How
 
