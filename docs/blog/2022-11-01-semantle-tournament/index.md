@@ -7,7 +7,7 @@ tags: [semantle-battle, semantle, tournament, game]
 
 ### What
 
-- Semantle Battle is a spin off the original semantle game where you pick a secret, the other player picks a secret and the person who guesses the secret before the other player wins.
+- Semantle Battle is a spin off of the original semantle game where two players pick secrets for one another to guess. The player who guesses the secret first wins.
 - Play a it with a friend [here](https://www.urturn.app/games/63474d0012b461000e15dc96) to prepare before the tournament.
 
 ### When
