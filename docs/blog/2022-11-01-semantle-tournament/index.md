@@ -1,8 +1,8 @@
 ---
-slug: Semantle Battle Tournament 
-title: The First Semantle Battle Tournament
-authors: []
-tags: [semantle-battle tournament]
+slug: Semantle Battle Tournament
+title: Semantle Battle Tournament (11/5/2022)
+authors: [kevo1ution, sarahannali, yquansah]
+tags: [semantle-battle, semantle, tournament, game]
 ---
 
 ### What
@@ -17,7 +17,7 @@ tags: [semantle-battle tournament]
 
 ### Where
 
-Always [Discord](https://discord.gg/myWacjdb5S)
+Always [Discord](https://discord.gg/myWacjdb5S).
 
 ### How
 

@@ -60,9 +60,16 @@ const config = {
           },
           {to: '/blog', label: 'Blog', position: 'left'},
           {
-            href: 'https://github.com/turnbasedgames/urturn',
-            label: 'GitHub',
+            href: 'https://discord.gg/myWacjdb5S',
             position: 'right',
+            className: "header-discord-link",
+            "aria-label": "UrTurn Discord",
+          },
+          {
+            href: 'https://github.com/turnbasedgames/urturn',
+            position: 'right',
+            className: "header-github-link",
+            "aria-label": "GitHub repository",
           },
         ],
       },
