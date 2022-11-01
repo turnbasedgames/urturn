@@ -53,6 +53,10 @@ async function setupServer({ apiPort }) {
     if (backendModule == null) {
       return;
     }
+    if (typeof backendModule.onRoomStart !== 'function') {
+      console.error("Unable to start game because 'onRoomStart' function is not exported!");
+      return;
+    }
     boardGame = newBoardGame(backendModule);
     io.sockets.emit('stateChanged', boardGame);
   };
