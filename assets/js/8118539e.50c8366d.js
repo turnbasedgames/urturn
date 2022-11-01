@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_urturn_docs=self.webpackChunk_urturn_docs||[]).push([[39],{6941:t=>{t.exports=JSON.parse('{"label":"tournament","permalink":"/blog/tags/tournament","allTagsPath":"/blog/tags","count":1}')}}]);

@@ -2,10 +2,34 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://docs.urturn.app/blog</id>
     <title>UrTurn Blog</title>
-    <updated>2022-02-05T00:00:00.000Z</updated>
+    <updated>2022-11-01T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://docs.urturn.app/blog"/>
     <subtitle>UrTurn Blog</subtitle>
+    <entry>
+        <title type="html"><![CDATA[Semantle Battle Tournament (11/5/2022)]]></title>
+        <id>Semantle Battle Tournament</id>
+        <link href="https://docs.urturn.app/blog/Semantle Battle Tournament"/>
+        <updated>2022-11-01T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[What]]></summary>
+        <content type="html"><![CDATA[<h3 class="anchor anchorWithStickyNavbar_JmGV" id="what">What<a class="hash-link" href="#what" title="Direct link to heading">​</a></h3><ul><li>Semantle Battle is a spin off of the original semantle game where two players pick secrets for one another to guess. The player who guesses the secret first wins.</li><li>Play a it with a friend <a href="https://www.urturn.app/games/63474d0012b461000e15dc96" target="_blank" rel="noopener noreferrer">here</a> to prepare before the tournament.</li></ul><h3 class="anchor anchorWithStickyNavbar_JmGV" id="when">When<a class="hash-link" href="#when" title="Direct link to heading">​</a></h3><ul><li>Tournament will be hosted <strong>Saturday 11/5/2022 2:00 PM PST</strong>.</li><li>RSVP in the <a href="https://discord.gg/myWacjdb5S" target="_blank" rel="noopener noreferrer">Discord</a> as soon as possible, we will cap the number of participants.</li></ul><h3 class="anchor anchorWithStickyNavbar_JmGV" id="where">Where<a class="hash-link" href="#where" title="Direct link to heading">​</a></h3><p>Always <a href="https://discord.gg/9hpzbEba?event=1037129035651751997" target="_blank" rel="noopener noreferrer">Discord</a>.</p><h3 class="anchor anchorWithStickyNavbar_JmGV" id="how">How<a class="hash-link" href="#how" title="Direct link to heading">​</a></h3><p>Entry is <strong>Free</strong>.</p><h4 class="anchor anchorWithStickyNavbar_JmGV" id="tournament-structure">Tournament Structure<a class="hash-link" href="#tournament-structure" title="Direct link to heading">​</a></h4><ul><li>We will auto generate a random bracket with every player that RSVPs in the <a href="https://discord.gg/myWacjdb5S" target="_blank" rel="noopener noreferrer">Discord</a>.</li><li>All games will be live streamed (each player will share their screen in two separate channels).</li><li>Each player starts out on their own and are their own <strong>team leader</strong> (each team will have 1 player at the first round).</li><li>When a team wins, the two teams combine and the new team leader is the <strong>team leader of the winning team</strong>. Eventually the last Semantle Battle will be between two large teams.</li><li>Only the team leader can type in guesses. Teams will not have access to the other teams voice chat/text channel.</li></ul><h4 class="anchor anchorWithStickyNavbar_JmGV" id="prizes">Prizes<a class="hash-link" href="#prizes" title="Direct link to heading">​</a></h4><ul><li>Team leader winner gets the only tournament winner discord role.</li><li>Winners will get a special discord role.</li></ul><h4 class="anchor anchorWithStickyNavbar_JmGV" id="rules">Rules<a class="hash-link" href="#rules" title="Direct link to heading">​</a></h4><ul><li>No Cheating of any form (you will be disqualified immediately, banned from the discord server, and the UrTurn platform - seriously don't ruin the fun of others).</li><li>The winner is chosen based on the player in this order of priority:<ul><li>player who guessed the word first</li><li>closest word index-wise (e.g. 99th word in nearest list is better than 70th word in nearest list)</li><li>closest word similarity score-wise</li></ul></li><li>Each game you have 30 seconds to provide your secret and 5 minutes to guess the other player's secret. At the end of the 5 minutes, a winner is chosen.</li></ul>]]></content>
+        <author>
+            <name>Kevin Tang</name>
+            <uri>https://github.com/kevo1ution</uri>
+        </author>
+        <author>
+            <name>Sarah Ali</name>
+            <uri>https://github.com/sarahannali</uri>
+        </author>
+        <author>
+            <name>Yoofi Quansah</name>
+            <uri>https://github.com/yquansah</uri>
+        </author>
+        <category label="semantle-battle" term="semantle-battle"/>
+        <category label="semantle" term="semantle"/>
+        <category label="tournament" term="tournament"/>
+        <category label="game" term="game"/>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Welcome]]></title>
         <id>welcome</id>

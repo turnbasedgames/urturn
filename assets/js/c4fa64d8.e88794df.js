@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_urturn_docs=self.webpackChunk_urturn_docs||[]).push([[947],{3738:e=>{e.exports=JSON.parse('{"label":"semantle-battle","permalink":"/blog/tags/semantle-battle","allTagsPath":"/blog/tags","count":1}')}}]);
