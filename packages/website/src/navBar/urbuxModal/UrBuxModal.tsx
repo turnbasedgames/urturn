@@ -38,7 +38,7 @@ function UrBuxModal({ open, setOpen }: UrBuxProps): React.ReactElement {
             />
             <CardActions>
               <Button startIcon={<GiTwoCoins />} onClick={() => setIntent(true)}>
-                100 UrBux for $1
+                1000 UrBux for $10
               </Button>
             </CardActions>
           </Card>
