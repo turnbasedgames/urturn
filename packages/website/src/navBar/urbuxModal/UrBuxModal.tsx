@@ -24,7 +24,7 @@ function UrBuxModal({ open, setOpen }: UrBuxProps): React.ReactElement {
       {intent
         ? (
           <Card sx={{ padding: 2 }}>
-            <CardHeader title="Checkout" titleTypographyProps={{ color: 'secondary' }} subheader="Buying 100 UrBux for $1 USD" sx={{ padding: 0, marginBottom: 1 }} />
+            <CardHeader title="Checkout" titleTypographyProps={{ color: 'secondary' }} subheader="Buying 1000 UrBux for $10 USD" sx={{ padding: 0, marginBottom: 1 }} />
             <PaymentCard />
           </Card>
         )
