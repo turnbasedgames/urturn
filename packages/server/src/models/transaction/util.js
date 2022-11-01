@@ -1,5 +1,5 @@
 const USD_TO_URBUX = {
-  1: 100,
+  10: 1000,
 };
 
 const ALLOWED_CURRENCIES_SET = new Set(['usd']);

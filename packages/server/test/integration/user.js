@@ -126,7 +126,7 @@ test('POST /user/create-payment-intent throws error for unsupported currency', a
   t.context.createdUsers.push(userCred);
 });
 
-test('POST /user/create-payment-intent throws error for any other amount than 100 usd', async (t) => {
+test('POST /user/create-payment-intent throws error for amounts not accepted', async (t) => {
   const { api } = t.context.app;
   const userCred = await createUserCred();
   const authToken = await userCred.user.getIdToken();
@@ -152,7 +152,7 @@ test('POST /user/create-payment-intent creates a payment intent for a user', asy
 
   const { status, data } = await api.post('/user/create-payment-intent', {
     currency: 'usd',
-    amount: 100,
+    amount: 1000,
   }, { headers: { authorization: authToken } });
 
   t.is(status, StatusCodes.CREATED);
@@ -168,7 +168,7 @@ test('POST /user/purchase/webhook throws 400 if wrong currency provided', async 
   const wrongCurrencyPayload = {
     data: {
       object: {
-        amount: 100,
+        amount: 1000,
         id: '894318943218943219',
         currency: 'ghs',
         metadata: {
@@ -186,7 +186,7 @@ test('POST /user/purchase/webhook throws 400 if wrong currency provided', async 
   );
 
   t.is(status, StatusCodes.BAD_REQUEST);
-  t.is(message, 'conversion to urbux failed (currency=ghs, paymentAmount=100)');
+  t.is(message, 'conversion to urbux failed (currency=ghs, paymentAmount=1000)');
   t.context.createdUsers.push(userCred);
 });
 
@@ -195,7 +195,7 @@ test('POST /user/purchase/webhook throws 400 if no userId provided', async (t) =
   const wrongCurrencyPayload = {
     data: {
       object: {
-        amount: 100,
+        amount: 1000,
         id: '8943189432189432123',
         currency: 'usd',
         metadata: {},
@@ -220,7 +220,7 @@ test('POST /user/purchase/webhook throws 404 if no user found with provided user
   const wrongCurrencyPayload = {
     data: {
       object: {
-        amount: 100,
+        amount: 1000,
         id: '894318943218943219',
         currency: 'usd',
         metadata: {
@@ -250,7 +250,7 @@ test('POST /user/purchase/webhook throws 400 if bad Stripe-Signature header prov
     object: 'event',
     data: {
       object: {
-        amount: 100,
+        amount: 1000,
         id: '894318943218943210',
         currency: 'usd',
         metadata: {
@@ -279,7 +279,7 @@ test('POST /user/purchase/webhook adds urbux to the user and stores currencyToUr
     object: 'event',
     data: {
       object: {
-        amount: 100,
+        amount: 1000,
         id: '894318943218943217',
         currency: 'usd',
         metadata: {
@@ -300,7 +300,7 @@ test('POST /user/purchase/webhook adds urbux to the user and stores currencyToUr
 
   t.is(status, StatusCodes.OK);
   t.is(newUser.id, user.id);
-  t.is(newUser.urbux, 100);
+  t.is(newUser.urbux, 1000);
   t.context.createdUsers.push(userCred);
 });
 
@@ -315,7 +315,7 @@ test('POST /user/purchase/webhook duplicate transactions (paymentIntent.id gets 
     object: 'event',
     data: {
       object: {
-        amount: 100,
+        amount: 1000,
         id: '894318943218943215',
         currency: 'usd',
         metadata: {
@@ -338,7 +338,7 @@ test('POST /user/purchase/webhook duplicate transactions (paymentIntent.id gets 
 
   t.true(responses.every(({ status }) => status === StatusCodes.OK));
   t.is(newUser.id, user.id);
-  t.is(newUser.urbux, 100);
+  t.is(newUser.urbux, 1000);
   t.context.createdUsers.push(userCred);
 });
 
@@ -353,7 +353,7 @@ test('POST /user/purchase/webhook with an unhandled event type is ignored and ju
     object: 'event',
     data: {
       object: {
-        amount: 100,
+        amount: 1000,
         id: '894318943218943218',
         currency: 'usd',
         metadata: {

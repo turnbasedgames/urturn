@@ -64,10 +64,10 @@ router.post('/create-payment-intent', expressUserAuthMiddleware, asyncHandler(as
     throw err;
   }
 
-  // We only allow increments of 100 urbux for now
-  if (!Object.values(USD_TO_URBUX).includes(amount)) {
+  const amounts = Object.values(USD_TO_URBUX);
+  if (!amounts.includes(amount)) {
     const err = new Error();
-    err.message = 'invalid request: only increments of 100 urbux are allowed.';
+    err.message = `invalid request: only increments of ${amounts.join()} urbux are allowed.`;
     err.status = StatusCodes.BAD_REQUEST;
     throw err;
   }
