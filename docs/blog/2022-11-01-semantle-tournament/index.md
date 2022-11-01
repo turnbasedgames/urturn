@@ -35,7 +35,6 @@ Entry is **Free.**
 
 - Team leader winner gets the only tournament winner discord role
 - Winners will get a special discord role
-- To limit liability we cannot offer cash prizes (we want to do this at some point in the future)
 
 #### Rules
 
