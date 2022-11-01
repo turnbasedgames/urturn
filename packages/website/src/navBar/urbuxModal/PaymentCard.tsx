@@ -6,7 +6,7 @@ import { createPaymentIntent } from '../../models/user';
 import logger from '../../logger';
 import CheckoutForm from './CheckoutForm';
 
-const URBUX_100_COST_USD_CENTS = 100;
+const URBUX_1000_COST_USD_CENTS = 1000;
 
 if (process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY == null) {
   throw new Error('REACT_APP_STRIPE_PUBLISHABLE_KEY env variable not set! This is needed to integrate with stripe.');
@@ -17,7 +17,7 @@ function PaymentCard(): React.ReactElement {
 
   useEffect(() => {
     // Create PaymentIntent as soon as the page loads
-    createPaymentIntent(URBUX_100_COST_USD_CENTS).then(setClientSecret).catch((err) => {
+    createPaymentIntent(URBUX_1000_COST_USD_CENTS).then(setClientSecret).catch((err) => {
       // main-178: display error messages when this fails
       logger.error(err);
     });
