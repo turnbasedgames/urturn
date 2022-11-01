@@ -9,12 +9,18 @@ function EndGame({ plrToSecretHash, curPlr }) {
     .filter((secretHash) => secretHash != null);
   return (
     <Stack>
-      <Typography variants="h5" color="text.primary">we keep secrets from each other but they somehow find a way to be revealed...</Typography>
-      {otherSecrets.map((secretHash) => (
-        <Typography color="secondary">
-          {Buffer.from(secretHash, 'base64').toString('ascii')}
-        </Typography>
-      ))}
+      {otherSecrets.length > 0
+        && (
+        <>
+          <Typography variants="h5" color="text.primary">we keep secrets from each other but they somehow find a way to be revealed...</Typography>
+          {otherSecrets.map((secretHash) => (
+            <Typography color="secondary">
+              {Buffer.from(secretHash, 'base64').toString('ascii')}
+            </Typography>
+          ))}
+
+        </>
+        )}
     </Stack>
   );
 }

@@ -1,5 +1,7 @@
 import { wordToVecRaw, wordToNearestRaw } from './words';
-import { getSimilarityScore, getNearestIndex, getNthNearest } from './utils';
+import {
+  getSimilarityScore, getNearestIndex, getNthNearest, MAX_SIMILARITY,
+} from './utils';
 
 function hashWord(secret) {
   return Buffer.from(secret).toString('base64');
@@ -26,6 +28,8 @@ const Status = Object.freeze({
 });
 const MAX_WORD_LENGTH = 6;
 const MAX_HINT_INDEX = 70;
+const CHOOSE_SECRET_TIMEOUT_MS = 30000; // 30 seconds
+const IN_GAME_TIMEOUT_MS = 300000; // 5 minutes
 
 function isValidWord(word) {
   return typeof word === 'string' && word.length <= MAX_WORD_LENGTH && hashToVec.has(hashWord(word));
@@ -46,6 +50,10 @@ function onRoomStart() {
       hintIndex: -1,
       status: Status.PreGame,
       winner: null,
+      // time set when second player joins and players begin choosing secrets
+      chooseSecretStartTime: null,
+      // time set when the actual in-game begins when both players provided valid secrets
+      guessStartTime: null,
     },
   };
 }
@@ -59,6 +67,7 @@ function onPlayerJoin(plr, boardGame) {
 
   // when the number of players is equal to 2, then we can start the game
   if (players.length === 2) {
+    state.chooseSecretStartTime = new Date().toISOString();
     // other players will be unable to join this room (UrTurn will handle this for us)
     return { state, joinable: false };
   }
@@ -66,9 +75,20 @@ function onPlayerJoin(plr, boardGame) {
 }
 
 function onPlayerMovePreGame(plr, move, boardGame) {
-  // TODO: add time control so player doesn't not pick word indefinitely
-  const { secret } = move;
+  const { secret, forceEndGame } = move;
   const { state, players } = boardGame;
+  if (forceEndGame) {
+    const timeoutMs = new Date(state.chooseSecretStartTime).getTime() + CHOOSE_SECRET_TIMEOUT_MS;
+    const nowMs = Date.now();
+    if (nowMs < timeoutMs) {
+      throw new Error('Player still has time left!');
+    }
+
+    const [winnerID] = Object.keys(state.plrToSecretHash);
+    state.winner = players.find((p) => p.id === winnerID);
+    state.status = Status.EndGame;
+    return { state, joinable: false, finished: true };
+  }
 
   // validate that the player has not already chosen a secret
   if (plr.id in state.plrToSecretHash) {
@@ -86,10 +106,9 @@ function onPlayerMovePreGame(plr, move, boardGame) {
   // modify the state accordingly so we know what each plr secret word is
   state.plrToSecretHash[plr.id] = hashWord(secret);
 
-  // if both players have chosen secrets then the games should start
-  // we also have to return the new state so UrTurn can update the boardGame
-  // and stream changes to our frontend client
+  // if both players have chosen secrets then the in game guessing phase should start
   if (players.every(({ id }) => id in state.plrToSecretHash) && players.length === 2) {
+    state.guessStartTime = new Date().toISOString();
     state.status = Status.InGame;
     return { state };
   }
@@ -127,15 +146,72 @@ function grantHint(state, players) {
   /* eslint-enable no-param-reassign */
 }
 
+function getScoreCard(guessToInfo) {
+  const initialScoreCard = [-1, -MAX_SIMILARITY - 1];
+  return Object.entries(guessToInfo)
+    .reduce(([curMaxIndex, curMaxSimilarity], [, { index, similarity }]) => {
+      if (index > curMaxIndex) {
+        return [index, similarity];
+      }
+      if (similarity > curMaxSimilarity) {
+        return [index, similarity];
+      }
+      return [curMaxIndex, curMaxSimilarity];
+    }, initialScoreCard);
+}
+
+function onInGameTimeout(boardGame, plr, otherPlr) {
+  const { state } = boardGame;
+  const timeoutMs = new Date(state.guessStartTime).getTime() + IN_GAME_TIMEOUT_MS;
+  const nowMs = Date.now();
+  if (nowMs < timeoutMs) {
+    throw new Error('Game still has time left!');
+  }
+
+  const plrScoreCard = getScoreCard(state.plrToGuessToInfo[plr.id]);
+  const otherPlrScoreCard = getScoreCard(state.plrToGuessToInfo[otherPlr.id]);
+
+  for (let i = 0; i < 2; i += 1) {
+    if (plrScoreCard[i] > otherPlrScoreCard[i]) {
+      state.winner = plr;
+      state.status = Status.EndGame;
+      return {
+        state,
+        finished: true,
+      };
+    }
+    if (plrScoreCard[i] < otherPlrScoreCard[i]) {
+      state.winner = otherPlr;
+      state.status = Status.EndGame;
+      return {
+        state,
+        finished: true,
+      };
+    }
+  }
+
+  // Score cards are identical, so it must be tie.
+  state.status = Status.EndGame;
+  return {
+    state,
+    finished: true,
+  };
+}
+
 function onPlayerMoveInGame(plr, move, boardGame) {
-  // TODO: implement time control limits
-  const { guess, hintRequest, acceptHint } = move;
+  const {
+    guess, hintRequest, acceptHint, forceEndGame,
+  } = move;
   const { players, state } = boardGame;
   const { plrToSecretHash } = state;
   const otherPlayer = players.find(({ id }) => id !== plr.id);
 
   if (otherPlayer == null) {
     throw new Error('This should be impossible. Contact Developers.');
+  }
+
+  if (forceEndGame != null) {
+    return onInGameTimeout(boardGame, plr, otherPlayer);
   }
 
   if (acceptHint != null) {
@@ -178,6 +254,7 @@ function onPlayerMoveInGame(plr, move, boardGame) {
   const guessHash = hashWord(guess);
   const otherPlayersSecretHash = plrToSecretHash[otherPlayer.id];
   const date = new Date();
+
   const guessInfo = state.plrToGuessToInfo[plr.id][guess] ?? { count: 0 };
   guessInfo.lastUpdateTime = date.toISOString();
   guessInfo.count += 1;

@@ -1,3 +1,6 @@
+// upscale by 100 so that similarities are between -100 and 100 instead of -1 and 1
+export const MAX_SIMILARITY = 100;
+
 export const getMagnitudeOfVector = (array) => Math.sqrt(
   array.reduce((sum, cur) => sum + (cur * cur), 0),
 );
@@ -12,13 +15,11 @@ export const getSimilarityScore = (hashToVec, hash1, hash2) => {
   }
   const mag1 = getMagnitudeOfVector(vec1);
   const mag2 = getMagnitudeOfVector(vec2);
-  // upscale by 100 so that similarities are between -100 and 100 instead of -1 and 1
-  const upscale = 100;
 
   // take the dot product of the unit vectors
   // this solves for the value of cos(theta) value in the dot product equation
   // cos(theta) = dot(vec1, vec2) * ||vec1||||vec2||
-  return upscale * vec1.reduce((sum, vec1Elem, ind) => {
+  return MAX_SIMILARITY * vec1.reduce((sum, vec1Elem, ind) => {
     const vec2Elem = vec2[ind];
     return sum + ((vec1Elem / mag1) * (vec2Elem / mag2));
   }, 0);

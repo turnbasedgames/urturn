@@ -5,12 +5,17 @@ export const getStatusMsg = ({
   status, winner, finished, players, curPlr, plrToSecretHash,
 }) => {
   if (finished) {
+    const playerWon = winner?.id === curPlr?.id;
+
+    const forcedEndGame = Object.keys(plrToSecretHash).length < 2;
+
     if (winner == null) {
-      return "It's a tie (This is super rare)!";
-    } if (winner?.id === curPlr?.id) {
-      return 'You Won!';
+      if (forcedEndGame) return 'Neither player entered a secret in time.';
+      return 'It\'s a tie (This is super rare)!';
+    } if (playerWon) {
+      return `You Won!${forcedEndGame ? ' The other player did not enter a secret in time.' : ''}`;
     }
-    return 'You lost';
+    return `You lost.${forcedEndGame ? ' You did not enter a secret in time.' : ''}`;
   }
   if (status === 'preGame') {
     if (players.length === 1) { return 'Waiting on another player to join...'; }

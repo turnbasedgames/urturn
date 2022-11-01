@@ -10,6 +10,10 @@ import PlayerList from './PlayerList';
 import ChooseSecret from './ChooseSecret';
 import InGame from './InGame';
 import EndGame from './EndGame';
+import Timer from './Timer';
+
+const CHOOSE_SECRET_TIMEOUT_MS = 30000; // 30 seconds
+const IN_GAME_TIMEOUT_MS = 300000; // 5 minutes
 
 // TODO: cool animated background with words bouncing around
 // TODO: add music playlist
@@ -45,8 +49,11 @@ function App() {
       hintIndex,
       status,
       winner,
+      chooseSecretStartTime,
+      guessStartTime,
     } = {},
   } = boardGame;
+
   const { players = [], finished } = boardGame;
   const dataLoading = boardGame == null || curPlr == null;
   const generalStatus = getStatusMsg({
@@ -68,8 +75,32 @@ function App() {
           <Typography variant="subtitle1" textAlign="center" color="text.primary">A UrTurn Classic</Typography>
         </Stack>
         )}
-        <Stack direction="column" sx={{ marginTop: 1 }}>
+        <Stack direction="column" sx={{ marginTop: 1 }} alignItems="center">
           <Typography textAlign="center" color="text.primary">{generalStatus}</Typography>
+          {status === 'preGame' && chooseSecretStartTime != null && (
+          <Timer
+            startTime={chooseSecretStartTime}
+            timeoutBufferMs={500}
+            timeoutMs={CHOOSE_SECRET_TIMEOUT_MS}
+            onTimeout={() => {
+              client.makeMove({ forceEndGame: true }).catch(console.error);
+            }}
+            prefix={(curPlr?.id in plrToSecretHash) ? 'Opponent has ' : 'You have '}
+            suffix=" seconds to set a secret..."
+          />
+          )}
+          {status === 'inGame' && (
+          <Timer
+            startTime={guessStartTime}
+            timeoutBufferMs={500}
+            timeoutMs={IN_GAME_TIMEOUT_MS}
+            onTimeout={() => {
+              client.makeMove({ forceEndGame: true }).catch(console.error);
+            }}
+            prefix=""
+            suffix=""
+          />
+          )}
           {dataLoading ? <LinearProgress />
             : (
               <Stack margin={2} spacing={1} direction="row" justifyContent="center">
@@ -83,16 +114,16 @@ function App() {
                   </>
                 )}
                 {status === 'inGame' && (
-                  <InGame
-                    players={players}
-                    curPlr={curPlr}
-                    plrToSecretHash={plrToSecretHash}
-                    plrToGuessToInfo={plrToGuessToInfo}
-                    setRecentErrorMsg={setRecentErrorMsg}
-                    plrToHintRequest={plrToHintRequest}
-                    plrToRejectHintResponse={plrToRejectHintResponse}
-                    hintIndex={hintIndex}
-                  />
+                <InGame
+                  players={players}
+                  curPlr={curPlr}
+                  plrToSecretHash={plrToSecretHash}
+                  plrToGuessToInfo={plrToGuessToInfo}
+                  setRecentErrorMsg={setRecentErrorMsg}
+                  plrToHintRequest={plrToHintRequest}
+                  plrToRejectHintResponse={plrToRejectHintResponse}
+                  hintIndex={hintIndex}
+                />
                 )}
                 {status === 'endGame' && (<EndGame curPlr={curPlr} plrToSecretHash={plrToSecretHash} />)}
               </Stack>
