@@ -16,9 +16,6 @@ jobs:
           npx lerna bootstrap
       - name: build @urturn/docs
         run: npx lerna run build --scope=@urturn/docs
-      - name: deploy to github pages
-        run: |
-          npx lerna run deploy --scope=@urturn/docs
       - name: Deploy UrTurn Docs 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
