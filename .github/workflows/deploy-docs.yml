@@ -1,0 +1,25 @@
+name: Deploy UrTurn Documentation To Production
+'on':
+  push:
+    branches:
+      - main
+jobs:
+  build_and_preview:
+    if: '${{ github.event.pull_request.head.repo.full_name == github.repository }}'
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - uses: actions/checkout@v2
+      - name: install and setup the monorepo dependencies
+        run: |
+          npm ci
+          npx lerna bootstrap
+      - name: build @urturn/docs
+        run: npx lerna run build --scope=@urturn/docs
+      - name: deploy to github pages
+        run: |
+          npx lerna run deploy --scope=@urturn/docs
+      - name: Deploy UrTurn Docs 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: docs/build
