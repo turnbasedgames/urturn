@@ -17,5 +17,5 @@ jobs:
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DOCS }}'
-          projectId: board-games-dev
+          projectId: board-games-dev-e8c04
           entryPoint: docs
