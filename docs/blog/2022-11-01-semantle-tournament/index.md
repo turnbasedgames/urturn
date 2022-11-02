@@ -1,14 +1,15 @@
 ---
 slug: Semantle Battle Tournament
 title: Semantle Battle Tournament (11/5/2022)
-authors: [kevo1ution, sarahannali, yquansah]
+authors: [sarahannali, kevo1ution, yquansah]
 tags: [semantle-battle, semantle, tournament, game]
 ---
 
+![](https://visitor-badge.glitch.me/badge?page_id=semantle-battle-tournament-11-5-2022)
 ### What
 
 - Semantle Battle is a spin off of the original semantle game where two players pick secrets for one another to guess. The player who guesses the secret first wins.
-- Play a it with a friend [here](https://www.urturn.app/games/63474d0012b461000e15dc96) to prepare before the tournament.
+- Play it with a friend [here](https://www.urturn.app/games/63474d0012b461000e15dc96) to prepare before the tournament.
 
 ### When
 
@@ -26,8 +27,8 @@ Entry is **Free**.
 #### Tournament Structure
 
 - We will auto generate a random bracket with every player that RSVPs in the [Discord](https://discord.gg/myWacjdb5S).
-- All games will be live streamed (each player will share their screen in two separate channels).
-- Each player starts out on their own and are their own **team leader** (each team will have 1 player at the first round).
+- All games will be screen shared (each player will share their screen in two separate channels) to ensure no cheating.
+- Each player starts out on their own and are their own **team leader** (i.e. each team will have 1 player at the first round).
 - When a team wins, the two teams combine and the new team leader is the **team leader of the winning team**. Eventually the last Semantle Battle will be between two large teams.
 - Only the team leader can type in guesses. Teams will not have access to the other teams voice chat/text channel.
 
