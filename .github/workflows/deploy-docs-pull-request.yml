@@ -1,0 +1,21 @@
+name: Deploy UrTurn Documentation
+'on': pull_request
+jobs:
+  build_and_preview:
+    if: '${{ github.event.pull_request.head.repo.full_name == github.repository }}'
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - uses: actions/checkout@v2
+      - name: install and setup the monorepo dependencies
+        run: |
+          npm ci
+          npx lerna bootstrap
+      - name: build @urturn/docs
+        run: npx lerna run build --scope=@urturn/docs
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DOCS }}'
+          projectId: board-games-io
+          entryPoint: docs
