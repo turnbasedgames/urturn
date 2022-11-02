@@ -4,8 +4,7 @@ name: Deploy UrTurn Documentation To Production
     branches:
       - main
 jobs:
-  build_and_preview:
-    if: '${{ github.event.pull_request.head.repo.full_name == github.repository }}'
+  build_and_deploy:
     runs-on: ubuntu-latest
     environment: development
     steps:
