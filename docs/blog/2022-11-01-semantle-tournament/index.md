@@ -34,8 +34,8 @@ Entry is **Free**.
 
 #### Prizes
 
-- Team leader winner gets the only tournament winner discord role.
-- Winners will get a special discord role.
+- Team leader of last team standing gets the only ultimate tournament winner discord role.
+- Players on the winning team will get a tournament winner discord role.
 
 #### Rules
 
