@@ -2,7 +2,7 @@ const MAX_WORD_LENGTH = 6;
 const NEAREST_WORDS_COUNT = 100;
 
 export const getStatusMsg = ({
-  status, winner, finished, players, curPlr, plrToSecretHash,
+  status, winner, finished, players, curPlr, plrToSecretHash, spectator,
 }) => {
   if (finished) {
     const playerWon = winner?.id === curPlr?.id;
@@ -12,18 +12,28 @@ export const getStatusMsg = ({
     if (winner == null) {
       if (forcedEndGame) return 'Neither player entered a secret in time.';
       return 'It\'s a tie (This is super rare)!';
-    } if (playerWon) {
+    }
+    if (playerWon) {
       return `You Won!${forcedEndGame ? ' The other player did not enter a secret in time.' : ''}`;
+    }
+    if (spectator) {
+      return `${winner.username} won the game!`;
     }
     return `You lost.${forcedEndGame ? ' You did not enter a secret in time.' : ''}`;
   }
   if (status === 'preGame') {
+    if (spectator) {
+      return 'Waiting on players to choose their secret...';
+    }
     if (players.length === 1) { return 'Waiting on another player to join...'; }
     if (!(curPlr?.id in plrToSecretHash)) {
       return 'Choose a secret word for the other player to guess (max 6 letters)';
     }
     return 'Waiting on other player to choose their secret word...';
   } if (status === 'inGame') {
+    if (spectator) {
+      return 'There goes them words, clashing, banging; who will get to the secret first?';
+    }
     return 'Just keep guessing🎵 just keep guessing🎵...';
   }
   return 'Error: You should never see this. Contact developers!';

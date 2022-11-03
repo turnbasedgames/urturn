@@ -11,8 +11,28 @@ import {
 
 function InGame({
   players, curPlr, setRecentErrorMsg, plrToSecretHash, plrToGuessToInfo, plrToHintRequest,
-  plrToRejectHintResponse, hintIndex,
+  plrToRejectHintResponse, hintIndex, spectator,
 }) {
+  if (spectator) {
+    return (
+      <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
+        {players.map(({ id, username }) => (
+          <Stack direction="column" sx={{ display: { xs: 'none', sm: 'flex' } }}>
+            <Toolbar>
+              <Typography color="text.primary">
+                {`${username} Guesses`}
+              </Typography>
+            </Toolbar>
+            <GuessesTable
+              dense
+              guessesData={plrToGuessToInfo[id]}
+            />
+          </Stack>
+        ))}
+      </Stack>
+    );
+  }
+
   const guessToInfo = plrToGuessToInfo[curPlr.id];
   const secret = Buffer.from(plrToSecretHash[curPlr.id], 'base64').toString('ascii');
   const guessesData = getGuessesData(guessToInfo);
@@ -22,7 +42,7 @@ function InGame({
   const otherGuessesData = getGuessesData(otherGuessToInfo);
 
   return (
-    <Stack direction="row" spacing={2}>
+    <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
       <Stack direction="column" sx={{ display: { xs: 'none', sm: 'flex' } }}>
         <Toolbar>
           <Typography color="text.primary">
@@ -72,6 +92,7 @@ InGame.propTypes = {
     lastUpdateTime: PropTypes.string,
     count: PropTypes.number,
   }))).isRequired,
+  spectator: PropTypes.bool.isRequired,
 };
 
 export default InGame;

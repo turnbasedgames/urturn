@@ -15,8 +15,6 @@ import Timer from './Timer';
 const CHOOSE_SECRET_TIMEOUT_MS = 30000; // 30 seconds
 const IN_GAME_TIMEOUT_MS = 300000; // 5 minutes
 
-// TODO: cool animated background with words bouncing around
-// TODO: add music playlist
 function App() {
   const [boardGame, setBoardGame] = useState(client.getBoardGame() || {});
   useEffect(() => {
@@ -56,8 +54,9 @@ function App() {
 
   const { players = [], finished } = boardGame;
   const dataLoading = boardGame == null || curPlr == null;
+  const spectator = !players.some(({ id }) => id === curPlr?.id);
   const generalStatus = getStatusMsg({
-    status, winner, finished, curPlr, players, plrToSecretHash,
+    status, winner, finished, curPlr, players, plrToSecretHash, spectator,
   });
   const plrToStatus = players.reduce((prev, cur) => {
     if (status === 'preGame' && plrToSecretHash[cur.id] != null) {
@@ -68,7 +67,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Stack height="100vh" spacing={1} justifyContent={status === 'inGame' ? 'start' : 'space-around'}>
+      <Stack height="100vh" spacing={1} justifyContent="space-around">
         {status !== 'inGame' && (
         <Stack>
           <Typography variant="h3" textAlign="center" color="text.primary">Semantle Battle</Typography>
@@ -77,39 +76,41 @@ function App() {
         )}
         <Stack direction="column" sx={{ marginTop: 1 }} alignItems="center">
           <Typography textAlign="center" color="text.primary">{generalStatus}</Typography>
-          {status === 'preGame' && chooseSecretStartTime != null && (
+          {status === 'preGame' && !spectator && chooseSecretStartTime != null && (
           <Timer
             startTime={chooseSecretStartTime}
             timeoutBufferMs={500}
             timeoutMs={CHOOSE_SECRET_TIMEOUT_MS}
             onTimeout={() => {
-              client.makeMove({ forceEndGame: true }).catch(console.error);
+              client.makeMove({ forceEndGame: true }).catch(console.log);
             }}
             prefix={(curPlr?.id in plrToSecretHash) ? 'Opponent has ' : 'You have '}
             suffix=" seconds to set a secret..."
           />
           )}
-          {status === 'inGame' && (
-          <Timer
-            startTime={guessStartTime}
-            timeoutBufferMs={500}
-            timeoutMs={IN_GAME_TIMEOUT_MS}
-            onTimeout={() => {
-              client.makeMove({ forceEndGame: true }).catch(console.error);
-            }}
-            prefix=""
-            suffix=""
-          />
+          {status === 'inGame' && !spectator && (
+            <Timer
+              startTime={guessStartTime}
+              timeoutBufferMs={500}
+              timeoutMs={IN_GAME_TIMEOUT_MS}
+              onTimeout={() => {
+                client.makeMove({ forceEndGame: true }).catch(console.log);
+              }}
+              prefix=""
+              suffix=""
+            />
           )}
           {dataLoading ? <LinearProgress />
             : (
               <Stack margin={2} spacing={1} direction="row" justifyContent="center">
-                {status === 'preGame' && !(curPlr?.id in plrToSecretHash)
+                {status === 'preGame' && (spectator || !(curPlr?.id in plrToSecretHash))
                 && (
                   <>
+                    {!spectator && (
                     <ChooseSecret
                       setRecentErrorMsg={setRecentErrorMsg}
                     />
+                    )}
                     <PlayerList players={players} plrToStatus={plrToStatus} />
                   </>
                 )}
@@ -117,6 +118,7 @@ function App() {
                 <InGame
                   players={players}
                   curPlr={curPlr}
+                  spectator={spectator}
                   plrToSecretHash={plrToSecretHash}
                   plrToGuessToInfo={plrToGuessToInfo}
                   setRecentErrorMsg={setRecentErrorMsg}
@@ -125,16 +127,14 @@ function App() {
                   hintIndex={hintIndex}
                 />
                 )}
-                {status === 'endGame' && (<EndGame curPlr={curPlr} plrToSecretHash={plrToSecretHash} />)}
+                {status === 'endGame' && (<EndGame plrToSecretHash={plrToSecretHash} />)}
               </Stack>
             )}
         </Stack>
-        <Stack direction="row">
-          {/* TODO: put about and other links
-          1. how to make a game like this (blog link)
-          2. about UrTurn
-          3. kevin.tang = kevintang.info
-          */}
+        <Stack direction="row" justifyContent="center">
+          <Typography variant="subtitle2" color="text.secondary">
+            Made with ❤️ by Kevin, Sarah, Yoofi
+          </Typography>
         </Stack>
       </Stack>
       <Snackbar
