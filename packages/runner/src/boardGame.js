@@ -66,7 +66,8 @@ export function newBoardGame(backendModule) {
 export function getPlayerById(id, boardGame) {
   // Use a new object value so developers do not try to do plr === boardGame.players[x]
   // Rather developers should be comparing the player ids instead
-  return { ...boardGame.players.find((plr) => plr.id === id) };
+  const plrRes = boardGame.players.find((plr) => plr.id === id);
+  return plrRes == null ? undefined : { ...plrRes };
 }
 
 export function removePlayerById(id, boardGame) {

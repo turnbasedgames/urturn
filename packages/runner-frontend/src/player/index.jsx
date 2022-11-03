@@ -8,7 +8,7 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 import { RoomPlayer } from '@urturn/ui-common';
 import {
-  getPlayerInGameById, makeMove, getBaseUrl, removePlayer,
+  getPlayerInGameById, makeMove, getBaseUrl, removePlayer, SPECTATOR_USER,
 } from '../data';
 
 function Player() {
@@ -42,7 +42,7 @@ function Player() {
     const handleNewBoardGame = (boardGame) => {
       // we should close the tab when the player is no longer in the game
       // this happens usually when the backend is hot reloaded and the state is reset
-      if (!boardGame.players.some((p) => p.id === playerId)) {
+      if (playerId !== SPECTATOR_USER.id && !boardGame.players.some((p) => p.id === playerId)) {
         window.close();
       }
       childClient.stateChanged(boardGame);
@@ -70,7 +70,13 @@ function Player() {
         await makeMove(player, move);
       }}
       quitRoom={async () => {
-        await removePlayer(player);
+        if (player.id === SPECTATOR_USER.id) {
+          // Just close the tab if spectator; don't attempt to removePlayer from room because
+          // the spectator) is not actually in the room.
+          window.close();
+        } else {
+          await removePlayer(player);
+        }
       }}
     />
   );

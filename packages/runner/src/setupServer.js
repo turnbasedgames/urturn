@@ -11,6 +11,7 @@ import {
 } from './boardGame.js';
 import requireUtil from './requireUtil.cjs';
 
+const spectatorId = 'spectator';
 const backendHotReloadIntervalMs = 100;
 
 const getLatestBackendModule = async (backendPath) => {
