@@ -28,9 +28,14 @@ export const makeMove = async (player, move) => axios.post(`${await getBaseUrl()
 
 export const refreshState = async () => axios.put(`${await getBaseUrl()}/state/refresh`);
 
+export const SPECTATOR_USER = { id: 'spectator1', username: 'billywatchesyou' };
+
 export const removePlayer = async (player) => axios.delete(`${await getBaseUrl()}/player/${player.id}`);
 
 export const getPlayerInGameById = async (plrId) => {
+  if (plrId === SPECTATOR_USER.id) {
+    return SPECTATOR_USER;
+  }
   const { players } = await getState();
   return players.find((somePlr) => somePlr.id === plrId);
 };

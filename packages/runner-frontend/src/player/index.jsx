@@ -8,12 +8,12 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 import { RoomPlayer } from '@urturn/ui-common';
 import {
-  getPlayerInGameById, makeMove, getBaseUrl, removePlayer,
+  getPlayerInGameById, makeMove, getBaseUrl, removePlayer, SPECTATOR_USER,
 } from '../data';
 
 function Player() {
   const { playerId } = useParams();
-
+  const [boardGame, setBoardGame] = useState();
   const [player, setPlayer] = useState();
   useEffect(() => {
     const setupPlayer = async (id) => {
@@ -39,13 +39,14 @@ function Player() {
       return () => {};
     }
 
-    const handleNewBoardGame = (boardGame) => {
-      // we should close the tab when the player is no longer in the game
+    const handleNewBoardGame = (newBoardGame) => {
+      // we should close the tab when a non spectator player is no longer in the game
       // this happens usually when the backend is hot reloaded and the state is reset
-      if (!boardGame.players.some((p) => p.id === playerId)) {
+      if (playerId !== SPECTATOR_USER.id && !newBoardGame.players.some((p) => p.id === playerId)) {
         window.close();
       }
-      childClient.stateChanged(boardGame);
+      childClient.stateChanged(newBoardGame);
+      setBoardGame(newBoardGame);
     };
     const socket = io(await getBaseUrl());
     socket.on('stateChanged', handleNewBoardGame);
@@ -70,7 +71,13 @@ function Player() {
         await makeMove(player, move);
       }}
       quitRoom={async () => {
-        await removePlayer(player);
+        const noOp = boardGame == null
+        || boardGame.finished
+        || boardGame.players.every(({ id }) => id !== player.id);
+        if (!noOp) {
+          await removePlayer(player);
+        }
+        window.close();
       }}
     />
   );
