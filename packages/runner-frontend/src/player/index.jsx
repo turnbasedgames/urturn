@@ -13,7 +13,7 @@ import {
 
 function Player() {
   const { playerId } = useParams();
-
+  const [boardGame, setBoardGame] = useState();
   const [player, setPlayer] = useState();
   useEffect(() => {
     const setupPlayer = async (id) => {
@@ -39,13 +39,14 @@ function Player() {
       return () => {};
     }
 
-    const handleNewBoardGame = (boardGame) => {
-      // we should close the tab when the player is no longer in the game
+    const handleNewBoardGame = (newBoardGame) => {
+      // we should close the tab when a non spectator player is no longer in the game
       // this happens usually when the backend is hot reloaded and the state is reset
-      if (playerId !== SPECTATOR_USER.id && !boardGame.players.some((p) => p.id === playerId)) {
+      if (playerId !== SPECTATOR_USER.id && !newBoardGame.players.some((p) => p.id === playerId)) {
         window.close();
       }
-      childClient.stateChanged(boardGame);
+      childClient.stateChanged(newBoardGame);
+      setBoardGame(newBoardGame);
     };
     const socket = io(await getBaseUrl());
     socket.on('stateChanged', handleNewBoardGame);
@@ -70,13 +71,13 @@ function Player() {
         await makeMove(player, move);
       }}
       quitRoom={async () => {
-        if (player.id === SPECTATOR_USER.id) {
-          // Just close the tab if spectator; don't attempt to removePlayer from room because
-          // the spectator) is not actually in the room.
-          window.close();
-        } else {
+        const noOp = boardGame == null
+        || boardGame.finished
+        || boardGame.players.every(({ id }) => id !== player.id);
+        if (!noOp) {
           await removePlayer(player);
         }
+        window.close();
       }}
     />
   );
