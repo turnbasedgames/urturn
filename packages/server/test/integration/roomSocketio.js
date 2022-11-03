@@ -659,11 +659,11 @@ socketConfigs.forEach(({ name, config }) => {
     t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
     t.is(roomRightAfterDisconnectTimeout.id, room.id);
     t.is(roomRightAfterDisconnectTimeout.latestState.version, room.latestState.version + 1);
-    t.is(roomRightAfterDisconnectTimeout.players.length, 0);
+    t.is(roomRightAfterDisconnectTimeout.players.length, 1);
     await assertNextLatestState(t, userTwoSocket, {
       finished: true,
       joinable: false,
-      players: [],
+      players: room.players.filter(({ id }) => userOne.id !== id),
       version: room.latestState.version + 1,
       state: {
         board: [[null, null, null], [null, null, null], [null, null, null]],

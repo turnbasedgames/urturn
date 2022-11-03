@@ -587,8 +587,8 @@ test('POST /room/:id/quit user is no longer in the room, and is in inactivePlaye
   t.is(joinable, false);
   t.is(finished, true);
   t.deepEqual(winner, getPublicUserFromUser(userTwo));
-  t.deepEqual(players, []);
-  t.deepEqual(inactivePlayers, [userOne, userTwo].map(getPublicUserFromUser));
+  t.deepEqual(players, [userTwo].map(getPublicUserFromUser));
+  t.deepEqual(inactivePlayers, [userOne].map(getPublicUserFromUser));
   t.deepEqual([
     [null, null, null],
     [null, null, null],

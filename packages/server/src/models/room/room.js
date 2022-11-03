@@ -89,11 +89,7 @@ RoomSchema.method('applyCreatorRoomState', function applyCreatorRoomState(creato
   this.applyCreatorData(creatorRoomState);
   if (creatorRoomState.finished) {
     this.joinable = false;
-    this.inactivePlayers = Array.from(new Set([...this.inactivePlayers, ...this.players]));
-    this.players = [];
     this.markModified('joinable');
-    this.markModified('players');
-    this.markModified('inactivePlayers');
   }
   this.latestState = newRoomStateId;
   this.markModified('latestState');
