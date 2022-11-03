@@ -3,13 +3,14 @@ import {
   AppBar, Toolbar, Typography, Stack, Button, IconButton,
   Paper, MenuItem, MenuList, LinearProgress, Snackbar, Alert, Fade,
 } from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import ArticleIcon from '@mui/icons-material/Article';
 import ClearIcon from '@mui/icons-material/Clear';
 import ReactJson from 'react-json-view';
 import Editor from '@monaco-editor/react';
 import axios from 'axios';
 import {
-  addPlayer, removePlayer, useGameState,
+  addPlayer, removePlayer, SPECTATOR_USER, useGameState,
 } from '../data';
 
 function GameManager() {
@@ -167,41 +168,55 @@ function GameManager() {
           }}
           >
             <Stack>
-              <Stack spacing={2} direction="row" justifyContent="space-between" alignItems="center">
+              <Stack alignItems="center">
                 <Typography color="text.primary" sx={{ fontWeight: 'bold' }}>
                   {playerTitle}
                 </Typography>
-              </Stack>
-              <MenuList
-                id="basic-menu"
-                open
-                variant="selectedMenu"
-              >
-                {players.map((player) => (
+                <MenuList
+                  id="basic-menu"
+                  open
+                  variant="selectedMenu"
+                >
+                  {players.map((player) => (
+                    <MenuItem
+                      key={player.id}
+                      onClick={() => {
+                        openPlayerTab(player);
+                      }}
+                    >
+                      <Typography
+                        color="text.primary"
+                      >
+                        {player.username}
+                      </Typography>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          await removePlayer(player);
+                        }}
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    </MenuItem>
+                  ))}
                   <MenuItem
-                    key={player.id}
+                    key={SPECTATOR_USER.id}
                     onClick={() => {
-                      openPlayerTab(player);
+                      openPlayerTab(SPECTATOR_USER);
                     }}
                   >
                     <Typography
                       color="text.primary"
+                      marginRight={1}
                     >
-                      {player.username}
+                      Spectate
                     </Typography>
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        await removePlayer(player);
-                      }}
-                    >
-                      <ClearIcon />
-                    </IconButton>
+                    <VisibilityIcon />
                   </MenuItem>
-                ))}
-              </MenuList>
+                </MenuList>
+              </Stack>
             </Stack>
           </Paper>
         </Stack>
