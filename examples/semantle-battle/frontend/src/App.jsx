@@ -8,8 +8,8 @@ import theme from './theme';
 import { getStatusMsg } from './utils';
 import PlayerList from './PlayerList';
 import ChooseSecret from './ChooseSecret';
-import InGame from './InGame';
-import EndGame from './EndGame';
+import InGame from './views/InGame';
+import EndGame from './views/EndGame';
 import Timer from './Timer';
 
 const CHOOSE_SECRET_TIMEOUT_MS = 30000; // 30 seconds
@@ -74,7 +74,7 @@ function App() {
           <Typography variant="subtitle1" textAlign="center" color="text.primary">A UrTurn Classic</Typography>
         </Stack>
         )}
-        <Stack direction="column" sx={{ marginTop: 1 }} alignItems="center">
+        <Stack direction="column" sx={{ marginTop: 1, flexGrow: status === 'inGame' && 1 }} alignItems="center">
           <Typography textAlign="center" color="text.primary">{generalStatus}</Typography>
           {status === 'preGame' && !spectator && chooseSecretStartTime != null && (
           <Timer

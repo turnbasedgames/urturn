@@ -2,12 +2,12 @@ import { Buffer } from 'buffer';
 import React from 'react';
 import { Stack, Typography, Toolbar } from '@mui/material';
 import PropTypes from 'prop-types';
-import SubmitWord from './SubmitWord';
-import GuessesTable from './GuessesTable';
+import SubmitWord from '../SubmitWord';
+import GuessesTable from '../GuessesTable';
 import InGameMenu from './InGameMenu';
 import {
   getGuessesData, getOtherPlayer,
-} from './utils';
+} from '../utils';
 
 function InGame({
   players, curPlr, setRecentErrorMsg, plrToSecretHash, plrToGuessToInfo, plrToHintRequest,
@@ -16,8 +16,8 @@ function InGame({
   if (spectator) {
     return (
       <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
-        {players.map(({ id, username }) => (
-          <Stack direction="column" sx={{ display: { xs: 'none', sm: 'flex' } }}>
+        {players?.map(({ id, username }) => (
+          <Stack key={id} direction="column" sx={{ display: { xs: 'none', sm: 'flex' } }}>
             <Toolbar>
               <Typography color="text.primary">
                 {`${username} Guesses`}
@@ -25,7 +25,7 @@ function InGame({
             </Toolbar>
             <GuessesTable
               dense
-              guessesData={plrToGuessToInfo[id]}
+              guessesData={getGuessesData(plrToGuessToInfo[id])}
             />
           </Stack>
         ))}

@@ -12,7 +12,7 @@ function EndGame({ plrToSecretHash }) {
         <>
           <Typography variants="h5" color="text.primary">we keep secrets from each other but they somehow find a way to be revealed...</Typography>
           {otherSecrets.map(([plrId, secretHash]) => (
-            <Typography color="secondary">
+            <Typography key={plrId} color="secondary">
               {`${plrId} => ${Buffer.from(secretHash, 'base64').toString('ascii')}`}
             </Typography>
           ))}
