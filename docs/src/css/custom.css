@@ -75,3 +75,23 @@ html[data-theme='dark'] .header-discord-link:before {
     no-repeat;
   background-size: 100% 100%;
 }
+
+.hero__hard-title {
+  display: inline;
+  font-size: 4rem;
+  background-image: linear-gradient(0.25turn, #dc7ec3, #9500ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero__title {
+  display: inline;
+  color: black;
+  font-size: 4rem;
+}
+
+html[data-theme='dark'] .hero__title {
+  display: inline;
+  color: white;
+  font-size: 4rem;
+}

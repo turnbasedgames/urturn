@@ -6,14 +6,13 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'UrTurn',
-  tagline: 'Quickly build multiplayer games - only four functions!',
+  title: 'Create web games faster than ever',
+  tagline: "Continue to use your favorite game frameworks, while leveraging all of UrTurn's open source infrastructure from a simple client.",
   url: 'https://docs.urturn.app',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-  // favicon: 'img/favicon.ico', TODO: replace with turn based games logo
-  organizationName: 'turnbasedgames',
+  organizationName: 'urturn',
   projectName: 'urturn',
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
@@ -112,7 +111,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Turn Based Games Inc.`,
+        copyright: `Copyright © ${new Date().getFullYear()} UrTurn Inc.`,
       },
       prism: {
         theme: lightCodeTheme,
