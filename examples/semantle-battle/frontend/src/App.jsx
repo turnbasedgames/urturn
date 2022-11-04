@@ -67,14 +67,14 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Stack height="100vh" spacing={1} justifyContent="space-around">
+      <Stack height="100%" spacing={1} justifyContent="flex-start">
         {status !== 'inGame' && (
-        <Stack>
+        <Stack margin={5}>
           <Typography variant="h3" textAlign="center" color="text.primary">Semantle Battle</Typography>
           <Typography variant="subtitle1" textAlign="center" color="text.primary">A UrTurn Classic</Typography>
         </Stack>
         )}
-        <Stack direction="column" sx={{ marginTop: 1, flexGrow: status === 'inGame' && 1 }} alignItems="center">
+        <Stack direction="column" sx={{ marginTop: 1, flexGrow: 1 }} alignItems="center">
           <Typography textAlign="center" color="text.primary">{generalStatus}</Typography>
           {status === 'preGame' && !spectator && chooseSecretStartTime != null && (
           <Timer
@@ -131,7 +131,14 @@ function App() {
               </Stack>
             )}
         </Stack>
-        <Stack direction="row" justifyContent="center">
+        <Stack
+          sx={{
+            position: 'fixed',
+            width: '100%',
+          }}
+          direction="row"
+          justifyContent="center"
+        >
           <Typography variant="subtitle2" color="text.secondary">
             Made with ❤️ by Kevin, Sarah, Yoofi
           </Typography>
