@@ -32,8 +32,8 @@
 
 .svg-thumbnail {
   margin-top: 2rem;
-  max-height: 46.82%;
-  max-width: 50%;
+  max-height: 400px;
+  max-width: 80%;
 }
 
 .badge {

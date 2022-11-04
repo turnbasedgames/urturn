@@ -38,11 +38,11 @@ const ExampleGameList = [
 ];
 
 const FeatureList = [
-  // TODO: we should link these cards to various concept pages
   {
     title: 'Multiplayer',
     description: "Just write the code for how you want the state to change, and that's it. Room state transitions occur on the order of milliseconds with networking and matchmaking already built in.",
-    svgComponent: <Multiplayer className={styles['svg-thumbnail']} />
+    svgComponent: <Multiplayer className={styles['svg-thumbnail']} />,
+    learnMore: true
   },
   {
     title: 'Scale',
@@ -93,12 +93,12 @@ export default function ShowCase() {
         <h1 className={styles['title-alt']}>Blazingly Fast Architecture</h1>
         <p className='hero__subtitle'>We are obsessed over the game developer experience. Here's what you can do with UrTurn.</p>
         <Grid2 container spacing={2} margin={2}>
-          {FeatureList.map(({ subtitle, title, description, svgComponent }, index) => (
+          {FeatureList.map(({ subtitle, title, description, svgComponent, learnMore }, index) => (
             <Grid2 xs={12} sm={6} lg={4} key={index}>
               <Stack
                 width="100%"
                 alignItems="center"
-                maxHeight="300px"
+                maxHeight="400px"
                 margin={1}
               >
                 <div className={clsx("card", styles.card)}>
@@ -107,6 +107,9 @@ export default function ShowCase() {
                     <p className={styles['card-title']}>{description}</p>
                   </div>
                   {svgComponent}
+                  {learnMore && <div class="card__footer">
+                    <a href="/docs/" class="button button--secondary button--block">Learn More</a>
+                  </div>}
                 </div>
               </Stack>
             </Grid2>
