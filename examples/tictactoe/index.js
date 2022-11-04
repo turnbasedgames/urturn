@@ -131,7 +131,7 @@ function onPlayerMove(player, move, boardGame) {
     throw new Error(`Invalid move, someone already marked here: ${x},${y}`);
   }
 
-  const plrMark = player.id === players[0] ? 'X' : 'O';
+  const plrMark = player.id === players[0].id ? 'X' : 'O';
   board[x][y] = plrMark;
 
   // Check if game is over
