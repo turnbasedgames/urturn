@@ -17,7 +17,7 @@ const sidebars = {
     {
       type: 'category',
       label: 'Introduction',
-      link:{type: 'doc', id: 'Introduction/Introduction'},
+      link: { type: 'doc', id: 'Introduction/Introduction' },
       items: [
         'Introduction/Flow-Of-Simple-Game',
         'Introduction/Concepts'
@@ -46,6 +46,7 @@ const sidebars = {
       },
       items: [
         'API/backend',
+        'API/client',
       ],
     },
   ],

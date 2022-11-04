@@ -36,7 +36,7 @@ Common mistake is to forget returning the [`roomStateResult`](#roomstateresult).
 3. `Isolated`: you are guaranteed that operations on a roomState for a given room are handled one by one. No two operations can corrupt each other.
 4. `Durable`: successful roomState operations are guaranteed to survive system failure. Even if UrTurn goes down, or has partial outages, your data for each room should survive.
 
-### onRoomStart
+### `onRoomStart` **Required**
 
 ```ts
 onRoomStart = () => RoomStateResult
@@ -49,7 +49,7 @@ onRoomStart = () => RoomStateResult
 - Operation fails on error (when user clicks play or attempts start a game, it will show them an error and will not start the game). This should never error, but the operation is not forced because it may start your game in a corrupt state.
 - `Returns` the [RoomStateResult](#roomstateresult).
 
-### onPlayerJoin
+### `onPlayerJoin` **Required**
 
 ```ts
 onPlayerJoin = (player: Player, roomState: RoomState) => RoomStateResult
@@ -60,7 +60,7 @@ onPlayerJoin = (player: Player, roomState: RoomState) => RoomStateResult
 - If `roomState.joinable` or `roomState.finished` is `true` then it is **guaranteed** that no player will be added to the room and `onPlayerJoin` will never be called for a player.
 - `Returns` the [RoomStateResult](#roomstateresult).
 
-### onPlayerQuit
+### `onPlayerQuit` **Required**
 
 ```ts
 onPlayerQuit = (player: Player, roomState: RoomState) => RoomStateResult
@@ -79,7 +79,7 @@ This may put the `roomState` for the room in a corrupt state depending on your c
 
 :::
 
-### onPlayerMove
+### `onPlayerMove` **Required**
 
 ```ts
 onPlayerMove = (player: Player, move: Move, roomState: RoomState) => RoomStateResult
