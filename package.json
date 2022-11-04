@@ -6,6 +6,8 @@
   },
   "workspaces": [
     "packages/*",
+    "examples/*",
+    "examples/*/frontend",
     "docs"
   ],
   "devDependencies": {

@@ -13,9 +13,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'npm'
       - name: install and setup the monorepo dependencies
         run: |
           npm ci
@@ -26,5 +27,3 @@ jobs:
         run: ./bin/every-package-json.sh '.scripts."lint:fix" != null'
       - name: checking if packages are formatted properly (lint)
         run: npx lerna run lint
-      - name: checking if packages can be auto formatted (lint:fix)
-        run: npx lerna run lint:fix
