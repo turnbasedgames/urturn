@@ -49,12 +49,12 @@ const config = {
         title: 'UrTurn',
         logo: {
           alt: 'UrTurn',
-          src: 'img/logo.svg', // TODO: need to change logo
+          src: 'img/logo.svg',
         },
         items: [
           {
             type: 'doc',
-            docId: 'getting-started/introduction',
+            docId: 'Getting-Started/introduction',
             position: 'left',
             label: 'Docs',
           },

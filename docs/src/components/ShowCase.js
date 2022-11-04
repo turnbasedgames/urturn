@@ -41,7 +41,7 @@ const FeatureList = [
   // TODO: we should link these cards to various concept pages
   {
     title: 'Multiplayer',
-    description: "Just write the code for how you want the state to change, and that's it. Room state transitions occur on the order of milliseconds.",
+    description: "Just write the code for how you want the state to change, and that's it. Room state transitions occur on the order of milliseconds with networking and matchmaking already built in.",
     svgComponent: <Multiplayer className={styles['svg-thumbnail']} />
   },
   {
