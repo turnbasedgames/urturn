@@ -134,6 +134,7 @@ function App() {
         <Stack
           sx={{
             position: 'fixed',
+            bottom: 0,
             width: '100%',
           }}
           direction="row"
