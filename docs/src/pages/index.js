@@ -23,7 +23,7 @@ function HomepageHeader() {
         <Stack direction="row" padding={2} spacing={2}>
           <a
             className="button button--lg button--primary button--primary"
-            href="/docs/getting-started"
+            href="/docs/category/getting-started"
           >
             Get Started
           </a>

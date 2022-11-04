@@ -8,7 +8,7 @@ The `backend` for all games is compromised of functions exported by the **index.
 
 ## Functions
 
-### Pure Functions
+### All Functions Are Pure Functions
 
 All functions are `pure`:
 
@@ -29,43 +29,71 @@ Common mistake is to forget returning the [`roomStateResult`](#roomstateresult).
 
 :::
 
+### All Functions Are ACID Transactions
+
+1. `Atomic`: either all updates returned are fully completed or completely fail. This is important for handling operations like player purchases; you don’t want a player to be charged Urbux and fail to give them their desired item. This prevents data corruption of your roomState.
+2. `Consistent`: your functions will never be given partial data or corrupt data; they will always get the latest roomState for the room.
+3. `Isolated`: you are guaranteed that operations on a roomState for a given room are handled one by one. No two operations can corrupt each other.
+4. `Durable`: successful roomState operations are guaranteed to survive system failure. Even if UrTurn goes down, or has partial outages, your data for each room should survive.
+
 ### onRoomStart
 
 ```ts
-onRoomStart = () => BoardGameResult
+onRoomStart = () => RoomStateResult
 ```
 
-Runs when the room is first initialized, as triggered by these actions:
-
-1. When a private room is created (player clicks *Create Private Room*)
-2. When a room is created for the matchmaking queue (player clicks *Play*)
-
-Returns the [BoardGameResult](#boardgameresult). Use this function to initialize your board game state.
+- Use this function to initialize your board game state.
+- Runs when the room is first initialized, as triggered by these actions:
+  1. When a private room is created (player clicks *Create Private Room*).
+  2. When a room is created for the matchmaking queue (player clicks *Play*).
+- Operation fails on error (when user clicks play or attempts start a game, it will show them an error and will not start the game). This should never error, but the operation is not forced because it may start your game in a corrupt state.
+- `Returns` the [RoomStateResult](#roomstateresult).
 
 ### onPlayerJoin
 
 ```ts
-onPlayerJoin = (player: Player, boardGame: object) => BoardGameResult
+onPlayerJoin = (player: Player, roomState: RoomState) => RoomStateResult
 ```
 
-Runs when a player joins the room, including when the room is created (i.e. the player clicks *Play* or *Create Private Room*). Reveals the player who joined and the current [BoardGame](#boardgame) state. Returns the [BoardGameResult](#boardgameresult).
+- Runs when a player joins the room, including when the room is created (i.e. the player clicks *Play* or *Create Private Room*).
+- Operation fails on error (when user clicks play and joins a game, it will show them an error snackbar). This should never error, but the operation is not forced.
+- If `roomState.joinable` or `roomState.finished` is `true` then it is **guaranteed** that no player will be added to the room and `onPlayerJoin` will never be called for a player.
+- `Returns` the [RoomStateResult](#roomstateresult).
 
 ### onPlayerQuit
 
 ```ts
-onPlayerQuit = (player: Player, boardGame: object) => BoardGameResult
+onPlayerQuit = (player: Player, roomState: RoomState) => RoomStateResult
 ```
 
-Runs when a player quits the game. A player **only** quits the game by manually clicking the ***quit*** button - closing the browser or tab will not end the game session. Reveals the player who quit and the current [BoardGame](#boardgame) state. Returns the [BoardGameResult](#boardgameresult).
+- Runs when a player quits the game.
+- A player can quit the game by manually clicking the ***quit*** button.
+- Only players in the room, can quit the room (e.g. we can't call `onPlayerQuit` with a player not known to the room).
+- `Returns` the [RoomStateResult](#roomstateresult).
+
+:::caution
+
+`onPlayerQuit` is **forced**. Even if an error occurs in your code, we will force our own logic to be executed (e.g. removing `player` from the `roomState.players` list).
+
+This may put the `roomState` for the room in a corrupt state depending on your code, so you should avoid erroring in this function.
+
+:::
 
 ### onPlayerMove
 
 ```ts
-onPlayerMove = (player: Player, move: object, boardGame: object) => BoardGameResult
+onPlayerMove = (player: Player, move: Move, roomState: RoomState) => RoomStateResult
 ```
 
-Runs when a player moves (i.e. when ```client.makeMove()``` is called). Reveals the player that made the move, the object containing the move, and the current [BoardGame](#boardgame) state. The move object is defined by you and can be any JSON object. Returns the [BoardGameResult](#boardgameresult).
+- Runs when a player moves (i.e. when `client.makeMove()` is called with the [`move`](#move) JSON object).
+- Operation fails on error. The client triggering this will receive your error as a return value.
+- `Returns` the [RoomStateResult](#roomstateresult).
 
+:::info
+
+If a player is trying to do something impossible/against game rules, then it is **recommended** to throw an error, so you can handle it in the game frontend.
+
+:::
 
 ## Types
 
