@@ -85,7 +85,7 @@ This may put the `roomState` for the room in a corrupt state depending on your c
 onPlayerMove = (player: Player, move: Move, roomState: RoomState) => RoomStateResult
 ```
 
-- Runs when a player moves (i.e. when `client.makeMove()` is called with the [`move`](#move) JSON object).
+- Runs when a player moves (i.e. when [`client.makeMove()`](/docs/API/client#clientmakemovemove-move) is called with the [`move`](#move) JSON object).
 - Operation fails on error. The client triggering this will receive your error as a return value.
 - `Returns` the [RoomStateResult](#roomstateresult).
 
