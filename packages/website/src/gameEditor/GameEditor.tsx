@@ -103,7 +103,7 @@ function GameEditor({
           />
           <TextField
             required
-            label="Commit or branch"
+            label="Commit SHA (e.g. cd7614c90db0e9c4d2c99800da9c0bdd107bc7fa)"
             value={form.commitSHA}
             onChange={({ target: { value } }) => {
               setField('commitSHA', value);
