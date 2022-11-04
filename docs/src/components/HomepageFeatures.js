@@ -2,10 +2,9 @@ import React from 'react';
 import clsx from 'clsx';
 import styles from './HomepageFeatures.module.css';
 
-// TODO: update images
 const FeatureList = [
   {
-    title: 'Free!',
+    title: 'Multiplayer',
     description: (
       <>
         UrTurn was designed for the Creator. Easily setup a new game and deploy on the platform for free without worrying about operational costs.
@@ -23,6 +22,7 @@ const FeatureList = [
 ];
 
 function Feature({title, description}) {
+  // TODO: these should be cards
   return (
     <div className={clsx('col col--6')}>
       <div className="text--center padding-horiz--md">

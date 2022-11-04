@@ -12,15 +12,9 @@ function HomepageHeader() {
     <header className={clsx('hero hero', styles.heroBanner)}>
       <div className="container">
         <h1 className="hero__hard-title">{siteConfig.title.split(' ').slice(0,2).join(' ')}</h1>
-        <h1 className="hero__title">{' ' + siteConfig.title.split(' ').slice(2).join(' ')}</h1>
+        <h1 className="hero__title">{' ' + siteConfig.title.split(' ').slice(2,4).join(' ')}</h1>
+        <h1 className="hero__soft-title">{' ' + siteConfig.title.split(' ').slice(4).join(' ')}</h1>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
-        <div className={styles.buttons}>
-          <Link
-            className="button button--secondary button--lg"
-            to="/docs/getting-started/introduction">
-            Make your first game - 15 min ⏱️
-          </Link>
-        </div>
       </div>
     </header>
   );

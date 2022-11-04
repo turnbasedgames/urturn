@@ -13,7 +13,8 @@
   --ifm-color-primary-light: #4891cc;
   --ifm-color-primary-lighter: #5297ce;
   --ifm-color-primary-lightest: #70a9d7;
-  --ifm-navbar-background-color: opacity(25%);
+  --ifm-color-typography-subtitle: var(--ifm-color-emphasis-700);
+  --ifm-navbar-background-color: opacity(100%);
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -26,7 +27,6 @@ html[data-theme='dark'] {
   --ifm-color-primary-lighter: #c8e5fc;
   --ifm-color-primary-lightest: #ffffff;
 }
-
 
 .docusaurus-highlight-code-line {
   background-color: rgba(0, 0, 0, 0.1);
@@ -87,12 +87,39 @@ html[data-theme='dark'] .header-discord-link:before {
 
 .hero__title {
   display: inline;
-  color: black;
   font-size: 4rem;
 }
 
-html[data-theme='dark'] .hero__title {
-  display: inline;
-  color: white;
+.hero__soft-title {
   font-size: 4rem;
+}
+
+.hero__subtitle {
+  display: inline-block;
+  max-width: 70%;
+  color: var(--ifm-color-typography-subtitle)
+}
+
+html[data-theme='dark'] .hero__title {
+  color: white;
+}
+
+@media screen and (max-width: 479px) {
+  .hero__hard-title {
+    font-size: 2rem;
+  }
+
+  .hero__title {
+    font-size: 2rem;
+  }
+
+  .hero__soft-title {
+    font-size: 2rem;
+  }
+
+  .hero__subtitle {
+    max-width: 100%;
+    color: var(--ifm-color-typography-subtitle);
+    font-size: 1rem;
+  }
 }
