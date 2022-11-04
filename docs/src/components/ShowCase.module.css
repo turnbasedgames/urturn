@@ -30,12 +30,6 @@
   color: var(--ifm-color-typography-subtitle);
 }
 
-.card-title-dark {
-  text-align: center;
-  margin: 0.25rem;
-  color: var(--ifm-color-emphasis-1000);
-}
-
 .svg-thumbnail {
   margin-top: 2rem;
   max-height: 46.82%;

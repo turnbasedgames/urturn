@@ -34,7 +34,6 @@ const ExampleGameList = [
     gif: projectIncognitoGif,
     thumbnail: projectIncognitoThumbnail,
     prodUrl: "https://www.urturn.app/games/62adfb1b212915000e44e7a8",
-    className: 'card-title-dark'
   },
 ];
 
@@ -64,7 +63,7 @@ export default function ShowCase() {
         <h1 className={styles.title}>Built with UrTurn</h1>
         <p className='hero__subtitle'>Battle tested by a rich community of developers and players.</p>
         <Grid2 container spacing={2} margin={2}>
-          {ExampleGameList.map(({ className, title, description, gif, thumbnail, prodUrl }, index) => (
+          {ExampleGameList.map(({ title, description, gif, thumbnail, prodUrl }, index) => (
             <Grid2 xs={12} sm={6} lg={4} key={index}>
               <Link to={prodUrl}>
                 <Stack
@@ -80,8 +79,8 @@ export default function ShowCase() {
                     alt="loading preview..."
                   />
                   <Stack sx={{ position: 'absolute', width: '100%', bottom: 0, background: 'rgba(21, 21, 21, 0.3)' }}>
-                    <h1 className={styles[className ?? 'card-title']}>{title}</h1>
-                    <p className={styles[className ?? 'card-title']}>{description}</p>
+                    <h1 className={styles['card-title']}>{title}</h1>
+                    <p className={styles['card-title']}>{description}</p>
                   </Stack>
                 </Stack>
               </Link>
