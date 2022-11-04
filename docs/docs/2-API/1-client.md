@@ -31,7 +31,7 @@ You can tell if the local player is a spectator or a regular player if they are 
 
 ### `client.getRoomState()`
 
-- returns the current `RoomState`
+- returns the current [`RoomState`](/docs/API/backend#roomstate)
 
 ## Types
 

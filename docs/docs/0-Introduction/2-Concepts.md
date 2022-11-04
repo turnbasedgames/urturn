@@ -32,17 +32,18 @@ All room states follow a structure like this:
 
 ```
 
-All `Room` operations modify or use the `roomState` to create a new `roomState`.
+All [`Room`](#room) operations modify or use the [`roomState`](/docs/API/backend#roomstate) to create a new [`roomState`](/docs/API/backend#roomstate).
 
 ## Room
 
-- Rooms are instances of games. 
-- Rooms will have an associated RoomState to track the current state of the room. 
-- Players create new rooms whenever they click play on your game. UrTurn will automatically place players together in a room if it is public. 
+- Rooms are instances of games.
+- Rooms will have an associated RoomState to track the current state of the room.
+- Players create new rooms whenever they click play on your game. UrTurn will automatically place players together in a room if it is public.
 - `private` rooms are created by players when they click `create private room`, and are usually played with people they already know. You can handle private rooms differently than public rooms; for example, you might want to let the player who created the private room determine the settings of the room.
 - If a user accidentally closes their browser, they may reopen it to view the room again (exception: see [disconnectTimeout](/docs/How-It-Works/Concepts#automatic-disconnect-handling))
 
 ## Game
+
 Each game can have a thumbnail, title, description, and specific code related to it that is run whenever a room is created.
 
 ## Automatic Disconnect Handling
