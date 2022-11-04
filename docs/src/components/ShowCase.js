@@ -113,7 +113,7 @@ export default function ShowCase() {
           ))}
         </Grid2>
       </Stack>
-      <Stack minHeight="30vh" alignItems="center">
+      <Stack minHeight="30vh" marginBottom={5} alignItems="center">
         <h1 className={styles['title-alt']}>Got Any Questions?</h1>
         <a
           href="https://discord.gg/myWacjdb5S"
