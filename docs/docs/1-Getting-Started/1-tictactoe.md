@@ -1,9 +1,11 @@
 ---
-title: Creating Your First Game!
+description: Create your first game - TicTacToe
 ---
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+
+# Create a simple TicTacToe game
 
 ## Overview
 

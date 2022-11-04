@@ -1,3 +1,8 @@
+---
+description: UrTurn is a game platform that hosts and handles all infrastructure for your game
+slug: /
+---
+
 # Introduction
 
 ## What UrTurn Is

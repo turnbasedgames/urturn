@@ -12,7 +12,7 @@ Here is an example for [TicTacToe](https://github.com/turnbasedgames/urturn/tree
 
 :::success
 
-This is easily achieved using [GitHub Actions](https://docs.github.com/en/actions). Steps in [getting started](/docs/Getting-Started/introduction) should automatically generated this for you.
+This is easily achieved using [GitHub Actions](https://docs.github.com/en/actions). Steps in [getting started](/docs/Getting-Started) should automatically generated this for you.
 
 :::
 
