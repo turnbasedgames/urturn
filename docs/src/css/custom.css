@@ -96,6 +96,24 @@ html[data-theme='dark'] .hero__title {
   color: white;
 }
 
+.text__left-align {
+  text-align: left;
+}
+
+.navbar__title {
+  color: var(--ifm-color-typography-subtitle);
+  font-size: 1.5rem;
+}
+
+.footer__links {
+  text-align: right;
+}
+
+.navbar__subtitle {
+  color: var(--ifm-color-typography-subtitle);
+  font-size: 1rem;
+}
+
 @media screen and (max-width: 479px) {
   .hero__hard-title {
     font-size: 2rem;
