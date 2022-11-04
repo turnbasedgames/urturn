@@ -29,7 +29,7 @@ function HomepageHeader() {
           </a>
           <a
             className="button button--lg button--outline button--secondary"
-            href="docs/How-It-Works/Flow-Of-Simple-Game"
+            href="docs/Introduction"
           >
             Concepts
           </a>
