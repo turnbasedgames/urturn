@@ -12,7 +12,7 @@ Here is an example for [TicTacToe](https://github.com/turnbasedgames/urturn/tree
 
 :::success
 
-This is easily achieved using [GitHub Actions](https://docs.github.com/en/actions). Steps in [getting started](/docs/Getting-Started) should automatically generated this for you.
+This is easily achieved using [GitHub Actions](https://docs.github.com/en/actions). Steps in [getting started](/docs/category/getting-started) should automatically generated this for you.
 
 :::
 
@@ -40,7 +40,7 @@ All [`Room`](#room) operations modify or use the [`roomState`](/docs/API/backend
 - Rooms will have an associated RoomState to track the current state of the room.
 - Players create new rooms whenever they click play on your game. UrTurn will automatically place players together in a room if it is public.
 - `private` rooms are created by players when they click `create private room`, and are usually played with people they already know. You can handle private rooms differently than public rooms; for example, you might want to let the player who created the private room determine the settings of the room.
-- If a user accidentally closes their browser, they may reopen it to view the room again (exception: see [disconnectTimeout](/docs/How-It-Works/Concepts#automatic-disconnect-handling))
+- If a user accidentally closes their browser, they may reopen it to view the room again (exception: see [disconnectTimeout](/docs/Introduction/Concepts#automatic-disconnect-handling))
 
 ## Game
 

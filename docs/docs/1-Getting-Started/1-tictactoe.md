@@ -15,7 +15,7 @@ We are ready to make our first game - tic-tac-toe! There are two major component
 
 ### What is Board Game State?
 
-Your game state is held in the [BoardGame](/docs/backend#boardgame) object. You can tell UrTurn if your game is joinable and/or if it is finished. You can also define the "state" object that will define the way the board currently looks. For this tic-tac-toe game, the BoardGame state will look like this:
+Your game state is held in the [RoomState](/docs/API/backend#roomstate) object. You can tell UrTurn if your game is joinable and/or if it is finished. You can also define the "state" object that will define the way the board currently looks. For this tic-tac-toe game, the BoardGame state will look like this:
 
 ```json
 {
@@ -42,7 +42,7 @@ All of our game logic can be encompassed by the following four functions:
 
 #### 1. onRoomStart
 
-This function will be called whenever a [room is created](/docs/backend#onroomstart). When the game starts, we want to initialize our empty BoardGame state, which includes the following for tic-tac-toe:
+This [function](/docs/API/backend#onroomstart-required) will be called whenever a room is created. When the game starts, we want to initialize our empty BoardGame state, which includes the following for tic-tac-toe:
 
 1. The Board: A 3x3 square, initialized with null values.
 2. The Winner: The winner's ID, if there is a winner. Initially null.
@@ -64,9 +64,9 @@ function onRoomStart() {
 
 #### 2. onPlayerJoin
 
-This function will be called whenever a player actually joins the game. It provides us with the ID of the player who joined as well as the current [BoardGame state](/docs/backend#boardgame).
+This function will be called whenever a player actually joins the game. It provides us with the ID of the player who joined as well as the current [RoomState](/docs/API/backend#roomstate).
 
-If this is the first player to join, we will just return an empty object. If this is the second player to join, then the game has all the necessary players and should be marked as unjoinable.
+If this is the first player to join, we will just return an empty object. If this is the second player to join, then the game has all the necessary players and should be marked as not joinable.
 
 ```js title="index.js"
 function onPlayerJoin(plr, boardGame) {
@@ -185,9 +185,9 @@ function onPlayerMove(plr, move, boardGame) {
 
 #### 4. onPlayerQuit
 
-This function will be called whenever a player [quits the game](/docs/backend#onplayerquit). It provides us with the ID of the player who quit and the current board game state.
+This [function](/docs/API/backend#onplayerquit-required) will be called whenever a player quits the game. It provides us with the player who quit and the current board game state.
 
-For tic-tac-toe, the game will end if one of the players quits. The game will be marked as unjoinable and finished, and the remaining player will be marked the winner.
+For tic-tac-toe, the game will end if one of the players quits. The game will be marked as not joinable and finished, and the remaining player will be marked the winner.
 
 ```js title="index.js"
 function onPlayerQuit(plr, boardGame) {
@@ -204,7 +204,7 @@ function onPlayerQuit(plr, boardGame) {
 
 ## Frontend
 
-This section will go over how to implement the frontend for our tic-tac-toe so that it is visible to the user. We will be adding our components to ```frontend/src/App.jsx```. This file already contains some logic for you to access the [BoardGame](/docs/backend#boardgame) object and for any state changes to make to be propagated to your backend.
+This section will go over how to implement the frontend for our tic-tac-toe so that it is visible to the user. We will be adding our components to ```frontend/src/App.jsx```. This file already contains some logic for you to access the [RoomState](/docs/API/backend#roomstate) object and for any state changes to make to be propagated to your backend.
 
 ### 1. Extract the Board Game State
 
@@ -400,7 +400,7 @@ export default App;
 
 ### 3. Add MakeMove()
 
-We can now add in the ability for a player to make a move. We'll add an onClick handler to each tic-tac-toe square that will send a move containing the x- and y-coordinates (the row and column numbers of the box they clicked on) to the client. UrTurn will handle sending the move to your onPlayerMove function!
+We can now add in the ability for a player to make a move. We'll add an onClick handler to each tic-tac-toe square that will send a move containing the x- and y-coordinates (the row and column numbers of the box they clicked on) to the client. UrTurn will handle sending the move to your [onPlayerMove](/docs/API/backend#onplayermove-required) function!
 
 
 <Tabs>
@@ -507,10 +507,4 @@ In our game state, "joinable" still says true. We can add an additional player a
 
 You can now simulate playing tic-tac-toe between the two tabs!
 
-:::note
-
-You currently must refresh the Runner to see all "state" specific changes.
-
-:::
-
-[Here](https://github.com/turnbasedgames/tictactoe/tree/solution) is the finished tic-tac-toe game in production, which includes error handling, move validation, player validation, and more!
+[Here](https://github.com/turnbasedgames/urturn/tree/main/examples/tictactoe) is the finished tic-tac-toe game in production, which includes error handling, move validation, player validation, and more!
