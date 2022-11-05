@@ -1,0 +1,23 @@
+.title {
+  margin: 2rem;
+  font-size: 3rem;
+  text-align: center;
+}
+
+.img-thumbnail {
+  border-radius: 10px;
+  height: 100%;
+  width: 100%;
+}
+
+.card-title {
+  text-align: center;
+  margin: 0.25rem;
+  color: var(--ifm-color-typography-subtitle);
+}
+
+.card-title-dark {
+  text-align: center;
+  margin: 0.25rem;
+  color: var(--ifm-color-emphasis-1000);
+}
