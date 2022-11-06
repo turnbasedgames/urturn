@@ -10,7 +10,9 @@ function HomepageHeader() {
   const { siteConfig } = useDocusaurusContext();
   return (
     <header className={clsx('hero hero', styles.heroBanner)}>
-      <Stack margin="auto" width="70%" justifyContent="center" alignItems="center">
+      <Stack margin="auto" width="70%" justifyContent="center" alignItems="center"
+        sx={{ maxWidth: "1000px" }}
+      >
         <h1 className="hero__title">
           <a className="hero__hard-title">
             {siteConfig.title.split(' ').slice(0, 3).join(' ')}
@@ -20,13 +22,13 @@ function HomepageHeader() {
         <p className="hero__subtitle">{siteConfig.tagline}</p>
         <Stack direction="row" padding={2} spacing={2}>
           <a
-            className="button button--primary button--primary"
+            className="button button--lg button--primary button--primary"
             href="/docs/getting-started/introduction"
           >
             Get Started
           </a>
           <a
-            className="button button--outline button--secondary"
+            className="button button--lg button--outline button--secondary"
             href="/docs/general"
           >
             Concepts

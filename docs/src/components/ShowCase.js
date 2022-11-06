@@ -8,10 +8,13 @@ import projectIncognitoGif from './projectIncognito.gif'
 import projectIncognitoThumbnail from './projectIncognitoThumbnail.png'
 import battleshipGif from './battleship.gif'
 import battleshipThumbnail from './battleshipThumbnail.png'
+import Multiplayer from './multiplayer.svg';
+import Monetize from './monetize.svg';
+import Scale from './scale.svg';
 
-const FeatureList = [
+const ExampleGameList = [
   {
-    title: 'Semantle Battle',
+    title: <>Semantle Battle <span className="badge badge--primary">New!</span></>,
     description: 'Multiplayer spin off of Semantle, built with ReactJS',
     gif: semantleBattleGif,
     thumbnail: semantleBattleThumbnail,
@@ -34,12 +37,31 @@ const FeatureList = [
   },
 ];
 
+const FeatureList = [
+  {
+    title: 'Multiplayer',
+    description: "Just write the code for how you want the state to change, and that's it. Room state transitions occur on the order of milliseconds.",
+    svgComponent: <Multiplayer className={styles['svg-thumbnail']} />
+  },
+  {
+    title: 'Scale',
+    description: 'Never worry about scaling your games again, and never pay for scale again',
+    svgComponent: <Scale className={styles['svg-thumbnail']} />
+  },
+  {
+    title: 'Monetization',
+    subtitle: <span className="badge badge--warning">Coming Soon!</span>,
+    description: 'Monetize your games by implementing a simple function',
+    svgComponent: <Monetize className={styles['svg-thumbnail']} />
+  },
+];
+
 export default function ShowCase() {
   return (
-    <Stack justifyContent="center">
+    <Stack justifyContent="center" maxWidth="1500px" margin="auto">
       <h1 className={styles.title}>Built with UrTurn</h1>
       <Grid2 container spacing={2} margin={2}>
-        {FeatureList.map(({ className, title, description, gif, thumbnail, prodUrl }, index) => (
+        {ExampleGameList.map(({ className, title, description, gif, thumbnail, prodUrl }, index) => (
           <Grid2 xs={12} sm={6} lg={4} key={index}>
             <Link to={prodUrl}>
               <Stack
@@ -60,6 +82,23 @@ export default function ShowCase() {
                 </Stack>
               </Stack>
             </Link>
+          </Grid2>
+        ))}
+      </Grid2>
+      <h1 className={styles['title-subtle']}>Blazingly Fast Architecture</h1>
+      <Grid2 container spacing={2} margin={2}>
+        {FeatureList.map(({ subtitle, title, description, svgComponent }, index) => (
+          <Grid2 xs={12} sm={6} lg={4} key={index}>
+            <Stack
+              width="100%"
+              alignItems="center"
+              maxHeight="300px"
+            >
+              <h1 className={styles['card-title']}>{title}</h1>
+              {subtitle}
+              <p className={styles['card-title']}>{description}</p>
+              {svgComponent}
+            </Stack>
           </Grid2>
         ))}
       </Grid2>

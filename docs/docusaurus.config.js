@@ -43,6 +43,7 @@ const config = {
     ({
       colorMode: {
         defaultMode: 'dark',
+        disableSwitch: false,
       },
       navbar: {
         title: 'UrTurn',
