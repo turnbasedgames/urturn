@@ -101,8 +101,8 @@ export default function ShowCase() {
                 maxHeight="300px"
                 margin={1}
               >
-                <div class={clsx("card", styles.card)}>
-                  <div class="card__header">
+                <div className={clsx("card", styles.card)}>
+                  <div className="card__header">
                     <h1 className={styles['card-title']}>{title} {subtitle}</h1>
                     <p className={styles['card-title']}>{description}</p>
                   </div>
