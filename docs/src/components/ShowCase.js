@@ -60,7 +60,7 @@ const FeatureList = [
 export default function ShowCase() {
   return (
     <Stack justifyContent="center" maxWidth="1500px" margin="auto">
-      <Stack minHeight="60vh" alignItems="center" justifyContent="center">
+      <Stack maxWidth="90%" margin="auto" minHeight="60vh" alignItems="center" justifyContent="center">
         <h1 className={styles.title}>Built with UrTurn</h1>
         <p className='hero__subtitle'>Battle tested by a rich community of developers and players.</p>
         <Grid2 container spacing={2} margin={2}>
@@ -89,7 +89,7 @@ export default function ShowCase() {
           ))}
         </Grid2>
       </Stack>
-      <Stack minHeight="60vh" alignItems="center" justifyContent="center">
+      <Stack maxWidth="90%" margin="auto" minHeight="60vh" alignItems="center" justifyContent="center">
         <h1 className={styles['title-alt']}>Blazingly Fast Architecture</h1>
         <p className='hero__subtitle'>We are obsessed over the game developer experience. Here's what you can do with UrTurn.</p>
         <Grid2 container spacing={2} margin={2}>
