@@ -1,4 +1,4 @@
-name: Deploy UrTurn Website and Docs To Production
+name: Deploy UrTurn To Production
 on:
   push:
     branches:
