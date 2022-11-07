@@ -1,8 +1,7 @@
-name: Deploy UrTurn Website Per PR
-'on': pull_request
+name: Deploy UrTurn Documentation and Website Per PR
+on: pull_request
 jobs:
-  build_and_preview:
-    if: '${{ github.event.pull_request.head.repo.full_name == github.repository }}'
+  build:
     runs-on: ubuntu-latest
     environment: development
     steps:
@@ -11,12 +10,28 @@ jobs:
         run: |
           npm ci
           npx lerna bootstrap
-      - name: build @urturn/website
+      - name: build @urturn/docs
+        run: npx lerna run build
         env:
           REACT_APP_FIREBASE_CONFIG: ${{ secrets.REACT_APP_FIREBASE_CONFIG }}
           REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
           REACT_APP_STRIPE_PUBLISHABLE_KEY: ${{ secrets.REACT_APP_STRIPE_PUBLISHABLE_KEY }}
-        run: npx lerna run build --scope=@urturn/website
+  preview_docs:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DOCS }}'
+          projectId: board-games-dev-e8c04
+          entryPoint: docs
+  preview_website:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
