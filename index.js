@@ -5,13 +5,6 @@ const Status = Object.freeze({
   EndGame: 'endGame',
 });
 
-function getPlrMark(player, plrs) {
-  if (player.id === plrs[0].id) {
-    return 'X';
-  }
-  return 'O';
-}
-
 function getPlrFromMark(mark, plrs) {
   return mark === 'X' ? plrs[0] : plrs[1];
 }
@@ -89,7 +82,6 @@ function onRoomStart() {
         [null, null, null],
       ],
       winner: null, // null means tie if game is finished, otherwise set to the plr that won,
-      emptyObject: {},
     },
   };
 }
@@ -100,30 +92,19 @@ function onRoomStart() {
  * @param {BoardGame} currentGame
  * @returns {BoardGameResult}
  */
-function onPlayerJoin(player, boardGame) {
-  const { players, state } = boardGame;
-
-  // VALIDATIONS
-  // check if game has started
-  if (state.status !== Status.PreGame) {
-    throw new Error("game has already started, can't join the game!");
-  }
-
-  // TRANSFORMATIONS
-  // determine if we should start the game
-  if (players.length === 2) {
-    // start game
+function onPlayerJoin(player, roomState) {
+  const { players, state } = roomState;
+  if (players.length === 2) { // enough players to play the game
     state.status = Status.InGame;
-    state.plrToMoveIndex = 0;
-    return {
+    state.plrToMoveIndex = 0; // keep track of who’s turn it is
+    return { // return modifications we want to make to the roomState
       state,
+      // we should not allow new players to join the game, tictactoe only needs two players
       joinable: false,
     };
   }
-  return {
-    state,
-    joinable: true,
-  };
+  // our first player joined, we should do nothing (not enough players yet to start).
+  return {};
 }
 
 /**
@@ -150,7 +131,7 @@ function onPlayerMove(player, move, boardGame) {
     throw new Error(`Invalid move, someone already marked here: ${x},${y}`);
   }
 
-  const plrMark = getPlrMark(player, players);
+  const plrMark = player.id === players[0] ? 'X' : 'O';
   board[x][y] = plrMark;
 
   // Check if game is over
