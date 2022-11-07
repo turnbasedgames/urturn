@@ -65,6 +65,7 @@ jobs:
           projectId: board-games-prod
           entryPoint: packages/website
   deploy_tictactoe:
+    needs: build
     name: Deploy TicTacToe
     runs-on: ubuntu-latest
     steps:
