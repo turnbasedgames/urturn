@@ -24,7 +24,6 @@ const getStatusMsg = ({
   } if (status === 'preGame') {
     return 'Waiting on for another player to join...';
   } if (status === 'inGame') {
-    console.log(plrToMove, curPlr);
     if (plrToMove.id === curPlr?.id) {
       return "It's ur turn; make a move";
     }
@@ -35,7 +34,6 @@ const getStatusMsg = ({
 
 function App() {
   const [boardGame, setBoardGame] = useState(client.getBoardGame() || {});
-  console.log('boardGame:', boardGame);
   useEffect(() => {
     const onStateChanged = (newBoardGame) => {
       setBoardGame(newBoardGame);
@@ -47,7 +45,6 @@ function App() {
   }, []);
 
   const [curPlr, setCurPlr] = useState();
-  console.log('new current plr', curPlr);
   useEffect(() => {
     const setupCurPlr = async () => {
       const newCurPlr = await client.getLocalPlayer();
