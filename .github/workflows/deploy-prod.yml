@@ -24,10 +24,22 @@ jobs:
           REACT_APP_FIREBASE_CONFIG: ${{ secrets.REACT_APP_FIREBASE_CONFIG }}
           REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
           REACT_APP_STRIPE_PUBLISHABLE_KEY: ${{ secrets.REACT_APP_STRIPE_PUBLISHABLE_KEY }}
+      - uses: actions/cache@v3
+        id: cache-build
+        with:
+          path: .
+          key: ${{ github.run_id }}-build
+          restore-keys: ${{ github.run_id }}-build
   deploy_docs:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - uses: actions/cache@v3
+        id: cache-build
+        with:
+          path: .
+          key: ${{ github.run_id }}-build
+          restore-keys: ${{ github.run_id }}-build
       - name: Deploy UrTurn Docs 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
@@ -36,6 +48,12 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - uses: actions/cache@v3
+        id: cache-build
+        with:
+          path: .
+          key: ${{ github.run_id }}-build
+          restore-keys: ${{ github.run_id }}-build
       - name: Deploy UrTurn Website 🚀
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -48,6 +66,12 @@ jobs:
     name: Build artifacts for frontend
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/cache@v3
+        id: cache-build
+        with:
+          path: .
+          key: ${{ github.run_id }}-build
+          restore-keys: ${{ github.run_id }}-build
       - name: Deploy examples/tictactoe 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
