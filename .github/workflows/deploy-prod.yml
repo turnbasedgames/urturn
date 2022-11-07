@@ -31,6 +31,7 @@ jobs:
           key: ${{ github.run_id }}-build
           restore-keys: ${{ github.run_id }}-build
   deploy_docs:
+    needs: build
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -45,6 +46,7 @@ jobs:
         with:
           folder: docs/build
   deploy_website:
+    needs: build
     runs-on: ubuntu-latest
     environment: production
     steps:
