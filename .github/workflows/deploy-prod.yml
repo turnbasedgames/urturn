@@ -65,7 +65,7 @@ jobs:
           projectId: board-games-prod
           entryPoint: packages/website
   deploy_tictactoe:
-    name: Build artifacts for frontend
+    name: Deploy TicTacToe
     runs-on: ubuntu-latest
     steps:
       - uses: actions/cache@v3
