@@ -14,14 +14,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/turnbasedgames/tictactoe.git"
+    "url": "git+https://github.com/turnbasedgames/urturn.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/turnbasedgames/tictactoe/issues"
+    "url": "https://github.com/turnbasedgames/urturn/issues"
   },
-  "homepage": "https://github.com/turnbasedgames/tictactoe#readme",
+  "homepage": "https://github.com/turnbasedgames/urturn#readme",
   "devDependencies": {
     "@urturn/runner": "*",
     "concurrently": "^7.1.0",
