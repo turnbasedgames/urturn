@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+concurrency: deploy-prod-${{ github.ref }}
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -39,3 +40,12 @@ jobs:
           channelId: live
           projectId: board-games-prod
           entryPoint: packages/website
+  deploy_tictactoe:
+    name: Build artifacts for frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy examples/tictactoe 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: examples/tictactoe
+          branch: published-tictactoe
