@@ -31,6 +31,7 @@ jobs:
           key: ${{ github.run_id }}-build
           restore-keys: ${{ github.run_id }}-build
   deploy_docs:
+    needs: build
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -45,6 +46,7 @@ jobs:
         with:
           folder: docs/build
   deploy_website:
+    needs: build
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -63,7 +65,7 @@ jobs:
           projectId: board-games-prod
           entryPoint: packages/website
   deploy_tictactoe:
-    name: Build artifacts for frontend
+    name: Deploy TicTacToe
     runs-on: ubuntu-latest
     steps:
       - uses: actions/cache@v3
