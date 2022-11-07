@@ -1,5 +1,5 @@
 {
-  "name": "semantle battle",
+  "name": "@urturn/semantle-battle",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,21 +10,20 @@
     "dev:rollup": "rollup -c -w",
     "dev:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start",
     "lint": "eslint . --ignore-path .gitignore --ext .js",
-    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix",
-    "postinstall": "cd frontend && npm install"
+    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/turnbasedgames/semantle.git"
+    "url": "git+https://github.com/turnbasedgames/urturn.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/turnbasedgames/semantle/issues"
+    "url": "https://github.com/turnbasedgames/urturn/issues"
   },
-  "homepage": "https://github.com/turnbasedgames/semantle#readme",
+  "homepage": "https://github.com/turnbasedgames/urturn#readme",
   "devDependencies": {
-    "@urturn/runner": "0.1.5",
+    "@urturn/runner": "*",
     "concurrently": "^7.1.0",
     "cross-env": "^7.0.3",
     "eslint": "^8.14.0",

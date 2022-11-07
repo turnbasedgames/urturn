@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "@urturn/semantle-battle-frontend",
   "version": "0.1.0",
   "private": true,
   "homepage": ".",
@@ -9,7 +9,7 @@
     "@mui/icons-material": "^5.10.9",
     "@mui/lab": "^5.0.0-alpha.105",
     "@mui/material": "^5.2.8",
-    "@urturn/client": "0.1.2",
+    "@urturn/client": "*",
     "buffer": "^6.0.3",
     "prop-types": "^15.8.1",
     "react": "^17.0.2",
@@ -27,6 +27,7 @@
   "scripts": {
     "start": "react-scripts start",
     "lint": "eslint . --ignore-path .gitignore --ext .js,.jsx",
+    "lint:fix": "eslint . --ignore-path .gitignore --ext .js,.jsx --fix",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
