@@ -6,6 +6,10 @@ jobs:
     environment: development
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
       - name: install and setup the monorepo dependencies
         run: |
           npm ci
@@ -16,11 +20,23 @@ jobs:
           REACT_APP_FIREBASE_CONFIG: ${{ secrets.REACT_APP_FIREBASE_CONFIG }}
           REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
           REACT_APP_STRIPE_PUBLISHABLE_KEY: ${{ secrets.REACT_APP_STRIPE_PUBLISHABLE_KEY }}
+      - uses: actions/cache@v3
+        id: cache-build
+        with:
+          path: .
+          key: ${{ github.run_id }}-build
+          restore-keys: ${{ github.run_id }}-build
   preview_docs:
     needs: build
     runs-on: ubuntu-latest
     environment: development
     steps:
+      - uses: actions/cache@v3
+        id: cache-build
+        with:
+          path: .
+          key: ${{ github.run_id }}-build
+          restore-keys: ${{ github.run_id }}-build
       - name: Deploy UrTurn Docs Preview 🚀
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -33,6 +49,12 @@ jobs:
     runs-on: ubuntu-latest
     environment: development
     steps:
+      - uses: actions/cache@v3
+        id: cache-build
+        with:
+          path: .
+          key: ${{ github.run_id }}-build
+          restore-keys: ${{ github.run_id }}-build
       - name: Deploy UrTurn Website Preview 🚀
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
