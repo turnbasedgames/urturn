@@ -1,5 +1,5 @@
 name: Deploy UrTurn Documentation To Production
-'on':
+on:
   push:
     branches:
       - main
