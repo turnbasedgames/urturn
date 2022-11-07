@@ -5,6 +5,7 @@
   "main": "index.js",
   "private": true,
   "scripts": {
+    "build": "mkdir -p build/frontend && cp index.js build/index.js && cp -r frontend/build build/frontend/build",
     "dev": "concurrently \"npm run dev:runner\" \"npm run dev:frontend\"",
     "dev:runner": "runner --frontend-port 3000",
     "dev:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start",
@@ -22,6 +23,9 @@
     "url": "https://github.com/turnbasedgames/urturn/issues"
   },
   "homepage": "https://github.com/turnbasedgames/urturn#readme",
+  "dependencies": {
+    "@urturn/tictactoe-frontend": "*"
+  },
   "devDependencies": {
     "@urturn/runner": "*",
     "concurrently": "^7.1.0",

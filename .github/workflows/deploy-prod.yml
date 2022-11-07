@@ -78,7 +78,7 @@ jobs:
       - name: Deploy examples/tictactoe 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: examples/tictactoe
+          folder: examples/tictactoe/build
           branch: published-tictactoe
   deploy_semantle_battle:
     needs: build
@@ -94,5 +94,5 @@ jobs:
       - name: Deploy examples/semantle-battle 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: examples/semantle-battle
+          folder: examples/semantle-battle/build
           branch: published-semantle-battle
