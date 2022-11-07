@@ -1,5 +1,9 @@
 module.exports = {
+  ignorePatterns: [
+    'frontend', // frontend folder has it's own eslint config
+  ],
   env: {
+    commonjs: true,
     es2021: true,
     node: true,
   },
@@ -8,10 +12,7 @@ module.exports = {
   ],
   parserOptions: {
     ecmaVersion: 'latest',
-    sourceType: 'module',
   },
   rules: {
-    'no-console': 'off',
-    'import/extensions': 'off',
   },
 };

@@ -1,4 +1,7 @@
 module.exports = {
+  ignorePatterns: [
+    'build', // build folder is for releases
+  ],
   root: true,
   env: {
     browser: true,
@@ -12,7 +15,7 @@ module.exports = {
     ecmaFeatures: {
       jsx: true,
     },
-    ecmaVersion: 'latest',
+    ecmaVersion: 13,
     sourceType: 'module',
   },
   plugins: [
