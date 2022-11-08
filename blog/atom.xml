@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://docs.urturn.app/blog</id>
-    <title>UrTurn Blog</title>
+    <title>Create web games faster than ever Blog</title>
     <updated>2022-11-01T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://docs.urturn.app/blog"/>
-    <subtitle>UrTurn Blog</subtitle>
+    <subtitle>Create web games faster than ever Blog</subtitle>
     <entry>
         <title type="html"><![CDATA[Semantle Battle Tournament (11/5/2022)]]></title>
         <id>Semantle Battle Tournament</id>
