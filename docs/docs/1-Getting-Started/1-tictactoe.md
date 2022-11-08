@@ -11,7 +11,7 @@ import TabItem from '@theme/TabItem';
 
 We are ready to make our first game - tic-tac-toe! There are two major components of your game: the [frontend](#frontend) and the [backend](#backend). We will go over the basics of each.
 
-## The Backend
+## Backend
 
 ### What is Board Game State?
 

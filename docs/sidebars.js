@@ -37,6 +37,17 @@ const sidebars = {
         'Getting-Started/typescript-support'
       ],
     },
+    {
+      type: 'category',
+      label: 'API',
+      link: {
+        type: 'generated-index',
+        keywords: ['api'],
+      },
+      items: [
+        'API/backend',
+      ],
+    },
   ],
 };
 
