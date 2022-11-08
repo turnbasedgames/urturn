@@ -1,0 +1,41 @@
+.title {
+  margin: 2rem;
+  font-size: 3rem;
+  text-align: center;
+}
+
+.title-alt {
+  margin-top: 3rem;
+  font-size: 3rem;
+  background-image: linear-gradient(0.25turn, var(--ifm-color-gray-600), var(--ifm-color-gray-700));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+}
+
+.img-thumbnail {
+  border-radius: 10px;
+  height: 100%;
+  width: 100%;
+}
+
+.card {
+  align-items: center;
+  padding-bottom: 2rem;
+}
+
+.card-title {
+  text-align: center;
+  margin: 0.25rem;
+  color: var(--ifm-color-typography-subtitle);
+}
+
+.svg-thumbnail {
+  margin-top: 2rem;
+  max-height: 400px;
+  max-width: 80%;
+}
+
+.badge {
+  margin: auto
+}

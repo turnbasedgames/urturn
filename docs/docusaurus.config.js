@@ -6,15 +6,14 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'UrTurn',
-  tagline: 'Quickly build multiplayer games - only four functions!',
+  title: 'Create web games faster than ever',
+  tagline: "Use your favorite game frameworks, while leveraging all of UrTurn's open source infrastructure from a simple client for free.",
   url: 'https://docs.urturn.app',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-  // favicon: 'img/favicon.ico', TODO: replace with turn based games logo
-  organizationName: 'turnbasedgames',
-  projectName: 'urturn',
+  organizationName: 'UrTurn',
+  projectName: 'UrTurn',
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
   themes: ['@docusaurus/theme-live-codeblock'],
@@ -44,21 +43,22 @@ const config = {
     ({
       colorMode: {
         defaultMode: 'dark',
+        disableSwitch: false,
       },
       navbar: {
         title: 'UrTurn',
         logo: {
           alt: 'UrTurn',
-          src: 'img/logo.svg', // TODO: need to change logo
+          src: 'img/logo.svg',
         },
         items: [
           {
             type: 'doc',
-            docId: 'getting-started/introduction',
+            docId: 'Introduction/Introduction',
             position: 'left',
             label: 'Docs',
           },
-          {to: '/blog', label: 'Blog', position: 'left'},
+          { to: '/blog', label: 'Blog', position: 'left' },
           {
             href: 'https://discord.gg/myWacjdb5S',
             position: 'right',
@@ -74,45 +74,30 @@ const config = {
         ],
       },
       footer: {
-        style: 'dark',
         links: [
           {
-            title: 'Docs',
-            items: [
-              {
-                label: 'Tutorial',
-                to: '/docs/getting-started/introduction',
-              },
-            ],
-          },
-          {
-            title: 'Community',
-            items: [
-              {
-                label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/urturn',
-              },
-              {
-                label: 'Discord',
-                href: 'https://discord.gg/myWacjdb5S',
-              },
-            ],
-          },
-          {
-            title: 'More',
-            items: [
-              {
-                label: 'Blog',
-                to: '/blog',
-              },
-              {
-                label: 'GitHub',
-                href: 'https://github.com/turnbasedgames',
-              },
-            ],
+            html: `
+              <div class="container container--fluid">
+                <div class="row footer__links">
+                  <div class="col footer__col">
+                    <h1 class="navbar__title text__left-align">Here's to a better world<br/>with better games.</h1>
+                    <p class="navbar__subtitle text__left-align">Made with ❤️ by Kevin, Sarah, Yoofi</p>
+                  </div>
+                  <div class="col footer__col">
+                    <div class="footer__links">
+                      <a class="footer__link-item" href="https://discord.gg/myWacjdb5S">Discord</a>
+                      <span class="footer__link-separator">&middot;</span>
+                      <a class="footer__link-item" href="/blog">Blog</a>
+                      <span class="footer__link-separator">&middot;</span>
+                      <a class="footer__link-item" href="https://github.com/turnbasedgames">GitHub</a>
+                    </div>
+                  <div>
+                </div>
+              </div>
+            `
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Turn Based Games Inc.`,
+        copyright: `Copyright © ${new Date().getFullYear()} UrTurn Inc.`,
       },
       prism: {
         theme: lightCodeTheme,
@@ -121,6 +106,6 @@ const config = {
     }),
   // This is required to make the docs site searchable https://github.com/praveenn77/docusaurus-lunr-search
   plugins: [require.resolve('docusaurus-lunr-search')]
- };
+};
 
 module.exports = config;

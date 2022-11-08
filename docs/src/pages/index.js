@@ -1,39 +1,51 @@
 import React from 'react';
 import clsx from 'clsx';
 import Layout from '@theme/Layout';
-import Link from '@docusaurus/Link';
+import { Stack } from '@mui/material'
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import styles from './index.module.css';
-import HomepageFeatures from '../components/HomepageFeatures';
+import ShowCase from '../components/ShowCase';
 
 function HomepageHeader() {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
   return (
-    <header className={clsx('hero hero--primary', styles.heroBanner)}>
-      <div className="container">
-        <h1 className="hero__title">{siteConfig.title}</h1>
+    <header className={clsx('hero hero', styles.heroBanner)}>
+      <Stack margin="auto" width="70%" justifyContent="center" alignItems="center"
+        sx={{ maxWidth: "1000px" }}
+      >
+        <h1 className="hero__title">
+          <a className="hero__hard-title">
+            {siteConfig.title.split(' ').slice(0, 3).join(' ')}
+          </a>
+          {' ' + siteConfig.title.split(' ').slice(3).join(' ')}
+        </h1>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
-        <div className={styles.buttons}>
-          <Link
-            className="button button--secondary button--lg"
-            to="/docs/getting-started/introduction">
-            Make your first game - 15 min ⏱️
-          </Link>
-        </div>
-      </div>
+        <Stack direction="row" padding={2} spacing={2}>
+          <a
+            className="button button--lg button--primary button--primary"
+            href="/docs/category/getting-started"
+          >
+            Get Started
+          </a>
+          <a
+            className="button button--lg button--outline button--secondary"
+            href="docs/"
+          >
+            Concepts
+          </a>
+        </Stack>
+      </Stack>
     </header>
   );
 }
 
 export default function Home() {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
   return (
-    <Layout
-      title={`Quickly build multiplayer games - only four functions! | ${siteConfig.title}`}
-      description="Quickly build multiplayer games - only four functions!">
+    <Layout title={`${siteConfig.organizationName}`}>
       <HomepageHeader />
       <main>
-        <HomepageFeatures />
+        <ShowCase />
       </main>
     </Layout>
   );
