@@ -1,6 +1,6 @@
 {
-  "name": "@urturn/template-react",
-  "version": "0.0.1",
+  "name": "@urturn/template-backend",
+  "version": "0.1.0",
   "description": "template UrTurn game with ReactJS",
   "main": "index.js",
   "private": true,
