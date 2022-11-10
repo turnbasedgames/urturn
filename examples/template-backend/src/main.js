@@ -1,6 +1,4 @@
 // tip: docs @ https://docs.urturn.app/docs/API/backend#functions
-// TODO:KEVIN docs for walkthrough on template files
-// TODO:WHYTF IS CRA NOT WORKIING
 
 function onRoomStart() {
   // TODO: implement what the state of the room looks like initially
