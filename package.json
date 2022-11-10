@@ -6,6 +6,7 @@
   },
   "workspaces": [
     "packages/*",
+    "templates/*",
     "examples/*",
     "examples/*/frontend",
     "docs"

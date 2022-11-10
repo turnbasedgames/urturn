@@ -8,19 +8,7 @@ import { isInteger, clearConsole } from '../src/util.js';
 import setupFrontends from '../src/setupFrontends.js';
 import setupServer from '../src/setupServer.js';
 
-async function main() {
-  program
-    // hide UrTurn dev only options
-    .addOption(new Option('--dev').hideHelp())
-    .addOption(new Option('--no-clear', "Don't clear console when starting the runner."))
-    .requiredOption('-f, --frontend-port <frontendPort>', 'Specify the port of where the frontend of your game is being hosted locally.')
-    // TODO: MAIN-86 we need to use a logger instead of console.log and add debug log outputs
-    // everywhere
-    .option('-d, --debug', 'print debug logs to stdout');
-
-  program.parse();
-  const options = program.opts();
-
+async function start(options) {
   // validate options
   if (!isInteger(options.frontendPort)) {
     throw new Error(`Invalid '--frontend-port' option provided: ${options.frontendUrl}`);
@@ -69,6 +57,30 @@ async function main() {
       process.exit();
     });
   });
+}
+
+async function init(destination) {
+}
+
+async function main() {
+  program
+    .command('init <destination>')
+    .description('initialize a new UrTurn Game')
+    .action(init);
+
+  program
+    .command('start', { isDefault: true })
+    .description('starts the local runner serving the console and backend')
+    // hide UrTurn dev only options
+    .addOption(new Option('--dev').hideHelp())
+    .addOption(new Option('--no-clear', "Don't clear console when starting the runner."))
+    .requiredOption('-f, --frontend-port <frontendPort>', 'Specify the port of where the frontend of your game is being hosted locally.')
+    // TODO: MAIN-86 we need to use a logger instead of console.log and add debug log outputs
+    // everywhere
+    .option('-d, --debug', 'print debug logs to stdout')
+    .action(start);
+
+  program.parse();
 }
 
 main();
