@@ -3,7 +3,7 @@ import {
 } from '@mui/material';
 import { Game } from '@urturn/types-common';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import CardMediaWithFallback from '../gameCard/CardMediaWithFallback';
 import ActiveUsersOverlay from '../gameCard/ActiveUsersOverlay';
 
@@ -12,8 +12,6 @@ interface GameListCardProps {
 }
 
 function GameListCard({ game }: GameListCardProps): React.ReactElement {
-  const navigate = useNavigate();
-
   return (
     <Card
       sx={{
@@ -26,7 +24,7 @@ function GameListCard({ game }: GameListCardProps): React.ReactElement {
       }}
       key={`GameCard-${game.id}`}
     >
-      <CardActionArea href={`/games/${game.id}`} onClick={() => navigate(`/games/${game.id}`)}>
+      <CardActionArea component={Link} to={`/games/${game.id}`}>
         <div>
           {
             game.activePlayerCount !== 0

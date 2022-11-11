@@ -2,7 +2,7 @@ import {
   Button, IconButton, LinearProgress, Stack, Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Game, User, DISCORD_URL, DOCS_URL,
 } from '@urturn/types-common';
@@ -72,13 +72,15 @@ function CreatorView({ user }: Props): React.ReactElement {
               </Typography>
               )}
               <IconButton
-                href={DISCORD_URL}
+                component={Link}
+                to={DISCORD_URL}
                 target="_blank"
               >
                 <SiDiscord />
               </IconButton>
               <IconButton
-                href={DOCS_URL}
+                component={Link}
+                to={DOCS_URL}
                 target="_blank"
               >
                 <SchoolIcon />
