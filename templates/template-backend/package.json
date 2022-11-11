@@ -23,6 +23,8 @@
   "homepage": "https://github.com/turnbasedgames/urturn#readme",
   "devDependencies": {
     "@urturn/runner": "*",
-    "concurrently": "^7.1.0"
+    "concurrently": "^7.1.0",
+    "cross-env": "^7.0.3",
+    "rollup": "^3.2.5"
   }
 }
