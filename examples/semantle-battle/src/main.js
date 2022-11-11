@@ -58,9 +58,9 @@ function onRoomStart() {
   };
 }
 
-function onPlayerJoin(plr, boardGame) {
-  // UrTurn provides the boardGame object which let's us know who is in the room
-  const { players, state } = boardGame;
+function onPlayerJoin(plr, roomState) {
+  // UrTurn provides the roomState object which let's us know who is in the room
+  const { players, state } = roomState;
 
   // set guess to an empty object
   state.plrToGuessToInfo[plr.id] = {};
@@ -74,9 +74,9 @@ function onPlayerJoin(plr, boardGame) {
   return { state };
 }
 
-function onPlayerMovePreGame(plr, move, boardGame) {
+function onPlayerMovePreGame(plr, move, roomState) {
   const { secret, forceEndGame } = move;
-  const { state, players } = boardGame;
+  const { state, players } = roomState;
   if (forceEndGame) {
     const timeoutMs = new Date(state.chooseSecretStartTime).getTime() + CHOOSE_SECRET_TIMEOUT_MS;
     const nowMs = Date.now();
@@ -160,8 +160,8 @@ function getScoreCard(guessToInfo) {
     }, initialScoreCard);
 }
 
-function onInGameTimeout(boardGame, plr, otherPlr) {
-  const { state } = boardGame;
+function onInGameTimeout(roomState, plr, otherPlr) {
+  const { state } = roomState;
   const timeoutMs = new Date(state.guessStartTime).getTime() + IN_GAME_TIMEOUT_MS;
   const nowMs = Date.now();
   if (nowMs < timeoutMs) {
@@ -198,11 +198,11 @@ function onInGameTimeout(boardGame, plr, otherPlr) {
   };
 }
 
-function onPlayerMoveInGame(plr, move, boardGame) {
+function onPlayerMoveInGame(plr, move, roomState) {
   const {
     guess, hintRequest, acceptHint, forceEndGame,
   } = move;
-  const { players, state } = boardGame;
+  const { players, state } = roomState;
   const { plrToSecretHash } = state;
   const otherPlayer = players.find(({ id }) => id !== plr.id);
 
@@ -211,7 +211,7 @@ function onPlayerMoveInGame(plr, move, boardGame) {
   }
 
   if (forceEndGame != null) {
-    return onInGameTimeout(boardGame, plr, otherPlayer);
+    return onInGameTimeout(roomState, plr, otherPlayer);
   }
 
   if (acceptHint != null) {
@@ -276,24 +276,24 @@ function onPlayerMoveInGame(plr, move, boardGame) {
   return { state };
 }
 
-function onPlayerMove(plr, move, boardGame) {
-  const { state } = boardGame;
+function onPlayerMove(plr, move, roomState) {
+  const { state } = roomState;
   const { status } = state;
 
   switch (status) {
     case Status.PreGame:
-      return onPlayerMovePreGame(plr, move, boardGame);
+      return onPlayerMovePreGame(plr, move, roomState);
     case Status.InGame:
-      return onPlayerMoveInGame(plr, move, boardGame);
+      return onPlayerMoveInGame(plr, move, roomState);
     case Status.EndGame:
       throw new Error('Game is over, you cannot continue playing.');
     default:
-      throw new Error("Game got corrupted, with invalid 'boardGame.state.status'. This should never happen, so contact developers.");
+      throw new Error("Game got corrupted, with invalid 'roomState.state.status'. This should never happen, so contact developers.");
   }
 }
 
-function onPlayerQuit(_, boardGame) {
-  const { state, players } = boardGame;
+function onPlayerQuit(_, roomState) {
+  const { state, players } = roomState;
   const { status } = state;
 
   // The only player left should be considered the winner by default if the game already started.

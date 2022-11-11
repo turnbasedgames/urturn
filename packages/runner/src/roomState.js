@@ -13,7 +13,7 @@ const FIELD_TYPES = {
    ),
 };
 
-export function filterBoardGame(state) {
+export function filterRoomState(state) {
   return CREATOR_VIEWABLE_FIELDS.reduce(
     (newState, key) => ({
       ...newState,
@@ -23,8 +23,8 @@ export function filterBoardGame(state) {
   );
 }
 
-export function validateBoardGame(state) {
-  const filteredState = filterBoardGame(state);
+export function validateRoomState(state) {
+  const filteredState = filterRoomState(state);
 
   Object.keys(state).forEach((key) => {
     if (!CREATOR_VIEWABLE_FIELDS.includes(key)) throw Error(`Invalid key: ${key} - maybe move into the 'state' field?`);
@@ -42,7 +42,7 @@ export function validateBoardGame(state) {
   });
 }
 
-export function applyBoardGameResult(state, result) {
+export function applyRoomStateResult(state, result) {
   return Object.keys(result).reduce((newState, key) => {
     if (CREATOR_EDITABLE_FIELDS.includes(key)) {
       return { ...newState, [key]: result[key] };
@@ -51,8 +51,8 @@ export function applyBoardGameResult(state, result) {
   }, { ...state, version: state.version + 1 });
 }
 
-export function newBoardGame(backendModule) {
-  const boardGame = {
+export function newRoomState(backendModule) {
+  const roomState = {
     joinable: true,
     finished: false,
     players: [],
@@ -60,16 +60,16 @@ export function newBoardGame(backendModule) {
     // Used to generate unique user ids with a simple counter. No new user will have the same id
     playerIdCounter: 0,
   };
-  return applyBoardGameResult(boardGame, backendModule.onRoomStart());
+  return applyRoomStateResult(roomState, backendModule.onRoomStart());
 }
 
-export function getPlayerById(id, boardGame) {
-  // Use a new object value so developers do not try to do plr === boardGame.players[x]
+export function getPlayerById(id, roomState) {
+  // Use a new object value so developers do not try to do plr === roomState.players[x]
   // Rather developers should be comparing the player ids instead
-  const plrRes = boardGame.players.find((plr) => plr.id === id);
+  const plrRes = roomState.players.find((plr) => plr.id === id);
   return plrRes == null ? undefined : { ...plrRes };
 }
 
-export function removePlayerById(id, boardGame) {
-  return { ...boardGame, players: boardGame.players.filter((p) => p.id !== id) };
+export function removePlayerById(id, roomState) {
+  return { ...roomState, players: roomState.players.filter((p) => p.id !== id) };
 }

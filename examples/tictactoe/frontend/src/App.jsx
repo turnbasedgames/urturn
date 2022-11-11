@@ -33,10 +33,10 @@ const getStatusMsg = ({
 };
 
 function App() {
-  const [boardGame, setBoardGame] = useState(client.getBoardGame() || {});
+  const [roomState, setRoomState] = useState(client.getRoomState() || {});
   useEffect(() => {
-    const onStateChanged = (newBoardGame) => {
-      setBoardGame(newBoardGame);
+    const onStateChanged = (newRoomState) => {
+      setRoomState(newRoomState);
     };
     events.on('stateChanged', onStateChanged);
     return () => {
@@ -68,8 +68,8 @@ function App() {
         [null, null, null],
       ],
     },
-  } = boardGame;
-  const { players = [], finished } = boardGame;
+  } = roomState;
+  const { players = [], finished } = roomState;
   const generalStatus = getStatusMsg({
     status, winner, finished, plrToMove: status === 'inGame' ? players[plrToMoveIndex] : null, curPlr,
   });
