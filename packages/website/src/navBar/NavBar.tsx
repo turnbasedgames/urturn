@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import {
   AppBar, Button, Toolbar, Typography, IconButton, Stack,
-  Link,
+  Link as MuiLink,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
-import ArticleIcon from '@mui/icons-material/Article';
-import { useNavigate } from 'react-router-dom';
+import SchoolIcon from '@mui/icons-material/School';
+import { Link } from 'react-router-dom';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { GiTwoCoins } from 'react-icons/gi';
 import { IoBuild } from 'react-icons/io5';
@@ -22,7 +22,6 @@ interface Props {
 }
 
 function NavBar({ user }: Props): React.ReactElement {
-  const navigate = useNavigate();
   const [urbuxModalOpen, setUrBuxModalOpen] = useState(false);
   const signedIn = (user != null) && !user.firebaseUser.isAnonymous;
   const firebaseUserDetermined = Boolean(auth.currentUser);
@@ -46,18 +45,16 @@ function NavBar({ user }: Props): React.ReactElement {
           </Typography>
         </Button>
         <IconButton
+          component={Link}
+          to="/develop"
           sx={{ display: { xs: 'none', sm: 'flex' } }}
-          onClick={() => {
-            navigate('/develop');
-          }}
         >
           <IoBuild />
         </IconButton>
         <Button
           color="inherit"
-          onClick={() => {
-            navigate('/profile');
-          }}
+          component={Link}
+          to="/profile"
           size="small"
         >
           <PersonIcon />
@@ -110,13 +107,13 @@ function NavBar({ user }: Props): React.ReactElement {
               alignItems="center"
               spacing={1}
             >
-              <Link href="/" color="textPrimary" underline="hover">
+              <MuiLink component={Link} to="/" color="textPrimary" underline="hover">
                 <Typography sx={{ display: { xs: 'none', sm: 'flex' } }}>
                   UrTurn
                 </Typography>
-              </Link>
+              </MuiLink>
               <IconButton href="https://docs.urturn.app/" target="_blank" rel="noopener">
-                <ArticleIcon />
+                <SchoolIcon />
               </IconButton>
             </Stack>
             <Search />

@@ -1,12 +1,12 @@
 import axios from 'axios';
-import { BoardGame, Room, RoomState } from '@urturn/types-common';
+import { RoomState, Room, LatestState } from '@urturn/types-common';
 
 export enum Errors {
   RoomNotJoinable = 'RoomNotJoinable',
   CreatorError = 'CreatorError',
 }
 
-export const generateBoardGame = (room: Room, roomState: RoomState): BoardGame => {
+export const generateRoomState = (room: Room, roomState: LatestState): RoomState => {
   const { players, joinable, finished } = room;
   const { state, version } = roomState;
 

@@ -4,19 +4,19 @@ export default {
       message: 'room start!',
     },
   }),
-  onPlayerJoin: ({ username }, boardGame) => ({
+  onPlayerJoin: ({ username }, roomState) => ({
     state: {
       message: `${username} joined!`,
-      last: boardGame,
+      last: roomState,
     },
   }),
-  onPlayerMove: ({ username }, move, boardGame) => {
+  onPlayerMove: ({ username }, move, roomState) => {
     // move.error triggers an error to be thrown immediately for testing purposes
     const { error } = move;
     if (error) {
       throw new Error(error);
     }
-    // This is duplicated from src/boardGame.js CREATOR_EDITABLE_FIELDS
+    // This is duplicated from src/roomState.js CREATOR_EDITABLE_FIELDS
     // TODO: we can use that variable if this file turns into an es6 file
     return ['joinable', 'finished', 'state'].reduce((prev, field) => {
       if (field in move) {
@@ -28,14 +28,14 @@ export default {
       state: {
         message: `${username} made move!`,
         move,
-        last: boardGame,
+        last: roomState,
       },
     });
   },
-  onPlayerQuit: ({ username }, boardGame) => ({
+  onPlayerQuit: ({ username }, roomState) => ({
     state: {
       message: `${username} left!`,
-      last: boardGame,
+      last: roomState,
     },
   }),
 };

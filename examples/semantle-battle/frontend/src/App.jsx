@@ -16,10 +16,10 @@ const CHOOSE_SECRET_TIMEOUT_MS = 30000; // 30 seconds
 const IN_GAME_TIMEOUT_MS = 300000; // 5 minutes
 
 function App() {
-  const [boardGame, setBoardGame] = useState(client.getBoardGame() || {});
+  const [roomState, setRoomState] = useState(client.getRoomState() || {});
   useEffect(() => {
-    const onStateChanged = (newBoardGame) => {
-      setBoardGame(newBoardGame);
+    const onStateChanged = (newRoomState) => {
+      setRoomState(newRoomState);
     };
     events.on('stateChanged', onStateChanged);
     return () => {
@@ -50,10 +50,10 @@ function App() {
       chooseSecretStartTime,
       guessStartTime,
     } = {},
-  } = boardGame;
+  } = roomState;
 
-  const { players = [], finished } = boardGame;
-  const dataLoading = boardGame == null || curPlr == null;
+  const { players = [], finished } = roomState;
+  const dataLoading = roomState == null || curPlr == null;
   const spectator = !players.some(({ id }) => id === curPlr?.id);
   const generalStatus = getStatusMsg({
     status, winner, finished, curPlr, players, plrToSecretHash, spectator,

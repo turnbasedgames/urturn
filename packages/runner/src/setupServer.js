@@ -6,9 +6,9 @@ import { Server } from 'socket.io';
 import { watchFile } from 'fs';
 import { userBackend } from '../config/paths.js';
 import {
-  newBoardGame, applyBoardGameResult, filterBoardGame, getPlayerById, removePlayerById,
-  validateBoardGame,
-} from './boardGame.js';
+  newRoomState, applyRoomStateResult, filterRoomState, getPlayerById, removePlayerById,
+  validateRoomState,
+} from './roomState.js';
 import requireUtil from './requireUtil.cjs';
 
 const backendHotReloadIntervalMs = 100;
@@ -36,7 +36,7 @@ const getLatestBackendModule = async (backendPath) => {
 async function setupServer({ apiPort }) {
   const app = express();
   const httpServer = createServer(app);
-  let boardGame;
+  let roomState;
   let backendModule;
   const io = new Server(httpServer, {
     serveClient: false,
@@ -45,7 +45,7 @@ async function setupServer({ apiPort }) {
     },
   });
   io.on('connection', (socket) => {
-    socket.emit('stateChanged', boardGame);
+    socket.emit('stateChanged', roomState);
   });
 
   const startGame = async () => {
@@ -57,8 +57,8 @@ async function setupServer({ apiPort }) {
       console.error("Unable to start game because 'onRoomStart' function is not exported!");
       return;
     }
-    boardGame = newBoardGame(backendModule);
-    io.sockets.emit('stateChanged', boardGame);
+    roomState = newRoomState(backendModule);
+    io.sockets.emit('stateChanged', roomState);
   };
 
   const restartGame = async () => {
@@ -83,59 +83,59 @@ async function setupServer({ apiPort }) {
   });
 
   app.post('/player', (_, res) => {
-    let boardGameContender = JSON.parse(JSON.stringify(boardGame));
-    if (!boardGameContender.joinable) {
-      res.status(StatusCodes.BAD_REQUEST).json({ message: `Cannot add player to this room because it is not joinable (boardGame.joinable=${boardGameContender.joinable}).` });
+    let roomStateContender = JSON.parse(JSON.stringify(roomState));
+    if (!roomStateContender.joinable) {
+      res.status(StatusCodes.BAD_REQUEST).json({ message: `Cannot add player to this room because it is not joinable (roomState.joinable=${roomStateContender.joinable}).` });
       return;
     }
 
-    const username = `user_${boardGame.playerIdCounter}`;
-    const id = `id_${boardGame.playerIdCounter}`;
+    const username = `user_${roomState.playerIdCounter}`;
+    const id = `id_${roomState.playerIdCounter}`;
     const player = {
       id, username,
     };
-    boardGameContender.playerIdCounter += 1;
-    boardGameContender.players.push(player);
-    boardGameContender = applyBoardGameResult(
-      boardGameContender,
-      backendModule.onPlayerJoin(player, filterBoardGame(boardGameContender)),
+    roomStateContender.playerIdCounter += 1;
+    roomStateContender.players.push(player);
+    roomStateContender = applyRoomStateResult(
+      roomStateContender,
+      backendModule.onPlayerJoin(player, filterRoomState(roomStateContender)),
     );
-    io.sockets.emit('stateChanged', boardGameContender);
-    boardGame = boardGameContender;
+    io.sockets.emit('stateChanged', roomStateContender);
+    roomState = roomStateContender;
     res.status(StatusCodes.OK).json(player);
   });
 
   app.delete('/player/:id', (req, res) => {
     const { id } = req.params;
-    const player = getPlayerById(id, boardGame);
+    const player = getPlayerById(id, roomState);
     if (player === undefined) {
       res.status(StatusCodes.BAD_REQUEST).json({ message: `${id} is not in the board game` });
       return;
     }
-    let boardGameContender = JSON.parse(JSON.stringify(boardGame));
-    boardGameContender = removePlayerById(id, boardGameContender);
-    boardGameContender = applyBoardGameResult(
-      boardGameContender,
-      backendModule.onPlayerQuit(player, filterBoardGame(boardGameContender)),
+    let roomStateContender = JSON.parse(JSON.stringify(roomState));
+    roomStateContender = removePlayerById(id, roomStateContender);
+    roomStateContender = applyRoomStateResult(
+      roomStateContender,
+      backendModule.onPlayerQuit(player, filterRoomState(roomStateContender)),
     );
-    io.sockets.emit('stateChanged', boardGameContender);
-    boardGame = boardGameContender;
+    io.sockets.emit('stateChanged', roomStateContender);
+    roomState = roomStateContender;
     res.sendStatus(StatusCodes.OK);
   });
 
   app.post('/player/:id/move', (req, res) => {
     const { id } = req.params;
-    let boardGameContender = JSON.parse(JSON.stringify(boardGame));
-    const player = getPlayerById(id, boardGameContender);
+    let roomStateContender = JSON.parse(JSON.stringify(roomState));
+    const player = getPlayerById(id, roomStateContender);
     if (player === undefined) {
       res.status(StatusCodes.BAD_REQUEST).json({ message: `${id} is not in the board game` });
       return;
     }
     const move = req.body;
     try {
-      boardGameContender = applyBoardGameResult(
-        boardGameContender,
-        backendModule.onPlayerMove(player, move, filterBoardGame(boardGameContender)),
+      roomStateContender = applyRoomStateResult(
+        roomStateContender,
+        backendModule.onPlayerMove(player, move, filterRoomState(roomStateContender)),
       );
     } catch (err) {
       res.status(StatusCodes.BAD_REQUEST).json({
@@ -147,28 +147,28 @@ async function setupServer({ apiPort }) {
       });
       return;
     }
-    io.sockets.emit('stateChanged', boardGameContender);
-    boardGame = boardGameContender;
+    io.sockets.emit('stateChanged', roomStateContender);
+    roomState = roomStateContender;
     res.sendStatus(StatusCodes.OK);
   });
 
   app.get('/state', (req, res) => {
-    res.status(StatusCodes.OK).json(filterBoardGame(boardGame));
+    res.status(StatusCodes.OK).json(filterRoomState(roomState));
   });
 
   app.post('/state', (req, res) => {
-    let boardGameContender;
+    let roomStateContender;
 
     try {
-      boardGameContender = JSON.parse(JSON.stringify(req.body));
-      validateBoardGame(boardGameContender);
+      roomStateContender = JSON.parse(JSON.stringify(req.body));
+      validateRoomState(roomStateContender);
     } catch (err) {
       res.status(StatusCodes.BAD_REQUEST).json({ message: err.message });
       return;
     }
 
-    io.sockets.emit('stateChanged', boardGameContender);
-    boardGame = boardGameContender;
+    io.sockets.emit('stateChanged', roomStateContender);
+    roomState = roomStateContender;
     res.sendStatus(StatusCodes.OK);
   });
 

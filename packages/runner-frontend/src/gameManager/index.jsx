@@ -4,7 +4,7 @@ import {
   Paper, MenuItem, MenuList, LinearProgress, Snackbar, Alert, Fade,
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import ArticleIcon from '@mui/icons-material/Article';
+import SchoolIcon from '@mui/icons-material/School';
 import ClearIcon from '@mui/icons-material/Clear';
 import ReactJson from 'react-json-view';
 import Editor from '@monaco-editor/react';
@@ -64,7 +64,7 @@ function GameManager() {
           </Typography>
           <Stack spacing={1} direction="row">
             <IconButton size="small" href="https://docs.urturn.app/" target="_blank" rel="noopener">
-              <ArticleIcon />
+              <SchoolIcon />
             </IconButton>
             {!editMode && (
             <Button

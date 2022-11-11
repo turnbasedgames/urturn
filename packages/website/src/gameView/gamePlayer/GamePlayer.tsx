@@ -4,14 +4,14 @@ import React, {
 import { useNavigate, useParams } from 'react-router-dom';
 import { LinearProgress, Typography } from '@mui/material';
 import {
-  BoardGame,
+  RoomState,
   Game, Room, RoomUser, User, WatchRoomRes,
 } from '@urturn/types-common';
 
 import { RoomPlayer } from '@urturn/ui-common';
 import { useSnackbar } from 'notistack';
 import {
-  joinRoom, getRoom, makeMove, generateBoardGame, quitRoom,
+  joinRoom, getRoom, makeMove, generateRoomState, quitRoom,
 } from '../../models/room';
 import { UserContext } from '../../models/user';
 import logger from '../../logger';
@@ -37,7 +37,7 @@ function getIframeSrc(game: Game): string {
 function GamePlayer(): React.ReactElement {
   const { roomId } = useParams();
   const [room, setRoom] = useState<Room | undefined>();
-  const [boardGame, setBoardGame] = useState<BoardGame | undefined>();
+  const [roomState, setRoomState] = useState<RoomState | undefined>();
   const userContext = useContext(UserContext);
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
@@ -74,12 +74,12 @@ function GamePlayer(): React.ReactElement {
       return () => {};
     }
 
-    function handleNewBoardGame(newBoardGame: any): void {
-      childClient.stateChanged(newBoardGame);
-      setBoardGame(newBoardGame);
+    function handleNewRoomState(newRoomState: any): void {
+      childClient.stateChanged(newRoomState);
+      setRoomState(newRoomState);
     }
 
-    socket.on('room:latestState', handleNewBoardGame);
+    socket.on('room:latestState', handleNewRoomState);
 
     // A socket can only watch one room in it's lifetime
     socket.emit('watchRoom', { roomId }, (res: null | WatchRoomRes) => {
@@ -87,10 +87,10 @@ function GamePlayer(): React.ReactElement {
         logger.error('error trying to watch room', res.error);
       }
     });
-    handleNewBoardGame(generateBoardGame(room, room.latestState));
+    handleNewRoomState(generateRoomState(room, room.latestState));
 
     return () => {
-      socket.off('room:latestState', handleNewBoardGame);
+      socket.off('room:latestState', handleNewRoomState);
     };
   }, [childClient, socket]);
 
@@ -119,9 +119,9 @@ function GamePlayer(): React.ReactElement {
       }}
       quitRoom={async () => {
         try {
-          const noOp = boardGame == null
-           || boardGame.finished
-           || boardGame.players.every(({ id }: RoomUser) => id !== userContext.user?.id);
+          const noOp = roomState == null
+           || roomState.finished
+           || roomState.players.every(({ id }: RoomUser) => id !== userContext.user?.id);
           if (!noOp) {
             await quitRoom(room.id);
           }
