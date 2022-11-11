@@ -1,10 +1,3 @@
-/**
- * Copyright (c) 2017-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 import React, { useRef, useCallback, useState } from "react";
 import classnames from "classnames";
 import { useHistory } from "@docusaurus/router";
@@ -57,7 +50,7 @@ const Search = props => {
       Promise.all([
         getSearchDoc(),
         getLunrIndex(),
-        import("./lib/DocSearch"),
+        import("./DocSearch"),
         import("./algolia.css")
       ]).then(([searchDocs, searchIndex, { default: DocSearch }]) => {
         if (searchDocs.length === 0) {
@@ -86,7 +79,7 @@ const Search = props => {
   }
 
   return (
-    <div className="navbar__search" style={{marginLeft: "10px"}} key="search-box">
+    <div className="navbar__search" key="search-box">
       <span
         aria-label="expand searchbar"
         role="button"
