@@ -48,7 +48,7 @@ function isEndGame(board, plrs) {
  *  id: string, unique player id
  *  username: string, the player's display name
  * }
- * @type BoardGame: json object, in the format of
+ * @type RoomState: json object, in the format of
  * {
  *  // creator read write fields
  *  state: json object, which represents any board game state
@@ -59,7 +59,7 @@ function isEndGame(board, plrs) {
  *  players: [Player], array of player objects
  *  version: Number, an integer value that increases by 1 with each state change
  * }
- * @type BoardGameResult: json object, in the format of
+ * @type RoomStateResult: json object, in the format of
  * {
  *  // fields that creator wants to overwrite
  *  state?: json object, which represents any board game state
@@ -70,7 +70,7 @@ function isEndGame(board, plrs) {
 
 /**
  * onRoomStart
- * @returns {BoardGameResult}
+ * @returns {RoomStateResult}
  */
 function onRoomStart() {
   return {
@@ -89,8 +89,8 @@ function onRoomStart() {
 /**
  * onPlayerJoin
  * @param {Player} player, represents the player that is attempting to join this game
- * @param {BoardGame} currentGame
- * @returns {BoardGameResult}
+ * @param {RoomState} currentGame
+ * @returns {RoomStateResult}
  */
 function onPlayerJoin(player, roomState) {
   const { players, state } = roomState;
@@ -111,15 +111,15 @@ function onPlayerJoin(player, roomState) {
  * onPlayerMove
  * @param {Player} player, the player that is attempting to make a move
  * @param {*} move json object, controlled the creator that represents the player's move
- * @param {BoardGame} currentGame
- * @returns {BoardGameResult}
+ * @param {RoomState} currentGame
+ * @returns {RoomStateResult}
  */
-function onPlayerMove(player, move, boardGame) {
-  const { state, players } = boardGame;
+function onPlayerMove(player, move, roomState) {
+  const { state, players } = roomState;
   const { board, plrToMoveIndex } = state;
 
   // VALIDATIONS
-  // boardgame must be in the game
+  // roomState must be in game
   const { x, y } = move;
   if (state.status !== Status.InGame) {
     throw new Error("game is not in progress, can't make move!");
@@ -149,11 +149,11 @@ function onPlayerMove(player, move, boardGame) {
 /**
  * onPlayerQuit
  * @param {Player} player, the player that is attempting to quit the game
- * @param {BoardGame} currentGame
- * @returns {BoardGameResult}
+ * @param {RoomState} currentGame
+ * @returns {RoomStateResult}
  */
-function onPlayerQuit(player, boardGame) {
-  const { state, players } = boardGame;
+function onPlayerQuit(player, roomState) {
+  const { state, players } = roomState;
   state.status = Status.EndGame;
   if (players.length === 1) {
     const [winner] = players;
