@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import client from '@urturn/client'
+import styles from './Game.module.css';
 
 function Game() {
   const [roomState, setRoomState] = useState(client.getRoomState() || {});
@@ -30,8 +31,8 @@ function Game() {
 
   return (
     <div>
-      <h1>TODO: Implement your game UI here!</h1>
-      <p>Current Plr: {curPlr?.username}</p>
+      <h1 className={styles['game-title']}>TODO: Implement your game UI here!</h1>
+      <p className={styles.description}>Current Plr: {curPlr?.username}</p>
     </div>
   );
 }
