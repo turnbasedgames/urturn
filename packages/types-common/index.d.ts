@@ -21,7 +21,7 @@ export interface MoveResult {
   error: any
 }
 
-export interface RoomState {
+export interface LatestState {
   room: string
   state: any
   version: number
@@ -35,10 +35,10 @@ export interface Room {
   players: RoomUser[]
   finished: boolean
   joinable: boolean
-  latestState: RoomState
+  latestState: LatestState
 }
 
-export interface BoardGame {
+export interface RoomState {
   players: RoomUser[]
   joinable: boolean
   finished: boolean

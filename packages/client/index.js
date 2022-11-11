@@ -4,24 +4,29 @@ const EventEmitter = require('./src/util/eventEmitter');
 
 const eventEmitter = new EventEmitter();
 
-let curBoardGame = null;
-const setBoardGameWithContender = (contender) => {
-  if (!curBoardGame || (curBoardGame.version < contender.version)) {
-    curBoardGame = contender;
+let curRoomState = null;
+const setRoomStateWithContender = (contender) => {
+  if (!curRoomState || (curRoomState.version < contender.version)) {
+    curRoomState = contender;
     eventEmitter.emit('stateChanged', contender);
   }
 };
 
 const connection = connectToParent({
   methods: {
-    stateChanged(boardGame) {
-      setBoardGameWithContender(boardGame);
+    stateChanged(roomState) {
+      setRoomStateWithContender(roomState);
     },
   },
 });
 
 function getBoardGame() {
-  return curBoardGame;
+  console.warn('client.getBoardGame() is deprecated. Use client.getRoomState() instead.');
+  return curRoomState;
+}
+
+function getRoomState() {
+  return curRoomState;
 }
 
 async function getLocalPlayer() {
@@ -35,5 +40,5 @@ async function makeMove(move) {
 }
 
 module.exports = {
-  getBoardGame, getLocalPlayer, makeMove, events: eventEmitter,
+  getRoomState, getBoardGame, getLocalPlayer, makeMove, events: eventEmitter,
 };

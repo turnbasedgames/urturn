@@ -294,11 +294,11 @@ Resulting [`roomState`](/docs/API/backend#roomstate) (changes are highlighted):
   <TabItem value="onRoomStart" label="onRoomStart code">
 
 ```js title="index.js"
-function onPlayerMove(player, move, boardGame) {
-  const { state, players } = boardGame;
+function onPlayerMove(player, move, roomState) {
+  const { state, players } = roomState;
   const { board, plrToMoveIndex } = state;
   const { x, y } = move;
-  if (state.status !== Status.InGame) { // boardgame must be in the game (clients may spoof and send onPlayerMove with whatever values they want!)
+  if (state.status !== Status.InGame) { // must be in the game (clients may spoof and send onPlayerMove with whatever values they want!)
     throw new Error("game is not in progress, can't make move!"); // error will be propagated to the client.makeMove() call
   }
   if (players[plrToMoveIndex].id !== player.id) { // make sure it is the player’s turn
