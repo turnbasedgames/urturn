@@ -2,11 +2,16 @@
 import { program, Option } from 'commander';
 import chalk from 'chalk';
 import open from 'open';
-import { exec } from 'child_process';
+import { execSync } from 'child_process';
 import getPort from 'get-port';
+import inquirer from 'inquirer';
+import degit from 'degit';
 import { isInteger, clearConsole } from '../src/util.js';
 import setupFrontends from '../src/setupFrontends.js';
 import setupServer from '../src/setupServer.js';
+
+const templateBackendRepo = 'turnbasedgames/urturn/templates/template-backend';
+const templateFrontendRepoPrefix = 'turnbasedgames/urturn/templates/template-';
 
 async function start(options) {
   // validate options
@@ -59,13 +64,48 @@ async function start(options) {
   });
 }
 
-async function init(destination) {
+async function init(destination, { commit }) {
+  const { frontendType } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'frontendType',
+      message: "Which game frontend do you want to use? (don't see your frontend, add it in a PR!)",
+      default: 'ReactJS',
+      choices: [
+        { name: 'ReactJS', value: 'react' },
+        { name: 'None', value: 'none' },
+      ],
+    },
+  ]);
+  const commitSuffix = commit == null ? '' : `#${commit}`;
+  const templateFrontendPath = templateFrontendRepoPrefix + frontendType + commitSuffix;
+  const templateBackendPath = templateBackendRepo + commitSuffix;
+  const templateBackendEmitter = degit(templateBackendPath, {
+    cache: true,
+    force: true,
+    verbose: true,
+  });
+  const templateFrontendEmitter = degit(templateFrontendPath, {
+    cache: true,
+    force: true,
+    verbose: true,
+  });
+
+  await templateBackendEmitter.clone(destination);
+  await templateFrontendEmitter.clone(`${destination}/frontend`);
+
+  // TODO:KEVIN install all of our dependencies
+  console.log('Installing dependencies!');
+  console.log('Successfully created template UrTurn game. Happy hacking!');
+  console.log("Don't forget to share your creations in our discord! https://discord.gg/myWacjdb5S");
 }
 
 async function main() {
   program
     .command('init <destination>')
     .description('initialize a new UrTurn Game')
+    // hide UrTurn dev only options
+    .addOption(new Option('--commit <commit>', 'custom commit or branch to run init from').hideHelp())
     .action(init);
 
   program
