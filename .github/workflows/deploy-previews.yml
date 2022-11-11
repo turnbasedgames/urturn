@@ -37,10 +37,10 @@ jobs:
           path: .
           key: ${{ github.run_id }}-build
           restore-keys: ${{ github.run_id }}-build
-      - name: all packages need to have lint script defined in package.json
-        run: ./bin/every-package-json.sh ".scripts.lint != null"
-      - name: all packages need to have lint:fix script defined in package.json
-        run: ./bin/every-package-json.sh '.scripts."lint:fix" != null'
+      - name: all packages (except templates/) need to have lint script defined in package.json
+        run: ./bin/every-package-json.sh ".scripts.lint != null" '/templates/'
+      - name: all packages (except templates/) need to have lint:fix script defined in package.json
+        run: ./bin/every-package-json.sh '.scripts."lint:fix" != null' '/templates/'
       - name: checking if packages are formatted properly (lint)
         run: npx lerna run lint
   preview_docs:
