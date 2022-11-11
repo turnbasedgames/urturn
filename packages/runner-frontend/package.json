@@ -62,6 +62,5 @@
     "react-router-dom": "^6.4.1",
     "react-scripts": "5.0.0",
     "socket.io-client": "^4.5.0"
-  },
-  "gitHead": "cd0626a6cc5f46d6b01aa56ca6725af33946f6e8"
+  }
 }
