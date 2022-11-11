@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "build": "rollup -c",
-    "dev": "concurrently \"npm run dev:runner\" \"npm run dev:frontend\"",
+    "dev": "concurrently \"npm run dev:rollup\" \"npm run dev:runner\" \"npm run dev:frontend\"",
     "dev:runner": "runner --frontend-port 3000",
     "dev:rollup": "rollup -c -w",
     "dev:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start",

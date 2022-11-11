@@ -2,7 +2,7 @@
 import { program, Option } from 'commander';
 import chalk from 'chalk';
 import open from 'open';
-import { execSync } from 'child_process';
+import { exec, execSync } from 'child_process';
 import getPort from 'get-port';
 import inquirer from 'inquirer';
 import degit from 'degit';
@@ -80,24 +80,19 @@ async function init(destination, { commit }) {
   const commitSuffix = commit == null ? '' : `#${commit}`;
   const templateFrontendPath = templateFrontendRepoPrefix + frontendType + commitSuffix;
   const templateBackendPath = templateBackendRepo + commitSuffix;
-  const templateBackendEmitter = degit(templateBackendPath, {
-    cache: true,
-    force: true,
-    verbose: true,
-  });
-  const templateFrontendEmitter = degit(templateFrontendPath, {
-    cache: true,
-    force: true,
-    verbose: true,
-  });
+  const templateBackendEmitter = degit(templateBackendPath);
+  const templateFrontendEmitter = degit(templateFrontendPath);
 
   await templateBackendEmitter.clone(destination);
-  await templateFrontendEmitter.clone(`${destination}/frontend`);
-
-  // TODO:KEVIN install all of our dependencies
-  console.log('Installing dependencies!');
-  console.log('Successfully created template UrTurn game. Happy hacking!');
+  const frontendPath = `${destination}/frontend`;
+  await templateFrontendEmitter.clone(frontendPath);
+  const extraBackendPackages = ['@urturn/runner'];
+  const extraFrontendPackages = ['@urturn/client'];
+  execSync(`npm i ${extraBackendPackages.join(' ')} --no-audit --save --save-exact --loglevel error`, { cwd: destination, stdio: 'inherit' });
+  execSync(`npm i ${extraFrontendPackages.join(' ')} --no-audit --save --save-exact --loglevel error`, { cwd: frontendPath, stdio: 'inherit' });
+  console.log('\n\nSuccessfully created template UrTurn game. Happy hacking!');
   console.log("Don't forget to share your creations in our discord! https://discord.gg/myWacjdb5S");
+  console.log(`Try running "cd ${destination} && npm run dev".`);
 }
 
 async function main() {
