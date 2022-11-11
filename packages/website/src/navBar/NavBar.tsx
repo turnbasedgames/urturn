@@ -4,7 +4,7 @@ import {
   Link as MuiLink,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
-import ArticleIcon from '@mui/icons-material/Article';
+import SchoolIcon from '@mui/icons-material/School';
 import { Link } from 'react-router-dom';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { GiTwoCoins } from 'react-icons/gi';
@@ -113,7 +113,7 @@ function NavBar({ user }: Props): React.ReactElement {
                 </Typography>
               </MuiLink>
               <IconButton href="https://docs.urturn.app/" target="_blank" rel="noopener">
-                <ArticleIcon />
+                <SchoolIcon />
               </IconButton>
             </Stack>
             <Search />
