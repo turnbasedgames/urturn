@@ -30,8 +30,8 @@ function Game() {
 
   return (
     <div>
-      <h1>TODO: Implement your game UI here!</h1>
-      <p>Current Plr: {curPlr?.username}</p>
+      <h1 color="white">TODO: Implement your game UI here!</h1>
+      <p color="white">Current Plr: {curPlr?.username}</p>
     </div>
   );
 }
