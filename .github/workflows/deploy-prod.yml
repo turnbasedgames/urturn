@@ -64,6 +64,8 @@ jobs:
           channelId: live
           projectId: board-games-prod
           entryPoint: packages/website
+
+# example game jobs
   deploy_tictactoe:
     needs: build
     name: Deploy TicTacToe

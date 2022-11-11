@@ -1,21 +1,5 @@
 # Concepts
 
-## Project Folder/File Structure
-
-The commit that is deployed in productions needs to look like:
-
-- `frontend/build` all the built html, css, javascript files go here
-- `index.js` your entire backend in one file
-- `thumbnail.png` the rendered thumbnail for your game throughout the UrTurn platform
-
-Here is an example for [TicTacToe](https://github.com/turnbasedgames/urturn/tree/published-tictactoe).
-
-:::success
-
-This is easily achieved using [GitHub Actions](https://docs.github.com/en/actions). Steps in [getting started](/docs/category/getting-started) should automatically generated this for you.
-
-:::
-
 ## RoomState
 
 All room states follow a structure like this:

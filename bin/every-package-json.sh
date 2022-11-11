@@ -9,10 +9,14 @@
 # 
 # Exit non-zero if any packages have over 10 scripts defined
 # ./every-package-json.sh ".script | length >= 10"
+#
+# Exit non-zero if any packages have over 10 scripts defined (ignore /templates/ files)
+# ./every-package-json.sh ".script | length >= 10" "/templates/"
 
 JQ_FILTER=$1
+GREP_FILTER_OUT=${2:-"$^"}
 
-for package in $(npx lerna list -l -a --ndjson --loglevel error | jq -r .location)
+for package in $(npx lerna list -l -a --ndjson --loglevel error | jq -r .location | grep -v "$GREP_FILTER_OUT")
 do
   if [[ $(jq "${JQ_FILTER}" < "${package}/package.json") != "true" ]]
   then

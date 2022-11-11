@@ -1,0 +1,28 @@
+{
+  "name": "@urturn/template-backend",
+  "version": "0.1.0",
+  "description": "template UrTurn game with ReactJS",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "concurrently \"npm run dev:rollup\" \"npm run dev:runner\" \"npm run dev:frontend\"",
+    "dev:runner": "runner --frontend-port 3000",
+    "dev:rollup": "rollup -c -w",
+    "dev:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/turnbasedgames/urturn.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/turnbasedgames/urturn/issues"
+  },
+  "homepage": "https://github.com/turnbasedgames/urturn#readme",
+  "devDependencies": {
+    "@urturn/runner": "*",
+    "concurrently": "^7.1.0"
+  }
+}

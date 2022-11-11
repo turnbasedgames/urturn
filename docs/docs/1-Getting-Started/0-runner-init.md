@@ -1,19 +1,41 @@
 ---
-description: 🚧 Quickly generate a new UrTurn Game. Coming soon...
+description: Quickly generate a new UrTurn Game
 ---
 
 # Generating a new UrTurn Game
 
-:::caution
+## Create Game
 
-Work in progress. Join the early release wait list on [discord](https://discord.gg/myWacjdb5S), so we can notify you when we add support.
+```bash
+npx @urturn/runner init my-game # generates new game files
+cd my-game
+npm run dev # run the game locally
+```
+
+## File/Folder structure
+
+```bash
+game
+│   package.json # npm package specification for dependencies on your backend (includes @urturn/runner for local development)
+│
+└───.github/workflows # contains important GitHub actions that create a build artifact for UrTurn to use
+│
+└───src
+│   │   main.js # backend functions (e.g. onRoomStart, onPlayerMove, etc.)
+│   
+└───frontend # holds all the files related to your game frontend
+    │   package.json  # npm package specification for dependencies on your frontend (includes @urturn/client)
+    │   ...your frontend files
+```
+
+## GitHub Actions in `.github/workflows`
+
+:::success
+
+No [GitHub Actions](https://github.com/features/actions) experience needed!
+
+We've already done the hard work for you. When you ran `npx @urturn/runner init my-game`, the correct github actions were created for you.
 
 :::
 
-To get started, run:
-
-```bash
-
-npx @urturn/runner --init
-
-```
+When you `push` to `main` branch of your repo on GitHub, the actions will automatically create the correct [Artifact structure](/docs/Getting-Started/Deploying-Your-Game#build-artifact-spec), which you will use to [deploy to production](/docs/Getting-Started/Deploying-Your-Game).
