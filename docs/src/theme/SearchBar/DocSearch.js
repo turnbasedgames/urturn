@@ -5,16 +5,6 @@ import templates from "./templates";
 import utils from "./utils";
 import $ from "autocomplete.js/zepto";
 
-/**
- * Adds an autocomplete dropdown to an input field
- * @function DocSearch
- * @param  {Object} options.searchDocs Search Documents
- * @param  {Object} options.searchIndex Lune searchIndexes
- * @param  {string} options.inputSelector  CSS selector that targets the input
- * value.
- * @param  {Object} [options.autocompleteOptions] Options to pass to the underlying autocomplete instance
- * @return {Object}
- */
 class DocSearch {
     constructor({
         searchDocs,
