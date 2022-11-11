@@ -3,6 +3,7 @@
   "version": "0.1.6",
   "description": "",
   "main": "index.js",
+  "private": true,
   "scripts": {
     "build": "rollup -c && mkdir -p build/frontend && cp index.js build/index.js && cp thumbnail.png build/thumbnail.png || cp -r frontend/build build/frontend/build",
     "dev": "concurrently \"npm run dev:rollup\" \"npm run dev:runner\" \"npm run dev:frontend\"",
@@ -33,5 +34,6 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
     "rollup": "^3.2.3"
-  }
+  },
+  "gitHead": "144b9f893ce13ef2c3ce32d4a8074f404e2742ce"
 }
