@@ -21,6 +21,7 @@ interface PlayerMenuProps {
 function PlayerMenu({ quitRoom, players, curPlayer }: PlayerMenuProps): React.ReactElement {
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [playersModalOpen, setPlayersModalOpen] = useState(false);
+  const spectating = players.every(({ id }) => id !== curPlayer.id);
   return (
     <ThemeProvider theme={Theme}>
       <Modal
@@ -56,18 +57,40 @@ function PlayerMenu({ quitRoom, players, curPlayer }: PlayerMenuProps): React.Re
       <Modal
         open={playersModalOpen}
         onClose={() => setPlayersModalOpen(false)}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
       >
-        <Paper sx={{ padding: 1 }}>
-          <Stack>
-            <Typography color="text.secondary">Players</Typography>
+        <Card
+          variant="outlined"
+          sx={{
+            padding: 1,
+            minWidth: '300px',
+            maxHeight: '70%',
+            overflowY: 'auto',
+          }}
+        >
+          <CardHeader
+            title="Players"
+            subheader={spectating ? 'Spectating' : 'Playing with'}
+            sx={{ padding: 1 }}
+          />
+          <Stack spacing={1}>
             {players.map(({ username, id }, idx) => (
-              <Typography key={id}>
-                {`${idx + 1}. ${username}${id === curPlayer.id ? ' (you)' : ''}`}
-              </Typography>
+              <Card variant="outlined">
+                <CardHeader
+                  title={`${idx + 1}. ${username}${id === curPlayer.id ? ' (you)' : ''}`}
+                  titleTypographyProps={{ variant: 'h6' }}
+                  subheader={id}
+                  subheaderTypographyProp={{ variant: 'subtitle2' }}
+                  sx={{ padding: 1 }}
+                />
+              </Card>
             ))}
           </Stack>
-        </Paper>
+        </Card>
       </Modal>
       <Paper
         sx={{
