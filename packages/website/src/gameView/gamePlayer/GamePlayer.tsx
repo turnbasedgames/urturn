@@ -94,7 +94,13 @@ function GamePlayer(): React.ReactElement {
     };
   }, [childClient, socket]);
 
-  if (room == null || userContext.user == null || socket == null || !socketConnected) {
+  if (
+    room == null
+    || userContext.user == null
+    || socket == null
+    || !socketConnected
+    || roomState == null
+  ) {
     return (<LinearProgress />);
   }
   if (roomId == null || room.game == null) {
@@ -133,6 +139,7 @@ function GamePlayer(): React.ReactElement {
         }
         navigate(`/games${(room.game != null) ? `/${room.game.id}` : ''}`);
       }}
+      players={roomState.players}
     />
   );
 }
