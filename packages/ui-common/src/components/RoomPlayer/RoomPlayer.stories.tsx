@@ -56,4 +56,8 @@ Default.args = {
   setChildClient: (childClient: any) => logger.info('setting child client', { childClient }),
   makeMove: async (move: any) => logger.info('make move called', { move }),
   quitRoom: async () => logger.info('attempting to quit room'),
+  players: [
+    { id: defaultUser.id, username: defaultUser.username },
+    { id: 'user-id-2', username: 'billy' },
+  ],
 };

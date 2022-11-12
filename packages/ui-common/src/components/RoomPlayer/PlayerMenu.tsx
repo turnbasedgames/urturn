@@ -7,16 +7,20 @@ import { SiDiscord } from 'react-icons/si';
 import { ThemeProvider } from '@mui/material/styles';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { TbLetterU } from 'react-icons/tb';
-import { DISCORD_URL, DOCS_URL } from '@urturn/types-common';
+import { DISCORD_URL, DOCS_URL, RoomUser } from '@urturn/types-common';
+import PeopleIcon from '@mui/icons-material/People';
 import logger from '../../logger';
 import Theme from '../Theme';
 
 interface PlayerMenuProps {
   quitRoom: () => Promise<void>
+  players: RoomUser[]
+  curPlayer: RoomUser
 }
 
-function PlayerMenu({ quitRoom }: PlayerMenuProps): React.ReactElement {
+function PlayerMenu({ quitRoom, players, curPlayer }: PlayerMenuProps): React.ReactElement {
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
+  const [playersModalOpen, setPlayersModalOpen] = useState(false);
   return (
     <ThemeProvider theme={Theme}>
       <Modal
@@ -49,6 +53,22 @@ function PlayerMenu({ quitRoom }: PlayerMenuProps): React.ReactElement {
           </CardActions>
         </Card>
       </Modal>
+      <Modal
+        open={playersModalOpen}
+        onClose={() => setPlayersModalOpen(false)}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Paper sx={{ padding: 1 }}>
+          <Stack>
+            <Typography color="text.secondary">Players</Typography>
+            {players.map(({ username, id }, idx) => (
+              <Typography key={id}>
+                {`${idx + 1}. ${username}${id === curPlayer.id ? ' (you)' : ''}`}
+              </Typography>
+            ))}
+          </Stack>
+        </Paper>
+      </Modal>
       <Paper
         sx={{
           opacity: 0.4,
@@ -70,6 +90,15 @@ function PlayerMenu({ quitRoom }: PlayerMenuProps): React.ReactElement {
               }}
             >
               <TbLetterU />
+            </IconButton>
+          </Tooltip>
+          <Tooltip disableFocusListener placement="right" title="Players">
+            <IconButton
+              size="small"
+              onClick={() => setPlayersModalOpen(true)}
+              sx={{ borderRadius: 1 }}
+            >
+              <PeopleIcon />
             </IconButton>
           </Tooltip>
           <Tooltip disableFocusListener placement="right" title="Quit">
