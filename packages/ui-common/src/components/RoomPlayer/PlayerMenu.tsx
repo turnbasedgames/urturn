@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  IconButton, Paper, Stack, Modal, Card, Typography, CardContent, CardActions, Button, CardHeader,
+  IconButton, Paper, Stack, Modal, Card, Typography, CardContent, CardActions, Button, CardHeader, Tooltip,
 } from '@mui/material';
 import { SiDiscord } from 'react-icons/si';
 import { ThemeProvider } from '@mui/material/styles';
@@ -60,27 +60,31 @@ function PlayerMenu({ quitRoom }: PlayerMenuProps): React.ReactElement {
         square
       >
         <Stack direction="column">
-          <IconButton
-            size="small"
-            sx={{ borderRadius: 1 }}
-            onClick={() => {
-              setAboutModalOpen(!aboutModalOpen);
-            }}
-          >
-            <TbLetterU />
-          </IconButton>
-          <IconButton
-            size="small"
-            onClick={() => {
-              quitRoom().catch(logger.error);
-            }}
-            sx={{
-              borderRadius: 1,
-              transform: 'rotate(-180deg)',
-            }}
-          >
-            <ExitToAppIcon />
-          </IconButton>
+          <Tooltip disableFocusListener placement="right" title="About">
+            <IconButton
+              size="small"
+              sx={{ borderRadius: 1 }}
+              onClick={() => {
+                setAboutModalOpen(!aboutModalOpen);
+              }}
+            >
+              <TbLetterU />
+            </IconButton>
+          </Tooltip>
+          <Tooltip disableFocusListener placement="right" title="Quit">
+            <IconButton
+              size="small"
+              onClick={() => {
+                quitRoom().catch(logger.error);
+              }}
+              sx={{
+                borderRadius: 1,
+                transform: 'rotate(-180deg)',
+              }}
+            >
+              <ExitToAppIcon />
+            </IconButton>
+          </Tooltip>
         </Stack>
       </Paper>
     </ThemeProvider>
