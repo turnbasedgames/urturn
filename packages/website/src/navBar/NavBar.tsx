@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   AppBar, Button, Toolbar, Typography, IconButton, Stack,
-  Link as MuiLink,
+  Link as MuiLink, Tooltip,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import SchoolIcon from '@mui/icons-material/School';
@@ -35,22 +35,26 @@ function NavBar({ user }: Props): React.ReactElement {
   if (signedIn) {
     userPanel = (
       <>
-        <Button
-          color="secondary"
-          startIcon={<GiTwoCoins />}
-          onClick={() => { setUrBuxModalOpen(true); }}
-        >
-          <Typography>
-            {user.urbux}
-          </Typography>
-        </Button>
-        <IconButton
-          component={Link}
-          to="/develop"
-          sx={{ display: { xs: 'none', sm: 'flex' } }}
-        >
-          <IoBuild />
-        </IconButton>
+        <Tooltip disableFocusListener title="UrBux">
+          <Button
+            color="secondary"
+            startIcon={<GiTwoCoins />}
+            onClick={() => { setUrBuxModalOpen(true); }}
+          >
+            <Typography>
+              {user.urbux}
+            </Typography>
+          </Button>
+        </Tooltip>
+        <Tooltip disableFocusListener title="Create">
+          <IconButton
+            component={Link}
+            to="/develop"
+            sx={{ display: { xs: 'none', sm: 'flex' } }}
+          >
+            <IoBuild />
+          </IconButton>
+        </Tooltip>
         <Button
           color="inherit"
           component={Link}
@@ -112,9 +116,11 @@ function NavBar({ user }: Props): React.ReactElement {
                   UrTurn
                 </Typography>
               </MuiLink>
-              <IconButton href="https://docs.urturn.app/" target="_blank" rel="noopener">
-                <SchoolIcon />
-              </IconButton>
+              <Tooltip disableFocusListener title="Documentation">
+                <IconButton href="https://docs.urturn.app/" target="_blank" rel="noopener">
+                  <SchoolIcon />
+                </IconButton>
+              </Tooltip>
             </Stack>
             <Search />
             <Stack

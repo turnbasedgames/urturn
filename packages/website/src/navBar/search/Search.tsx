@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logEvent } from 'firebase/analytics';
 import {
-  Paper, IconButton, InputBase, Stack,
+  Paper, IconButton, InputBase, Stack, Tooltip,
 } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
 import { analytics } from '../../firebase/setupFirebase';
@@ -33,18 +33,20 @@ function Search(): React.ReactElement {
             setSearchText(ev.target.value);
           }}
         />
-        <IconButton
-          type="submit"
-          aria-label="search"
-          size="small"
-          sx={{ display: { xs: 'none', sm: 'flex' } }}
-          onClick={(ev) => {
-            ev.preventDefault();
-            onSearch(searchText);
-          }}
-        >
-          <SearchIcon />
-        </IconButton>
+        <Tooltip disableFocusListener title="Search">
+          <IconButton
+            type="submit"
+            aria-label="search"
+            size="small"
+            sx={{ display: { xs: 'none', sm: 'flex' } }}
+            onClick={(ev) => {
+              ev.preventDefault();
+              onSearch(searchText);
+            }}
+          >
+            <SearchIcon />
+          </IconButton>
+        </Tooltip>
       </Stack>
     </Paper>
   );
