@@ -1,9 +1,25 @@
-import React, { useRef, useCallback, useState } from "react";
+import React, { useRef, useEffect, useCallback, useState } from "react";
 import classnames from "classnames";
 import { useHistory } from "@docusaurus/router";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import { usePluginData } from '@docusaurus/useGlobalData';
 import useIsBrowser from "@docusaurus/useIsBrowser";
+
+function useKey(key, ref) {
+  useEffect(() => {
+    function hotkeyPress(e) {
+      if (e.keyCode === key) {
+        e.preventDefault();
+        ref.current.focus();
+        return;
+      }
+    }
+
+    document.addEventListener('keydown', hotkeyPress);
+    return () => document.removeEventListener('keydown', hotkeyPress);
+  }, [key]);
+}
+
 const Search = props => {
   const initialized = useRef(false);
   const searchBarRef = useRef(null);
@@ -33,6 +49,9 @@ const Search = props => {
         }
       });
   };
+
+  // focus whenever '/' is hit
+  useKey(191, searchBarRef);
 
   const pluginData = usePluginData('docusaurus-lunr-search');
   const getSearchDoc = () =>
@@ -93,7 +112,7 @@ const Search = props => {
       <input
         id="search_input_react"
         type="search"
-        placeholder={indexReady ? 'Search' : 'Loading...'}
+        placeholder={indexReady ? 'Search - "/"' : 'Loading...'}
         aria-label="Search"
         className={classnames(
           "navbar__search-input",
