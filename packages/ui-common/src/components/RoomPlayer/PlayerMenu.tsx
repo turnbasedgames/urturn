@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
-  IconButton, Paper, Stack, Modal, Card, Typography, CardContent, CardActions, Button, CardHeader, Tooltip,
+  IconButton, Paper, Stack, Modal, Card, Typography, CardContent, CardActions, Button, CardHeader,
+  Tooltip,
 } from '@mui/material';
 import { SiDiscord } from 'react-icons/si';
 import { ThemeProvider } from '@mui/material/styles';
