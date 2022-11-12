@@ -121,6 +121,26 @@ If a player is trying to do something impossible/against game rules, then it is 
 - `roomState.version`: *int*, **read-only**
   - **default**: 0
   - UrTurn manages this field and increments the `version` by 1 every time there is a room operation applied to it.
+- `roomState.logger`: [*RoomLogger*](#roomlogger), **read-only**
+  - Logger object used to log out metadata or message related to the room operation.
+  - This helps us correlate logs with a specific roomState and room operation
+
+### RoomLogger
+
+`RoomLogger` is an object to be used to log any metadata or message
+
+- `RoomLogger.info` *(...args) => void*
+  - logs at the `info` level
+- `RoomLogger.warn` *(...args) => void*
+  - logs at the `warn` level
+- `RoomLogger.error` *(...args) => void*
+  - logs at the `error` level
+
+:::caution
+
+Viewing production logs is not supported yet. Provide details on your use case at our [discord](https://discord.gg/myWacjdb5S).
+
+:::
 
 ### RoomStateResult
 
