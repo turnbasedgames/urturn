@@ -39,7 +39,7 @@ Common mistake is to forget returning the [`roomStateResult`](#roomstateresult).
 ### `onRoomStart` **Required**
 
 ```ts
-onRoomStart = () => RoomStateResult
+onRoomStart = (roomState: RoomState) => RoomStateResult
 ```
 
 - Use this function to initialize your board game state.
@@ -117,24 +117,54 @@ If a player is trying to do something impossible/against game rules, then it is 
 - `roomState.players`: [*Player[]*](#player), **read-only**
   - **default**: `[]`
   - UrTurn manages this field and will add a player object to the list before calling `onPlayerJoin` and removes the player object from the list before calling `onPlayerQuit`.
-  - sorted in the order players joined the room (earliest player first with later players further in the array).
+  - Sorted in the order players joined the room (earliest player first with later players further in the array).
 - `roomState.version`: *int*, **read-only**
   - **default**: 0
   - UrTurn manages this field and increments the `version` by 1 every time there is a room operation applied to it.
 - `roomState.logger`: [*RoomLogger*](#roomlogger), **read-only**
   - Logger object used to log out metadata or message related to the room operation.
   - This helps us correlate logs with a specific roomState and room operation
+- `roomState.roomStartContext`: [*RoomStartContext*](#roomstartcontext), **read-only**
+  - **default**: {}
+  - Provides crucial information on context of how this room was created
+  - For example, private rooms will set `roomState.roomStartContext.private = true`.
+
+### RoomStartContext
+
+`RoomStartContext` is an object that is defined by how the player created the room. This is useful whenever you want your game to behave differently depending on how the room started.
+
+There are currently only two possible contexts:
+
+1. Default (User clicks `Play`)
+
+  ```js
+  roomState.roomStartContext = {} // default is an empty object
+  ```
+
+2. Private Rooms (User clicks `Create Private Room`)
+
+  ```js
+  roomState.roomStartContext = { private: true }
+  ```
+
+:::caution
+
+It is not possible to have custom `RoomStartContext`. We are still brainstorming on a good solution for this.
+
+Please join our [discord](https://discord.gg/myWacjdb5S) to tell us about your use case.
+
+:::
 
 ### RoomLogger
 
 `RoomLogger` is an object to be used to log any metadata or message
 
 - `RoomLogger.info` *(...args) => void*
-  - logs at the `info` level
+  - Logs at the `info` level
 - `RoomLogger.warn` *(...args) => void*
-  - logs at the `warn` level
+  - Logs at the `warn` level
 - `RoomLogger.error` *(...args) => void*
-  - logs at the `error` level
+  - Logs at the `error` level
 
 :::caution
 
@@ -149,12 +179,12 @@ Viewing production logs is not supported yet. Provide details on your use case a
 ### Player
 
 - `player.id`: *string*
-  - **unique** identification string for the player.
-  - no two players will have the same `id`.
-  - player's cannot ever change their `id`.
+  - **Unique** identification string for the player.
+  - No two players will have the same `id`.
+  - Player's cannot ever change their `id`.
 - `player.username`: *string*
-  - **unique** amongst any player at a point in time.
-  - player may change their `username`.
+  - **Unique** amongst any player at a point in time.
+  - Player may change their `username`.
 
 ```json
 { // example
