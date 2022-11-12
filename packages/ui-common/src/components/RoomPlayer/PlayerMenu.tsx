@@ -1,21 +1,27 @@
 import React, { useState } from 'react';
 import {
-  IconButton, Paper, Stack, Modal, Card, Typography, CardContent, CardActions, Button, CardHeader, Tooltip,
+  IconButton, Paper, Stack, Modal, Card, Typography, CardContent, CardActions, Button, CardHeader,
+  Tooltip,
 } from '@mui/material';
 import { SiDiscord } from 'react-icons/si';
 import { ThemeProvider } from '@mui/material/styles';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { TbLetterU } from 'react-icons/tb';
-import { DISCORD_URL, DOCS_URL } from '@urturn/types-common';
+import { DISCORD_URL, DOCS_URL, RoomUser } from '@urturn/types-common';
+import PeopleIcon from '@mui/icons-material/People';
 import logger from '../../logger';
 import Theme from '../Theme';
 
 interface PlayerMenuProps {
   quitRoom: () => Promise<void>
+  players: RoomUser[]
+  curPlayer: RoomUser
 }
 
-function PlayerMenu({ quitRoom }: PlayerMenuProps): React.ReactElement {
+function PlayerMenu({ quitRoom, players, curPlayer }: PlayerMenuProps): React.ReactElement {
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
+  const [playersModalOpen, setPlayersModalOpen] = useState(false);
+  const spectating = players.every(({ id }) => id !== curPlayer.id);
   return (
     <ThemeProvider theme={Theme}>
       <Modal
@@ -48,6 +54,44 @@ function PlayerMenu({ quitRoom }: PlayerMenuProps): React.ReactElement {
           </CardActions>
         </Card>
       </Modal>
+      <Modal
+        open={playersModalOpen}
+        onClose={() => setPlayersModalOpen(false)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Card
+          variant="outlined"
+          sx={{
+            padding: 1,
+            minWidth: '300px',
+            maxHeight: '70%',
+            overflowY: 'auto',
+          }}
+        >
+          <CardHeader
+            title="Players"
+            subheader={spectating ? 'Spectating' : 'Playing with'}
+            sx={{ padding: 1 }}
+          />
+          <Stack spacing={1}>
+            {players.map(({ username, id }, idx) => (
+              <Card variant="outlined">
+                <CardHeader
+                  title={`${idx + 1}. ${username}${id === curPlayer.id ? ' (you)' : ''}`}
+                  titleTypographyProps={{ variant: 'h6' }}
+                  subheader={id}
+                  subheaderTypographyProp={{ variant: 'subtitle2' }}
+                  sx={{ padding: 1 }}
+                />
+              </Card>
+            ))}
+          </Stack>
+        </Card>
+      </Modal>
       <Paper
         sx={{
           opacity: 0.4,
@@ -69,6 +113,15 @@ function PlayerMenu({ quitRoom }: PlayerMenuProps): React.ReactElement {
               }}
             >
               <TbLetterU />
+            </IconButton>
+          </Tooltip>
+          <Tooltip disableFocusListener placement="right" title="Players">
+            <IconButton
+              size="small"
+              onClick={() => setPlayersModalOpen(true)}
+              sx={{ borderRadius: 1 }}
+            >
+              <PeopleIcon />
             </IconButton>
           </Tooltip>
           <Tooltip disableFocusListener placement="right" title="Quit">

@@ -79,6 +79,7 @@ function Player() {
         }
         window.close();
       }}
+      players={roomState?.players}
     />
   );
 }
