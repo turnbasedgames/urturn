@@ -74,6 +74,15 @@ ManyPlayers.args = {
   ],
 };
 
+export const PlayersUndefined = Template.bind({});
+PlayersUndefined.args = {
+  src: 'http://localhost:3000',
+  user: defaultUser,
+  setChildClient: (childClient: any) => logger.info('setting child client', { childClient }),
+  makeMove: async (move: any) => logger.info('make move called', { move }),
+  quitRoom: async () => logger.info('attempting to quit room'),
+};
+
 export const Spectating = Template.bind({});
 Spectating.args = {
   src: 'http://localhost:3000',

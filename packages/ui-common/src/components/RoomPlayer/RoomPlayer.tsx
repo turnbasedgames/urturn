@@ -56,7 +56,7 @@ function RoomPlayer({
 
   return (
     <>
-      <PlayerMenu quitRoom={quitRoom} players={players} curPlayer={user} />
+      <PlayerMenu quitRoom={quitRoom} players={players ?? []} curPlayer={user} />
       {iframeMemo}
     </>
   );

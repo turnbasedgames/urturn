@@ -57,7 +57,7 @@ function Player() {
     };
   }, [childClient]);
 
-  if (iframeSrc == null || player == null || roomState == null) {
+  if (iframeSrc == null || player == null) {
     return (
       <LinearProgress />
     );
@@ -79,7 +79,7 @@ function Player() {
         }
         window.close();
       }}
-      players={roomState.players}
+      players={roomState?.players}
     />
   );
 }

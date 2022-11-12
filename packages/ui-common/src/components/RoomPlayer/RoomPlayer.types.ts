@@ -12,5 +12,5 @@ export interface RoomPlayerProps {
   makeMove: (move: any) => Promise<void>
   setChildClient: (childClient: any) => void
   quitRoom: () => Promise<void>
-  players: RoomUser[]
+  players?: RoomUser[]
 }
