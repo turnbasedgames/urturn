@@ -9,7 +9,7 @@ const {
 
 const MAX_NUM_PLAYERS = 50;
 const CREATOR_EDITABLE_KEYS = ['joinable', 'finished'];
-const CREATOR_VIEWABLE_KEYS = [...CREATOR_EDITABLE_KEYS, 'players'];
+const CREATOR_VIEWABLE_KEYS = [...CREATOR_EDITABLE_KEYS, 'players', 'roomStartContext'];
 const RoomSchema = new Schema({
   game: {
     type: Schema.Types.ObjectId,
@@ -60,6 +60,14 @@ const RoomSchema = new Schema({
     required: true,
     default: false,
   },
+  roomStartContext: {
+    type: Schema.Types.Mixed,
+    required: true,
+    index: true,
+    default() {
+      return { private: this.private };
+    },
+  },
 }, { timestamps: true });
 
 RoomSchema.method('toJSON', function toJSON() {
@@ -82,6 +90,7 @@ RoomSchema.method('toJSON', function toJSON() {
     finished: this.finished,
     latestState: this.latestState,
     private: this.private,
+    roomStartContext: this.roomStartContext,
   };
 });
 RoomSchema.method('applyCreatorData', addKVToObjectFactoryFn(CREATOR_EDITABLE_KEYS));

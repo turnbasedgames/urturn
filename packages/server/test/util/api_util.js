@@ -95,6 +95,7 @@ async function createRoomAndAssert(t, api, userCred, game, user, makePrivate = f
     winner: null,
     emptyObject: {},
   });
+  t.deepEqual(room.roomStartContext, { private: makePrivate });
   return room;
 }
 

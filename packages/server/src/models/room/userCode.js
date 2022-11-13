@@ -18,13 +18,13 @@ class UserCode {
 
   static playerOperation(logger, room, roomState, operation, operationFunc) {
     logger.info('running room operation', { operation });
-    let creatorRoomState = {};
-    if (room && roomState) {
-      creatorRoomState = UserCode.getCreatorRoomState(room, roomState);
-      logger.info('state before operation', { creatorRoomState });
-    }
+    const creatorRoomState = UserCode.getCreatorRoomState(room, roomState);
+    logger.info('state before operation', { creatorRoomState });
     try {
-      const newRoomState = operationFunc(creatorRoomState);
+      const newRoomState = operationFunc({
+        ...creatorRoomState,
+        logger,
+      });
       logger.info('state after operation', { newRoomState });
       return newRoomState;
     } catch (error) {
@@ -35,9 +35,11 @@ class UserCode {
     }
   }
 
-  startRoom() {
+  startRoom(room, roomState) {
     const { vmModule, logger } = this;
-    return UserCode.playerOperation(logger, null, null, 'onRoomStart', () => vmModule.onRoomStart({}));
+    return UserCode.playerOperation(logger, room, roomState, 'onRoomStart', (creatorRoomState) => vmModule.onRoomStart(
+      creatorRoomState,
+    ));
   }
 
   playerJoin(player, room, roomState) {

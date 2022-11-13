@@ -108,11 +108,11 @@ function setupRouter({ io }) {
 
     await room.populate('players').populate('game').populate({ path: 'game', populate: { path: 'creator' } }).execPopulate();
     const userCode = await fetchUserCodeFromGame(logger, room.game);
-    const creatorInitRoomState = userCode.startRoom();
     const roomState = new RoomState({
       room: room.id,
       version: 0,
     });
+    const creatorInitRoomState = userCode.startRoom(room, roomState);
     roomState.applyCreatorData(creatorInitRoomState);
     const creatorJoinRoomState = userCode.playerJoin(player, room, roomState);
     roomState.applyCreatorData(creatorJoinRoomState);

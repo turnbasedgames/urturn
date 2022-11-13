@@ -23,7 +23,7 @@ const runnerCacheOptions = {
 
   // method for actually creating the userCode object to be used for various room operations
   fetchMethod: async (key, _, options) => {
-    const { logger, game, url } = options.context;
+    const { logger, url } = options.context;
     logger.info('cache miss, so requesting github url for code string...', { key });
     const { data: vmModuleStr, headers } = await axios.get(url);
     // There isn't a simple way to calculate memory footprint of a generic object (the vmModule).
@@ -31,15 +31,7 @@ const runnerCacheOptions = {
     // To get a minimum bound we use the number of bytes the code string itself is.
     const sizeBytes = headers['content-length'];
     logger.info('loading vm', { sizeBytes });
-    const vm = new NodeVM({});
-    // TODO: actually put the creator logs somewhere useful so that developers can debug
-    // TODO: These logs may be using the wrong logger object because this runner object may be used.
-    // for another request than the original request that created this object. Instead we should be
-    // passing in a custom logger that is locked down every time we make a user code function call
-    // (e.g. onRoomStart(logger))
-    vm.on('console.log', (data) => {
-      logger.info('creator log', { data, gameId: game.id });
-    });
+    const vm = new NodeVM({ console: 'off' });
     const vmModule = vm.run(vmModuleStr);
     const userCode = new UserCode(logger, vmModule, sizeBytes);
     logger.info('vm loaded and ready to use');
@@ -55,7 +47,7 @@ module.exports = async function fetchUserCodeFromGame(logger, game) {
   const [owner, repo] = githubURL.pathname.match(/[^/]+/g);
   const url = `https://raw.githubusercontent.com/${owner}/${repo}/${game.commitSHA}/index.js`;
   logger.info('attempting to fetch userCode object from cache', { url, gameId: game.id });
-  const userCode = await runnerCache.fetch(url, { fetchContext: { url, logger, game } });
+  const userCode = await runnerCache.fetch(url, { fetchContext: { url, logger } });
   logger.info('userCode object is ready');
   return userCode;
 };

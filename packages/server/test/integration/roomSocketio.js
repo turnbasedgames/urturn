@@ -276,6 +276,9 @@ socketConfigs.forEach(({ name, config }) => {
           emptyObject: {},
         },
       },
+      roomStartContext: {
+        private: false,
+      },
       players: [userOne, userTwo].map(getPublicUserFromUser),
       inactivePlayers: [],
       private: false,
@@ -285,6 +288,9 @@ socketConfigs.forEach(({ name, config }) => {
       joinable: false,
       players: [userOne, userTwo].map(getPublicUserFromUser),
       version: 1,
+      roomStartContext: {
+        private: false,
+      },
       state: {
         board: [[null, null, null], [null, null, null], [null, null, null]],
         plrToMoveIndex: 0,
@@ -303,6 +309,9 @@ socketConfigs.forEach(({ name, config }) => {
       joinable: false,
       players: [userOne, userTwo].map(getPublicUserFromUser),
       version: 2,
+      roomStartContext: {
+        private: false,
+      },
       state: {
         board: [['X', null, null], [null, null, null], [null, null, null]],
         plrToMoveIndex: 1,
@@ -322,6 +331,9 @@ socketConfigs.forEach(({ name, config }) => {
       joinable: false,
       players: [userOne, userTwo].map(getPublicUserFromUser),
       version: 3,
+      roomStartContext: {
+        private: false,
+      },
       state: {
         board: [['X', 'O', null], [null, null, null], [null, null, null]],
         plrToMoveIndex: 0,
@@ -437,6 +449,9 @@ socketConfigs.forEach(({ name, config }) => {
       joinable: false,
       players: [userOne, userTwo].map(getPublicUserFromUser),
       version: 2,
+      roomStartContext: {
+        private: false,
+      },
       state: {
         board: [['X', null, null], [null, null, null], [null, null, null]],
         plrToMoveIndex: 1,
@@ -455,6 +470,9 @@ socketConfigs.forEach(({ name, config }) => {
       joinable: false,
       players: [userOne, userTwo].map(getPublicUserFromUser),
       version: 3,
+      roomStartContext: {
+        private: false,
+      },
       state: {
         board: [['X', 'O', null], [null, null, null], [null, null, null]],
         plrToMoveIndex: 0,
@@ -665,6 +683,9 @@ socketConfigs.forEach(({ name, config }) => {
       joinable: false,
       players: room.players.filter(({ id }) => userOne.id !== id),
       version: room.latestState.version + 1,
+      roomStartContext: {
+        private: false,
+      },
       state: {
         board: [[null, null, null], [null, null, null], [null, null, null]],
         plrToMoveIndex: 0,
