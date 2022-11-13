@@ -11,6 +11,7 @@ slug: /
 
 The framework lets you modify game state of a room in a **transactional** and **event-based** manner. Just define how to modify game states on each event, and that's it (no infrastructure headaches, no worrying about scale again).
 
+// TODO:KEVIN need to put cloud around this backend
 ![simple diagram of UrTurn and your code](./simple_diagram.png)
 
 ### Perfect for
