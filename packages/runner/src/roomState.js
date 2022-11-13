@@ -1,5 +1,5 @@
 export const CREATOR_EDITABLE_FIELDS = ['joinable', 'finished', 'state'];
-export const CREATOR_VIEWABLE_FIELDS = [...CREATOR_EDITABLE_FIELDS, 'version', 'players'];
+export const CREATOR_VIEWABLE_FIELDS = [...CREATOR_EDITABLE_FIELDS, 'version', 'players', 'roomStartContext'];
 
 const FIELD_TYPES = {
   joinable: (x) => typeof x === 'boolean',
@@ -51,16 +51,19 @@ export function applyRoomStateResult(state, result) {
   }, { ...state, version: state.version + 1 });
 }
 
-export function newRoomState(backendModule) {
+export function newRoomState(logger, backendModule) {
   const roomState = {
     joinable: true,
     finished: false,
     players: [],
-    version: -1,
+    version: 0,
+    state: {},
     // Used to generate unique user ids with a simple counter. No new user will have the same id
     playerIdCounter: 0,
+    logger,
+    roomStartContext: { private: false },
   };
-  return applyRoomStateResult(roomState, backendModule.onRoomStart());
+  return applyRoomStateResult(roomState, backendModule.onRoomStart(filterRoomState(roomState)));
 }
 
 export function getPlayerById(id, roomState) {

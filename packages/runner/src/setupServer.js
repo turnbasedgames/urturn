@@ -10,6 +10,7 @@ import {
   validateRoomState,
 } from './roomState.js';
 import requireUtil from './requireUtil.cjs';
+import logger from './logger';
 
 const backendHotReloadIntervalMs = 100;
 
@@ -45,7 +46,7 @@ async function setupServer({ apiPort }) {
     },
   });
   io.on('connection', (socket) => {
-    socket.emit('stateChanged', roomState);
+    socket.emit('stateChanged', filterRoomState(roomState));
   });
 
   const startGame = async () => {
@@ -57,8 +58,8 @@ async function setupServer({ apiPort }) {
       console.error("Unable to start game because 'onRoomStart' function is not exported!");
       return;
     }
-    roomState = newRoomState(backendModule);
-    io.sockets.emit('stateChanged', roomState);
+    roomState = newRoomState(logger, backendModule);
+    io.sockets.emit('stateChanged', filterRoomState(roomState));
   };
 
   const restartGame = async () => {
@@ -98,9 +99,9 @@ async function setupServer({ apiPort }) {
     roomStateContender.players.push(player);
     roomStateContender = applyRoomStateResult(
       roomStateContender,
-      backendModule.onPlayerJoin(player, filterRoomState(roomStateContender)),
+      backendModule.onPlayerJoin(player, { ...filterRoomState(roomStateContender), logger }),
     );
-    io.sockets.emit('stateChanged', roomStateContender);
+    io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
     roomState = roomStateContender;
     res.status(StatusCodes.OK).json(player);
   });
@@ -116,9 +117,9 @@ async function setupServer({ apiPort }) {
     roomStateContender = removePlayerById(id, roomStateContender);
     roomStateContender = applyRoomStateResult(
       roomStateContender,
-      backendModule.onPlayerQuit(player, filterRoomState(roomStateContender)),
+      backendModule.onPlayerQuit(player, { ...filterRoomState(roomStateContender), logger }),
     );
-    io.sockets.emit('stateChanged', roomStateContender);
+    io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
     roomState = roomStateContender;
     res.sendStatus(StatusCodes.OK);
   });
@@ -135,7 +136,11 @@ async function setupServer({ apiPort }) {
     try {
       roomStateContender = applyRoomStateResult(
         roomStateContender,
-        backendModule.onPlayerMove(player, move, filterRoomState(roomStateContender)),
+        backendModule.onPlayerMove(
+          player,
+          move,
+          { ...filterRoomState(roomStateContender), logger },
+        ),
       );
     } catch (err) {
       res.status(StatusCodes.BAD_REQUEST).json({
@@ -147,7 +152,7 @@ async function setupServer({ apiPort }) {
       });
       return;
     }
-    io.sockets.emit('stateChanged', roomStateContender);
+    io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
     roomState = roomStateContender;
     res.sendStatus(StatusCodes.OK);
   });
