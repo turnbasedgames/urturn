@@ -137,19 +137,13 @@ If a player is trying to do something impossible/against game rules, then it is 
   - `true` if the room is private (other players will not be able to access the room without the link)
   - `false` if the room is public. This means players can queue up and join this room.
 
-Examples:
+```js
+// Example 1. Default (User clicks `Play`)
+roomState.roomStartContext = { private: false }
 
-1. Default (User clicks `Play`)
-
-  ```js
-  roomState.roomStartContext = { private: false }
-  ```
-
-2. Private Rooms (User clicks `Create Private Room`)
-
-  ```js
-  roomState.roomStartContext = { private: true }
-  ```
+// Example 2. Private Rooms (User clicks `Create Private Room`)
+roomState.roomStartContext = { private: true }
+```
 
 :::caution
 
