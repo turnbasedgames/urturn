@@ -41,6 +41,7 @@ function onRoomStart() {
     state: {
       // only set if the room is private, and first player to join is the admin by default
       admin: null,
+      settings: null,
       plrToSecretHash: {},
       plrToGuessToInfo: {},
       // plrToHintRequest: {[plr.id]: boolean}
@@ -87,10 +88,11 @@ function onPlayerJoin(plr, roomState) {
 }
 
 function onPlayerMovePreGame(plr, move, roomState) {
-  const { secret, forceEndGame } = move;
-  const { state, players } = roomState;
-  if (forceEndGame) {
-    // TODO: change this behavior for private rooms
+  const { secret, forceEndGame, settings } = move;
+  const { state, players, roomStartContext } = roomState;
+  const { private: roomPrivate } = roomStartContext;
+  const { admin } = state;
+  if (forceEndGame && state.chooseSecretStartTime != null) {
     const timeoutMs = new Date(state.chooseSecretStartTime).getTime() + CHOOSE_SECRET_TIMEOUT_MS;
     const nowMs = Date.now();
     if (nowMs < timeoutMs) {
@@ -103,23 +105,30 @@ function onPlayerMovePreGame(plr, move, roomState) {
     return { state, joinable: false, finished: true };
   }
 
-  // validate that the player has not already chosen a secret
-  if (plr.id in state.plrToSecretHash) {
-    // not letting player re-pick their secret will help simplify the logic and number of
-    // state changes
-    throw new Error('You already chose a secret. You cannot re-pick');
-  }
-
-  // validate the secret
-  const valid = isValidWord(secret);
-  if (!valid) {
-    throw new Error('The secret word chosen is not known.');
-  }
-
-  // modify the state accordingly so we know what each plr secret word is
-  state.plrToSecretHash[plr.id] = hashWord(secret);
-
   // if both players have chosen secrets then the in game guessing phase should start
+  if (roomPrivate && settings != null) {
+    if (admin === plr.id) {
+      state.settings = settings;
+    } else {
+      throw new Error('Player is not the admin!');
+    }
+  } else if (secret != null) {
+    // validate that the player has not already chosen a secret
+    if (plr.id in state.plrToSecretHash) {
+      // not letting player re-pick their secret will help simplify the logic and number of
+      // state changes
+      throw new Error('You already chose a secret. You cannot re-pick');
+    }
+
+    // validate the secret
+    const valid = isValidWord(secret);
+    if (!valid) {
+      throw new Error('The secret word chosen is not known.');
+    }
+
+    // modify the state accordingly so we know what each plr secret word is
+    state.plrToSecretHash[plr.id] = hashWord(secret);
+  }
   if (players.every(({ id }) => id in state.plrToSecretHash) && players.length === 2) {
     state.guessStartTime = new Date().toISOString();
     state.status = Status.InGame;
