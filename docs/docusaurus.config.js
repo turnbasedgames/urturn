@@ -90,13 +90,15 @@ const config = {
                       <span class="footer__link-separator">&middot;</span>
                       <a class="footer__link-item" href="https://github.com/turnbasedgames">GitHub</a>
                     </div>
-                  <div>
+                    <div class="footer__copyright">
+                      Copyright © ${new Date().getFullYear()} UrTurn Inc.
+                    </div>
+                  </div>
                 </div>
               </div>
             `
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} UrTurn Inc.`,
       },
       prism: {
         theme: lightCodeTheme,
