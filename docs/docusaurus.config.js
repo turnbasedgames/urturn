@@ -7,7 +7,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Create web games faster than ever',
-  tagline: "Use your favorite game frameworks, while leveraging all of UrTurn's open source infrastructure from a simple client for free.",
+  tagline: "Leverage an open source game platform that hosts and handles all infrastructure for your game (networking, multiplayer, matchmaking, data storage, etc.) for free from a simple client.",
   url: 'https://docs.urturn.app',
   baseUrl: '/',
   onBrokenLinks: 'throw',
