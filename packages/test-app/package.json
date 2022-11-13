@@ -2,7 +2,7 @@
   "name": "@urturn/test-app",
   "private": true,
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.1.7",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -18,8 +18,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@urturn/runner": "*",
-    "@urturn/runner-frontend": "*"
+    "@urturn/runner": "^0.1.7",
+    "@urturn/runner-frontend": "^0.1.7"
   },
   "devDependencies": {
     "concurrently": "^7.1.0",

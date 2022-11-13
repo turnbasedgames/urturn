@@ -1,10 +1,10 @@
 {
   "name": "@urturn/template-none",
-  "version": "0.1.0",
+  "version": "0.1.7",
   "private": true,
   "homepage": ".",
   "dependencies": {
-    "@urturn/client": "*"
+    "@urturn/client": "^0.1.7"
   },
   "scripts": {
     "start": "echo TODO create start script",

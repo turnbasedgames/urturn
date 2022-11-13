@@ -1,13 +1,13 @@
 {
   "name": "@urturn/test-app-frontend",
-  "version": "0.0.1",
+  "version": "0.1.7",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@monaco-editor/react": "^4.4.2",
     "@mui/material": "^5.6.1",
-    "@urturn/client": "*",
+    "@urturn/client": "^0.1.7",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-scripts": "5.0.1",

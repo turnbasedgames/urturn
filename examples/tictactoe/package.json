@@ -1,6 +1,6 @@
 {
   "name": "@urturn/tictactoe",
-  "version": "1.0.0",
+  "version": "0.1.7",
   "description": "",
   "main": "index.js",
   "private": true,
@@ -24,14 +24,14 @@
   },
   "homepage": "https://github.com/turnbasedgames/urturn#readme",
   "dependencies": {
-    "@urturn/tictactoe-frontend": "*"
+    "@urturn/tictactoe-frontend": "^0.1.7"
   },
   "devDependencies": {
-    "@urturn/runner": "*",
+    "@urturn/runner": "^0.1.7",
     "concurrently": "^7.1.0",
+    "cross-env": "^7.0.3",
     "eslint": "^8.14.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.26.0",
-    "cross-env": "^7.0.3"
+    "eslint-plugin-import": "^2.26.0"
   }
 }
