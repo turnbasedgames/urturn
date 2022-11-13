@@ -19,8 +19,6 @@ wordToVecRaw.trim().split(/\r?\n/).forEach((line) => {
   hashToVec.set(hashWord(word), vec);
 });
 
-// TODO: setup unit tests for the exported functions
-// TODO: cleanup jupyter notebook to output proper text files
 const Status = Object.freeze({
   PreGame: 'preGame',
   InGame: 'inGame',
@@ -41,6 +39,8 @@ function onRoomStart() {
     // UrTurn will not touch anything under 'state' field, and expects it to be a JSON
     // serializable object.
     state: {
+      // only set if the room is private, and first player to join is the admin by default
+      admin: null,
       plrToSecretHash: {},
       plrToGuessToInfo: {},
       // plrToHintRequest: {[plr.id]: boolean}
@@ -58,18 +58,30 @@ function onRoomStart() {
   };
 }
 
+function setSecretStartTime(roomState) {
+  const { state } = roomState;
+  state.chooseSecretStartTime = new Date().toISOString();
+  return { state };
+}
+
 function onPlayerJoin(plr, roomState) {
   // UrTurn provides the roomState object which let's us know who is in the room
-  const { players, state } = roomState;
+  const { players, state, roomStartContext } = roomState;
 
   // set guess to an empty object
   state.plrToGuessToInfo[plr.id] = {};
 
   // when the number of players is equal to 2, then we can start the game
   if (players.length === 2) {
-    state.chooseSecretStartTime = new Date().toISOString();
-    // other players will be unable to join this room (UrTurn will handle this for us)
-    return { state, joinable: false };
+    return {
+      // only set secret start time if the room is public
+      ...(roomStartContext.private ? {} : setSecretStartTime(roomState)),
+      // other players will be unable to join this room (UrTurn will handle this for us)
+      joinable: false,
+    };
+  }
+  if (roomStartContext.private) {
+    state.admin = plr.id;
   }
   return { state };
 }
@@ -78,6 +90,7 @@ function onPlayerMovePreGame(plr, move, roomState) {
   const { secret, forceEndGame } = move;
   const { state, players } = roomState;
   if (forceEndGame) {
+    // TODO: change this behavior for private rooms
     const timeoutMs = new Date(state.chooseSecretStartTime).getTime() + CHOOSE_SECRET_TIMEOUT_MS;
     const nowMs = Date.now();
     if (nowMs < timeoutMs) {
