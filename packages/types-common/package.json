@@ -1,6 +1,6 @@
 {
   "name": "@urturn/types-common",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "common types used across urturn packages",
   "main": "index.js",
   "scripts": {

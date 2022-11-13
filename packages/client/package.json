@@ -1,6 +1,6 @@
 {
   "name": "@urturn/client",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "client used for a turn based game",
   "main": "index.js",
   "scripts": {

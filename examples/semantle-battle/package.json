@@ -1,6 +1,6 @@
 {
   "name": "@urturn/semantle-battle",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "",
   "main": "index.js",
   "private": true,
@@ -24,10 +24,10 @@
   },
   "homepage": "https://github.com/turnbasedgames/urturn#readme",
   "dependencies": {
-    "@urturn/semantle-battle-frontend": "*"
+    "@urturn/semantle-battle-frontend": "^0.1.7"
   },
   "devDependencies": {
-    "@urturn/runner": "^0.1.6",
+    "@urturn/runner": "^0.1.7",
     "concurrently": "^7.1.0",
     "cross-env": "^7.0.3",
     "eslint": "^8.14.0",
