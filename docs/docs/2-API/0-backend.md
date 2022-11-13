@@ -121,13 +121,13 @@ If a player is trying to do something impossible/against game rules, then it is 
 - `roomState.version`: *int*, **read-only**
   - **default**: 0
   - UrTurn manages this field and increments the `version` by 1 every time there is a room operation applied to it.
-- `roomState.logger`: [*RoomLogger*](#roomlogger), **read-only**
-  - Logger object used to log out metadata or message related to the room operation.
-  - This helps us correlate logs with a specific roomState and room operation
 - `roomState.roomStartContext`: [*RoomStartContext*](#roomstartcontext), **read-only**
   - **default**: {}
   - Provides crucial information on context of how this room was created
   - For example, private rooms will set `roomState.roomStartContext.private = true`.
+- `roomState.logger`: [*RoomLogger*](#roomlogger), **read-only**, **backend-only**
+  - Logger object used to log out metadata or message related to the room operation.
+  - This helps us correlate logs with a specific roomState and room operation
 
 ### RoomStartContext
 
@@ -138,7 +138,7 @@ There are currently only two possible contexts:
 1. Default (User clicks `Play`)
 
   ```js
-  roomState.roomStartContext = {} // default is an empty object
+  roomState.roomStartContext = { private: false }
   ```
 
 2. Private Rooms (User clicks `Create Private Room`)
