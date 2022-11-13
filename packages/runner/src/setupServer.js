@@ -7,7 +7,7 @@ import { watchFile } from 'fs';
 import { userBackend } from '../config/paths.js';
 import {
   newRoomState, applyRoomStateResult, filterRoomState, getPlayerById, removePlayerById,
-  validateRoomState,
+  validateRoomState, ROOM_STATE_DEFAULTS,
 } from './roomState.js';
 import requireUtil from './requireUtil.cjs';
 import logger from './logger.js';
@@ -165,14 +165,14 @@ async function setupServer({ apiPort }) {
     let roomStateContender;
 
     try {
-      roomStateContender = JSON.parse(JSON.stringify(req.body));
+      roomStateContender = JSON.parse(JSON.stringify({ ...ROOM_STATE_DEFAULTS, ...req.body }));
       validateRoomState(roomStateContender);
     } catch (err) {
       res.status(StatusCodes.BAD_REQUEST).json({ message: err.message });
       return;
     }
 
-    io.sockets.emit('stateChanged', roomStateContender);
+    io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
     roomState = roomStateContender;
     res.sendStatus(StatusCodes.OK);
   });

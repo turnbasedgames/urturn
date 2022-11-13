@@ -14,6 +14,11 @@ const FIELD_TYPES = {
   roomStartContext: (x) => typeof x === 'object',
 };
 
+export const ROOM_STATE_DEFAULTS = {
+  // Used to generate unique user ids with a simple counter. No new user will have the same id
+  playerIdCounter: 0,
+};
+
 export function filterRoomState(state) {
   return CREATOR_VIEWABLE_FIELDS.reduce(
     (newState, key) => ({
@@ -54,13 +59,12 @@ export function applyRoomStateResult(state, result) {
 
 export function newRoomState(logger, backendModule) {
   const roomState = {
+    ...ROOM_STATE_DEFAULTS,
     joinable: true,
     finished: false,
     players: [],
     version: 0,
     state: {},
-    // Used to generate unique user ids with a simple counter. No new user will have the same id
-    playerIdCounter: 0,
     logger,
     roomStartContext: { private: false },
   };
