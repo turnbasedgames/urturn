@@ -1,9 +1,12 @@
 export default {
-  onRoomStart: () => ({
-    state: {
-      message: 'room start!',
-    },
-  }),
+  onRoomStart: ({ logger }) => {
+    logger.info('test app: room start');
+    return {
+      state: {
+        message: 'room start!',
+      },
+    };
+  },
   onPlayerJoin: ({ username }, roomState) => ({
     state: {
       message: `${username} joined!`,

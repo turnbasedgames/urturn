@@ -63,7 +63,10 @@ export function newRoomState(logger, backendModule) {
     logger,
     roomStartContext: { private: false },
   };
-  return applyRoomStateResult(roomState, backendModule.onRoomStart(filterRoomState(roomState)));
+  return applyRoomStateResult(
+    roomState,
+    backendModule.onRoomStart({ ...filterRoomState(roomState), logger }),
+  );
 }
 
 export function getPlayerById(id, roomState) {
