@@ -1,27 +1,30 @@
 // tip: docs @ https://docs.urturn.app/docs/API/backend#functions
 
-function onRoomStart() {
-  // TODO: implement what the state of the room looks like initially
-  console.log('Start called')
-  const state = {}
-  return { state }
+function onRoomStart(roomState) {
+  const { logger } = roomState;
+  logger.info('Start called')
+  logger.warn('TODO: implement what the state of the room looks like initially')
+  return {}
 }
 
 function onPlayerJoin(player, roomState) {
-  // TODO: implement how to change the roomState when a player joins
-  console.log('Join called with:', { player, roomState })
+  const { logger } = roomState
+  logger.info('Join called with:', { player, roomState })
+  logger.warn('TODO: implement how to change the roomState when a player joins')
   return {}
 }
 
 function onPlayerQuit(player, roomState) {
-  // TODO: implement how to change the roomState when a player quits the room
-  console.log('Quit called with:', { player, roomState })
+  const { logger } = roomState
+  logger.info('Quit called with:', { player, roomState })
+  logger.warn('TODO: implement how to change the roomState when a player quits the room')
   return {}
 }
 
 function onPlayerMove(player, move, roomState) {
-  // TODO: implement how to change the roomState when any player makes a move
-  console.log('Move called with:', { player, move, roomState })
+  const { logger } = roomState
+  logger.info('Move called with:', { player, move, roomState })
+  logger.warn('TODO: implement how to change the roomState when any player makes a move')
   return {}
 }
 

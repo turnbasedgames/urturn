@@ -1,9 +1,12 @@
 export default {
-  onRoomStart: () => ({
-    state: {
-      message: 'room start!',
-    },
-  }),
+  onRoomStart: ({ logger }) => {
+    logger.info('test app: room start');
+    return {
+      state: {
+        message: 'room start!',
+      },
+    };
+  },
   onPlayerJoin: ({ username }, roomState) => ({
     state: {
       message: `${username} joined!`,
@@ -11,9 +14,11 @@ export default {
     },
   }),
   onPlayerMove: ({ username }, move, roomState) => {
+    roomState.logger.info('test app: onPlayerMove called', { username, move, roomState });
     // move.error triggers an error to be thrown immediately for testing purposes
     const { error } = move;
     if (error) {
+      roomState.logger.error('test app:', error);
       throw new Error(error);
     }
     // This is duplicated from src/roomState.js CREATOR_EDITABLE_FIELDS
