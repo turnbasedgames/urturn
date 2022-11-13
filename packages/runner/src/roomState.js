@@ -11,6 +11,7 @@ const FIELD_TYPES = {
      (player) => typeof player.id === 'string'
       && typeof player.username === 'string',
    ),
+  roomStartContext: (x) => typeof x === 'object',
 };
 
 export function filterRoomState(state) {
