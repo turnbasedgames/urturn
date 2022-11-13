@@ -36,6 +36,7 @@ export interface Room {
   finished: boolean
   joinable: boolean
   latestState: LatestState
+  roomStartContext: any
 }
 
 export interface RoomState {
@@ -44,6 +45,7 @@ export interface RoomState {
   finished: boolean
   state: any
   version: number
+  roomStartContext: any
 }
 
 export interface Game {
