@@ -7,7 +7,9 @@ export enum Errors {
 }
 
 export const generateRoomState = (room: Room, roomState: LatestState): RoomState => {
-  const { players, joinable, finished } = room;
+  const {
+    players, joinable, finished, roomStartContext,
+  } = room;
   const { state, version } = roomState;
 
   return {
@@ -16,6 +18,7 @@ export const generateRoomState = (room: Room, roomState: LatestState): RoomState
     finished,
     state,
     version,
+    roomStartContext,
   };
 };
 

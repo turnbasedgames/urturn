@@ -10,7 +10,7 @@ import {
   validateRoomState,
 } from './roomState.js';
 import requireUtil from './requireUtil.cjs';
-import logger from './logger';
+import logger from './logger.js';
 
 const backendHotReloadIntervalMs = 100;
 
