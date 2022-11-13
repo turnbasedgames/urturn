@@ -133,7 +133,11 @@ If a player is trying to do something impossible/against game rules, then it is 
 
 `RoomStartContext` is an object that is defined by how the player created the room. This is useful whenever you want your game to behave differently depending on how the room started.
 
-There are currently only two possible contexts:
+- `RoomStartContext.private` **bool**
+  - `true` if the room is private (other players will not be able to access the room without the link)
+  - `false` if the room is public. This means players can queue up and join this room.
+
+Examples:
 
 1. Default (User clicks `Play`)
 
