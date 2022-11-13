@@ -165,8 +165,9 @@ async function setupServer({ apiPort }) {
     let roomStateContender;
 
     try {
-      roomStateContender = JSON.parse(JSON.stringify({ ...ROOM_STATE_DEFAULTS, ...req.body }));
+      roomStateContender = JSON.parse(JSON.stringify(req.body));
       validateRoomState(roomStateContender);
+      roomStateContender = { ...ROOM_STATE_DEFAULTS, ...roomStateContender };
     } catch (err) {
       res.status(StatusCodes.BAD_REQUEST).json({ message: err.message });
       return;
