@@ -8,6 +8,9 @@ The `backend` for all games is compromised of functions exported by the **index.
 
 ## Functions
 
+All functions follow this flow when handling an event:
+![function flow](./simple_flow.png)
+
 ### All Functions Are Pure Functions
 
 All functions are `pure`:
@@ -31,10 +34,10 @@ Common mistake is to forget returning the [`roomStateResult`](#roomstateresult).
 
 ### All Functions Are ACID Transactions
 
-1. `Atomic`: either all updates returned are fully completed or completely fail. This is important for handling operations like player purchases; you don’t want a player to be charged Urbux and fail to give them their desired item. This prevents data corruption of your roomState.
+1. `Atomic`: either all updates returned are fully completed or completely fail. This is important for handling functions like player purchases; you don’t want a player to be charged Urbux and fail to give them their desired item. This prevents data corruption of your roomState.
 2. `Consistent`: your functions will never be given partial data or corrupt data; they will always get the latest [`roomState`](#roomstate) for the room.
-3. `Isolated`: you are guaranteed that operations on a [`roomState`](#roomstate) for a given room are handled one by one. No two operations can corrupt each other.
-4. `Durable`: successful [`roomState`](#roomstate) operations are guaranteed to survive system failure. Even if UrTurn goes down, or has partial outages, your data for each room should survive.
+3. `Isolated`: you are guaranteed that functions for a given room are handled one by one. No two functions can corrupt each other.
+4. `Durable`: successful room functions are guaranteed to survive system failure. Even if UrTurn goes down, or has partial outages, your data for each room should survive.
 
 ### `onRoomStart` **Required**
 
@@ -46,7 +49,7 @@ onRoomStart = (roomState: RoomState) => RoomStateResult
 - Runs when the room is first initialized, as triggered by these actions:
   1. When a private room is created (player clicks *Create Private Room*).
   2. When a room is created for the matchmaking queue (player clicks *Play*).
-- Operation fails on error (when user clicks play or attempts start a game, it will show them an error and will not start the game). This should never error, but the operation is not forced because it may start your game in a corrupt state.
+- Fails on error (when user clicks play or attempts start a game, it will show them an error and will not start the game).
 - `Returns` the [RoomStateResult](#roomstateresult).
 
 ### `onPlayerJoin` **Required**
@@ -56,7 +59,7 @@ onPlayerJoin = (player: Player, roomState: RoomState) => RoomStateResult
 ```
 
 - Runs when a player joins the room, including when the room is created (i.e. the player clicks *Play* or *Create Private Room*).
-- Operation fails on error (when user clicks play and joins a game, it will show them an error snackbar). This should never error, but the operation is not forced.
+- Fails on error (when user clicks play and joins a game, it will show them an error snackbar).
 - If `roomState.joinable` or `roomState.finished` is `true` then it is **guaranteed** that no player will be added to the room and `onPlayerJoin` will never be called for a player.
 - `Returns` the [RoomStateResult](#roomstateresult).
 
@@ -86,7 +89,7 @@ onPlayerMove = (player: Player, move: Move, roomState: RoomState) => RoomStateRe
 ```
 
 - Runs when a player moves (i.e. when [`client.makeMove()`](/docs/API/client#clientmakemovemove-move) is called with the [`move`](#move) JSON object).
-- Operation fails on error. The client triggering this will receive your error as a return value.
+- Fails on error. The client triggering this will receive your error as a return value.
 - `Returns` the [RoomStateResult](#roomstateresult).
 
 :::info
@@ -99,7 +102,7 @@ If a player is trying to do something impossible/against game rules, then it is 
 
 ### RoomState
 
-`RoomState` object is provided to each operation, and will have the fields:
+`RoomState` object is provided to each [room function](/docs/API/backend#functions), and will have the fields:
 
 - `roomState.joinable`: *bool*
   - **default**: `true`
@@ -107,7 +110,7 @@ If a player is trying to do something impossible/against game rules, then it is 
   - If false, new users can not join this game instance via a private room or matchmaking.
 - `roomState.finished`: *bool*
   - **default**: `false`.
-  - If true, no new operations will be handled for the room (e.g. no new players can join, players can't make moves anymore, etc.). Marking a room finished is important for UrTurn to index each room properly.
+  - If true, no new functions will be called for the room (e.g. no new players can join, players can't make moves anymore, etc.). Marking a room finished is important for UrTurn to index each room properly.
   - If false, the game will show in the "Active Games" list for players.
 - `roomState.state`: *JSON object*
   - **default**: `{}`
@@ -120,14 +123,14 @@ If a player is trying to do something impossible/against game rules, then it is 
   - Sorted in the order players joined the room (earliest player first with later players further in the array).
 - `roomState.version`: *int*, **read-only**
   - **default**: 0
-  - UrTurn manages this field and increments the `version` by 1 every time there is a room operation applied to it.
+  - UrTurn manages this field and increments the `version` by 1 every time a function successfully modifies it.
 - `roomState.roomStartContext`: [*RoomStartContext*](#roomstartcontext), **read-only**
   - **default**: {}
   - Provides crucial information on context of how this room was created
   - For example, private rooms will set `roomState.roomStartContext.private = true`.
 - `roomState.logger`: [*RoomLogger*](#roomlogger), **read-only**, **backend-only**
-  - Logger object used to log out metadata or message related to the room operation.
-  - This helps us correlate logs with a specific roomState and room operation
+  - Logger object used to log out metadata or message.
+  - This helps us correlate logs in the same function call.
 
 ### RoomStartContext
 

@@ -3,21 +3,6 @@ import TabItem from '@theme/TabItem';
 
 # Flow of a Simple Game
 
-## Basic architecture
-
-This diagram shows 4 systems. You control the `game frontend` and the `game backend`. UrTurn controls the `runner` and `client`.
-
-![architecture diagram](./everything_diagram.png)
-
-For you, it will feel like your game frontend is seamlessly communicating directly with your backend.
-
-:::caution
-
-**The user is able to control the game frontend.**
-This means critical game logic should always be in the backend (e.g. validation of user data, handling transition of state, etc.), which is managed by our cloud servers.
-
-:::
-
 ## TicTacToe
 
 Let's walk through a simple TicTacToe game that you made:
@@ -26,7 +11,7 @@ Let's walk through a simple TicTacToe game that you made:
 
 [![billy clicks play](./click_play_button_tictactoe.gif)](./click_play_button_tictactoe.gif)
 
-UrTurn calls your function implementation of [`onRoomStart`](/docs/API/backend#onroomstart-required) to initialize the room state.
+UrTurn calls your [room function](/docs/API/backend#functions) implementation of [`onRoomStart`](/docs/API/backend#onroomstart-required) to initialize the room state.
 
 <Tabs>
   <TabItem value="result" label="Initial roomState" default>
@@ -35,7 +20,7 @@ UrTurn calls your function implementation of [`onRoomStart`](/docs/API/backend#o
 {
   "joinable": true, // defaults to true, (when set to false, UrTurn prevents any new players from joining the room)
   "finished": false, // defaults to false, (when set to true, UrTurn prevents any new moves from being made)
-  "state": { // this field can be any JSON object that you define. This was defined by the function above.
+  "state": { // this field can be any JSON object that you define. This was provided in the roomStateResult by the room function above.
     "status": "preGame",
     "board": [
       [
@@ -114,7 +99,7 @@ UrTurn calls [`onPlayerJoin`](/docs/API/backend#onplayerjoin-required) function 
     "winner": null
   },
   // highlight-start
-  "version": 1, // incremented because we applied another roomState operation
+  "version": 1, // incremented because our room function successfully modified the state
   "players": [ // new player is in the player list
     {
       "id": "id_0",
@@ -329,17 +314,22 @@ function onPlayerMove(player, move, roomState) {
   </TabItem>
 </Tabs>
 
-### 4. Your backend is just a group of `pure functions`
+### 4. [Room functions](/docs/API/backend#functions) are [pure functions](/docs/api/backend#all-functions-are-pure-functions)
 
-Notice how all of the implemented functions [`onRoomStart`](/docs/API/backend#onroomstart-required), [`onPlayerJoin`](/docs/API/backend#onplayerjoin-required), etc. takes in the current state and several other arguments and returns the resulting state after applying the operation.
+Notice how all of the implemented room functions ([`onRoomStart`](/docs/API/backend#onroomstart-required), [`onPlayerJoin`](/docs/API/backend#onplayerjoin-required), etc.) takes in the current [`roomState`](/docs/API/backend#roomstate) and several other arguments and returns a [`roomStateResult`](/docs/API/backend#roomstateresult).
 
-This makes it easier to understand, debug, and test your entire backend. More on [pure functions](/docs/api/backend#all-functions-are-pure-functions).
+Data should feel like a natural flow of transformations throughout time:
+![pure functions diagram](./pure_function.png)
+
+This makes it easier to understand, debug, and test your [room functions](/docs/API/backend#functions). More on [pure functions](/docs/api/backend#all-functions-are-pure-functions).
 
 ## Getting the hang of it?
 
 :::success
 
-Notice how you are only responsible for defining **how states change** with each operation. UrTurn takes care of the rest.
+You just write code for **how state changes** based on various room events - player joins, quits, makes move, etc.
+
+UrTurn takes care of the rest.
 
 :::
 
