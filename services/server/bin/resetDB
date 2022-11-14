@@ -1,0 +1,11 @@
+#!/usr/bin/env node
+
+const setupDB = require('../src/setupDB');
+
+async function resetDB() {
+  const mongoose = await setupDB();
+  await mongoose.connection.db.dropDatabase();
+  process.exit();
+}
+
+resetDB();

@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+const { deleteAllTestUsers } = require('../test/util/firebase');
+
+async function main() {
+  await deleteAllTestUsers();
+  process.exit();
+}
+
+main();
