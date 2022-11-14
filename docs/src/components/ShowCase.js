@@ -61,7 +61,7 @@ const FeatureList = [
     title: 'Monetization',
     subtitle: <span className={clsx("badge badge--warning", styles.badge)}>Coming Soon!</span>,
     points: [
-      'Monetize your games by implementing a simple function',
+      'Monetize your games by implementing a simple function.',
       'ACID Transaction handling built in.'
     ],
     svgComponent: <Monetize className={styles['svg-thumbnail']} />
