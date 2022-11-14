@@ -2,7 +2,7 @@
 
 ## Basic architecture
 
-This diagram shows 4 systems. You write code for the `web frontend` and the [`room functions`](/docs/API/backend#functions). We write code for the `runner` and `client` so you don't have to.
+This diagram shows 4 systems. You write code for the `web frontend` and the [`room functions`](/docs/API/room-functions). We write code for the `runner` and `client` so you don't have to.
 
 ![architecture diagram](./everything_diagram.png)
 
@@ -10,24 +10,24 @@ This diagram shows 4 systems. You write code for the `web frontend` and the [`ro
 
 All infrastructure shown is managed, scaled, and operated by UrTurn.
 
-For you, it will feel like your frontend is seamlessly communicating directly with your [room functions](/docs/API/backend#functions).
+For you, it will feel like your frontend is seamlessly communicating directly with your [room functions](/docs/API/room-functions).
 
 :::
 
 :::caution
 
 **The user is able to control the game frontend.**
-This means critical game logic should always be in the backend (e.g. validation of user data, handling transition of state, etc.), which is managed by our cloud servers.
+This means critical game logic should always be in your [room functions](/docs/API/room-functions) (e.g. validation of user data, handling transition of state, etc.), which is managed by our cloud servers.
 
 :::
 
 ## Room
 
 - Rooms are instances of [games](/docs/Introduction/Concepts#game).
-- Rooms will have an associated [`RoomState`](/docs/API/backend#roomstate) to track the current state of the room.
+- Rooms will have an associated [`RoomState`](/docs/API/types#roomstate) to track the current state of the room.
 - Players create new rooms whenever they click play on your game. UrTurn will automatically place players together in a room if it is public.
 - `private` rooms are created by players when they click `create private room`.
-  - You can handle private rooms differently than public rooms (see [roomStartContext](/docs/API/backend#roomstartcontext)) in your [room functions](/docs/API/backend#functions).
+  - You can handle private rooms differently than public rooms (see [roomStartContext](/docs/API/types#roomstartcontext)) in your [room functions](/docs/API/room-functions).
   - For example, you might want players to be able to control various game settings or rules in a private room.
 - If a user accidentally closes their browser, they may reopen it to view the room again (exception: see [disconnectTimeout](/docs/Introduction/Concepts#automatic-disconnect-handling))
 
