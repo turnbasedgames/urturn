@@ -5,6 +5,7 @@
     "prepublishOnly": "npx lerna run build"
   },
   "workspaces": [
+    "services/*",
     "packages/*",
     "templates/*",
     "examples/*",
