@@ -9,9 +9,8 @@ slug: /
 
 [UrTurn](https://www.urturn.app/) is a game platform that hosts and handles **all infrastructure for your game**: networking, multiplayer, matchmaking, and data storage.
 
-The framework lets you modify game state of a room in a **transactional** and **event-based** manner. Just define how to modify game states on each event, and that's it (no infrastructure headaches, no worrying about scale again).
+The framework lets you modify game state of a room in a **transactional** and **event-based** manner. Just define the resulting state after each room event, and that's it (no infrastructure headaches, no worrying about scale again).
 
-// TODO:KEVIN need to put cloud around this backend
 ![simple diagram of UrTurn and your code](./simple_diagram.png)
 
 ### Perfect for
@@ -35,6 +34,15 @@ UrTurn is **NOT** opinionated on the frontend of your game or your dev environme
 
 - Continue to use your favorite frontend web technologies (e.g. vanilla HTML5, ReactJS, PhaserIO, BabylonJS, etc.), and hook into UrTurn using the `@urturn/client`.
 - Continue to use your favorite IDE for coding with JavaScript, and continue using your favorite dev tools and open source libraries.
+
+:::info
+
+UrTurn's framework is **NOT** closed source.
+
+:::
+
+- We want developers to have as much control over the look and feel of their game, and post them anywhere, host them anywhere.
+- If you wanted to self host UrTurn, you can because all code is available on GitHub. See self-hosting [guide](/docs/Advanced/self-hosting).
 
 :::caution
 

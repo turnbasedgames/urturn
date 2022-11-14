@@ -50,6 +50,17 @@ const sidebars = {
         'API/client',
       ],
     },
+    {
+      type: 'category',
+      label: 'Advanced Guides',
+      link: {
+        type: 'doc', id: 'Advanced/index'
+      },
+      items: [
+        'Advanced/custom-game-page',
+        'Advanced/self-hosting',
+      ],
+    },
   ],
 };
 
