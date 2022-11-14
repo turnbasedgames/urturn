@@ -98,6 +98,6 @@ jobs:
       - name: run tests
         run: npx lerna run test:check-coverage
         env:
-          FIREBASE_CONFIG: ${{ secrets.REACT_APP_FIREBASE_CONFIG }}
+          FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
           GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
           STRIPE_KEY: ${{ secrets.STRIPE_KEY }}

@@ -18,7 +18,6 @@
     "build": "react-scripts build",
     "lint": "eslint . --ignore-path .gitignore --ext .js,.jsx",
     "lint:fix": "eslint . --ignore-path .gitignore --ext .js,.jsx --fix",
-    "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
