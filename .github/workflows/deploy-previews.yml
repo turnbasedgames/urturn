@@ -95,6 +95,10 @@ jobs:
           path: .
           key: ${{ github.run_id }}-build
           restore-keys: ${{ github.run_id }}-build
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
       - name: run tests
         run: npx lerna run test:check-coverage
         env:
