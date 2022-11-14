@@ -4,6 +4,8 @@ description: objects that are used by the client and room functions
 
 # Types
 
+Objects that are used by the [client](/docs/API/client) and [room functions](/docs/API/room-functions)
+
 ## RoomState
 
 `RoomState` object is provided to each [room function](/docs/API/room-functions), and will have the fields:
