@@ -9,13 +9,13 @@ import TabItem from '@theme/TabItem';
 
 ## Overview
 
-We are ready to make our first game - tic-tac-toe! There are two major components of your game: the [frontend](#frontend) and the [backend](#backend). We will go over the basics of each.
+We are ready to make our first game - tic-tac-toe! There are two major components of your game: the [frontend](/docs/Getting-Started/tictactoe#frontend) and the [room functions](#/docs/Getting-Started/tictactoe#defining-the-room-functions). We will go over the basics of each.
 
-## Backend
+## Defining the [room functions](/docs/API/room-functions)
 
 ### What is roomState?
 
-Your game state is held in the [RoomState](/docs/API/backend#roomstate) object. You can tell UrTurn if your game is joinable and/or if it is finished. You can also define the "state" object that will define the way the board currently looks. For this tic-tac-toe game, the roomState state will look like this:
+Your game state is held in the [RoomState](/docs/API/types#roomstate) object. You can tell UrTurn if your game is joinable and/or if it is finished. You can also define the "state" object that will define the way the board currently looks. For this tic-tac-toe game, the roomState state will look like this:
 
 ```json
 {
@@ -42,7 +42,7 @@ All of our game logic can be encompassed by the following four functions:
 
 #### 1. onRoomStart
 
-This [function](/docs/API/backend#onroomstart-required) will be called whenever a room is created. When the game starts, we want to initialize our empty roomState, which includes the following for tic-tac-toe:
+This [function](/docs/API/room-functions#onroomstart-required) will be called whenever a room is created. When the game starts, we want to initialize our empty roomState, which includes the following for tic-tac-toe:
 
 1. The Board: A 3x3 square, initialized with null values.
 2. The Winner: The winner's ID, if there is a winner. Initially null.
@@ -64,7 +64,7 @@ function onRoomStart() {
 
 #### 2. onPlayerJoin
 
-This function will be called whenever a player actually joins the game. It provides us with the ID of the player who joined as well as the current [RoomState](/docs/API/backend#roomstate).
+This function will be called whenever a player actually joins the game. It provides us with the ID of the player who joined as well as the current [RoomState](/docs/API/types#roomstate).
 
 If this is the first player to join, we will just return an empty object. If this is the second player to join, then the game has all the necessary players and should be marked as not joinable.
 
@@ -185,7 +185,7 @@ function onPlayerMove(plr, move, roomState) {
 
 #### 4. onPlayerQuit
 
-This [function](/docs/API/backend#onplayerquit-required) will be called whenever a player quits the game. It provides us with the player who quit and the current board game state.
+This [function](/docs/API/room-functions#onplayerquit-required) will be called whenever a player quits the game. It provides us with the player who quit and the current board game state.
 
 For tic-tac-toe, the game will end if one of the players quits. The game will be marked as not joinable and finished, and the remaining player will be marked the winner.
 
@@ -204,11 +204,11 @@ function onPlayerQuit(plr, roomState) {
 
 ## Frontend
 
-This section will go over how to implement the frontend for our tic-tac-toe so that it is visible to the user. We will be adding our components to ```frontend/src/App.jsx```. This file already contains some logic for you to access the [RoomState](/docs/API/backend#roomstate) object and for any state changes to make to be propagated to your backend.
+This section will go over how to implement the frontend for our tic-tac-toe so that it is visible to the user. We will be adding our components to ```frontend/src/App.jsx```. This file already contains some logic for you to access the [`RoomState`](/docs/API/types#roomstate) object and for any state changes to make to be propagated to your [room functions](/docs/API/room-functions).
 
-### 1. Extract the Board Game State
+### 1. Extract the RoomState
 
-We will first extract the information we need from the board game state:
+We will first extract the information we need from the [`RoomState`](/docs/API/types#roomstate):
 
 <Tabs>
 <TabItem value="snippet" label="Snippet">
@@ -280,7 +280,7 @@ export default App;
 
 ### 2. Create a Tic-Tac-Toe Board
 
-Using our empty board game, we can render a simple tic-tac-toe board:
+Using our defined empty `board` field, we can render a simple tic-tac-toe board:
 
 <Tabs>
 <TabItem value="snippet" label="Snippet">
@@ -400,7 +400,7 @@ export default App;
 
 ### 3. Add MakeMove()
 
-We can now add in the ability for a player to make a move. We'll add an onClick handler to each tic-tac-toe square that will send a move containing the x- and y-coordinates (the row and column numbers of the box they clicked on) to the client. UrTurn will handle sending the move to your [onPlayerMove](/docs/API/backend#onplayermove-required) function!
+We can now add in the ability for a player to make a move. We'll add an onClick handler to each tic-tac-toe square that will send a move containing the x- and y-coordinates (the row and column numbers of the box they clicked on) to the client. UrTurn will handle sending the move to your [onPlayerMove](/docs/API/room-functions#onplayermove-required) function!
 
 
 <Tabs>

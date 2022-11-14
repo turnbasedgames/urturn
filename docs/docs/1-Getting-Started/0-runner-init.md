@@ -22,12 +22,12 @@ npm run dev # run the game locally
 
 ```bash
 game
-│   package.json # npm package specification for dependencies on your backend (includes @urturn/runner for local development)
+│   package.json # npm package specification for dependencies for your room functions (includes @urturn/runner for local development)
 │
 └───.github/workflows # contains important GitHub actions that create a build artifact for UrTurn to use
 │
 └───src
-│   │   main.js # backend functions (e.g. onRoomStart, onPlayerMove, etc.)
+│   │   main.js # room functions (e.g. onRoomStart, onPlayerMove, etc.)
 │   
 └───frontend # holds all the files related to your game frontend
     │   package.json  # npm package specification for dependencies on your frontend (includes @urturn/client)

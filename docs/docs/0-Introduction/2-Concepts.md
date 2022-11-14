@@ -1,29 +1,34 @@
 # Concepts
 
-## RoomState
+## Basic architecture
 
-All room states follow a structure like this:
+This diagram shows 4 systems. You write code for the `web frontend` and the [`room functions`](/docs/API/room-functions). We write code for the `runner` and `client` so you don't have to.
 
-```json
+![architecture diagram](./everything_diagram.png)
 
-{
-  "joinable": true, // boolean
-  "finished": true, // boolean
-  "state": {}, // any JSON object that you define
-  "version": 0, // number
-  "players": [], // array of player objects
-}
+:::success
 
-```
+All infrastructure shown is managed, scaled, and operated by UrTurn.
 
-All [`Room`](#room) operations modify or use the [`roomState`](/docs/API/backend#roomstate) to create a new [`roomState`](/docs/API/backend#roomstate).
+For you, it will feel like your frontend is seamlessly communicating directly with your [room functions](/docs/API/room-functions).
+
+:::
+
+:::caution
+
+**The user is able to control the game frontend.**
+This means critical game logic should always be in your [room functions](/docs/API/room-functions) (e.g. validation of user data, handling transition of state, etc.), which is managed by our cloud servers.
+
+:::
 
 ## Room
 
-- Rooms are instances of games.
-- Rooms will have an associated RoomState to track the current state of the room.
+- Rooms are instances of [games](/docs/Introduction/Concepts#game).
+- Rooms will have an associated [`RoomState`](/docs/API/types#roomstate) to track the current state of the room.
 - Players create new rooms whenever they click play on your game. UrTurn will automatically place players together in a room if it is public.
-- `private` rooms are created by players when they click `create private room`, and are usually played with people they already know. You can handle private rooms differently than public rooms; for example, you might want to let the player who created the private room determine the settings of the room.
+- `private` rooms are created by players when they click `create private room`.
+  - You can handle private rooms differently than public rooms (see [roomStartContext](/docs/API/types#roomstartcontext)) in your [room functions](/docs/API/room-functions).
+  - For example, you might want players to be able to control various game settings or rules in a private room.
 - If a user accidentally closes their browser, they may reopen it to view the room again (exception: see [disconnectTimeout](/docs/Introduction/Concepts#automatic-disconnect-handling))
 
 ## Game

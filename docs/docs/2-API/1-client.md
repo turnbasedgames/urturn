@@ -13,13 +13,13 @@ description: Simple client to leverage all of UrTurn infrastructure
 
 #### `client.events.on('onStateChanged', (newRoomState: RoomState) => {})`
 
-- Calls the callback anytime the current [RoomState](/docs/API/backend#roomstate) changes for the room
+- Calls the callback anytime the current [RoomState](/docs/API/types#roomstate) changes for the room
 
 ## Methods
 
 ### `client.makeMove(move: Move)`
 
-- [Move](/docs/API/backend#move) is any JSON serializable object
+- [Move](/docs/API/types#move) is any JSON serializable object
 - returns [`Promise<MoveResult>`](#moveresult) if the move is accepted
 
 ### `client.getLocalPlayer()`
@@ -34,7 +34,7 @@ You can tell if the local player is a spectator or a regular player if they are 
 
 ### `client.getRoomState()`
 
-- returns the current [`RoomState`](/docs/API/backend#roomstate)
+- returns the current [`RoomState`](/docs/API/types#roomstate)
 
 ## Types
 

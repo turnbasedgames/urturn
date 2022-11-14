@@ -45,9 +45,10 @@ const sidebars = {
         keywords: ['api'],
       },
       items: [
-        'API/runner',
-        'API/backend',
+        'API/room-functions',
         'API/client',
+        'API/types',
+        'API/runner',
       ],
     },
     {
