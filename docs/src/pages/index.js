@@ -31,7 +31,7 @@ function HomepageHeader() {
             className="button button--lg button--outline button--secondary"
             href="docs/"
           >
-            Concepts
+            Learn More
           </a>
         </Stack>
       </Stack>

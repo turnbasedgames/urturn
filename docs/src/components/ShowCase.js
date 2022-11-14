@@ -40,19 +40,30 @@ const ExampleGameList = [
 const FeatureList = [
   {
     title: 'Multiplayer',
-    description: "Just write the code for how you want the state to change, and that's it. Room state transitions occur on the order of milliseconds with networking and matchmaking already built in.",
+    points: [
+      "Write the code for how you want the state to change, and that's it.",
+      'Networking and matchmaking already built in.',
+      'Updates occur on the order of milliseconds.'
+    ],
     svgComponent: <Multiplayer className={styles['svg-thumbnail']} />,
     learnMore: true
   },
   {
     title: 'Scale',
-    description: 'Never worry about scaling your games again, and never pay for scale again',
+    points: [
+      'Never worry about scaling or hosting your games again.',
+      'Never pay for infrastructure again', 
+      'We schedule your backend on our internal functions as a service platform for free.'
+    ],
     svgComponent: <Scale className={styles['svg-thumbnail']} />
   },
   {
     title: 'Monetization',
     subtitle: <span className={clsx("badge badge--warning", styles.badge)}>Coming Soon!</span>,
-    description: 'Monetize your games by implementing a simple function',
+    points: [
+      'Monetize your games by implementing a simple function.',
+      'ACID Transaction handling built in.'
+    ],
     svgComponent: <Monetize className={styles['svg-thumbnail']} />
   },
 ];
@@ -90,21 +101,24 @@ export default function ShowCase() {
         </Grid2>
       </Stack>
       <Stack maxWidth="90%" margin="auto" minHeight="60vh" alignItems="center" justifyContent="center">
-        <h1 className={styles['title-alt']}>Blazingly Fast Architecture</h1>
+        <h1 className={styles['title-alt']}>All of Your Infrastructure Needs</h1>
         <p className='hero__subtitle'>We are obsessed over the game developer experience. Here's what you can do with UrTurn.</p>
         <Grid2 container spacing={2} margin={2}>
-          {FeatureList.map(({ subtitle, title, description, svgComponent, learnMore }, index) => (
+          {FeatureList.map(({ subtitle, title, description, points, svgComponent, learnMore }, index) => (
             <Grid2 xs={12} sm={6} lg={4} key={index}>
               <Stack
                 width="100%"
                 alignItems="center"
-                maxHeight="400px"
+                maxHeight="500px"
                 margin={1}
               >
                 <div className={clsx("card", styles.card)}>
                   <div className="card__header">
                     <h1 className={styles['card-title']}>{title} {subtitle}</h1>
                     <p className={styles['card-title']}>{description}</p>
+                    <ul>
+                      {points.map((point, index) => <li key={index}>{point}</li>)}
+                    </ul>
                   </div>
                   {svgComponent}
                   {learnMore && <div class="card__footer">
