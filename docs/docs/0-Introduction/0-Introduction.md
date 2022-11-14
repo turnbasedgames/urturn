@@ -9,7 +9,7 @@ slug: /
 
 [UrTurn](https://www.urturn.app/) is a game platform that hosts and handles **all infrastructure for your game**: networking, multiplayer, matchmaking, and data storage.
 
-The framework lets you modify game state of a room in a **transactional** and **event-based** manner. Just define the resulting state after each room event, and that's it (no infrastructure headaches, no worrying about scale again).
+The framework lets you modify game state of a room in a **transactional** and **event-based** manner. Just define how to modify game states on each event, and that's it (no infrastructure headaches, no worrying about scale again).
 
 ![simple diagram of UrTurn and your code](./simple_diagram.png)
 

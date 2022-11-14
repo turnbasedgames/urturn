@@ -4,6 +4,12 @@ description: Quickly generate a new UrTurn Game
 
 # Generating a new UrTurn Game
 
+:::success
+
+Understand what [UrTurn is and isn't](/docs).
+
+:::
+
 ## Create Game
 
 ```bash
