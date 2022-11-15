@@ -1,6 +1,6 @@
 {
-  "name": "tictactoe",
-  "version": "1.0.0",
+  "name": "@urturn/server",
+  "version": "0.1.8",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "dev": "node -r dotenv/config ./bin/devRun",
     "lint": "eslint --ignore-path .gitignore .",
     "lint:fix": "eslint --ignore-path .gitignore . --fix",
-    "test": "ava --timeout=90s --verbose",
+    "test": "ava --timeout=180s --verbose",
     "test:coverage": "nyc npm run test",
     "test:check-coverage": "npm run test:coverage && nyc check-coverage --lines 80 --branches 80 --statements 80 --functions 80",
     "reset": "npm run reset:db && npm run reset:firebase",

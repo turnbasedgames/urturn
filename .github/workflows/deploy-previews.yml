@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: development
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -79,3 +79,20 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BOARD_GAMES }}'
           projectId: board-games-io
           entryPoint: packages/website
+  tests:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - uses: actions/cache@v3
+        id: cache-build
+        with:
+          path: .
+          key: ${{ github.run_id }}-build
+          restore-keys: ${{ github.run_id }}-build
+      - name: run tests
+        run: npx lerna run test:check-coverage
+        env:
+          FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
+          GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
+          STRIPE_KEY: ${{ secrets.STRIPE_KEY }}
