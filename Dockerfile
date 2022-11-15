@@ -23,7 +23,7 @@ COPY .gitignore .gitignore
 COPY --from=builder /app/out/json/ .
 COPY --from=builder /app/out/package-lock.json ./package-lock.json
 RUN npm install -g npm@9.x
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 # Build the project and its dependencies
 COPY --from=builder /app/out/full/ .
