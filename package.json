@@ -2,6 +2,9 @@
   "name": "root",
   "private": true,
   "scripts": {
+    "lint": "npx lerna run lint",
+    "lint:fix": "npx lerna run lint:fix",
+    "build": "npx lerna run build",
     "prepublishOnly": "npx lerna run build"
   },
   "workspaces": [
