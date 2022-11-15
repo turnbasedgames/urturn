@@ -24,10 +24,10 @@
   },
   "homepage": "https://github.com/turnbasedgames/urturn#readme",
   "dependencies": {
-    "@urturn/tictactoe-frontend": "^0.1.7"
+    "@urturn/tictactoe-frontend": "*"
   },
   "devDependencies": {
-    "@urturn/runner": "^0.1.7",
+    "@urturn/runner": "*",
     "concurrently": "^7.1.0",
     "cross-env": "^7.0.3",
     "eslint": "^8.14.0",

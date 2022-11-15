@@ -18,8 +18,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@urturn/runner": "^0.1.7",
-    "@urturn/runner-frontend": "^0.1.7"
+    "@urturn/runner": "*",
+    "@urturn/runner-frontend": "*"
   },
   "devDependencies": {
     "concurrently": "^7.1.0",
