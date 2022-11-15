@@ -98,16 +98,3 @@ jobs:
         with:
           folder: examples/semantle-battle/build
           branch: published-semantle-battle
-  deploy_services:
-    needs: build
-    name: Deploy services
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/cache@v3
-        id: cache-build
-        with:
-          path: .
-          key: ${{ github.run_id }}-build
-          restore-keys: ${{ github.run_id }}-build
-      - name: deploy services
-        run: echo "testing"
