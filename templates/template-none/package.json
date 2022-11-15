@@ -4,7 +4,7 @@
   "private": true,
   "homepage": ".",
   "dependencies": {
-    "@urturn/client": "^0.1.7"
+    "@urturn/client": "*"
   },
   "scripts": {
     "start": "echo TODO create start script",
