@@ -6,7 +6,6 @@
   "private": "true",
   "scripts": {
     "start": "node index.js",
-    "build": "rollup -c",
     "build:docker": "docker build --tag urturn-server .",
     "dev": "node -r dotenv/config ./bin/devRun",
     "lint": "eslint --ignore-path .gitignore .",
@@ -62,6 +61,7 @@
     "nyc": "^15.1.0",
     "redis-memory-server": "^0.6.0",
     "rollup": "^3.3.0",
+    "rollup-plugin-polyfill-node": "^0.11.0",
     "socket.io-client": "^4.1.2"
   },
   "ava": {
