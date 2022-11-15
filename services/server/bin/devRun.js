@@ -26,7 +26,7 @@ async function main() {
 
   const serverEnv = { ...env, ...envWithMongo, ...envWithRedis };
   logger.info('Running server with dev environment', serverEnv);
-  const server = spawn('nodemon', ['index.js'], { env: serverEnv });
+  const server = spawn('nodemon', ['dist/index.js'], { env: serverEnv });
   const exitPromise = new Promise((resolve) => {
     server.on('exit', (code) => {
       logger.warn(`server exited with code: ${code}`);
