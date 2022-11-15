@@ -1,6 +1,6 @@
 {
   "name": "@urturn/runner",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "bin": {
     "runner": "bin/runner.js"
   },
@@ -26,7 +26,7 @@
   ],
   "description": "",
   "dependencies": {
-    "@urturn/runner-frontend": "*",
+    "@urturn/runner-frontend": "^0.1.9",
     "chalk": "^4.1.2",
     "commander": "^9.1.0",
     "cors": "^2.8.5",
