@@ -15,6 +15,7 @@
   "devDependencies": {
     "lerna": "^6.0.3",
     "nx": "^15.0.13",
-    "serve": "^14.1.1"
+    "serve": "^14.1.1",
+    "turbo": "^1.6.3"
   }
 }
