@@ -9,7 +9,7 @@
     "@mui/icons-material": "^5.10.9",
     "@mui/lab": "^5.0.0-alpha.105",
     "@mui/material": "^5.2.8",
-    "@urturn/client": "^0.1.7",
+    "@urturn/client": "*",
     "buffer": "^6.0.3",
     "prop-types": "^15.8.1",
     "react": "^17.0.2",

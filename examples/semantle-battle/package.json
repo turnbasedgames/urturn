@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/turnbasedgames/urturn#readme",
   "dependencies": {
-    "@urturn/semantle-battle-frontend": "^0.1.7"
+    "@urturn/semantle-battle-frontend": "*"
   },
   "devDependencies": {
     "@urturn/runner": "*",
