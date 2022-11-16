@@ -1,7 +1,14 @@
 {
   "name": "root",
   "private": true,
+  "engines": {
+    "node": ">=16.0.0 <17",
+    "npm": ">=9.1.1"
+  },
   "scripts": {
+    "lint": "npx lerna run lint",
+    "lint:fix": "npx lerna run lint:fix",
+    "build": "npx lerna run build",
     "prepublishOnly": "npx lerna run build"
   },
   "workspaces": [
@@ -15,6 +22,8 @@
   "devDependencies": {
     "lerna": "^6.0.3",
     "nx": "^15.0.13",
-    "serve": "^14.1.1"
-  }
+    "serve": "^14.1.1",
+    "turbo": "^1.6.3"
+  },
+  "packageManager": "npm@9.1.1"
 }

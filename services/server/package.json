@@ -3,7 +3,7 @@
   "version": "0.1.8",
   "description": "",
   "main": "index.js",
-  "private": "true",
+  "private": true,
   "scripts": {
     "start": "node index.js",
     "dev": "node -r dotenv/config ./bin/devRun",
@@ -20,7 +20,7 @@
   "license": "ISC",
   "engines": {
     "node": ">=16.0.0 <17",
-    "npm": ">=6.0.0"
+    "npm": ">=9.1.1"
   },
   "dependencies": {
     "@google-cloud/logging-winston": "^4.2.3",
