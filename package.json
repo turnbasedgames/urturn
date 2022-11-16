@@ -1,6 +1,10 @@
 {
   "name": "root",
   "private": true,
+  "engines": {
+    "node": ">=16.0.0 <17",
+    "npm": ">=9.1.1"
+  },
   "scripts": {
     "lint": "npx lerna run lint",
     "lint:fix": "npx lerna run lint:fix",
