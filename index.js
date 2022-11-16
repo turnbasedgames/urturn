@@ -1,5 +1,11 @@
 'use strict';
 
+// these roomState fields should be filtered out
+const BACKEND_ONLY_FIELDS = ['logger'];
+
+const filterEntries = (obj, keys) => Object
+  .fromEntries(Object.entries(obj).filter(([key]) => keys.includes(key)));
+
 var main = {
   onRoomStart: ({ logger }) => {
     logger.info('test app: room start');
@@ -12,7 +18,7 @@ var main = {
   onPlayerJoin: ({ username }, roomState) => ({
     state: {
       message: `${username} joined!`,
-      last: roomState,
+      last: filterEntries(roomState, BACKEND_ONLY_FIELDS),
     },
   }),
   onPlayerMove: ({ username }, move, roomState) => {
@@ -35,14 +41,14 @@ var main = {
       state: {
         message: `${username} made move!`,
         move,
-        last: roomState,
+        last: filterEntries(roomState, BACKEND_ONLY_FIELDS),
       },
     });
   },
   onPlayerQuit: ({ username }, roomState) => ({
     state: {
       message: `${username} left!`,
-      last: roomState,
+      last: filterEntries(roomState, BACKEND_ONLY_FIELDS),
     },
   }),
 };
