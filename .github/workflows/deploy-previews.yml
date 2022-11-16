@@ -96,27 +96,3 @@ jobs:
           FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
           GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
           STRIPE_KEY: ${{ secrets.STRIPE_KEY }}
-
-  deploy_server_staging:
-    name: Deploy Server Staging
-    runs-on: ubuntu-latest
-    steps:
-      # This does not depend on the build step which makes it faster, but if this service ever depends on another package we should confirm
-      # that we do not need to build the other packages.
-      # In the future we can do per PR deployments.
-      # TODO: this does not cache npm, which is causing our builds to take longer. We should address this.
-      # https://github.com/actions/setup-node/issues/416
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: 'npm'
-      - name: Prune for server
-        run: |
-          npm ci
-          npx turbo prune --scope=@urturn/server
-      - name: Deploy server
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: out/
-          branch: deploy-server-staging
