@@ -104,6 +104,8 @@ jobs:
       # This does not depend on the build step which makes it faster, but if this service ever depends on another package we should confirm
       # that we do not need to build the other packages.
       # In the future we can do per PR deployments.
+      # TODO: this does not cache npm, which is causing our builds to take longer. We should address this.
+      # https://github.com/actions/setup-node/issues/416
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
