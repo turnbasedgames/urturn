@@ -20,7 +20,7 @@ npm run dev # run the game locally
 
 :::caution
 
-Windows users, you must use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install). We currently do not support powershell/command prompt.
+**Windows** users must use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install). We currently do not support powershell/command prompt.
 
 Make sure to keep files and folders in your WSL directories (they should **NOT** be under `/mnt/c`, use `/home/<user>/` instead).
 
