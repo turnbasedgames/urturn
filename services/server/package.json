@@ -3,7 +3,7 @@
   "version": "0.1.8",
   "description": "",
   "main": "index.js",
-  "private": "true",
+  "private": true,
   "scripts": {
     "start": "node index.js",
     "build:docker": "docker build --tag urturn-server .",
