@@ -37,7 +37,7 @@ test('GET /user returns 401 if invalid token is provided', async (t) => {
 
 test('GET /user returns 404 when requester is authenticated but no corresponding user exists', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const authToken = await userCred.user.getIdToken();
   const { response: { status, data: { name } } } = await t.throwsAsync(api.get('/user', { headers: { authorization: authToken } }));
   t.is(status, StatusCodes.NOT_FOUND);
@@ -46,9 +46,8 @@ test('GET /user returns 404 when requester is authenticated but no corresponding
 
 test('GET /user returns user object', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
 
   const authToken = await userCred.user.getIdToken();
   const { status, data } = await api.get('/user', { headers: { authorization: authToken } });
@@ -59,9 +58,8 @@ test('GET /user returns user object', async (t) => {
 
 test('GET /user includePrivate query parameter returns private values', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred, true);
-  t.context.createdUsers.push(userCred);
 
   const authToken = await userCred.user.getIdToken();
   const { status, data } = await api.get('/user', {
@@ -75,9 +73,8 @@ test('GET /user includePrivate query parameter returns private values', async (t
 
 test('POST /user returns 409 if one already exists', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
 
   const authToken = await userCred.user.getIdToken();
   const { response: { status } } = await t.throwsAsync(api.post('/user', {}, { headers: { authorization: authToken } }));
@@ -91,11 +88,11 @@ test('POST /user returns 500 if username generation fails', async (t) => {
   const { api } = customApp;
 
   // the first user created will be successful and take up the only generated username "test"
-  const userCredOne = await createUserCred();
+  const userCredOne = await createUserCred(t);
   await createUserAndAssert(t, api, userCredOne);
   t.context.createdUsers.push(userCredOne);
 
-  const userCredTwo = await createUserCred();
+  const userCredTwo = await createUserCred(t);
   const authTokenTwo = await userCredTwo.user.getIdToken();
   const { response: { status, data: { name } } } = await t.throwsAsync(api.post('/user', {}, { headers: { authorization: authTokenTwo } }));
   t.is(status, StatusCodes.INTERNAL_SERVER_ERROR);
@@ -104,14 +101,13 @@ test('POST /user returns 500 if username generation fails', async (t) => {
 
 test('POST /user creates user', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
 });
 
 test('POST /user/create-payment-intent throws error for unsupported currency', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const authToken = await userCred.user.getIdToken();
 
   await createUserAndAssert(t, api, userCred);
@@ -122,13 +118,11 @@ test('POST /user/create-payment-intent throws error for unsupported currency', a
   }, { headers: { authorization: authToken } }));
 
   t.is(status, StatusCodes.BAD_REQUEST);
-
-  t.context.createdUsers.push(userCred);
 });
 
 test('POST /user/create-payment-intent throws error for amounts not accepted', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const authToken = await userCred.user.getIdToken();
 
   await createUserAndAssert(t, api, userCred);
@@ -139,13 +133,11 @@ test('POST /user/create-payment-intent throws error for amounts not accepted', a
   }, { headers: { authorization: authToken } }));
 
   t.is(status, StatusCodes.BAD_REQUEST);
-
-  t.context.createdUsers.push(userCred);
 });
 
 test('POST /user/create-payment-intent creates a payment intent for a user', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const authToken = await userCred.user.getIdToken();
 
   await createUserAndAssert(t, api, userCred);
@@ -157,13 +149,11 @@ test('POST /user/create-payment-intent creates a payment intent for a user', asy
 
   t.is(status, StatusCodes.CREATED);
   t.true(data.clientSecret.includes('pi'));
-
-  t.context.createdUsers.push(userCred);
 });
 
 test('POST /user/purchase/webhook throws 400 if wrong currency provided', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred);
   const wrongCurrencyPayload = {
     data: {
@@ -187,7 +177,6 @@ test('POST /user/purchase/webhook throws 400 if wrong currency provided', async 
 
   t.is(status, StatusCodes.BAD_REQUEST);
   t.is(message, 'conversion to urbux failed (currency=ghs, paymentAmount=1000)');
-  t.context.createdUsers.push(userCred);
 });
 
 test('POST /user/purchase/webhook throws 400 if no userId provided', async (t) => {
@@ -243,7 +232,7 @@ test('POST /user/purchase/webhook throws 404 if no user found with provided user
 
 test('POST /user/purchase/webhook throws 400 if bad Stripe-Signature header provided', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred);
   const payload = {
     id: 'evt_test_webhook',
@@ -265,12 +254,11 @@ test('POST /user/purchase/webhook throws 400 if bad Stripe-Signature header prov
 
   t.is(status, StatusCodes.BAD_REQUEST);
   t.is(message, 'No signatures found matching the expected signature for payload. Are you passing the raw request body you received from Stripe? https://github.com/stripe/stripe-node#webhook-signing');
-  t.context.createdUsers.push(userCred);
 });
 
 test('POST /user/purchase/webhook adds urbux to the user and stores currencyToUrbuxTransaction', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred);
   const authToken = await userCred.user.getIdToken();
 
@@ -301,12 +289,11 @@ test('POST /user/purchase/webhook adds urbux to the user and stores currencyToUr
   t.is(status, StatusCodes.OK);
   t.is(newUser.id, user.id);
   t.is(newUser.urbux, 1000);
-  t.context.createdUsers.push(userCred);
 });
 
 test('POST /user/purchase/webhook duplicate transactions (paymentIntent.id gets deduplicated) result in same user state', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred);
   const authToken = await userCred.user.getIdToken();
 
@@ -339,12 +326,11 @@ test('POST /user/purchase/webhook duplicate transactions (paymentIntent.id gets 
   t.true(responses.every(({ status }) => status === StatusCodes.OK));
   t.is(newUser.id, user.id);
   t.is(newUser.urbux, 1000);
-  t.context.createdUsers.push(userCred);
 });
 
 test('POST /user/purchase/webhook with an unhandled event type is ignored and just logged', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred);
   const authToken = await userCred.user.getIdToken();
 
@@ -377,7 +363,6 @@ test('POST /user/purchase/webhook with an unhandled event type is ignored and ju
   t.is(status, StatusCodes.OK);
   t.is(newUser.id, user.id);
   t.is(newUser.urbux, 0); // urbux is unchanged because this event type is not handled
-  t.context.createdUsers.push(userCred);
 });
 
 test('POST /user username generator adds random numbers when there is a collision', async (t) => {
@@ -387,11 +372,11 @@ test('POST /user username generator adds random numbers when there is a collisio
   const { api } = customApp;
 
   // the first user created will be successful and take up the only generated username "test"
-  const userCredOne = await createUserCred();
+  const userCredOne = await createUserCred(t);
   await createUserAndAssert(t, api, userCredOne);
   t.context.createdUsers.push(userCredOne);
 
-  const userCredTwo = await createUserCred();
+  const userCredTwo = await createUserCred(t);
   const userTwo = await createUserAndAssert(t, api, userCredTwo);
   t.context.createdUsers.push(userCredTwo);
   t.regex(userTwo.username, /test_[0-9]/);

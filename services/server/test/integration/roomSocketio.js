@@ -208,8 +208,8 @@ test.after.always(async (t) => {
 socketConfigs.forEach(({ name, config }) => {
   test(`sockets (${name}) that emit watchRoom with a room id will get events for room:latestState when the state changes`, async (t) => {
     const { api, baseURL } = t.context.app;
-    const userCredOne = await createUserCred();
-    const userCredTwo = await createUserCred();
+    const userCredOne = await createUserCred(t);
+    const userCredTwo = await createUserCred(t);
     const userOne = await createUserAndAssert(t, api, userCredOne);
     const userTwo = await createUserAndAssert(t, api, userCredTwo);
     const game = await createGameAndAssert(t, api, userCredOne, userOne);
@@ -346,7 +346,7 @@ socketConfigs.forEach(({ name, config }) => {
 
   test(`sockets (${name}) that emit watchRoom with a room id cannot watch another room`, async (t) => {
     const { api, baseURL } = t.context.app;
-    const userCredOne = await createUserCred();
+    const userCredOne = await createUserCred(t);
     const userOne = await createUserAndAssert(t, api, userCredOne);
     const game = await createGameAndAssert(t, api, userCredOne, userOne);
     const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
@@ -374,7 +374,7 @@ socketConfigs.forEach(({ name, config }) => {
 
   test(`sockets (${name}) that emit watchRoom with an invalid room id will get an error`, async (t) => {
     const { api, baseURL } = t.context.app;
-    const userCredOne = await createUserCred();
+    const userCredOne = await createUserCred(t);
     await createUserAndAssert(t, api, userCredOne);
     const socket = createSocket(t, baseURL, {
       ...config,
@@ -506,7 +506,7 @@ socketConfigs.forEach(({ name, config }) => {
     const { api, baseURL } = testApp;
     const { mongoClientDatabase } = app;
 
-    const userCredOne = await createUserCred();
+    const userCredOne = await createUserCred(t);
     const userOne = await createUserAndAssert(t, api, userCredOne);
     const socket = createSocket(
       t,
@@ -536,9 +536,9 @@ socketConfigs.forEach(({ name, config }) => {
 
   test(`sockets (${name}) across several rooms for the same game still get counted as 1 unique player in activePlayerCount`, async (t) => {
     const { api, baseURL } = t.context.app;
-    const userCredOne = await createUserCred();
-    const userCredTwo = await createUserCred();
-    const userCredThree = await createUserCred();
+    const userCredOne = await createUserCred(t);
+    const userCredTwo = await createUserCred(t);
+    const userCredThree = await createUserCred(t);
     const userOne = await createUserAndAssert(t, api, userCredOne);
     const userTwo = await createUserAndAssert(t, api, userCredTwo);
     const userThree = await createUserAndAssert(t, api, userCredThree);
@@ -595,7 +595,7 @@ socketConfigs.forEach(({ name, config }) => {
 
   test(`sockets (${name}) disconnected kicks player if they don't have a socket connection after 30 seconds`, async (t) => {
     const { api, baseURL } = t.context.app;
-    const userCredOne = await createUserCred();
+    const userCredOne = await createUserCred(t);
     const userOne = await createUserAndAssert(t, api, userCredOne);
     const game = await createGameAndAssert(t, api, userCredOne, userOne);
     const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
@@ -698,7 +698,7 @@ socketConfigs.forEach(({ name, config }) => {
 
   test(`sockets (${name}) multiple disconnections kicks player if they don't have a socket connection after 30 seconds`, async (t) => {
     const { api, baseURL } = t.context.app;
-    const userCredOne = await createUserCred();
+    const userCredOne = await createUserCred(t);
     const userOne = await createUserAndAssert(t, api, userCredOne);
     const game = await createGameAndAssert(t, api, userCredOne, userOne);
     const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
@@ -740,7 +740,7 @@ socketConfigs.forEach(({ name, config }) => {
 
   test(`sockets (${name}) disconnected does not kick player if they have a socket connection after 30 seconds`, async (t) => {
     const { api, baseURL } = t.context.app;
-    const userCredOne = await createUserCred();
+    const userCredOne = await createUserCred(t);
     const userOne = await createUserAndAssert(t, api, userCredOne);
     const game = await createGameAndAssert(t, api, userCredOne, userOne);
     const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
@@ -785,7 +785,7 @@ socketConfigs.forEach(({ name, config }) => {
 
   test(`sockets (${name}) disconnected does not kick player if room is private`, async (t) => {
     const { api, baseURL } = t.context.app;
-    const userCredOne = await createUserCred();
+    const userCredOne = await createUserCred(t);
     const userOne = await createUserAndAssert(t, api, userCredOne);
     const game = await createGameAndAssert(t, api, userCredOne, userOne);
     const room = await createRoomAndAssert(t, api, userCredOne, game, userOne, true);
