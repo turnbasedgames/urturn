@@ -28,8 +28,8 @@ async function createGameAndAssert(t, api, userCred, user, gameOptionalInfo = {}
   const gameRaw = {
     name,
     description,
-    commitSHA: '0870320e312f711d20e8c8078399d8a6aceb6d46',
-    githubURL: 'https://github.com/turnbasedgames/tictactoe',
+    commitSHA: 'published-test-app',
+    githubURL: 'https://github.com/turnbasedgames/urturn',
   };
   const authToken = await userCred.user.getIdToken();
   const { data: { game }, status } = await api.post('/game', gameRaw, { headers: { authorization: authToken } });
