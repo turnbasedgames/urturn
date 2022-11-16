@@ -6,6 +6,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "mkdir -p build/frontend && cp index.js build/index.js && cp thumbnail.png build/thumbnail.png && cp -r frontend/build build/frontend/build",
     "start": "concurrently \"npm run start:runner\" \"npm run start:frontend\"",
     "start:runner": "runner --frontend-port 3000 --no-clear",
     "start:frontend": "npx lerna run serve --scope=@urturn/test-app-frontend",
@@ -17,11 +18,9 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@urturn/runner": "*",
-    "@urturn/runner-frontend": "*"
-  },
   "devDependencies": {
+    "@urturn/runner": "*",
+    "@urturn/runner-frontend": "*",
     "concurrently": "^7.1.0",
     "eslint": "^8.21.0",
     "eslint-config-airbnb-base": "^15.0.0",
