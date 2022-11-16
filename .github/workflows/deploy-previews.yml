@@ -96,10 +96,14 @@ jobs:
           FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
           GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
           STRIPE_KEY: ${{ secrets.STRIPE_KEY }}
+
   deploy_server_staging:
     name: Deploy Server Staging
     runs-on: ubuntu-latest
     steps:
+      # This does not depend on the build step which makes it faster, but if this service ever depends on another package we should confirm
+      # that we do not need to build the other packages.
+      # In the future we can do per PR deployments.
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
