@@ -20,15 +20,13 @@ async function getRoomAndAssert(t, roomId) {
 }
 
 async function createGameAndAssert(t, api, userCred, user, gameOptionalInfo = {}) {
-  // TODO: we should switch from using tictactoe to runner/test_app backend where we
-  // have more control over the backend behavior. We can force trigger errors, or other behaviors
   const name = gameOptionalInfo.name ?? `integration-tests-${uuidv4()}`;
   const description = gameOptionalInfo.description ?? 'test description';
 
   const gameRaw = {
     name,
     description,
-    commitSHA: 'published-test-app',
+    commitSHA: '0493066b4aa9f6ea6ab301726a96097516aa8d58', // check the branch for later commits: published-test-app,
     githubURL: 'https://github.com/turnbasedgames/urturn',
   };
   const authToken = await userCred.user.getIdToken();
