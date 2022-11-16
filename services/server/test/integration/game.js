@@ -3,25 +3,13 @@ const { StatusCodes } = require('http-status-codes');
 const { v4: uuidv4 } = require('uuid');
 const { Types } = require('mongoose');
 
-const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
-const { createGameAndAssert, createUserAndAssert, cleanupTestUsers } = require('../util/api_util');
-const { setupTestFileLogContext } = require('../util/util');
+const { createGameAndAssert, createUserAndAssert } = require('../util/api_util');
+const { setupTestFileLogContext, setupTestBeforeAfterHooks } = require('../util/util');
 
-test.before(async (t) => {
-  const app = await spawnApp(t);
-  /* eslint-disable no-param-reassign */
-  t.context.app = app;
-  t.context.createdUsers = [];
-  /* eslint-enable no-param-reassign */
-});
+setupTestBeforeAfterHooks(test);
 
 setupTestFileLogContext(test);
-
-test.after.always(async (t) => {
-  await cleanupTestUsers(t);
-  await t.context.app.cleanup();
-});
 
 test('GET /game returns list of games', async (t) => {
   const { api } = t.context.app;

@@ -9,11 +9,10 @@ const {
   createUserAndAssert,
   createGameAndAssert,
   createRoomAndAssert,
-  cleanupTestUsers,
   startTicTacToeRoom,
   getRoomAndAssert,
 } = require('../util/api_util');
-const { createOrUpdateSideApps, setupTestFileLogContext } = require('../util/util');
+const { createOrUpdateSideApps, setupTestFileLogContext, setupTestBeforeAfterHooks } = require('../util/util');
 
 async function testOperationOnFinishedRoom(t, operation) {
   const { userCredOne, userCredTwo, room } = await startTicTacToeRoom(t);
@@ -31,25 +30,9 @@ async function testOperationOnFinishedRoom(t, operation) {
   t.is(message, `${room.id} is no longer mutable because it is finished!`);
 }
 
-test.before(async (t) => {
-  const app = await spawnApp(t);
-  /* eslint-disable no-param-reassign */
-  t.context.app = app;
-  t.context.createdUsers = [];
-  /* eslint-enable no-param-reassign */
-});
+setupTestBeforeAfterHooks(test);
 
 setupTestFileLogContext(test);
-
-test.after.always(async (t) => {
-  const { app, sideApps } = t.context;
-
-  await cleanupTestUsers(t);
-  await app.cleanup();
-  if (sideApps) {
-    await sideApps.cleanup();
-  }
-});
 
 test('GET /room returns list of rooms', async (t) => {
   const { api } = t.context.app;

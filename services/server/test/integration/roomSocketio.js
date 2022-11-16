@@ -11,7 +11,7 @@ const {
   startTicTacToeRoom, getRoomAndAssert,
 } = require('../util/api_util');
 const {
-  waitFor, createOrUpdateSideApps, setupTestFileLogContext, sleep,
+  waitFor, createOrUpdateSideApps, setupTestFileLogContext, sleep, setupTestBeforeAfterHooks,
 } = require('../util/util');
 
 const disconnectTimeoutSecs = 30;
@@ -190,20 +190,9 @@ async function assertActivePlayerCount(t, gameId, count) {
   t.is(await getActivePlayerCountAndAssert(t, gameId), count);
 }
 
-test.before(async (t) => {
-  // eslint-disable-next-line no-param-reassign
-  t.context.app = await spawnApp(t);
-});
+setupTestBeforeAfterHooks(test);
 
 setupTestFileLogContext(test);
-
-test.after.always(async (t) => {
-  const { app, sideApps } = t.context;
-  await app.cleanup();
-  if (sideApps) {
-    await sideApps.cleanup();
-  }
-});
 
 socketConfigs.forEach(({ name, config }) => {
   test(`sockets (${name}) that emit watchRoom with a room id will get events for room:latestState when the state changes`, async (t) => {

@@ -4,24 +4,13 @@ const { StatusCodes } = require('http-status-codes');
 
 const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
-const { createUserAndAssert, cleanupTestUsers } = require('../util/api_util');
+const { createUserAndAssert } = require('../util/api_util');
 const { testStripeClient, testStripeWebhookSecret, createTestWebhookHeader } = require('../util/stripe');
-const { createOrUpdateSideApps, setupTestFileLogContext } = require('../util/util');
+const { createOrUpdateSideApps, setupTestFileLogContext, setupTestBeforeAfterHooks } = require('../util/util');
 
-test.before(async (t) => {
-  const app = await spawnApp(t);
-  /* eslint-disable no-param-reassign */
-  t.context.createdUsers = [];
-  t.context.app = app;
-  /* eslint-enable no-param-reassign */
-});
+setupTestBeforeAfterHooks(test);
 
 setupTestFileLogContext(test);
-
-test.after.always(async (t) => {
-  await cleanupTestUsers(t);
-  await t.context.app.cleanup();
-});
 
 test('GET /user returns 401 if user is not authenticated', async (t) => {
   const { api } = t.context.app;

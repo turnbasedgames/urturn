@@ -1,20 +1,11 @@
 const test = require('ava');
 const { waitForOutput, waitFor, setupTestFileLogContext } = require('../util/util');
 const { spawnApp } = require('../util/app');
+const { setupTestBeforeAfterHooks } = require('../util/util');
 
-test.before(async (t) => {
-  const app = await spawnApp(t);
-  /* eslint-disable no-param-reassign */
-  t.context.createdUsers = [];
-  t.context.app = app;
-  /* eslint-enable no-param-reassign */
-});
+setupTestBeforeAfterHooks(test);
 
 setupTestFileLogContext(test);
-
-test.after.always(async (t) => {
-  await t.context.app.cleanup();
-});
 
 test('Server fails and process exits when required Stripe environment variables are not provided', async (t) => {
   const { app } = t.context;
