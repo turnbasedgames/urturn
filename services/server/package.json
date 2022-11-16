@@ -6,7 +6,6 @@
   "private": true,
   "scripts": {
     "start": "node index.js",
-    "build:docker": "docker build --tag urturn-server .",
     "dev": "node -r dotenv/config ./bin/devRun",
     "lint": "eslint --ignore-path .gitignore .",
     "lint:fix": "eslint --ignore-path .gitignore . --fix",
