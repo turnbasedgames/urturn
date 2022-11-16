@@ -115,7 +115,7 @@ jobs:
         run: |
           npm ci
           npx turbo prune --scope=@urturn/server
-      - name: Deploy examples/semantle-battle 🚀
+      - name: Deploy server
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: out/
