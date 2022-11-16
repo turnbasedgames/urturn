@@ -1,4 +1,6 @@
-export default {
+'use strict';
+
+var main = {
   onRoomStart: ({ logger }) => {
     logger.info('test app: room start');
     return {
@@ -44,3 +46,5 @@ export default {
     },
   }),
 };
+
+module.exports = main;
