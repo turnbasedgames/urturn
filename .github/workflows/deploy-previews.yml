@@ -96,3 +96,22 @@ jobs:
           FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
           GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
           STRIPE_KEY: ${{ secrets.STRIPE_KEY }}
+  deploy_server_staging:
+    needs: build
+    name: Deploy Server Staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/cache@v3
+        id: cache-build
+        with:
+          path: .
+          key: ${{ github.run_id }}-build
+          restore-keys: ${{ github.run_id }}-build
+      - name: Prune for server
+        run: |
+          npx turbo prune --scope=@urturn/server
+      - name: Deploy examples/semantle-battle 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: out/
+          branch: deploy-server-staging
