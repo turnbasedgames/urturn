@@ -3,8 +3,8 @@
 // these roomState fields should be filtered out
 const BACKEND_ONLY_FIELDS = ['logger'];
 
-const filterEntries = (obj, keys) => Object
-  .fromEntries(Object.entries(obj).filter(([key]) => keys.includes(key)));
+const filterOutEntries = (obj, keys) => Object
+  .fromEntries(Object.entries(obj).filter(([key]) => !keys.includes(key)));
 
 var main = {
   onRoomStart: ({ logger }) => {
@@ -18,7 +18,7 @@ var main = {
   onPlayerJoin: ({ username }, roomState) => ({
     state: {
       message: `${username} joined!`,
-      last: filterEntries(roomState, BACKEND_ONLY_FIELDS),
+      last: filterOutEntries(roomState, BACKEND_ONLY_FIELDS),
     },
   }),
   onPlayerMove: ({ username }, move, roomState) => {
@@ -41,14 +41,14 @@ var main = {
       state: {
         message: `${username} made move!`,
         move,
-        last: filterEntries(roomState, BACKEND_ONLY_FIELDS),
+        last: filterOutEntries(roomState, BACKEND_ONLY_FIELDS),
       },
     });
   },
   onPlayerQuit: ({ username }, roomState) => ({
     state: {
       message: `${username} left!`,
-      last: filterEntries(roomState, BACKEND_ONLY_FIELDS),
+      last: filterOutEntries(roomState, BACKEND_ONLY_FIELDS),
     },
   }),
 };
