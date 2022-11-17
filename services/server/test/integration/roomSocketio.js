@@ -11,8 +11,9 @@ const {
   startTicTacToeRoom, getRoomAndAssert,
 } = require('../util/api_util');
 const {
-  waitFor, createOrUpdateSideApps, setupTestFileLogContext, sleep, setupTestBeforeAfterHooks,
+  waitFor, createOrUpdateSideApps, setupTestFileLogContext, sleep,
 } = require('../util/util');
+const { setupTestBeforeAfterHooks } = require('../util/app');
 
 const disconnectTimeoutSecs = 30;
 const disconnectAssertionBufferSecs = 10;

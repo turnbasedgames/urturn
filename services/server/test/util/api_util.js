@@ -131,7 +131,7 @@ module.exports = {
   createGameAndAssert,
   createRoomAndAssert,
   createUserAndAssert,
-  cleanupTestUsers,
   startTicTacToeRoom,
   getRoomAndAssert,
+  cleanupTestUsers,
 };

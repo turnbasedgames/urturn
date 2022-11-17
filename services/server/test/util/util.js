@@ -2,8 +2,6 @@ const { MongoMemoryReplSet } = require('mongodb-memory-server');
 const { RedisMemoryServer } = require('redis-memory-server');
 const { MongoClient } = require('mongodb');
 const { v4: uuidv4 } = require('uuid');
-const { cleanupTestUsers } = require('./api_util');
-const { spawnApp } = require('./app');
 
 function getNested(obj, ...args) {
   return args.reduce((nestedObj, level) => nestedObj && nestedObj[level], obj);
@@ -172,26 +170,6 @@ function setupTestFileLogContext(test) {
   });
 }
 
-function setupTestBeforeAfterHooks(test) {
-  test.before(async (t) => {
-    const app = await spawnApp(t);
-    /* eslint-disable no-param-reassign */
-    t.context.app = app;
-    t.context.createdUsers = [];
-  /* eslint-enable no-param-reassign */
-  });
-
-  test.after.always(async (t) => {
-    const { app, sideApps } = t.context;
-
-    await cleanupTestUsers(t);
-    await app.cleanup();
-    if (sideApps) {
-      await sideApps.cleanup();
-    }
-  });
-}
-
 module.exports = {
   createOrUpdateSideApps,
   getNested,
@@ -201,5 +179,4 @@ module.exports = {
   setupRedis,
   sleep,
   setupTestFileLogContext,
-  setupTestBeforeAfterHooks,
 };

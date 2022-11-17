@@ -12,7 +12,8 @@ const {
   startTicTacToeRoom,
   getRoomAndAssert,
 } = require('../util/api_util');
-const { createOrUpdateSideApps, setupTestFileLogContext, setupTestBeforeAfterHooks } = require('../util/util');
+const { createOrUpdateSideApps, setupTestFileLogContext } = require('../util/util');
+const { setupTestBeforeAfterHooks } = require('../util/app');
 
 async function testOperationOnFinishedRoom(t, operation) {
   const { userCredOne, userCredTwo, room } = await startTicTacToeRoom(t);
@@ -20,8 +21,9 @@ async function testOperationOnFinishedRoom(t, operation) {
   const authTokenOne = await userCredOne.user.getIdToken();
   const authTokenTwo = await userCredTwo.user.getIdToken();
 
-  // quit room which will force the room to be in finished state
-  await api.post(`/room/${room.id}/quit`, undefined,
+  // Force the room to be finished
+  // test-app backend allows us to hook into metadata fields and modify on move
+  await api.post(`/room/${room.id}/move`, { finished: true },
     { headers: { authorization: authTokenOne } });
   const { response: { status, data: { message, name } } } = await t.throwsAsync(api.post(`/room/${room.id}/${operation}`, undefined,
     { headers: { authorization: authTokenTwo } }));
@@ -89,8 +91,6 @@ test('GET /room returns private room(s) for users that are querying there own da
     userCredOne, userTwo, userCredTwo, room, game,
   } = await startTicTacToeRoom(t);
   const authTokenTwo = await userCredTwo.user.getIdToken();
-  t.context.createdUsers.push(userCredOne);
-  t.context.createdUsers.push(userCredTwo);
 
   // only user two attempts to quit room
   await api.post(`/room/${room.id}/quit`, {}, { headers: { authorization: authTokenTwo } });
@@ -127,8 +127,6 @@ test('GET /room throws error if containsPlayer does not match user.id and privat
 
   const userOne = await createUserAndAssert(t, api, userCredOne);
   const userTwo = await createUserAndAssert(t, api, userCredTwo);
-  t.context.createdUsers.push(userCredOne);
-  t.context.createdUsers.push(userCredTwo);
 
   const game = await createGameAndAssert(t, api, userCredOne, userOne);
   await createRoomAndAssert(t, api, userCredOne, game, userOne, true);
@@ -147,8 +145,6 @@ test('GET /room throws error if containsInactivePlayer does not match user.id an
 
   const userOne = await createUserAndAssert(t, api, userCredOne);
   const userTwo = await createUserAndAssert(t, api, userCredTwo);
-  t.context.createdUsers.push(userCredOne);
-  t.context.createdUsers.push(userCredTwo);
 
   const game = await createGameAndAssert(t, api, userCredOne, userOne);
   await createRoomAndAssert(t, api, userCredOne, game, userOne, true);
@@ -167,8 +163,6 @@ test('GET /room throws error if containsPlayer does not match user.id and privat
 
   const userOne = await createUserAndAssert(t, api, userCredOne);
   const userTwo = await createUserAndAssert(t, api, userCredTwo);
-  t.context.createdUsers.push(userCredOne);
-  t.context.createdUsers.push(userCredTwo);
 
   const game = await createGameAndAssert(t, api, userCredOne, userOne);
   await createRoomAndAssert(t, api, userCredOne, game, userOne, true);
@@ -187,8 +181,6 @@ test('GET /room throws error if containsInactivePlayer does not match user.id an
 
   const userOne = await createUserAndAssert(t, api, userCredOne);
   const userTwo = await createUserAndAssert(t, api, userCredTwo);
-  t.context.createdUsers.push(userCredOne);
-  t.context.createdUsers.push(userCredTwo);
 
   const game = await createGameAndAssert(t, api, userCredOne, userOne);
   await createRoomAndAssert(t, api, userCredOne, game, userOne, true);
@@ -207,8 +199,6 @@ test('GET /room supports query by "joinable", "finished", "containsPlayer", and 
   const authTokenTwo = await userCredTwo.user.getIdToken();
   const userOne = await createUserAndAssert(t, api, userCredOne);
   const userTwo = await createUserAndAssert(t, api, userCredTwo);
-  t.context.createdUsers.push(userCredOne);
-  t.context.createdUsers.push(userCredTwo);
 
   const game = await createGameAndAssert(t, api, userCredOne, userOne);
   const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
@@ -239,8 +229,6 @@ test('GET /room supports query by "containsInactivePlayer"', async (t) => {
     userCredOne, userTwo, userCredTwo, room, game,
   } = await startTicTacToeRoom(t);
   const authTokenTwo = await userCredTwo.user.getIdToken();
-  t.context.createdUsers.push(userCredOne);
-  t.context.createdUsers.push(userCredTwo);
 
   // only user two attempts to quit room, but because this triggers a finished room
   // user one also becomes an inactive player
@@ -388,8 +376,6 @@ test('PUT /room joins a user to a room if there exist a room for the user to joi
   const userCredTwo = await createUserCred(t);
   const userOne = await createUserAndAssert(t, api, userCredOne);
   await createUserAndAssert(t, api, userCredTwo);
-  t.context.createdUsers.push(userCredOne);
-  t.context.createdUsers.push(userCredTwo);
 
   const game = await createGameAndAssert(t, api, userCredOne, userOne);
   await createRoomAndAssert(t, api, userCredOne, game, userOne, false);
@@ -405,15 +391,12 @@ test('PUT /room joins a user to a room if there exist a room for the user to joi
 
 test('POST /room/:id/join joins a game', async (t) => {
   const { userCredOne, userCredTwo } = await startTicTacToeRoom(t);
-  t.context.createdUsers.push(userCredOne);
-  t.context.createdUsers.push(userCredTwo);
 });
 
 test('POST /room/:id/join on a non joinable room provides a 400', async (t) => {
   const { api } = t.context.app;
   const userCredOne = await createUserCred(t);
   const userOne = await createUserAndAssert(t, api, userCredOne);
-  t.context.createdUsers.push(userCredOne);
 
   const game = await createGameAndAssert(t, api, userCredOne, userOne);
   const createdRoom = await createRoomAndAssert(t, api, userCredOne, game, userOne, false);
@@ -426,7 +409,6 @@ test('POST /room/:id/join on a non joinable room provides a 400', async (t) => {
 
   const userCredTwo = await createUserCred(t);
   await createUserAndAssert(t, api, userCredTwo);
-  t.context.createdUsers.push(userCredTwo);
 
   const authTokenTwo = await userCredTwo.user.getIdToken();
   const { response: { status, data: { message, name } } } = await t.throwsAsync(api.post(`/room/${createdRoom.id}/join`, undefined, { headers: { authorization: authTokenTwo } }));
@@ -438,7 +420,6 @@ test('POST /room/:id/join on a non joinable room provides a 400', async (t) => {
 test('POST /room/:id/join on a room a player already joined provides a 400', async (t) => {
   const { api } = t.context.app;
   const userCredOne = await createUserCred(t);
-  t.context.createdUsers.push(userCredOne);
   const userOne = await createUserAndAssert(t, api, userCredOne);
   const game = await createGameAndAssert(t, api, userCredOne, userOne);
   const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
@@ -464,33 +445,31 @@ test('POST /room/:id/join on a finished room throws an error', async (t) => {
 
 test('POST /room/:id/move invokes creator backend to modify the game state', async (t) => {
   const { userCredOne, userCredTwo, room } = await startTicTacToeRoom(t);
-  t.context.createdUsers.push(userCredOne);
-  t.context.createdUsers.push(userCredTwo);
-
   const { api } = t.context.app;
   const authToken = await userCredOne.user.getIdToken();
 
   // make move
-  const { status } = await api.post(`/room/${room.id}/move`, { x: 0, y: 0 },
-    { headers: { authorization: authToken } });
+  const { status } = await api.post(`/room/${room.id}/move`, {
+    x: 0, y: 0, testString: 'hello world', testNested: { a: 'billy' },
+  },
+  { headers: { authorization: authToken } });
   t.is(status, StatusCodes.OK);
-  const {
-    latestState: { state: { board } },
-    joinable, players,
-  } = await getRoomAndAssert(t, room.id);
+  const { latestState: { state }, joinable, players } = await getRoomAndAssert(t, room.id);
+  t.deepEqual(
+    {
+      move: {
+        x: 0, y: 0, testString: 'hello world', testNested: { a: 'billy' },
+      },
+      message: `${}`
+    },
+    state,
+  );
   t.is(joinable, room.joinable);
   t.deepEqual(players, room.players);
-  t.deepEqual([
-    ['X', null, null],
-    [null, null, null],
-    [null, null, null]],
-  board);
 });
 
 test('POST /room/:id/move provides error if user code throws an error', async (t) => {
   const { userCredOne, userCredTwo, room } = await startTicTacToeRoom(t);
-  t.context.createdUsers.push(userCredOne);
-  t.context.createdUsers.push(userCredTwo);
 
   const { api } = t.context.app;
 
@@ -508,8 +487,6 @@ test('POST /room/:id/move provides error if user tries to make move when not in 
   const userCredTwo = await createUserCred(t);
   const userOne = await createUserAndAssert(t, api, userCredOne);
   await createUserAndAssert(t, api, userCredTwo);
-  t.context.createdUsers.push(userCredOne);
-  t.context.createdUsers.push(userCredTwo);
 
   const authTokenTwo = await userCredTwo.user.getIdToken();
   const game = await createGameAndAssert(t, api, userCredOne, userOne);
@@ -532,8 +509,6 @@ test('POST /room/:id/move provides error if database fails', async (t) => {
       app: customApp,
     },
   });
-  t.context.createdUsers.push(userCredOne);
-  t.context.createdUsers.push(userCredTwo);
 
   const authToken = await userCredOne.user.getIdToken();
 
@@ -553,8 +528,6 @@ test('POST /room/:id/quit user is no longer in the room, and is in inactivePlaye
   const {
     userOne, userTwo, userCredOne, userCredTwo, room,
   } = await startTicTacToeRoom(t);
-  t.context.createdUsers.push(userCredOne);
-  t.context.createdUsers.push(userCredTwo);
 
   const { api } = t.context.app;
   const authToken = await userCredOne.user.getIdToken();
@@ -585,8 +558,6 @@ test('POST /room/:id/quit provides error if user is not in the room', async (t) 
   const userCredTwo = await createUserCred(t);
   const userOne = await createUserAndAssert(t, api, userCredOne);
   const userTwo = await createUserAndAssert(t, api, userCredTwo);
-  t.context.createdUsers.push(userCredOne);
-  t.context.createdUsers.push(userCredTwo);
 
   const authTokenTwo = await userCredTwo.user.getIdToken();
   const game = await createGameAndAssert(t, api, userCredOne, userOne);

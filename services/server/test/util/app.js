@@ -3,7 +3,7 @@ const { spawn } = require('child_process');
 const axios = require('axios');
 const getPort = require('get-port');
 const { v4: uuidv4 } = require('uuid');
-
+const { cleanupTestUsers } = require('./api_util');
 const { waitFor, setupMongoDB, setupRedis } = require('./util');
 const { testStripeKey, testStripeWebhookSecret } = require('./stripe');
 
@@ -139,4 +139,24 @@ async function spawnApp(t, options = {}) {
   };
 }
 
-module.exports = { spawnApp };
+function setupTestBeforeAfterHooks(test) {
+  test.before(async (t) => {
+    const app = await spawnApp(t);
+    /* eslint-disable no-param-reassign */
+    t.context.app = app;
+    t.context.createdUsers = [];
+  /* eslint-enable no-param-reassign */
+  });
+
+  test.after.always(async (t) => {
+    const { app, sideApps } = t.context;
+
+    await cleanupTestUsers(t);
+    await app.cleanup();
+    if (sideApps) {
+      await sideApps.cleanup();
+    }
+  });
+}
+
+module.exports = { spawnApp, setupTestBeforeAfterHooks };

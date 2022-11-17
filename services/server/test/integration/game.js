@@ -5,7 +5,8 @@ const { Types } = require('mongoose');
 
 const { createUserCred } = require('../util/firebase');
 const { createGameAndAssert, createUserAndAssert } = require('../util/api_util');
-const { setupTestFileLogContext, setupTestBeforeAfterHooks } = require('../util/util');
+const { setupTestFileLogContext } = require('../util/util');
+const { setupTestBeforeAfterHooks } = require('../util/app');
 
 setupTestBeforeAfterHooks(test);
 
@@ -61,10 +62,8 @@ test('GET /game with search text returns only games searched for by description'
 test('GET /game can filter for creator', async (t) => {
   const { api } = t.context.app;
   const userCredOne = await createUserCred(t);
-  t.context.createdUsers.push(userCredOne);
   const userOne = await createUserAndAssert(t, api, userCredOne);
   const userCredTwo = await createUserCred(t);
-  t.context.createdUsers.push(userCredTwo);
   const userTwo = await createUserAndAssert(t, api, userCredTwo);
 
   await createGameAndAssert(t, api, userCredOne, userOne);
@@ -180,7 +179,6 @@ test('PUT /game/:id responds unauthorized if user does not match creator', async
   const user = await createUserAndAssert(t, api, userCred);
   const evilUserCred = await createUserCred(t);
   await createUserAndAssert(t, api, evilUserCred);
-  t.context.createdUsers.push(evilUserCred);
 
   const evilAuthToken = await evilUserCred.user.getIdToken();
   const game = await createGameAndAssert(t, api, userCred, user);
@@ -243,7 +241,6 @@ test('DELETE /game/:id returns 401 if user does not match creator', async (t) =>
   const user = await createUserAndAssert(t, api, userCred);
   const evilUserCred = await createUserCred(t);
   await createUserAndAssert(t, api, evilUserCred);
-  t.context.createdUsers.push(evilUserCred);
 
   const evilAuthToken = await evilUserCred.user.getIdToken();
   const game = await createGameAndAssert(t, api, userCred, user);

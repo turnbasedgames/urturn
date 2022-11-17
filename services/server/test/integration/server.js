@@ -1,7 +1,7 @@
 const test = require('ava');
 const { waitForOutput, waitFor, setupTestFileLogContext } = require('../util/util');
 const { spawnApp } = require('../util/app');
-const { setupTestBeforeAfterHooks } = require('../util/util');
+const { setupTestBeforeAfterHooks } = require('../util/app');
 
 setupTestBeforeAfterHooks(test);
 

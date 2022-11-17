@@ -6,7 +6,8 @@ const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
 const { createUserAndAssert } = require('../util/api_util');
 const { testStripeClient, testStripeWebhookSecret, createTestWebhookHeader } = require('../util/stripe');
-const { createOrUpdateSideApps, setupTestFileLogContext, setupTestBeforeAfterHooks } = require('../util/util');
+const { createOrUpdateSideApps, setupTestFileLogContext } = require('../util/util');
+const { setupTestBeforeAfterHooks } = require('../util/app');
 
 setupTestBeforeAfterHooks(test);
 
@@ -79,7 +80,6 @@ test('POST /user returns 500 if username generation fails', async (t) => {
   // the first user created will be successful and take up the only generated username "test"
   const userCredOne = await createUserCred(t);
   await createUserAndAssert(t, api, userCredOne);
-  t.context.createdUsers.push(userCredOne);
 
   const userCredTwo = await createUserCred(t);
   const authTokenTwo = await userCredTwo.user.getIdToken();
@@ -363,10 +363,8 @@ test('POST /user username generator adds random numbers when there is a collisio
   // the first user created will be successful and take up the only generated username "test"
   const userCredOne = await createUserCred(t);
   await createUserAndAssert(t, api, userCredOne);
-  t.context.createdUsers.push(userCredOne);
 
   const userCredTwo = await createUserCred(t);
   const userTwo = await createUserAndAssert(t, api, userCredTwo);
-  t.context.createdUsers.push(userCredTwo);
   t.regex(userTwo.username, /test_[0-9]/);
 });
