@@ -26,7 +26,7 @@ async function createGameAndAssert(t, api, userCred, user, gameOptionalInfo = {}
   const gameRaw = {
     name,
     description,
-    commitSHA: 'f21dcff10addd35ea66da8d4eed943e9456a8bb3', // check the branch for later commits: published-test-app,
+    commitSHA: 'published-test-app', // check the branch for later commits: published-test-app,
     githubURL: 'https://github.com/turnbasedgames/urturn',
   };
   const authToken = await userCred.user.getIdToken();

@@ -109,7 +109,7 @@ jobs:
           path: .
           key: ${{ github.run_id }}-build
           restore-keys: ${{ github.run_id }}-build
-      - name: Deploy examples/semantle-battle 🚀
+      - name: Deploy test-app 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: examples/test-app/build
