@@ -578,7 +578,7 @@ test('POST /room/:id/quit provides error if user is not in the room', async (t) 
     data,
     {
       name: 'UserNotInRoom',
-      message: `${userTwo.id}: ${userTwo.username} is not in ${room.id}!`,
+      message: `You (${userTwo.username}) are not in the room! You are spectating.`,
     },
   );
 });
