@@ -13,6 +13,9 @@ const setupExpressLoggerMiddleware = () => {
     const correlationId = req.get('x-correlation-id') ?? `cid-${uuidv4()}`;
     const childLogger = logger.child({ requestId, correlationId });
     req.log = childLogger;
+
+    res.set('x-request-id', requestId);
+    res.set('x-correlation-id', correlationId);
     next();
   };
 };
