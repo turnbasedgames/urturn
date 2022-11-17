@@ -5,10 +5,11 @@ require('../../src/setupFirebase');
 
 firebase.initializeApp(JSON.parse(Buffer.from(process.env.FIREBASE_CONFIG, 'base64').toString('ascii')));
 
-async function createUserCred() {
+async function createUserCred(t) {
   const user = await admin.auth().createUser({});
   const customToken = await admin.auth().createCustomToken(user.uid);
   const userCred = firebase.auth().signInWithCustomToken(customToken);
+  t.context.createdUsers.push(userCred);
   return userCred;
 }
 

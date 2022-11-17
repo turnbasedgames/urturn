@@ -3,31 +3,19 @@ const { StatusCodes } = require('http-status-codes');
 const { v4: uuidv4 } = require('uuid');
 const { Types } = require('mongoose');
 
-const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
-const { createGameAndAssert, createUserAndAssert, cleanupTestUsers } = require('../util/api_util');
+const { createGameAndAssert, createUserAndAssert } = require('../util/api_util');
 const { setupTestFileLogContext } = require('../util/util');
+const { setupTestBeforeAfterHooks } = require('../util/app');
 
-test.before(async (t) => {
-  const app = await spawnApp(t);
-  /* eslint-disable no-param-reassign */
-  t.context.app = app;
-  t.context.createdUsers = [];
-  /* eslint-enable no-param-reassign */
-});
+setupTestBeforeAfterHooks(test);
 
 setupTestFileLogContext(test);
 
-test.after.always(async (t) => {
-  await cleanupTestUsers(t);
-  await t.context.app.cleanup();
-});
-
 test('GET /game returns list of games', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
 
   await createGameAndAssert(t, api, userCred, user);
   const { data: { games }, status } = await api.get('/game');
@@ -37,9 +25,8 @@ test('GET /game returns list of games', async (t) => {
 
 test('GET /game with search text returns only games searched for by name', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
 
   await createGameAndAssert(t, api, userCred, user, { name: 'Dog Game' });
   await createGameAndAssert(t, api, userCred, user, { name: 'Dog Cat Game' });
@@ -56,9 +43,8 @@ test('GET /game with search text returns only games searched for by name', async
 
 test('GET /game with search text returns only games searched for by description', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
 
   await createGameAndAssert(t, api, userCred, user, { description: 'Crazy billion dollar game' });
   await createGameAndAssert(t, api, userCred, user, { description: 'Crazy million dollar game' });
@@ -75,12 +61,10 @@ test('GET /game with search text returns only games searched for by description'
 
 test('GET /game can filter for creator', async (t) => {
   const { api } = t.context.app;
-  const userCredOne = await createUserCred();
+  const userCredOne = await createUserCred(t);
   const userOne = await createUserAndAssert(t, api, userCredOne);
-  const userCredTwo = await createUserCred();
+  const userCredTwo = await createUserCred(t);
   const userTwo = await createUserAndAssert(t, api, userCredTwo);
-  t.context.createdUsers.push(userCredOne);
-  t.context.createdUsers.push(userCredTwo);
 
   await createGameAndAssert(t, api, userCredOne, userOne);
   const { data: { games }, status } = await api.get('/game', { params: { creator: userOne.id } });
@@ -94,9 +78,8 @@ test('GET /game can filter for creator', async (t) => {
 
 test('GET /game filtering for unsupported query parameters provides 400 status', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
 
   await createGameAndAssert(t, api, userCred, user);
   const { response: { data: { validation }, status } } = await t.throwsAsync(api.get('/game', { params: { badField: 'evilValue' } }));
@@ -117,9 +100,8 @@ test('GET /game filtering for unsupported query parameters provides 400 status',
 
 test('GET /game/:id returns corresponding game', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
 
   const game = await createGameAndAssert(t, api, userCred, user);
   const { data: { game: gameRes }, status } = await api.get(`/game/${game.id}`);
@@ -141,18 +123,16 @@ test('GET /game/:id returns 404 if game does not exist', async (t) => {
 
 test('POST /game creates a game', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
 
   await createGameAndAssert(t, api, userCred, user);
 });
 
 test('POST /game responds 400 if data is missing fields', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
 
   const authToken = await userCred.user.getIdToken();
   const { response: { status, data: { message } } } = await t.throwsAsync(api.post('/game', {}, { headers: { authorization: authToken } }));
@@ -162,9 +142,8 @@ test('POST /game responds 400 if data is missing fields', async (t) => {
 
 test('POST /game responds 403 if user trying to modify keys they are not allowed to', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
 
   const authToken = await userCred.user.getIdToken();
   const multipleForbiddenFieldsRes = await t.throwsAsync(api.post('/game', {
@@ -180,9 +159,8 @@ test('POST /game responds 403 if user trying to modify keys they are not allowed
 
 test('PUT /game/:id updates a game', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
 
   const authToken = await userCred.user.getIdToken();
   const game = await createGameAndAssert(t, api, userCred, user);
@@ -197,12 +175,10 @@ test('PUT /game/:id updates a game', async (t) => {
 
 test('PUT /game/:id responds unauthorized if user does not match creator', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred);
-  const evilUserCred = await createUserCred();
+  const evilUserCred = await createUserCred(t);
   await createUserAndAssert(t, api, evilUserCred);
-  t.context.createdUsers.push(userCred);
-  t.context.createdUsers.push(evilUserCred);
 
   const evilAuthToken = await evilUserCred.user.getIdToken();
   const game = await createGameAndAssert(t, api, userCred, user);
@@ -218,9 +194,8 @@ test('PUT /game/:id responds unauthorized if user does not match creator', async
 
 test('PUT /game/:id responds not found if game does not exist', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
 
   const authToken = await userCred.user.getIdToken();
   const updateDoc = { name: `integration-tests-${uuidv4()}` };
@@ -230,9 +205,8 @@ test('PUT /game/:id responds not found if game does not exist', async (t) => {
 
 test('PUT /game/:id responds 403 if user trying to modify keys they are not allowed to', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
 
   const authToken = await userCred.user.getIdToken();
   const game = await createGameAndAssert(t, api, userCred, user);
@@ -250,9 +224,8 @@ test('PUT /game/:id responds 403 if user trying to modify keys they are not allo
 
 test('DELETE /game/:id deletes a game', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
 
   const authToken = await userCred.user.getIdToken();
   const game = await createGameAndAssert(t, api, userCred, user);
@@ -264,12 +237,10 @@ test('DELETE /game/:id deletes a game', async (t) => {
 
 test('DELETE /game/:id returns 401 if user does not match creator', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   const user = await createUserAndAssert(t, api, userCred);
-  const evilUserCred = await createUserCred();
+  const evilUserCred = await createUserCred(t);
   await createUserAndAssert(t, api, evilUserCred);
-  t.context.createdUsers.push(userCred);
-  t.context.createdUsers.push(evilUserCred);
 
   const evilAuthToken = await evilUserCred.user.getIdToken();
   const game = await createGameAndAssert(t, api, userCred, user);
@@ -284,9 +255,8 @@ test('DELETE /game/:id returns 401 if user does not match creator', async (t) =>
 
 test('DELETE /game/:id returns 404 if game does not exist', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred();
+  const userCred = await createUserCred(t);
   await createUserAndAssert(t, api, userCred);
-  t.context.createdUsers.push(userCred);
 
   const authToken = await userCred.user.getIdToken();
   const { response: { status } } = await t.throwsAsync(api.delete(`/game/${Types.ObjectId()}`, { headers: { authorization: authToken } }));

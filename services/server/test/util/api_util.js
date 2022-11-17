@@ -20,16 +20,14 @@ async function getRoomAndAssert(t, roomId) {
 }
 
 async function createGameAndAssert(t, api, userCred, user, gameOptionalInfo = {}) {
-  // TODO: we should switch from using tictactoe to runner/test_app backend where we
-  // have more control over the backend behavior. We can force trigger errors, or other behaviors
   const name = gameOptionalInfo.name ?? `integration-tests-${uuidv4()}`;
   const description = gameOptionalInfo.description ?? 'test description';
 
   const gameRaw = {
     name,
     description,
-    commitSHA: '0870320e312f711d20e8c8078399d8a6aceb6d46',
-    githubURL: 'https://github.com/turnbasedgames/tictactoe',
+    commitSHA: 'published-test-app', // check the branch for later commits: published-test-app,
+    githubURL: 'https://github.com/turnbasedgames/urturn',
   };
   const authToken = await userCred.user.getIdToken();
   const { data: { game }, status } = await api.post('/game', gameRaw, { headers: { authorization: authToken } });
@@ -53,6 +51,9 @@ async function createUserAndAssert(t, api, userCred) {
 }
 
 async function deleteUserAndAssert(t, api, userCred) {
+  if (userCred.user == null) {
+    return;
+  }
   const authToken = await userCred.user.getIdToken();
   const { status } = await api.delete('/user', { headers: { authorization: authToken } });
   t.is(status, StatusCodes.OK);
@@ -74,26 +75,19 @@ async function createRoomAndAssert(t, api, userCred, game, user, makePrivate = f
   t.is(room.private, makePrivate);
   t.deepEqual(room.players, [user].map(getPublicUserFromUser));
   t.deepEqual(room.latestState.state, {
-    board: [
-      [
-        null,
-        null,
-        null,
-      ],
-      [
-        null,
-        null,
-        null,
-      ],
-      [
-        null,
-        null,
-        null,
-      ],
-    ],
-    status: 'preGame',
-    winner: null,
-    emptyObject: {},
+    last: {
+      finished: false,
+      joinable: true,
+      players: [getPublicUserFromUser(user)],
+      roomStartContext: {
+        private: makePrivate,
+      },
+      state: {
+        message: 'room start!',
+      },
+      version: 0,
+    },
+    message: `${user.username} joined!`,
   });
   t.deepEqual(room.roomStartContext, { private: makePrivate });
   return room;
@@ -101,8 +95,8 @@ async function createRoomAndAssert(t, api, userCred, game, user, makePrivate = f
 
 async function startTicTacToeRoom(t) {
   const { api } = t.context.app;
-  const userCredOne = await createUserCred();
-  const userCredTwo = await createUserCred();
+  const userCredOne = await createUserCred(t);
+  const userCredTwo = await createUserCred(t);
   const userOne = await createUserAndAssert(t, api, userCredOne);
   const userTwo = await createUserAndAssert(t, api, userCredTwo);
   const authTokenTwo = await userCredTwo.user.getIdToken();
@@ -115,30 +109,20 @@ async function startTicTacToeRoom(t) {
   // created
   t.is(resRoom.id, room.id);
   t.deepEqual(resRoom.game, game);
-  t.is(resRoom.joinable, false);
+  t.is(resRoom.joinable, true);
   t.deepEqual(resRoom.players, [userOne, userTwo].map(getPublicUserFromUser));
   t.deepEqual(resRoom.latestState.state, {
-    board: [
-      [
-        null,
-        null,
-        null,
-      ],
-      [
-        null,
-        null,
-        null,
-      ],
-      [
-        null,
-        null,
-        null,
-      ],
-    ],
-    plrToMoveIndex: 0,
-    status: 'inGame',
-    winner: null,
-    emptyObject: {},
+    last: {
+      finished: false,
+      joinable: true,
+      players: resRoom.players,
+      roomStartContext: {
+        private: false,
+      },
+      version: 0,
+      state: room.latestState.state,
+    },
+    message: `${userTwo.username} joined!`,
   });
   return {
     userOne, userTwo, userCredOne, userCredTwo, game, room: resRoom,
@@ -150,7 +134,7 @@ module.exports = {
   createGameAndAssert,
   createRoomAndAssert,
   createUserAndAssert,
-  cleanupTestUsers,
   startTicTacToeRoom,
   getRoomAndAssert,
+  cleanupTestUsers,
 };
