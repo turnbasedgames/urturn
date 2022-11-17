@@ -6,6 +6,7 @@ import { exec, execSync } from 'child_process';
 import getPort from 'get-port';
 import inquirer from 'inquirer';
 import degit from 'degit';
+import logger from '../src/logger';
 import { isInteger, clearConsole } from '../src/util.js';
 import setupFrontends from '../src/setupFrontends.js';
 import setupServer from '../src/setupServer.js';
@@ -27,8 +28,8 @@ async function start(options) {
   if (options.noClear) {
     clearConsole();
   }
-  console.log(chalk.gray('Starting runner with your game...\n'));
-  console.log('running with options:', options);
+  logger.info(chalk.gray('Starting runner with your game...\n'));
+  logger.info('running with options:', options);
 
   const cleanupServerFunc = await setupServer({ apiPort: portForRunnerBackend });
 
@@ -43,7 +44,7 @@ async function start(options) {
       portForUserFrontend: options.frontendPort,
       portForRunnerBackend,
     });
-    console.log(`${chalk.green('\nYou can now view the runner in the browser at:')} \n${chalk.green.bold(runnerUrl)}`);
+    logger.info(`${chalk.green('\nYou can now view the runner in the browser at:')} \n${chalk.green.bold(runnerUrl)}`);
     open(runnerUrl);
   }
 
@@ -90,9 +91,9 @@ async function init(destination, { commit }) {
   const extraFrontendPackages = ['@urturn/client'];
   execSync(`npm i ${extraBackendPackages.join(' ')} --no-audit --save --save-exact --loglevel error`, { cwd: destination, stdio: 'inherit' });
   execSync(`npm i ${extraFrontendPackages.join(' ')} --no-audit --save --save-exact --loglevel error`, { cwd: frontendPath, stdio: 'inherit' });
-  console.log('\n\nSuccessfully created template UrTurn game. Happy hacking!');
-  console.log("Don't forget to share your creations in our discord! https://discord.gg/myWacjdb5S");
-  console.log(`Try running "cd ${destination} && npm run dev".`);
+  logger.info('\n\nSuccessfully created template UrTurn game. Happy hacking!');
+  logger.info("Don't forget to share your creations in our discord! https://discord.gg/myWacjdb5S");
+  logger.info(`Try running "cd ${destination} && npm run dev".`);
 }
 
 async function main() {
@@ -110,8 +111,6 @@ async function main() {
     .addOption(new Option('--dev').hideHelp())
     .addOption(new Option('--no-clear', "Don't clear console when starting the runner."))
     .requiredOption('-f, --frontend-port <frontendPort>', 'Specify the port of where the frontend of your game is being hosted locally.')
-    // TODO: MAIN-86 we need to use a logger instead of console.log and add debug log outputs
-    // everywhere
     .option('-d, --debug', 'print debug logs to stdout')
     .action(start);
 
