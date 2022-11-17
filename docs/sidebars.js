@@ -59,6 +59,8 @@ const sidebars = {
       },
       items: [
         'Advanced/custom-game-page',
+        'Advanced/room-versioning',
+        'Advanced/persisting-player-data',
         'Advanced/self-hosting',
       ],
     },
