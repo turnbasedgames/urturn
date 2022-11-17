@@ -50,6 +50,11 @@ function GamePlayer(): React.ReactElement {
       if (shouldJoinPrivateRoom(userContext.user, roomRaw)) {
         const joinedRoomResult = await joinRoom(roomId);
         setRoom(joinedRoomResult);
+      } else if (!roomRaw.players.some((p: RoomUser) => p.id === userContext.user?.id)) {
+        enqueueSnackbar('Spectating 👀', {
+          variant: 'info',
+          // persist: true,
+        });
       }
     }
     setupRoom().catch(logger.error);
