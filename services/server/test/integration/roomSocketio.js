@@ -236,34 +236,15 @@ socketConfigs.forEach(({ name, config }) => {
     t.deepEqual(resRoom, {
       id: room.id,
       game: { ...game, activePlayerCount: 2 },
-      joinable: false,
+      joinable: true,
       finished: false,
       latestState: {
         id: resRoom.latestState.id,
         version: 1,
         room: room.id,
         state: {
-          board: [
-            [
-              null,
-              null,
-              null,
-            ],
-            [
-              null,
-              null,
-              null,
-            ],
-            [
-              null,
-              null,
-              null,
-            ],
-          ],
-          plrToMoveIndex: 0,
-          status: 'inGame',
-          winner: null,
-          emptyObject: {},
+          last: resRoom.latestState.state.last,
+          message: `${userTwo.username} joined!`,
         },
       },
       roomStartContext: {
@@ -273,51 +254,54 @@ socketConfigs.forEach(({ name, config }) => {
       inactivePlayers: [],
       private: false,
     });
-    await assertNextSocketLatestState(t, sockets, {
+    const v1State = {
       finished: false,
-      joinable: false,
+      joinable: true,
       players: [userOne, userTwo].map(getPublicUserFromUser),
       version: 1,
       roomStartContext: {
         private: false,
       },
       state: {
-        board: [[null, null, null], [null, null, null], [null, null, null]],
-        plrToMoveIndex: 0,
-        status: 'inGame',
-        winner: null,
-        emptyObject: {},
+        last: resRoom.latestState.state.last,
+        message: `${userTwo.username} joined!`,
       },
-    });
+    };
+    await assertNextSocketLatestState(t, sockets, v1State);
     await assertActivePlayerCount(t, game.id, 2);
 
-    const { status: statusMove1 } = await api.post(`/room/${room.id}/move`, { x: 0, y: 0 },
+    const testMove = {
+      x: 0,
+      y: 0,
+      testString: 'hello world',
+      testNested: { a: 'billy' },
+      emptyObj: {},
+    };
+    const { status: statusMove1 } = await api.post(`/room/${room.id}/move`, testMove,
       { headers: { authorization: await userCredOne.user.getIdToken() } });
-    t.is(statusMove1, StatusCodes.OK);
-    await assertNextSocketLatestState(t, sockets, {
+    const v2State = {
       finished: false,
-      joinable: false,
+      joinable: true,
       players: [userOne, userTwo].map(getPublicUserFromUser),
       version: 2,
       roomStartContext: {
         private: false,
       },
       state: {
-        board: [['X', null, null], [null, null, null], [null, null, null]],
-        plrToMoveIndex: 1,
-        status: 'inGame',
-        winner: null,
-        emptyObject: {},
+        last: v1State,
+        message: `${userOne.username} made move!`,
+        move: testMove,
       },
-    });
+    };
+    t.is(statusMove1, StatusCodes.OK);
+    await assertNextSocketLatestState(t, sockets, v2State);
     await assertActivePlayerCount(t, game.id, 2);
 
-    const { status: statusMove2 } = await api.post(`/room/${room.id}/move`, { x: 0, y: 1 },
+    const finishingMove = { ...testMove, finished: true, joinable: false };
+    const { status: statusMove2 } = await api.post(`/room/${room.id}/move`, finishingMove,
       { headers: { authorization: await userCredTwo.user.getIdToken() } });
-    t.is(statusMove2, StatusCodes.OK);
-
-    await assertNextSocketLatestState(t, sockets, {
-      finished: false,
+    const v3State = {
+      finished: true,
       joinable: false,
       players: [userOne, userTwo].map(getPublicUserFromUser),
       version: 3,
@@ -325,13 +309,13 @@ socketConfigs.forEach(({ name, config }) => {
         private: false,
       },
       state: {
-        board: [['X', 'O', null], [null, null, null], [null, null, null]],
-        plrToMoveIndex: 0,
-        status: 'inGame',
-        winner: null,
-        emptyObject: {},
+        last: v2State,
+        message: `${userTwo.username} made move!`,
+        move: finishingMove,
       },
-    });
+    };
+    t.is(statusMove2, StatusCodes.OK);
+    await assertNextSocketLatestState(t, sockets, v3State);
   });
 
   test(`sockets (${name}) that emit watchRoom with a room id cannot watch another room`, async (t) => {
@@ -430,33 +414,50 @@ socketConfigs.forEach(({ name, config }) => {
         },
       )));
 
-    const { status: statusMove1 } = await api.post(`/room/${room.id}/move`, { x: 0, y: 0 },
+    const testMove = {
+      x: 0,
+      y: 0,
+      testString: 'hello world',
+      testNested: { a: 'billy' },
+      emptyObj: {},
+    };
+    const { status: statusMove1 } = await api.post(`/room/${room.id}/move`, testMove,
       { headers: { authorization: await userCredOne.user.getIdToken() } });
     t.is(statusMove1, StatusCodes.OK);
-
-    await assertNextSocketLatestState(t, sockets, {
+    const v1State = {
       finished: false,
-      joinable: false,
+      joinable: true,
+      players: [userOne, userTwo].map(getPublicUserFromUser),
+      version: 1,
+      roomStartContext: {
+        private: false,
+      },
+      state: {
+        last: room.latestState.state.last,
+        message: `${userTwo.username} joined!`,
+      },
+    };
+    const v2State = {
+      finished: false,
+      joinable: true,
       players: [userOne, userTwo].map(getPublicUserFromUser),
       version: 2,
       roomStartContext: {
         private: false,
       },
       state: {
-        board: [['X', null, null], [null, null, null], [null, null, null]],
-        plrToMoveIndex: 1,
-        status: 'inGame',
-        winner: null,
-        emptyObject: {},
+        last: v1State,
+        message: `${userOne.username} made move!`,
+        move: testMove,
       },
-    });
+    };
+    await assertNextSocketLatestState(t, sockets, v2State);
 
-    const { status: statusMove2 } = await api.post(`/room/${room.id}/move`, { x: 0, y: 1 },
+    const finishingMove = { ...testMove, finished: true, joinable: false };
+    const { status: statusMove2 } = await api.post(`/room/${room.id}/move`, finishingMove,
       { headers: { authorization: await userCredTwo.user.getIdToken() } });
-    t.is(statusMove2, StatusCodes.OK);
-
-    await assertNextSocketLatestState(t, sockets, {
-      finished: false,
+    const v3State = {
+      finished: true,
       joinable: false,
       players: [userOne, userTwo].map(getPublicUserFromUser),
       version: 3,
@@ -464,13 +465,13 @@ socketConfigs.forEach(({ name, config }) => {
         private: false,
       },
       state: {
-        board: [['X', 'O', null], [null, null, null], [null, null, null]],
-        plrToMoveIndex: 0,
-        status: 'inGame',
-        winner: null,
-        emptyObject: {},
+        last: v2State,
+        message: `${userTwo.username} made move!`,
+        move: finishingMove,
       },
-    });
+    };
+    t.is(statusMove2, StatusCodes.OK);
+    await assertNextSocketLatestState(t, sockets, v3State);
   });
 
   test(`sockets (${name}) gets connect_error if it does not provide auth tokens`, async (t) => {
@@ -669,19 +670,25 @@ socketConfigs.forEach(({ name, config }) => {
     t.is(roomRightAfterDisconnectTimeout.latestState.version, room.latestState.version + 1);
     t.is(roomRightAfterDisconnectTimeout.players.length, 1);
     await assertNextLatestState(t, userTwoSocket, {
-      finished: true,
-      joinable: false,
+      finished: false,
+      joinable: true,
       players: room.players.filter(({ id }) => userOne.id !== id),
       version: room.latestState.version + 1,
       roomStartContext: {
         private: false,
       },
       state: {
-        board: [[null, null, null], [null, null, null], [null, null, null]],
-        plrToMoveIndex: 0,
-        status: 'endGame',
-        winner: getPublicUserFromUser(userTwo),
-        emptyObject: {},
+        last: {
+          finished: false,
+          joinable: true,
+          players: room.players.filter(({ id }) => userOne.id !== id),
+          roomStartContext: {
+            private: false,
+          },
+          state: room.latestState.state,
+          version: room.latestState.version,
+        },
+        message: `${userOne.username} left!`,
       },
     });
   });
@@ -819,8 +826,8 @@ socketConfigs.forEach(({ name, config }) => {
       userCredOne, userOne, userCredTwo, room,
     } = await startTicTacToeRoom(t);
 
-    // quit room which will force the room to be in finished state
-    await api.post(`/room/${room.id}/quit`, undefined,
+    // force room to be in finished state using test-app backend implementation
+    await api.post(`/room/${room.id}/move`, { finished: true },
       { headers: { authorization: await userCredTwo.user.getIdToken() } });
     const roomAfterQuit = await getRoomAndAssert(t, room.id);
 

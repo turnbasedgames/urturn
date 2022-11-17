@@ -444,23 +444,32 @@ test('POST /room/:id/join on a finished room throws an error', async (t) => {
 });
 
 test('POST /room/:id/move invokes creator backend to modify the game state', async (t) => {
-  const { userCredOne, userCredTwo, room } = await startTicTacToeRoom(t);
+  const { userCredOne, userOne, room } = await startTicTacToeRoom(t);
   const { api } = t.context.app;
   const authToken = await userCredOne.user.getIdToken();
 
   // make move
   const { status } = await api.post(`/room/${room.id}/move`, {
-    x: 0, y: 0, testString: 'hello world', testNested: { a: 'billy' },
+    x: 0,
+    y: 0,
+    testString: 'hello world',
+    testNested: { a: 'billy' },
+    emptyObj: {}, // make sure empty objects don't get stripped by mongoose
   },
   { headers: { authorization: authToken } });
   t.is(status, StatusCodes.OK);
   const { latestState: { state }, joinable, players } = await getRoomAndAssert(t, room.id);
   t.deepEqual(
     {
+      last: state.last,
       move: {
-        x: 0, y: 0, testString: 'hello world', testNested: { a: 'billy' },
+        x: 0,
+        y: 0,
+        testString: 'hello world',
+        testNested: { a: 'billy' },
+        emptyObj: {},
       },
-      message: `${}`
+      message: `${userOne.username} made move!`,
     },
     state,
   );
@@ -469,16 +478,22 @@ test('POST /room/:id/move invokes creator backend to modify the game state', asy
 });
 
 test('POST /room/:id/move provides error if user code throws an error', async (t) => {
-  const { userCredOne, userCredTwo, room } = await startTicTacToeRoom(t);
+  const { userCredTwo, room } = await startTicTacToeRoom(t);
 
   const { api } = t.context.app;
 
-  // make move with user2 (it's user1's turn!)
   const authToken = await userCredTwo.user.getIdToken();
-  const { response: { status } } = await t.throwsAsync(api.post(`/room/${room.id}/move`,
-    { x: 0, y: 0 },
+  const { response: { status, data } } = await t.throwsAsync(api.post(`/room/${room.id}/move`,
+    { error: 'force error in test-app' },
     { headers: { authorization: authToken } }));
   t.is(status, StatusCodes.BAD_REQUEST);
+  t.deepEqual(data, {
+    creatorError: {
+      message: 'force error in test-app',
+      name: 'Error',
+    },
+    name: 'CreatorError',
+  });
 });
 
 test('POST /room/:id/move provides error if user tries to make move when not in the room', async (t) => {
@@ -502,7 +517,7 @@ test('POST /room/:id/move provides error if database fails', async (t) => {
   const customApp = await spawnApp(t, { forceCreatePersistentDependencies: true });
   createOrUpdateSideApps(t, [customApp]);
   const { api, cleanupMongoDB } = customApp;
-  const { userCredOne, userCredTwo, room } = await startTicTacToeRoom({
+  const { userCredOne, room } = await startTicTacToeRoom({
     ...t,
     context: {
       ...t.context,
@@ -526,7 +541,7 @@ test('POST /room/:id/move on a finished room throws an error', async (t) => {
 
 test('POST /room/:id/quit user is no longer in the room, and is in inactivePlayers list', async (t) => {
   const {
-    userOne, userTwo, userCredOne, userCredTwo, room,
+    userOne, userTwo, userCredOne, room,
   } = await startTicTacToeRoom(t);
 
   const { api } = t.context.app;
@@ -537,19 +552,12 @@ test('POST /room/:id/quit user is no longer in the room, and is in inactivePlaye
     { headers: { authorization: authToken } });
   t.is(status, StatusCodes.OK);
   const {
-    latestState: { state: { board, winner } },
     joinable, players, inactivePlayers, finished,
   } = await getRoomAndAssert(t, room.id);
-  t.is(joinable, false);
-  t.is(finished, true);
-  t.deepEqual(winner, getPublicUserFromUser(userTwo));
+  t.is(joinable, true);
+  t.is(finished, false);
   t.deepEqual(players, [userTwo].map(getPublicUserFromUser));
   t.deepEqual(inactivePlayers, [userOne].map(getPublicUserFromUser));
-  t.deepEqual([
-    [null, null, null],
-    [null, null, null],
-    [null, null, null]],
-  board);
 });
 
 test('POST /room/:id/quit provides error if user is not in the room', async (t) => {
