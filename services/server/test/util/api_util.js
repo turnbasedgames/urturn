@@ -51,7 +51,7 @@ async function createUserAndAssert(t, api, userCred) {
 }
 
 async function deleteUserAndAssert(t, api, userCred) {
-  if (userCred == null) {
+  if (userCred.user == null) {
     return;
   }
   const authToken = await userCred.user.getIdToken();
