@@ -9,6 +9,7 @@ async function createUserCred(t) {
   const user = await admin.auth().createUser({});
   const customToken = await admin.auth().createCustomToken(user.uid);
   const userCred = firebase.auth().signInWithCustomToken(customToken);
+  t.context.createdUsers.push(userCred);
   return userCred;
 }
 

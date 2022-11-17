@@ -88,7 +88,7 @@ test('GET /room returns private room(s) for users that are querying there own da
 test('GET /room returns private room(s) for users that are querying there own data with containsInactivePlayer', async (t) => {
   const { api } = t.context.app;
   const {
-    userCredOne, userTwo, userCredTwo, room, game,
+    userTwo, userCredTwo, room, game,
   } = await startTicTacToeRoom(t);
   const authTokenTwo = await userCredTwo.user.getIdToken();
 
@@ -226,7 +226,7 @@ test('GET /room supports query by "joinable", "finished", "containsPlayer", and 
 test('GET /room supports query by "containsInactivePlayer"', async (t) => {
   const { api } = t.context.app;
   const {
-    userCredOne, userTwo, userCredTwo, room, game,
+    userTwo, userCredTwo, room, game,
   } = await startTicTacToeRoom(t);
   const authTokenTwo = await userCredTwo.user.getIdToken();
 
@@ -390,7 +390,7 @@ test('PUT /room joins a user to a room if there exist a room for the user to joi
 });
 
 test('POST /room/:id/join joins a game', async (t) => {
-  const { userCredOne, userCredTwo } = await startTicTacToeRoom(t);
+  await startTicTacToeRoom(t);
 });
 
 test('POST /room/:id/join on a non joinable room provides a 400', async (t) => {
