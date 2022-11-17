@@ -59,6 +59,7 @@ const sidebars = {
       },
       items: [
         'Advanced/custom-game-page',
+        'Advanced/persisting-player-data',
         'Advanced/self-hosting',
       ],
     },

@@ -52,7 +52,7 @@ const FeatureList = [
     title: 'Scale',
     points: [
       'Never worry about scaling or hosting your games again.',
-      'Never pay for infrastructure again', 
+      'Never pay for infrastructure again.',
       'We schedule your room functions on our internal functions as a service platform for free.'
     ],
     svgComponent: <Scale className={styles['svg-thumbnail']} />
