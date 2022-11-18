@@ -11,6 +11,7 @@ import {
 } from './roomState.js';
 import requireUtil from './requireUtil.cjs';
 import logger from './logger.js';
+import wrapSocketErrors from './middleware/wrapSocketErrors.js';
 
 const backendHotReloadIntervalMs = 100;
 
@@ -29,7 +30,7 @@ const getLatestBackendModule = async (backendPath) => {
 
     return backendModule;
   } catch (err) {
-    logger.log(err);
+    logger.error(err);
     return undefined;
   }
 };
@@ -45,9 +46,9 @@ async function setupServer({ apiPort }) {
       origin: '*',
     },
   });
-  io.on('connection', (socket) => {
+  io.on('connection', wrapSocketErrors((socket) => {
     socket.emit('stateChanged', filterRoomState(roomState));
-  });
+  }));
 
   const startGame = async () => {
     backendModule = await getLatestBackendModule(userBackend);
@@ -199,7 +200,7 @@ async function setupServer({ apiPort }) {
 
   const server = httpServer.listen(apiPort);
   const url = `http://localhost:${apiPort}`;
-  logger.log(`api server at ${url}`);
+  logger.info(`api server at ${url}`);
 
   startGame();
   return () => server.close();
