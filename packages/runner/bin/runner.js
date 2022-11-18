@@ -7,6 +7,7 @@ import { exec, execSync } from 'child_process';
 import getPort from 'get-port';
 import inquirer from 'inquirer';
 import degit from 'degit';
+import path from 'path';
 import { createRequire } from 'module';
 import logger from '../src/logger.js';
 import { isInteger, clearConsole } from '../src/util.js';
@@ -80,6 +81,7 @@ async function start(options) {
 }
 
 async function init(destination, { commit }) {
+  const fullPathDestination = path.resolve(destination);
   const { frontendType } = await inquirer.prompt([
     {
       type: 'list',
@@ -95,19 +97,27 @@ async function init(destination, { commit }) {
   const commitSuffix = commit == null ? '' : `#${commit}`;
   const templateFrontendPath = templateFrontendRepoPrefix + frontendType + commitSuffix;
   const templateBackendPath = templateBackendRepo + commitSuffix;
+
   const templateBackendEmitter = degit(templateBackendPath);
   const templateFrontendEmitter = degit(templateFrontendPath);
 
+  logger.info('Downloading backend template...');
   await templateBackendEmitter.clone(destination);
   const frontendPath = `${destination}/frontend`;
+  logger.info('Downloading frontend template...');
   await templateFrontendEmitter.clone(frontendPath);
   const extraBackendPackages = ['@urturn/runner'];
   const extraFrontendPackages = ['@urturn/client'];
+  logger.info('\nInstalling packages. This might take a couple of minutes.');
+  logger.info(`Installing ${[...extraBackendPackages, ...extraFrontendPackages].map(((extraPkg) => chalk.cyan(extraPkg))).join(', ')}, and more...\n`);
   execSync(`npm i ${extraBackendPackages.join(' ')} --no-audit --save --save-exact --loglevel error`, { cwd: destination, stdio: 'inherit' });
   execSync(`npm i ${extraFrontendPackages.join(' ')} --no-audit --save --save-exact --loglevel error`, { cwd: frontendPath, stdio: 'inherit' });
-  logger.info('\n\nSuccessfully created template UrTurn game. Happy hacking!');
-  logger.info("Don't forget to share your creations in our discord! https://discord.gg/myWacjdb5S");
-  logger.info(`Try running "cd ${destination} && npm run dev".`);
+  logger.info(`\n\n${chalk.green('Successfully')} created UrTurn game at ${chalk.white.underline(fullPathDestination)}`);
+  logger.info(`\n${chalk.bold('Get Started:')}`);
+  logger.info(`\n  ${chalk.cyan('cd')} ${destination}`);
+  logger.info(`  ${chalk.cyan('npm run dev')}\n`);
+  logger.info(`Go to ${chalk.magenta.underline('https://discord.gg/myWacjdb5S')} for questions, game jams, meeting other developers, and more!`);
+  logger.info('Happy Hacking!!');
 }
 
 async function main() {
