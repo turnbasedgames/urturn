@@ -39,7 +39,7 @@ function GamePlayer(): React.ReactElement {
   const [room, setRoom] = useState<Room | undefined>();
   const [roomState, setRoomState] = useState<RoomState | undefined>();
   const userContext = useContext(UserContext);
-  const { enqueueSnackbar } = useSnackbar();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,9 +50,17 @@ function GamePlayer(): React.ReactElement {
       if (shouldJoinPrivateRoom(userContext.user, roomRaw)) {
         const joinedRoomResult = await joinRoom(roomId);
         setRoom(joinedRoomResult);
+      } else if ((userContext.user !== undefined)
+         && !roomRaw.players.some((p: RoomUser) => p.id === userContext.user?.id)) {
+        enqueueSnackbar('Spectating 👀', {
+          variant: 'info',
+          persist: true,
+        });
       }
     }
     setupRoom().catch(logger.error);
+
+    return () => closeSnackbar();
   }, [userContext.user]);
 
   const onSocketDisconnect = (reason: string): void => {
