@@ -1,510 +1,457 @@
 ---
-description: Create your first game - TicTacToe
+description: Create your first multiplayer game
 ---
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Create a simple TicTacToe game
+# Multiplayer TicTacToe
 
-## Overview
+## What you are making
 
-We are ready to make our first game - tic-tac-toe! There are two major components of your game: the [frontend](/docs/Getting-Started/tictactoe#frontend) and the [room functions](#/docs/Getting-Started/tictactoe#defining-the-room-functions). We will go over the basics of each.
+:::success
+Play the [final version](https://www.urturn.app/games/626eac7c65667f00160a6b42). Playing the game will help you envision what the underlying logic will look like. Ask yourself:
 
-## Defining the [room functions](/docs/API/room-functions)
+- How do you define what happens when a player moves?
+- How can you tell if a player won the game?
+:::
 
-### What is roomState?
+## Setup
 
-Your game state is held in the [RoomState](/docs/API/types#roomstate) object. You can tell UrTurn if your game is joinable and/or if it is finished. You can also define the "state" object that will define the way the board currently looks. For this tic-tac-toe game, the roomState state will look like this:
+Generate the tictactoe tutorial locally:
 
-```json
-{
-  "players": "[]", // controlled by UrTurn
-  "version": 0, // controlled by UrTurn
-  "joinable": true,
-  "finished": false,
-  "state": {
-    "board": "[
-      [null, null, null],
-      [null, null, null],
-      [null, null, null],
-    ]",
-    "winner": null
-  }
+```bash
+npx @urturn/runner init --tutorial first-game # answer prompts
+cd first-game
+```
+
+The UI is provided for you. Your goal is to implement the underlying logic ([room functions](/docs/API/room-functions)) which determine the resulting state after any event (e.g. player move, joins, etc.).
+
+### File/Folder structure
+
+```bash
+game
+└───src # room logic goes here
+│   │   main.js # room functions (e.g. onRoomStart, onPlayerMove, etc.)
+|   |   util.js # helper functions (e.g. evaluateBoard)
+│   
+└───frontend # Tictactoe UI code lives here
+|   │   ...frontend files
+|   ...other files # not important for this tutorial
+```
+
+:::info
+There are several `// TODO:` statements scattered across the files, `src/main.js` and `src/util.js`, to help guide you.
+:::
+
+## Defining how state changes
+
+Start up the game and play around.
+
+```bash
+npm run dev
+```
+
+:::info
+The [runner](/docs/API/runner) will immediately open a new window.
+
+You will see a console that let's you easily debug/inspect the global state of your game.
+
+You will also notice that if you `add`, `remove` a player or try to make a `move` on the tictactoe board, none of the state will change. So let's fix that!
+:::
+
+### Initializing state
+
+We need to define what the **initial state** of the room looks like.
+
+All state related to a room is held within the [RoomState](/docs/API/types#roomstate). We modify this object by returning the [RoomStateResult](/docs/API/types#roomstateresult).
+
+:::success
+The runner will automatically hot reload changes when **make changes** and **save**
+:::
+
+:::info
+Now, modify the [`onRoomStart`](/docs/API/room-functions#onroomstart-required) function.
+
+Implement the `TODO` statements in `onRoomStart` in the file `src/main.js`, and then check your work with the solution.
+:::
+
+<Tabs>
+  <TabItem value="initial" label="TODO" default>
+
+```js title="src/main.js"
+function onRoomStart() {
+  const state = {
+    /**
+    // highlight-start
+     * TODO: define initial values for the following:
+     * - status
+     * - plrIdToPlrMark
+     * - plrToMoveIndex
+     * - board
+     * - winner
+    // highlight-end
+     */
+  };
+  return { state };
 }
 ```
 
-We will be manipulating the ```joinable```, ```finished```, and ```state``` properties of this object to control our game.
+  </TabItem>
+  <TabItem value="solution" label="Solution">
 
-### Four Functions - That's It!
-
-All of our game logic can be encompassed by the following four functions:
-
-#### 1. onRoomStart
-
-This [function](/docs/API/room-functions#onroomstart-required) will be called whenever a room is created. When the game starts, we want to initialize our empty roomState, which includes the following for tic-tac-toe:
-
-1. The Board: A 3x3 square, initialized with null values.
-2. The Winner: The winner's ID, if there is a winner. Initially null.
-
-```js title="index.js"
+```js title="src/main.js"
 function onRoomStart() {
   return {
     state: {
+      // highlight-start
+      status: Status.PreGame,
+      plrIdToPlrMark: {}, // map from plrId to their mark (X or O)
+      plrToMoveIndex: 0, // track who's move it is
       board: [
         [null, null, null],
         [null, null, null],
         [null, null, null],
       ],
-      winner: null
-    }
+      winner: null,
+      // highlight-end
+    },
   };
 }
 ```
 
-#### 2. onPlayerJoin
-
-This function will be called whenever a player actually joins the game. It provides us with the ID of the player who joined as well as the current [RoomState](/docs/API/types#roomstate).
-
-If this is the first player to join, we will just return an empty object. If this is the second player to join, then the game has all the necessary players and should be marked as not joinable.
-
-```js title="index.js"
-function onPlayerJoin(plr, roomState) {
-  const { players } = roomState;
-
-  if (players.length === 2) {
-    return { joinable: false };
-  }
-  return { };
-}
-```
-
-
-#### 3. onPlayerMove
-
-This function will be called whenever a player makes a move. It provides us with the ID of the player who made the move, the move object, and the current board game state. We can define the move object as any valid JSON object - for tic-tac-toe, it will be an object containing the x- and y-coordinates of the square they selected.
-
-After the move is completed, if we determine the game is over and there is a winner, we will add the winner's ID to our state so it can be displayed on the frontend.
-
-<Tabs>
-<TabItem value="snippet" label="Snippet">
-
-```js title="index.js"
-function onPlayerMove(plr, move, roomState) {
-  const { state, players } = roomState;
-  const { board, plrToMoveIndex } = state;
-
-  const { x, y } = move;
-
-  const plrMark = getPlrMark(plr, players);
-
-  board[x][y] = plrMark;
-
-  const [isEnd, winner] = isEndGame(board, players);
-
-  if (isEnd) {
-    state.winner = winner;
-
-    return { state, finished: true };
-  }
-
-  return { state };
-}
-```
-
-</TabItem>
-<TabItem value="full" label="Full Code">
-
-```js title="index.js"
-function getPlrMark(plr, plrs) {
-  if (plr.id === plrs[0].id) { // for simplicity, the first player will be 'X'
-    return 'X';
-  }
-  return 'O';
-}
-
-function isEndGame(board, plrs) {
-  function getPlrFromMark(mark, plrs) {
-    return mark === 'X' ? plrs[0] : plrs[1];
-  }
-
-  function isWinningSequence(arr) {
-    return arr[0] !== null && arr[0] === arr[1] && arr[1] === arr[2];
-  }
-
-  // check rows and cols
-  for (let i = 0; i < board.length; i += 1) {
-    const row = board[i];
-    const col = [board[0][i], board[1][i], board[2][i]];
-
-    if (isWinningSequence(row)) {
-      return [true, getPlrFromMark(row[0], plrs)];
-    } if (isWinningSequence(col)) {
-      return [true, getPlrFromMark(col[0], plrs)];
-    }
-  }
-
-  // check diagonals
-  const d1 = [board[0][0], board[1][1], board[2][2]];
-  const d2 = [board[0][2], board[1][1], board[2][0]];
-  if (isWinningSequence(d1)) {
-    return [true, getPlrFromMark(d1[0], plrs)];
-  } if (isWinningSequence(d2)) {
-    return [true, getPlrFromMark(d2[0], plrs)];
-  }
-
-  // check for tie
-  if (board.some((row) => row.some((mark) => mark === null))) {
-    return [false, null];
-  }
-  return [true, null];
-}
-
-function onPlayerMove(plr, move, roomState) {
-  const { state, players } = roomState;
-  const { board, plrToMoveIndex } = state;
-
-  const { x, y } = move;
-
-  const plrMark = getPlrMark(plr, players);
-
-  board[x][y] = plrMark;
-
-  const [isEnd, winner] = isEndGame(board, players);
-
-  if (isEnd) {
-    state.winner = winner;
-    return { state, finished: true };
-  }
-  return { state };
-}
-```
-
-</TabItem>
+  </TabItem>
 </Tabs>
 
-#### 4. onPlayerQuit
+:::success
+You should see your modifications to the initial state show up in the console!
+:::
 
-This [function](/docs/API/room-functions#onplayerquit-required) will be called whenever a player quits the game. It provides us with the player who quit and the current board game state.
+### Players joining
 
-For tic-tac-toe, the game will end if one of the players quits. The game will be marked as not joinable and finished, and the remaining player will be marked the winner.
+:::info
+Modify the [`onPlayerJoin`](/docs/API/room-functions#onplayerjoin-required) function to handle when a player joins.
 
-```js title="index.js"
-function onPlayerQuit(plr, roomState) {
+Implement the `TODO` statements in `onPlayerJoin`, and then check your work with the solution.
+:::
+
+:::success
+While implementing, try adding players. Try adding 3 players to see what happens.
+::: 
+
+<Tabs>
+  <TabItem value="initial" label="TODO" default>
+
+```js title="src/main.js"
+function onPlayerJoin(player, roomState) {
+  const { players, state } = roomState;
+  if (players.length === 2) { // enough players to play the game
+    // highlight-next-line
+    // TODO: modify state to start the game
+    return {
+      // highlight-start
+      // TODO: tell UrTurn to NOT allow anymore players in this room
+      // TODO: return the modified state
+      // highlight-end
+    };
+  }
+
+  // still waiting on another player so make no modifications
+  return {};
+}
+```
+
+  </TabItem>
+  <TabItem value="solution" label="Solution">
+
+```js title="src/main.js"
+function onPlayerJoin(player, roomState) {
+  const { players, state } = roomState;
+  if (players.length === 2) { // enough players to play the game
+    // start the game and set the player's marks
+    // highlight-start
+    state.status = Status.InGame;
+    state.plrIdToPlrMark[players[0].id] = Mark.X;
+    state.plrIdToPlrMark[players[1].id] = Mark.O;
+    // highlight-end
+    // return modifications we want to make to the roomState
+    return {
+      // highlight-start
+      state,
+      // tell UrTurn to NOT allow anymore players in this room
+      joinable: false,
+      // highlight-end
+    };
+  }
+
+  // still waiting on another player so make no modifications
+  return {};
+}
+```
+
+  </TabItem>
+</Tabs>
+
+### Players leaving
+
+:::info
+Modify the [`onPlayerQuit`](/docs/API/room-functions#onplayerquit-required) function to handle when a player quits.
+
+Implement the `TODO` statements in `onPlayerQuit`, and then check your work with the solution.
+:::
+
+:::success
+While implementing, try adding players and then removing them. Does the console show the state you expect?
+:::
+
+<Tabs>
+  <TabItem value="initial" label="TODO" default>
+
+```js title="src/main.js"
+function onPlayerQuit(player, roomState) {
   const { state, players } = roomState;
 
+  state.status = Status.EndGame;
   if (players.length === 1) {
+    // highlight-start
+    // TODO: when a player quits and there is another player, we should default the winner to
+    // be the remaining player
+    // highlight-end
+    return {
+      // highlight-start
+      // TODO: properly tell UrTurn the room is over and no longer joinable
+      // (hint: modify finished, joinable, state fields)
+      // highlight-end
+    };
+  }
+  return {
+    // highlight-start
+    // TODO: when a player quits and there was no other player, there is no winner but we should
+    // properly tell UrTurn the room is over and no longer joinable
+    // (hint: modify finished and joinable fields)
+    // highlight-end
+  };
+}
+```
+
+  </TabItem>
+  <TabItem value="solution" label="Solution">
+
+```js title="src/main.js"
+function onPlayerQuit(player, roomState) {
+  const { state, players } = roomState;
+  state.status = Status.EndGame;
+  if (players.length === 1) {
+    // highlight-start
     const [winner] = players;
     state.winner = winner;
     return { state, joinable: false, finished: true };
+    // highlight-end
   }
+  // highlight-next-line
   return { joinable: false, finished: true };
 }
 ```
 
-## Frontend
+  </TabItem>
+</Tabs>
 
-This section will go over how to implement the frontend for our tic-tac-toe so that it is visible to the user. We will be adding our components to ```frontend/src/App.jsx```. This file already contains some logic for you to access the [`RoomState`](/docs/API/types#roomstate) object and for any state changes to make to be propagated to your [room functions](/docs/API/room-functions).
+### Helper functions
 
-### 1. Extract the RoomState
+Before we approach handling player moves, let's implement the helper function `evaluateBoard` for determining if the game is finished and who won.
 
-We will first extract the information we need from the [`RoomState`](/docs/API/types#roomstate):
+:::info
+Implement the `TODO` statements in `evaluateBoard`, and then check your work with the solution.
+
+Read the doc string for the function to understand what we should return!
+:::
+
+:::caution
+There are many ways to implement tictactoe evaluation logic, so don't be discouraged if your implementation doesn't look exactly like ours.
+:::
 
 <Tabs>
-<TabItem value="snippet" label="Snippet">
+  <TabItem value="initial" label="TODO" default>
 
-```jsx title="frontend/src/App.jsx"
-const {
-  state: {
-    board
-  } = {
-    board: [
-      [null, null, null],
-      [null, null, null],
-      [null, null, null]
-    ]
+```js title="src/util.js"
+export const evaluateBoard = (board, plrIdToPlrMark, players) => {
+  // highlight-start
+  // TODO: check for tie and return correct result
+
+  /**
+   * TODO: check for a winner
+   * - check rows
+   * - check columns
+   * - check diagonals
+   */
+
+  // TODO: return default not finished
+  // highlight-end
+};
+```
+
+  </TabItem>
+  <TabItem value="solution" label="Solution">
+
+```js title="src/util.js"
+export const evaluateBoard = (board, plrIdToPlrMark, players) => {
+  // calculate markToPlr map
+  const [XPlayer, OPlayer] = plrIdToPlrMark[players[0].id] === Mark.X ? players : players.reverse();
+  const markToPlr = {
+    [Mark.X]: XPlayer,
+    [Mark.O]: OPlayer,
+  };
+
+  // highlight-start
+  // check for tie
+  if (!board.some((row) => row.some((mark) => mark === null))) {
+    return {
+      finished: true,
+      tie: true,
+    };
   }
-} = roomState;
+  const winningLine = [ // all possible lines to check
+    // rows
+    [[0, 0], [0, 1], [0, 2]],
+    [[1, 0], [1, 1], [1, 2]],
+    [[2, 0], [2, 1], [2, 2]],
+    // columns
+    [[0, 0], [1, 0], [2, 0]],
+    [[0, 1], [1, 1], [2, 1]],
+    [[0, 2], [1, 2], [2, 2]],
+    // diagonals
+    [[0, 0], [1, 1], [2, 2]],
+    [[2, 0], [1, 1], [0, 2]],
+  ].find((indexes) => { // find the first line that has 3-in-a-row
+    const [[firstI, firstJ]] = indexes;
+    const firstMark = board[firstI][firstJ];
+    const isSame = indexes.every(([i, j]) => board[i][j] === firstMark);
+    return firstMark != null && isSame;
+  });
+
+  if (winningLine != null) { // winning line was found
+    const [i, j] = winningLine[0];
+    const mark = board[i][j];
+    return { finished: true, winner: markToPlr[mark] };
+  }
+
+  return { finished: false };
+  // highlight-end
+};
 ```
 
-</TabItem>
-<TabItem value="full" label="Full Code">
-
-```js title="frontend/src/App.jsx"
-import React, { useState, useEffect } from 'react';
-import { ThemeProvider, Typography } from '@mui/material';
-
-import client, { events } from '@urturn/client';
-import theme from './theme';
-
-function App() {
-  const [roomState, setRoomState] = useState(client.getRoomState() || {});
-  useEffect(() => {
-    const onStateChanged = (newRoomState) => {
-      setRoomState(newRoomState);
-    };
-    events.on('stateChanged', onStateChanged);
-    return () => {
-      events.off('stateChanged', onStateChanged);
-    };
-  }, []);
-
-  console.log('roomState:', roomState);
-
-  const {
-    state: {
-      board
-    } = {
-      board: [
-        [null, null, null],
-        [null, null, null],
-        [null, null, null]
-      ]
-    }
-  } = roomState;
-
-  return (
-    <ThemeProvider theme={theme}>
-      <Typography>
-        TODO: Display your game here
-      </Typography>
-    </ThemeProvider>
-  );
-}
-
-export default App;
-```
-
-</TabItem>
+  </TabItem>
 </Tabs>
 
-### 2. Create a Tic-Tac-Toe Board
+### Player Moves
 
-Using our defined empty `board` field, we can render a simple tic-tac-toe board:
+:::info
+Implement the `TODO` statements in [`onPlayerMove`](/docs/API/room-functions#onplayermove-required), and then check your work with the solution.
+:::
 
 <Tabs>
-<TabItem value="snippet" label="Snippet">
+  <TabItem value="initial" label="TODO" default>
 
-```jsx title="frontend/src/App.jsx" live
-function App(props) {
-  return (
-    <ThemeProvider theme={theme}>
-      <Typography>
-        <Stack margin={2} spacing={1} direction="row" justifyContent="center">
-          <Box>
-            {board.map((row, rowNum) => (
-              <Stack key={rowNum} direction="row">
-                {row.map((val, colNum) => (
-                  <Stack
-                    key={colNum}
-                    direction="row"
-                    justifyContent="center"
-                    alignItems="center"
-                    sx={{
-                      border: 1,
-                      borderColor: 'text.primary',
-                      height: '100px',
-                      width: '100px',
-                    }}
-                  >
-                    <Typography color="text.primary" fontSize="60px">
-                      {val}
-                    </Typography>
-                  </Stack>
-                ))}
-              </Stack>
-            ))}
-          </Box>
-        </Stack>
-      </Typography>
-    </ThemeProvider>
-  );
+```js title="src/main.js"
+function onPlayerMove(player, move, roomState) {
+  const { state, players, logger } = roomState;
+  const { plrToMoveIndex, plrIdToPlrMark } = state;
+  const { x, y } = move;
+  // highlight-start
+  // TODO: validate player move and throw sensible error messages
+  // 1. what if a player tries to make a move when the player is not in game?
+  // 2. what if a player makes a move and its not their turn?
+  // 3. what if a player makes a move on the board where there was already a mark?
+  // TODO: mark the board
+  // highlight-end
+
+  // check if the game is finished
+  const result = evaluateBoard(state.board, plrIdToPlrMark, players);
+  if (result?.finished) {
+    // highlight-start
+    // TODO: handle different cases when game is finished, using the values calculated from
+    // evaluateBoard() call
+    return {
+      // TODO: include state modifications so UrTurn updates the state
+      // TODO: tell UrTurn that the room is finished, which lets UrTurn display the room correctly
+    };
+    // highlight-end
+  }
+
+  // highlight-next-line
+  // TODO: Set the plr to move to the next player (hint: update state.plrToMoveIndex)
+  return { state };
 }
 ```
 
-</TabItem>
-<TabItem value="full" label="Full Code">
+  </TabItem>
+  <TabItem value="solution" label="Solution">
 
-```js title="frontend/src/App.jsx"
-import React, { useState, useEffect } from 'react';
-import { ThemeProvider, Typography, Stack, Box } from '@mui/material';
+```js title="src/main.js"
+function onPlayerMove(player, move, roomState) {
+  const { state, players } = roomState;
+  const { plrToMoveIndex, plrIdToPlrMark } = state;
+  const { x, y } = move;
 
-import client, { events } from '@urturn/client';
-import theme from './theme';
+  // highlight-start
+  // validate player moves
+  if (state.status !== Status.InGame) {
+    throw new Error("game is not in progress, can't make move!");
+  }
+  if (players[plrToMoveIndex].id !== player.id) {
+    throw new Error(`Its not this player's turn: ${player.username}`);
+  }
+  if (state.board[x][y] !== null) {
+    throw new Error(`Invalid move, someone already marked here: ${x},${y}`);
+  }
+  // highlight-end
 
-function App() {
-  const [roomState, setRoomState] = useState(client.getRoomState() || {});
-  useEffect(() => {
-    const onStateChanged = (newRoomState) => {
-      setRoomState(newRoomState);
-    };
-    events.on('stateChanged', onStateChanged);
-    return () => {
-      events.off('stateChanged', onStateChanged);
-    };
-  }, []);
+  // highlight-start
+  // mark the board
+  state.board[x][y] = plrIdToPlrMark[player.id];
+  // highlight-end
 
-  console.log('roomState:', roomState);
+  // check if the game is finished
+  const { winner, tie, finished } = evaluateBoard(state.board, plrIdToPlrMark, players);
+  if (finished) {
+    // highlight-start
+    state.status = Status.EndGame;
+    state.winner = winner;
+    state.tie = tie;
+    // tell UrTurn that the room is finished, which let's UrTurn index rooms properly and display
+    // finished rooms to players correctly
+    return { state, finished: true };
+    // highlight-end
+  }
 
-  const {
-    state: {
-      board
-    } = {
-      board: [
-        [null, null, null],
-        [null, null, null],
-        [null, null, null],
-      ]
-    }
-  } = roomState;
-
-  return (
-    <ThemeProvider theme={theme}>
-      <Typography>
-        <Stack margin={2} spacing={1} direction="row" justifyContent="center">
-          <Box>
-            {board.map((row, rowNum) => (
-              <Stack key={rowNum} direction="row">
-                {row.map((val, colNum) => (
-                  <Stack
-                    key={colNum}
-                    direction="row"
-                    justifyContent="center"
-                    alignItems="center"
-                    sx={{
-                      border: 1,
-                      borderColor: 'text.primary',
-                      height: '100px',
-                      width: '100px',
-                    }}
-                  >
-                    <Typography color="text.primary" fontSize="60px">
-                      {val}
-                    </Typography>
-                  </Stack>
-                ))}
-              </Stack>
-            ))}
-          </Box>
-        </Stack>
-      </Typography>
-    </ThemeProvider>
-  );
+  // highlight-start
+  // Set the plr to move to the next player
+  state.plrToMoveIndex = (plrToMoveIndex + 1) % 2;
+  return { state };
+  // highlight-end
 }
-
-export default App;
 ```
 
-</TabItem>
+  </TabItem>
 </Tabs>
 
-### 3. Add MakeMove()
+:::success
+That's it! Now try adding two players and play around with it.
+:::
 
-We can now add in the ability for a player to make a move. We'll add an onClick handler to each tic-tac-toe square that will send a move containing the x- and y-coordinates (the row and column numbers of the box they clicked on) to the client. UrTurn will handle sending the move to your [onPlayerMove](/docs/API/room-functions#onplayermove-required) function!
+## What's Next?
 
+:::success
+You can [**deploy your game to production**](/docs/Getting-Started/deploying-your-game) in a couple of minutes! Immediately play with random people, or create private rooms and play with close friends!
+:::
 
-<Tabs>
-<TabItem value="snippet" label="Snippet">
+:::success
+Notice that you didn't have to worry about:
 
-```js title="frontend/src/App.jsx"
-onClick={async (event) => {
-  event.preventDefault();
-  const move = { x: rowNum, y: colNum };
-  await client.makeMove(move);
-}}
-```
+- How to communicate between two players
+- How to manage room creation, matchmaking, and scaling
 
-</TabItem>
-<TabItem value="full" label="Full Code">
+With Urturn you get to focus on your game logic, without worrying about **unnecessary infrastructure** problems.
+:::
 
-```js title="frontend/src/App.jsx"
-import React, { useState, useEffect } from 'react';
-import { ThemeProvider, Typography, Stack, Box } from '@mui/material';
-
-import client, { events } from '@urturn/client';
-import theme from './theme';
-
-function App() {
-  const [roomState, setRoomState] = useState(client.getRoomState() || {});
-  useEffect(() => {
-    const onStateChanged = (newRoomState) => {
-      setRoomState(newRoomState);
-    };
-    events.on('stateChanged', onStateChanged);
-    return () => {
-      events.off('stateChanged', onStateChanged);
-    };
-  }, []);
-
-  console.log('roomState:', roomState);
-
-  const {
-    state: {
-      board
-    } = {
-      board: [
-        [null, null, null],
-        [null, null, null],
-        [null, null, null],
-      ]
-    }
-  } = roomState;
-
-  return (
-    <ThemeProvider theme={theme}>
-      <Typography>
-        <Stack margin={2} spacing={1} direction="row" justifyContent="center">
-          <Box>
-            {board.map((row, rowNum) => (
-              <Stack key={rowNum} direction="row">
-                {row.map((val, colNum) => (
-                  <Stack
-                    key={colNum}
-                    direction="row"
-                    justifyContent="center"
-                    alignItems="center"
-                    sx={{
-                      border: 1,
-                      borderColor: 'text.primary',
-                      height: '100px',
-                      width: '100px',
-                    }}
-                    onClick={async (event) => {
-                      event.preventDefault();
-                      const move = { x: rowNum, y: colNum };
-                      await client.makeMove(move);
-                    }}
-                  >
-                    <Typography color="text.primary" fontSize="60px">
-                      {val}
-                    </Typography>
-                  </Stack>
-                ))}
-              </Stack>
-            ))}
-          </Box>
-        </Stack>
-      </Typography>
-    </ThemeProvider>
-  );
-}
-
-export default App;
-```
-
-</TabItem>
-</Tabs>
-
-## Adding a Thumbnail
-
-We'll now find a suitable thumbnail for our game, such as [this one](https://unsplash.com/photos/67Rp3mulEVA). We'll download it, upload it at the highest level of our folder structure, and rename it "thumbnail.png" (the actual filetype doesn't matter - but it **must** have this name).
-
-## Testing Your Game
-
-We're now ready to test our game! In the Runner, you should see the empty board game state. Click **Add Player** to add a player to the game. This will open a new tab that simulates what the player will see upon joining.
-
-In our game state, "joinable" still says true. We can add an additional player and see that "joinable" is now set to false, as defined in our onPlayerJoin function.
-
-You can now simulate playing tic-tac-toe between the two tabs!
-
-[Here](https://github.com/turnbasedgames/urturn/tree/main/examples/tictactoe) is the finished tic-tac-toe game in production, which includes error handling, move validation, player validation, and more!
+If you think you are up for the challenge. Try making a more advanced game, [Semantle Battle](/docs/Getting-Started/semantle-battle). Or just start making your own [game](/docs/Getting-Started/runner-init)!

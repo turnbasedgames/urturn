@@ -9,6 +9,7 @@ import inquirer from 'inquirer';
 import degit from 'degit';
 import path from 'path';
 import { createRequire } from 'module';
+import { DISCORD_URL, DOCS_URL } from '@urturn/types-common';
 import logger from '../src/logger.js';
 import { isInteger, clearConsole } from '../src/util.js';
 import setupFrontends from '../src/setupFrontends.js';
@@ -20,6 +21,7 @@ const pkg = require('../package.json');
 
 const templateBackendRepo = 'turnbasedgames/urturn/templates/template-backend';
 const templateFrontendRepoPrefix = 'turnbasedgames/urturn/templates/template-';
+const tutorialBasePath = 'turnbasedgames/urturn/examples/';
 
 function wrapVersion(fn) {
   return (...args) => {
@@ -74,38 +76,75 @@ async function start(options) {
         runnerFrontendProcess.kill();
       }
 
-      console.warn('exiting runner');
+      logger.warn('exiting runner');
       process.exit();
     });
   });
 }
 
-async function init(destination, { commit }) {
-  const fullPathDestination = path.resolve(destination);
-  const { frontendType } = await inquirer.prompt([
-    {
-      type: 'list',
-      name: 'frontendType',
-      message: "Which game frontend do you want to use? (don't see your frontend, add it in a PR!)",
-      default: 'ReactJS',
-      choices: [
-        { name: 'ReactJS', value: 'react' },
-        { name: 'None', value: 'none' },
-      ],
-    },
-  ]);
+function getFrontendPathFromDest(destination) {
+  return `${destination}/frontend`;
+}
+
+async function setupProjectFiles({ destination, tutorial, commit }) {
+  const frontendPath = getFrontendPathFromDest(destination);
   const commitSuffix = commit == null ? '' : `#${commit}`;
-  const templateFrontendPath = templateFrontendRepoPrefix + frontendType + commitSuffix;
-  const templateBackendPath = templateBackendRepo + commitSuffix;
+  if (tutorial) {
+    const comingSoonTutorials = new Set(['semantleBattle']);
+    const { tutorialType } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'tutorialType',
+        message: 'Which game tutorial are you doing? (Want another tutorial, Add a PR!)',
+        default: 'TicTacToe',
+        choices: [
+          { name: 'TicTacToe', value: 'tictactoe-tutorial' },
+          { name: '🚧 Semantle Battle (Coming soon!)', value: 'semantle-battle-tutorial' },
+        ],
+      },
+    ]);
+    if (comingSoonTutorials.has(tutorialType)) {
+      throw new Error("Tutorial doesn't exist yet! It is coming soon! 🚧");
+    } else {
+      const tutorialPath = tutorialBasePath + tutorialType + commitSuffix;
+      logger.info('Downloading tutorial...');
+      const tutorialEmitter = degit(tutorialPath);
+      await tutorialEmitter.clone(destination);
+    }
+  } else {
+    const { frontendType } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'frontendType',
+        message: "Which game frontend do you want to use? (don't see your frontend, add it in a PR!)",
+        default: 'ReactJS',
+        choices: [
+          { name: 'ReactJS', value: 'react' },
+          { name: 'None', value: 'none' },
+        ],
+      },
+    ]);
+    const templateFrontendPath = templateFrontendRepoPrefix + frontendType + commitSuffix;
+    const templateBackendPath = templateBackendRepo + commitSuffix;
+    const templateBackendEmitter = degit(templateBackendPath);
+    const templateFrontendEmitter = degit(templateFrontendPath);
 
-  const templateBackendEmitter = degit(templateBackendPath);
-  const templateFrontendEmitter = degit(templateFrontendPath);
+    logger.info('Downloading backend template...');
+    await templateBackendEmitter.clone(destination);
+    logger.info('Downloading frontend template...');
+    await templateFrontendEmitter.clone(frontendPath);
+  }
+}
 
-  logger.info('Downloading backend template...');
-  await templateBackendEmitter.clone(destination);
-  const frontendPath = `${destination}/frontend`;
-  logger.info('Downloading frontend template...');
-  await templateFrontendEmitter.clone(frontendPath);
+async function init(destination, { commit, tutorial }) {
+  const fullPathDestination = path.resolve(destination);
+  const frontendPath = getFrontendPathFromDest(destination);
+  await setupProjectFiles({
+    destination,
+    commit,
+    tutorial,
+  });
+
   const extraBackendPackages = ['@urturn/runner'];
   const extraFrontendPackages = ['@urturn/client'];
   logger.info('\nInstalling packages. This might take a couple of minutes.');
@@ -116,16 +155,18 @@ async function init(destination, { commit }) {
   logger.info(`\n${chalk.bold('Get Started:')}`);
   logger.info(`\n  ${chalk.cyan('cd')} ${destination}`);
   logger.info(`  ${chalk.cyan('npm run dev')}\n`);
-  logger.info(`Go to ${chalk.magenta.underline('https://discord.gg/myWacjdb5S')} for questions, game jams, meeting other developers, and more!`);
+  logger.info(`Go to ${chalk.magenta.underline(DISCORD_URL)} for questions, game jams, meeting other developers, and more!`);
   logger.info('Happy Hacking!!');
 }
 
 async function main() {
   program.version(pkg.version, '-v, --version', 'output the current version');
+  program.addHelpText('afterAll', `\nAsk questions at ${DISCORD_URL}`);
 
   program
     .command('init <destination>')
     .description('initialize a new UrTurn Game')
+    .addOption(new Option('-t, --tutorial', `initialize a UrTurn tutorial game (see ${DOCS_URL}docs/category/getting-started)`))
     // hide UrTurn dev only options
     .addOption(new Option('--commit <commit>', 'custom commit or branch to run init from').hideHelp())
     .action(wrapVersion(init));

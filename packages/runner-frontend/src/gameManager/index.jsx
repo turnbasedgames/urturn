@@ -224,11 +224,16 @@ function GameManager() {
       <Snackbar
         autoHideDuration={6000}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        open={recentErrorMsg !== null}
-        onClose={() => { setRecentErrorMsg(null); }}
+        open={recentErrorMsg != null}
         TransitionComponent={Fade}
       >
-        <Alert severity="error" sx={{ width: '100%' }}>
+        <Alert
+          severity="error"
+          sx={{ width: '100%' }}
+          onClose={() => {
+            setRecentErrorMsg(null);
+          }}
+        >
           {recentErrorMsg}
         </Alert>
       </Snackbar>

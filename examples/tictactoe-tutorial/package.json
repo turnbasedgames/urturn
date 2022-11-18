@@ -1,5 +1,5 @@
 {
-  "name": "@urturn/tictactoe",
+  "name": "@urturn/tictactoe-tutorial",
   "version": "0.1.7",
   "description": "",
   "main": "index.js",
@@ -10,8 +10,8 @@
     "dev:runner": "runner --frontend-port 3000",
     "dev:rollup": "rollup -c -w",
     "dev:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start",
-    "lint": "eslint . --ignore-path .gitignore --ext .js",
-    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix"
+    "lint": "echo TODO lint",
+    "lint:fix": "echo TODO lint fix"
   },
   "repository": {
     "type": "git",
@@ -23,16 +23,10 @@
     "url": "https://github.com/turnbasedgames/urturn/issues"
   },
   "homepage": "https://github.com/turnbasedgames/urturn#readme",
-  "dependencies": {
-    "@urturn/tictactoe-frontend": "*"
-  },
   "devDependencies": {
     "@urturn/runner": "*",
     "concurrently": "^7.1.0",
     "cross-env": "^7.0.3",
-    "eslint": "^8.14.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.26.0",
     "rollup": "^3.2.3"
   }
 }

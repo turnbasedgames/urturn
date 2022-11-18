@@ -33,8 +33,8 @@ const sidebars = {
       items: [
         'Getting-Started/runner-init',
         'Getting-Started/tictactoe',
-        'Getting-Started/Deploying-Your-Game',
-        'Getting-Started/typescript-support'
+        'Getting-Started/semantle-battle',
+        'Getting-Started/deploying-your-game',
       ],
     },
     {
@@ -61,6 +61,7 @@ const sidebars = {
         'Advanced/custom-game-page',
         'Advanced/room-versioning',
         'Advanced/persisting-player-data',
+        'Advanced/typescript-support',
         'Advanced/self-hosting',
       ],
     },

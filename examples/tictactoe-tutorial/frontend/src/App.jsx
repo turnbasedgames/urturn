@@ -57,17 +57,15 @@ function App() {
 
   const {
     state: {
-      board,
-      status,
-      winner,
-      plrToMoveIndex,
-    } = {
-      board: [
+      board = [ // default board
         [null, null, null],
         [null, null, null],
         [null, null, null],
       ],
-    },
+      status,
+      winner,
+      plrToMoveIndex,
+    } = {},
   } = roomState;
   const { players = [], finished } = roomState;
   const generalStatus = getStatusMsg({

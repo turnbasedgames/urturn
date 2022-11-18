@@ -3,6 +3,7 @@
   "version": "0.1.7",
   "description": "common types used across urturn packages",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "lint": "eslint . --ignore-path .gitignore --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ignore-path .gitignore --ext .js,.jsx,.ts,.tsx --fix"

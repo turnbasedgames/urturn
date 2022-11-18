@@ -10,16 +10,17 @@ description: run your game locally
 ## Commands
 
 ```bash
-$ npx runner -h
-Usage: runner [options]
+$ npx @urturn/runner -h
+Usage: runner [options] [command]
 
 Options:
-  --no-clear                          Don't clear console when starting the
-                                      runner.
-  -f, --frontend-port <frontendPort>  Specify the port of where the frontend
-                                      of your game is being hosted locally.
-  -d, --debug                         print debug logs to stdout
-  -h, --help                          display help for command
+  -v, --version                 output the current version
+  -h, --help                    display help for command
+
+Commands:
+  init [options] <destination>  initialize a new UrTurn Game
+  start [options]               starts the local runner serving the console and backend
+  help [command]                display help for command
 ```
 
 :::caution

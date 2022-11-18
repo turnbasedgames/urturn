@@ -11,7 +11,7 @@
     "start:frontend": "npx lerna run serve --scope=@urturn/test-app-frontend",
     "dev": "concurrently \"npm run dev:rollup\" \"npm run dev:runner\" \"npm run dev:frontend\"",
     "dev:rollup": "rollup -c -w",
-    "dev:runner": "runner --frontend-port 3000 --debug --dev --no-clear",
+    "dev:runner": "runner --frontend-port 3000 --dev --no-clear",
     "dev:frontend": "BROWSER=none PORT=3000 npx lerna run start --scope=@urturn/test-app-frontend",
     "lint": "eslint . --ignore-path .gitignore --ext .js",
     "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix"
