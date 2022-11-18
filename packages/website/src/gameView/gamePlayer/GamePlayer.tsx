@@ -39,7 +39,7 @@ function GamePlayer(): React.ReactElement {
   const [room, setRoom] = useState<Room | undefined>();
   const [roomState, setRoomState] = useState<RoomState | undefined>();
   const userContext = useContext(UserContext);
-  const { enqueueSnackbar } = useSnackbar();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,6 +58,8 @@ function GamePlayer(): React.ReactElement {
       }
     }
     setupRoom().catch(logger.error);
+
+    return () => closeSnackbar();
   }, [userContext.user]);
 
   const onSocketDisconnect = (reason: string): void => {
