@@ -20,6 +20,9 @@ export const ROOM_STATE_DEFAULTS = {
 };
 
 export function filterRoomState(state) {
+  if (state == null) {
+    throw new Error('state is not defined yet.');
+  }
   return CREATOR_VIEWABLE_FIELDS.reduce(
     (newState, key) => ({
       ...newState,

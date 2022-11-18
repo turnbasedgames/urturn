@@ -3,38 +3,65 @@ export const Status = Object.freeze({
   InGame: 'inGame',
   EndGame: 'endGame',
 });
-function getPlrFromMark(mark, plrs) {
-  return mark === 'X' ? plrs[0] : plrs[1];
-}
 
-function isWinningSequence(arr) {
-  return arr[0] != null && arr[0] === arr[1] && arr[1] === arr[2];
-}
+export const Mark = Object.freeze({
+  X: 'X',
+  O: 'O',
+});
 
-function isEndGame(board, plrs) {
-  // check if there is a winner
-  for (let i = 0; i < board.length; i += 1) {
-    const row = board[i];
-    const col = [board[0][i], board[1][i], board[2][i]];
-
-    if (isWinningSequence(row)) {
-      return [true, getPlrFromMark(row[0], plrs)];
-    } if (isWinningSequence(col)) {
-      return [true, getPlrFromMark(col[0], plrs)];
-    }
-  }
-
-  const d1 = [board[0][0], board[1][1], board[2][2]];
-  const d2 = [board[0][2], board[1][1], board[2][0]];
-  if (isWinningSequence(d1)) {
-    return [true, getPlrFromMark(d1[0], plrs)];
-  } if (isWinningSequence(d2)) {
-    return [true, getPlrFromMark(d2[0], plrs)];
-  }
+/**
+ * evaluateBoard() determines if the tictactoe game is finished and provides details (tie or winner)
+ * @param {string[][]} board, a 3x3 2D array with 'X' and 'O' as values
+ * @param {{[string]: string}} plrIdToPlrMark, map from plrId to the player's mark
+ * @param {Player[]} players, list of players
+ * @returns {
+ *  winner?: Player, (the player that won the game if they exist)
+ *  tie?: bool, (true if tie, and false if not a tie)
+ *  finished: bool, (true if the game is finished, and false if not finished)
+ * }
+ */
+export const evaluateBoard = (board, plrIdToPlrMark, players) => {
+  // calculate markToPlr map
+  const [XPlayer, OPlayer] = plrIdToPlrMark[players[0].id] === Mark.X ? players : players.reverse();
+  const markToPlr = {
+    [Mark.X]: XPlayer,
+    [Mark.O]: OPlayer,
+  };
 
   // check for tie
-  if (board.some((row) => row.some((mark) => mark === null))) {
-    return [false, null];
+  if (!board.some((row) => row.some((mark) => mark === null))) {
+    return {
+      finished: true,
+      tie: true,
+    };
   }
-  return [true, null];
-}
+
+  const getIndexesFromLineNum = (num) => [num % 3, Math.floor(num / 3)];
+  const possibleLineIndexes = [ // possible matching lines to check
+    // rows
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    // columns
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    // diagonals
+    [0, 4, 8],
+    [2, 4, 6],
+  ].map((line) => line.map(getIndexesFromLineNum)); // convert line numbers to actual index pairs
+  const winningLine = possibleLineIndexes.find((indexes) => {
+    const [[firstI, firstJ]] = indexes;
+    const firstMark = board[firstI][firstJ];
+    const isSame = indexes.every(([i, j]) => board[i][j] === firstMark);
+    return firstMark != null && isSame;
+  });
+
+  if (winningLine != null) { // winning line was found
+    const [i, j] = winningLine[0];
+    const mark = board[i][j];
+    return { finished: true, winner: markToPlr[mark] };
+  }
+
+  return { finished: false };
+};

@@ -30,7 +30,7 @@ const getLatestBackendModule = async (backendPath) => {
 
     return backendModule;
   } catch (err) {
-    logger.error(err);
+    logger.error('error while loading your room functions:', err);
     return undefined;
   }
 };
@@ -146,6 +146,7 @@ async function setupServer({ apiPort }) {
         ),
       );
     } catch (err) {
+      logger.error('Error in while making move:', err);
       res.status(StatusCodes.BAD_REQUEST).json({
         name: 'CreatorError',
         creatorError: {
