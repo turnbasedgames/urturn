@@ -41,37 +41,6 @@ function isEndGame(board, plrs) {
   return [true, null];
 }
 
-/**
- * Generic board game types
- * @type Player: json object, in the format of
- * {
- *  id: string, unique player id
- *  username: string, the player's display name
- * }
- * @type RoomState: json object, in the format of
- * {
- *  // creator read write fields
- *  state: json object, which represents any board game state
- *  joinable: boolean (default=true), whether or not the room can have new players added to it
- *  finished: boolean (default=false), when true there will be no new board game state changes
- *
- *  // creator read only
- *  players: [Player], array of player objects
- *  version: Number, an integer value that increases by 1 with each state change
- * }
- * @type RoomStateResult: json object, in the format of
- * {
- *  // fields that creator wants to overwrite
- *  state?: json object, which represents any board game state
- *  joinable?: boolean, whether or not the room can have new players added to it
- *  finished?: boolean, when true there will be no new board game state changes
- * }
- */
-
-/**
- * onRoomStart
- * @returns {RoomStateResult}
- */
 function onRoomStart() {
   return {
     state: {
@@ -86,12 +55,6 @@ function onRoomStart() {
   };
 }
 
-/**
- * onPlayerJoin
- * @param {Player} player, represents the player that is attempting to join this game
- * @param {RoomState} currentGame
- * @returns {RoomStateResult}
- */
 function onPlayerJoin(player, roomState) {
   const { players, state } = roomState;
   if (players.length === 2) { // enough players to play the game
@@ -107,13 +70,6 @@ function onPlayerJoin(player, roomState) {
   return {};
 }
 
-/**
- * onPlayerMove
- * @param {Player} player, the player that is attempting to make a move
- * @param {*} move json object, controlled the creator that represents the player's move
- * @param {RoomState} currentGame
- * @returns {RoomStateResult}
- */
 function onPlayerMove(player, move, roomState) {
   const { state, players } = roomState;
   const { board, plrToMoveIndex } = state;
@@ -146,12 +102,6 @@ function onPlayerMove(player, move, roomState) {
   return { state };
 }
 
-/**
- * onPlayerQuit
- * @param {Player} player, the player that is attempting to quit the game
- * @param {RoomState} currentGame
- * @returns {RoomStateResult}
- */
 function onPlayerQuit(player, roomState) {
   const { state, players } = roomState;
   state.status = Status.EndGame;

@@ -10,8 +10,7 @@
     "dev:runner": "runner --frontend-port 3000",
     "dev:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start",
     "lint": "eslint . --ignore-path .gitignore --ext .js",
-    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix",
-    "postinstall": "cd frontend && npm install"
+    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix"
   },
   "repository": {
     "type": "git",

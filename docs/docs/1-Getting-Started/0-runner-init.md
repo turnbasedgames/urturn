@@ -52,4 +52,4 @@ We've already done the hard work for you. When you ran `npx @urturn/runner init 
 
 :::
 
-When you `push` to `main` branch of your repo on GitHub, the actions will automatically create the correct [Artifact structure](/docs/Getting-Started/Deploying-Your-Game#build-artifact-spec), which you will use to [deploy to production](/docs/Getting-Started/Deploying-Your-Game).
+When you `push` to `main` branch of your repo on GitHub, the actions will automatically create the correct [Artifact structure](/docs/Getting-Started/Deploying-Your-Game#build-artifact-spec) on the `published` branch, which you will use to [deploy to production](/docs/Getting-Started/Deploying-Your-Game).
