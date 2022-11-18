@@ -1,157 +1,141 @@
-// TicTacToe Example
+'use strict';
+
 const Status = Object.freeze({
   PreGame: 'preGame',
   InGame: 'inGame',
   EndGame: 'endGame',
 });
 
-function getPlrFromMark(mark, plrs) {
-  return mark === 'X' ? plrs[0] : plrs[1];
-}
+const Mark = Object.freeze({
+  X: 'X',
+  O: 'O',
+});
 
-function isWinningSequence(arr) {
-  return arr[0] != null && arr[0] === arr[1] && arr[1] === arr[2];
-}
-
-function isEndGame(board, plrs) {
-  // check if there is a winner
-  for (let i = 0; i < board.length; i += 1) {
-    const row = board[i];
-    const col = [board[0][i], board[1][i], board[2][i]];
-
-    if (isWinningSequence(row)) {
-      return [true, getPlrFromMark(row[0], plrs)];
-    } if (isWinningSequence(col)) {
-      return [true, getPlrFromMark(col[0], plrs)];
-    }
-  }
-
-  const d1 = [board[0][0], board[1][1], board[2][2]];
-  const d2 = [board[0][2], board[1][1], board[2][0]];
-  if (isWinningSequence(d1)) {
-    return [true, getPlrFromMark(d1[0], plrs)];
-  } if (isWinningSequence(d2)) {
-    return [true, getPlrFromMark(d2[0], plrs)];
-  }
+/**
+ * evaluateBoard() determines if the tictactoe game is finished and provides details (tie or winner)
+ * @param {string[][]} board, a 3x3 2D array with 'X' and 'O' as values
+ * @param {{[string]: string}} plrIdToPlrMark, map from plrId to the player's mark
+ * @param {Player[]} players, list of players
+ * @returns {
+ *  winner?: Player, (the player that won the game if they exist)
+ *  tie?: bool, (true if tie, and false if not a tie)
+ *  finished: bool, (true if the game is finished, and false if not finished)
+ * }
+ */
+const evaluateBoard = (board, plrIdToPlrMark, players) => {
+  // calculate markToPlr map
+  const [XPlayer, OPlayer] = plrIdToPlrMark[players[0].id] === Mark.X ? players : players.reverse();
+  const markToPlr = {
+    [Mark.X]: XPlayer,
+    [Mark.O]: OPlayer,
+  };
 
   // check for tie
-  if (board.some((row) => row.some((mark) => mark === null))) {
-    return [false, null];
+  if (!board.some((row) => row.some((mark) => mark === null))) {
+    return {
+      finished: true,
+      tie: true,
+    };
   }
-  return [true, null];
-}
 
-/**
- * Generic board game types
- * @type Player: json object, in the format of
- * {
- *  id: string, unique player id
- *  username: string, the player's display name
- * }
- * @type RoomState: json object, in the format of
- * {
- *  // creator read write fields
- *  state: json object, which represents any board game state
- *  joinable: boolean (default=true), whether or not the room can have new players added to it
- *  finished: boolean (default=false), when true there will be no new board game state changes
- *
- *  // creator read only
- *  players: [Player], array of player objects
- *  version: Number, an integer value that increases by 1 with each state change
- * }
- * @type RoomStateResult: json object, in the format of
- * {
- *  // fields that creator wants to overwrite
- *  state?: json object, which represents any board game state
- *  joinable?: boolean, whether or not the room can have new players added to it
- *  finished?: boolean, when true there will be no new board game state changes
- * }
- */
+  const winningLine = [ // all possible lines to check
+    // rows
+    [[0, 0], [0, 1], [0, 2]],
+    [[1, 0], [1, 1], [1, 2]],
+    [[2, 0], [2, 1], [2, 2]],
+    // columns
+    [[0, 0], [1, 0], [2, 0]],
+    [[0, 1], [1, 1], [2, 1]],
+    [[0, 2], [1, 2], [2, 2]],
+    // diagonals
+    [[0, 0], [1, 1], [2, 2]],
+    [[2, 0], [1, 1], [0, 2]],
+  ].find((indexes) => { // find the first line that has 3-in-a-row
+    const [[firstI, firstJ]] = indexes;
+    const firstMark = board[firstI][firstJ];
+    const isSame = indexes.every(([i, j]) => board[i][j] === firstMark);
+    return firstMark != null && isSame;
+  });
 
-/**
- * onRoomStart
- * @returns {RoomStateResult}
- */
+  if (winningLine != null) { // winning line was found
+    const [i, j] = winningLine[0];
+    const mark = board[i][j];
+    return { finished: true, winner: markToPlr[mark] };
+  }
+
+  return { finished: false };
+};
+
 function onRoomStart() {
   return {
     state: {
       status: Status.PreGame,
+      plrIdToPlrMark: {}, // map from plrId to their mark (X or O)
+      plrToMoveIndex: 0, // track who's move it is
       board: [
         [null, null, null],
         [null, null, null],
         [null, null, null],
       ],
-      winner: null, // null means tie if game is finished, otherwise set to the plr that won,
+      winner: null,
     },
   };
 }
 
-/**
- * onPlayerJoin
- * @param {Player} player, represents the player that is attempting to join this game
- * @param {RoomState} currentGame
- * @returns {RoomStateResult}
- */
 function onPlayerJoin(player, roomState) {
   const { players, state } = roomState;
   if (players.length === 2) { // enough players to play the game
+    // start the game and set the player's marks
     state.status = Status.InGame;
-    state.plrToMoveIndex = 0; // keep track of who’s turn it is
-    return { // return modifications we want to make to the roomState
+    state.plrIdToPlrMark[players[0].id] = Mark.X;
+    state.plrIdToPlrMark[players[1].id] = Mark.O;
+    // return modifications we want to make to the roomState
+    return {
       state,
-      // we should not allow new players to join the game, tictactoe only needs two players
+      // tell UrTurn to NOT allow anymore players in this room
       joinable: false,
     };
   }
-  // our first player joined, we should do nothing (not enough players yet to start).
+
+  // still waiting on another player so make no modifications
   return {};
 }
 
-/**
- * onPlayerMove
- * @param {Player} player, the player that is attempting to make a move
- * @param {*} move json object, controlled the creator that represents the player's move
- * @param {RoomState} currentGame
- * @returns {RoomStateResult}
- */
 function onPlayerMove(player, move, roomState) {
   const { state, players } = roomState;
-  const { board, plrToMoveIndex } = state;
-
-  // VALIDATIONS
-  // roomState must be in game
+  const { plrToMoveIndex, plrIdToPlrMark } = state;
   const { x, y } = move;
+
+  // validate player moves
   if (state.status !== Status.InGame) {
     throw new Error("game is not in progress, can't make move!");
   }
   if (players[plrToMoveIndex].id !== player.id) {
     throw new Error(`Its not this player's turn: ${player.username}`);
   }
-  if (board[x][y] !== null) {
+  if (state.board[x][y] !== null) {
     throw new Error(`Invalid move, someone already marked here: ${x},${y}`);
   }
 
-  const plrMark = player.id === players[0].id ? 'X' : 'O';
-  board[x][y] = plrMark;
+  // mark the board
+  state.board[x][y] = plrIdToPlrMark[player.id];
 
-  // Check if game is over
-  const [isEnd, winner] = isEndGame(board, players);
-  if (isEnd) {
+  // check if the game is finished
+  const { winner, tie, finished } = evaluateBoard(state.board, plrIdToPlrMark, players);
+  if (finished) {
     state.status = Status.EndGame;
     state.winner = winner;
+    state.tie = tie;
+    // tell UrTurn that the room is finished, which let's UrTurn index rooms properly and display
+    // finished rooms to players correctly
     return { state, finished: true };
   }
 
-  state.plrToMoveIndex = plrToMoveIndex === 0 ? 1 : 0;
+  // Set the plr to move to the next player
+  state.plrToMoveIndex = (plrToMoveIndex + 1) % 2;
   return { state };
 }
 
-/**
- * onPlayerQuit
- * @param {Player} player, the player that is attempting to quit the game
- * @param {RoomState} currentGame
- * @returns {RoomStateResult}
- */
 function onPlayerQuit(player, roomState) {
   const { state, players } = roomState;
   state.status = Status.EndGame;
@@ -163,9 +147,11 @@ function onPlayerQuit(player, roomState) {
   return { joinable: false, finished: true };
 }
 
-module.exports = {
+var main = {
   onRoomStart,
   onPlayerJoin,
   onPlayerMove,
   onPlayerQuit,
 };
+
+module.exports = main;
