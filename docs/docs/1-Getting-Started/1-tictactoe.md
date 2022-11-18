@@ -57,7 +57,7 @@ The [runner](/docs/API/runner) will immediately open a new window.
 
 You will see a console that let's you easily debug/inspect the global state of your game.
 
-You will also notice that if you `add`, `remove` a player or try to make a move on the tictactoe board none of the state will change.
+You will also notice that if you `add`, `remove` a player or try to make a `move` on the tictactoe board, none of the state will change. So let's fix that!
 :::
 
 ### Initializing state
@@ -67,13 +67,13 @@ We need to define what the **initial state** of the room looks like.
 All state related to a room is held within the [RoomState](/docs/API/types#roomstate). We modify this object by returning the [RoomStateResult](/docs/API/types#roomstateresult).
 
 :::success
-The runner will automatically hot reload changes when you save the file!
+The runner will automatically hot reload changes when **make changes** and **save**
 :::
 
 :::info
-Modify the [`onRoomStart`](/docs/API/room-functions#onroomstart-required) function.
+Now, modify the [`onRoomStart`](/docs/API/room-functions#onroomstart-required) function.
 
-Implement the `TODO` statements in `onRoomStart`, and then check your work with the solution.
+Implement the `TODO` statements in `onRoomStart` in the file `src/main.js`, and then check your work with the solution.
 :::
 
 <Tabs>
@@ -130,14 +130,14 @@ You should see your modifications to the initial state show up in the console!
 ### Players joining
 
 :::info
-Modify the [`onPlayerJoin`](/docs/API/room-functions#onplayerjoin-required) function to update the RoomState when a player joins.
+Modify the [`onPlayerJoin`](/docs/API/room-functions#onplayerjoin-required) function to handle when a player joins.
 
 Implement the `TODO` statements in `onPlayerJoin`, and then check your work with the solution.
 :::
 
 :::success
 While implementing, try adding players. Try adding 3 players to see what happens.
-:::
+::: 
 
 <Tabs>
   <TabItem value="initial" label="TODO" default>
@@ -195,7 +195,7 @@ function onPlayerJoin(player, roomState) {
 ### Players leaving
 
 :::info
-Modify the [`onPlayerQuit`](/docs/API/room-functions#onplayerquit-required) function to update the RoomState when a player quits.
+Modify the [`onPlayerQuit`](/docs/API/room-functions#onplayerquit-required) function to handle when a player quits.
 
 Implement the `TODO` statements in `onPlayerQuit`, and then check your work with the solution.
 :::
@@ -267,7 +267,7 @@ Read the doc string for the function to understand what we should return!
 :::
 
 :::caution
-There many ways to implement tictactoe evaluation logic, so don't be discouraged if your implementation doesn't look exactly like ours.
+There are many ways to implement tictactoe evaluation logic, so don't be discouraged if your implementation doesn't look exactly like ours.
 :::
 
 <Tabs>
@@ -378,6 +378,7 @@ function onPlayerMove(player, move, roomState) {
     // highlight-end
   }
 
+  // highlight-next-line
   // TODO: Set the plr to move to the next player (hint: update state.plrToMoveIndex)
   return { state };
 }
@@ -428,17 +429,6 @@ function onPlayerMove(player, move, roomState) {
   state.plrToMoveIndex = (plrToMoveIndex + 1) % 2;
   return { state };
   // highlight-end
-}
-
-function onPlayerQuit(player, roomState) {
-  const { state, players } = roomState;
-  state.status = Status.EndGame;
-  if (players.length === 1) {
-    const [winner] = players;
-    state.winner = winner;
-    return { state, joinable: false, finished: true };
-  }
-  return { joinable: false, finished: true };
 }
 ```
 

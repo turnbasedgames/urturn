@@ -18,7 +18,6 @@ Options:
                                       runner.
   -f, --frontend-port <frontendPort>  Specify the port of where the frontend
                                       of your game is being hosted locally.
-  -d, --debug                         print debug logs to stdout
   -h, --help                          display help for command
 ```
 
