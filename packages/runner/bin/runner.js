@@ -44,7 +44,7 @@ async function start(options) {
     clearConsole();
   }
   logger.info(chalk.gray('Starting runner with your game...\n'));
-  logger.debug('running with options:', options);
+  logger.info('running with options:', options);
 
   const cleanupServerFunc = await setupServer({ apiPort: portForRunnerBackend });
 
@@ -137,7 +137,6 @@ async function main() {
     .addOption(new Option('--dev').hideHelp())
     .addOption(new Option('--no-clear', "Don't clear console when starting the runner."))
     .requiredOption('-f, --frontend-port <frontendPort>', 'Specify the port of where the frontend of your game is being hosted locally.')
-    .option('-d, --debug', 'print debug logs to stdout')
     .action(wrapVersion(start));
   program.parse();
 }
