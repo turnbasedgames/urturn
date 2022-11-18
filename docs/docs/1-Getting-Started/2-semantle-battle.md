@@ -4,6 +4,8 @@ description: Advanced tutorial - create a complicated word game
 
 # Semantle Battle
 
+## Advanced
+
 Okay so [Multiplayer TicTacToe](/docs/Getting-Started/tictactoe) was *too easy* for you.
 
 :::success
@@ -20,9 +22,13 @@ Let's walk through the implementation of this and how UrTurn can even make a gam
 :::
 
 :::caution
+This is an **advanced tutorial** so it will move fast.
 
+We expect you to have a basic understanding what [UrTurn is](/docs).
+:::
+
+:::caution
 🚧 Tutorial is in progress 🚧!
 
 Join the early release wait list on [discord](https://discord.gg/myWacjdb5S), so we can notify you when we finish.
-
 :::
