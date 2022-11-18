@@ -1,19 +1,79 @@
 ---
-description: Create your first game - TicTacToe
+description: Create your first multiplayer game
 ---
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Create a simple TicTacToe game
+# Multiplayer TicTacToe
 
-## Overview
+## What you are making
 
-We are ready to make our first game - tic-tac-toe! There are two major components of your game: the [frontend](/docs/Getting-Started/tictactoe#frontend) and the [room functions](#/docs/Getting-Started/tictactoe#defining-the-room-functions). We will go over the basics of each.
+Play it [here](https://www.urturn.app/games/626eac7c65667f00160a6b42).
 
-## Defining the [room functions](/docs/API/room-functions)
+:::success
+Playing the game will help you envision what the underlying logic will look like. Ask yourself:
 
-### What is roomState?
+- How do you define what happens when a player moves?
+- How can you tell if a player won the game?
+:::
+
+## Setup
+
+Run to generate a simple tictactoe template:
+
+```bash
+npx @urturn/runner init --tutorial tictactoe first-game
+cd first-game
+```
+
+The UI is provided for you. Your goal is to implement the underlying logic (i.e. [room functions](/docs/API/room-functions)) which determine the resulting state after any event (e.g. player move, joins, etc.).
+
+### File/Folder structure
+
+```bash
+game
+└───src # room logic goes here
+│   │   main.js # room functions (e.g. onRoomStart, onPlayerMove, etc.)
+│   
+└───frontend # Tictactoe UI code lives here
+|   │   ...frontend files
+|   ...other files # not important for this tutorial
+```
+
+## Defining how state changes
+
+:::success
+With UrTurn, you only need to provide logic for how a single [room](/docs/Introduction/Concepts#room) behaves. UrTurn takes care of the rest.
+:::
+
+Start up the game and play around.
+
+```bash
+npm run dev
+```
+
+:::info
+The [runner](/docs/API/runner) will immediately open a new window.
+
+You will see a console that let's you easily debug/inspect the global state of your game.
+:::
+
+### Initializing state
+
+We need to define what the initial state of the room looks like.
+
+All state related to a room is held within the [RoomState](/docs/API/types#roomstate). We modify this object by returning the [RoomStateResult](/docs/API/types#roomstateresult).
+
+:::success
+Notice that you didn't have to worry about:
+
+- How to communicate between two players
+- How to manage room creation, matchmaking, and scaling
+
+Just focus on your game logic! This will let you build better games and implement that faster.
+[More info.](/docs#what-urturn-is)
+:::
 
 Your game state is held in the [RoomState](/docs/API/types#roomstate) object. You can tell UrTurn if your game is joinable and/or if it is finished. You can also define the "state" object that will define the way the board currently looks. For this tic-tac-toe game, the roomState state will look like this:
 
@@ -202,309 +262,3 @@ function onPlayerQuit(plr, roomState) {
 }
 ```
 
-## Frontend
-
-This section will go over how to implement the frontend for our tic-tac-toe so that it is visible to the user. We will be adding our components to ```frontend/src/App.jsx```. This file already contains some logic for you to access the [`RoomState`](/docs/API/types#roomstate) object and for any state changes to make to be propagated to your [room functions](/docs/API/room-functions).
-
-### 1. Extract the RoomState
-
-We will first extract the information we need from the [`RoomState`](/docs/API/types#roomstate):
-
-<Tabs>
-<TabItem value="snippet" label="Snippet">
-
-```jsx title="frontend/src/App.jsx"
-const {
-  state: {
-    board
-  } = {
-    board: [
-      [null, null, null],
-      [null, null, null],
-      [null, null, null]
-    ]
-  }
-} = roomState;
-```
-
-</TabItem>
-<TabItem value="full" label="Full Code">
-
-```js title="frontend/src/App.jsx"
-import React, { useState, useEffect } from 'react';
-import { ThemeProvider, Typography } from '@mui/material';
-
-import client, { events } from '@urturn/client';
-import theme from './theme';
-
-function App() {
-  const [roomState, setRoomState] = useState(client.getRoomState() || {});
-  useEffect(() => {
-    const onStateChanged = (newRoomState) => {
-      setRoomState(newRoomState);
-    };
-    events.on('stateChanged', onStateChanged);
-    return () => {
-      events.off('stateChanged', onStateChanged);
-    };
-  }, []);
-
-  console.log('roomState:', roomState);
-
-  const {
-    state: {
-      board
-    } = {
-      board: [
-        [null, null, null],
-        [null, null, null],
-        [null, null, null]
-      ]
-    }
-  } = roomState;
-
-  return (
-    <ThemeProvider theme={theme}>
-      <Typography>
-        TODO: Display your game here
-      </Typography>
-    </ThemeProvider>
-  );
-}
-
-export default App;
-```
-
-</TabItem>
-</Tabs>
-
-### 2. Create a Tic-Tac-Toe Board
-
-Using our defined empty `board` field, we can render a simple tic-tac-toe board:
-
-<Tabs>
-<TabItem value="snippet" label="Snippet">
-
-```jsx title="frontend/src/App.jsx" live
-function App(props) {
-  return (
-    <ThemeProvider theme={theme}>
-      <Typography>
-        <Stack margin={2} spacing={1} direction="row" justifyContent="center">
-          <Box>
-            {board.map((row, rowNum) => (
-              <Stack key={rowNum} direction="row">
-                {row.map((val, colNum) => (
-                  <Stack
-                    key={colNum}
-                    direction="row"
-                    justifyContent="center"
-                    alignItems="center"
-                    sx={{
-                      border: 1,
-                      borderColor: 'text.primary',
-                      height: '100px',
-                      width: '100px',
-                    }}
-                  >
-                    <Typography color="text.primary" fontSize="60px">
-                      {val}
-                    </Typography>
-                  </Stack>
-                ))}
-              </Stack>
-            ))}
-          </Box>
-        </Stack>
-      </Typography>
-    </ThemeProvider>
-  );
-}
-```
-
-</TabItem>
-<TabItem value="full" label="Full Code">
-
-```js title="frontend/src/App.jsx"
-import React, { useState, useEffect } from 'react';
-import { ThemeProvider, Typography, Stack, Box } from '@mui/material';
-
-import client, { events } from '@urturn/client';
-import theme from './theme';
-
-function App() {
-  const [roomState, setRoomState] = useState(client.getRoomState() || {});
-  useEffect(() => {
-    const onStateChanged = (newRoomState) => {
-      setRoomState(newRoomState);
-    };
-    events.on('stateChanged', onStateChanged);
-    return () => {
-      events.off('stateChanged', onStateChanged);
-    };
-  }, []);
-
-  console.log('roomState:', roomState);
-
-  const {
-    state: {
-      board
-    } = {
-      board: [
-        [null, null, null],
-        [null, null, null],
-        [null, null, null],
-      ]
-    }
-  } = roomState;
-
-  return (
-    <ThemeProvider theme={theme}>
-      <Typography>
-        <Stack margin={2} spacing={1} direction="row" justifyContent="center">
-          <Box>
-            {board.map((row, rowNum) => (
-              <Stack key={rowNum} direction="row">
-                {row.map((val, colNum) => (
-                  <Stack
-                    key={colNum}
-                    direction="row"
-                    justifyContent="center"
-                    alignItems="center"
-                    sx={{
-                      border: 1,
-                      borderColor: 'text.primary',
-                      height: '100px',
-                      width: '100px',
-                    }}
-                  >
-                    <Typography color="text.primary" fontSize="60px">
-                      {val}
-                    </Typography>
-                  </Stack>
-                ))}
-              </Stack>
-            ))}
-          </Box>
-        </Stack>
-      </Typography>
-    </ThemeProvider>
-  );
-}
-
-export default App;
-```
-
-</TabItem>
-</Tabs>
-
-### 3. Add MakeMove()
-
-We can now add in the ability for a player to make a move. We'll add an onClick handler to each tic-tac-toe square that will send a move containing the x- and y-coordinates (the row and column numbers of the box they clicked on) to the client. UrTurn will handle sending the move to your [onPlayerMove](/docs/API/room-functions#onplayermove-required) function!
-
-
-<Tabs>
-<TabItem value="snippet" label="Snippet">
-
-```js title="frontend/src/App.jsx"
-onClick={async (event) => {
-  event.preventDefault();
-  const move = { x: rowNum, y: colNum };
-  await client.makeMove(move);
-}}
-```
-
-</TabItem>
-<TabItem value="full" label="Full Code">
-
-```js title="frontend/src/App.jsx"
-import React, { useState, useEffect } from 'react';
-import { ThemeProvider, Typography, Stack, Box } from '@mui/material';
-
-import client, { events } from '@urturn/client';
-import theme from './theme';
-
-function App() {
-  const [roomState, setRoomState] = useState(client.getRoomState() || {});
-  useEffect(() => {
-    const onStateChanged = (newRoomState) => {
-      setRoomState(newRoomState);
-    };
-    events.on('stateChanged', onStateChanged);
-    return () => {
-      events.off('stateChanged', onStateChanged);
-    };
-  }, []);
-
-  console.log('roomState:', roomState);
-
-  const {
-    state: {
-      board
-    } = {
-      board: [
-        [null, null, null],
-        [null, null, null],
-        [null, null, null],
-      ]
-    }
-  } = roomState;
-
-  return (
-    <ThemeProvider theme={theme}>
-      <Typography>
-        <Stack margin={2} spacing={1} direction="row" justifyContent="center">
-          <Box>
-            {board.map((row, rowNum) => (
-              <Stack key={rowNum} direction="row">
-                {row.map((val, colNum) => (
-                  <Stack
-                    key={colNum}
-                    direction="row"
-                    justifyContent="center"
-                    alignItems="center"
-                    sx={{
-                      border: 1,
-                      borderColor: 'text.primary',
-                      height: '100px',
-                      width: '100px',
-                    }}
-                    onClick={async (event) => {
-                      event.preventDefault();
-                      const move = { x: rowNum, y: colNum };
-                      await client.makeMove(move);
-                    }}
-                  >
-                    <Typography color="text.primary" fontSize="60px">
-                      {val}
-                    </Typography>
-                  </Stack>
-                ))}
-              </Stack>
-            ))}
-          </Box>
-        </Stack>
-      </Typography>
-    </ThemeProvider>
-  );
-}
-
-export default App;
-```
-
-</TabItem>
-</Tabs>
-
-## Adding a Thumbnail
-
-We'll now find a suitable thumbnail for our game, such as [this one](https://unsplash.com/photos/67Rp3mulEVA). We'll download it, upload it at the highest level of our folder structure, and rename it "thumbnail.png" (the actual filetype doesn't matter - but it **must** have this name).
-
-## Testing Your Game
-
-We're now ready to test our game! In the Runner, you should see the empty board game state. Click **Add Player** to add a player to the game. This will open a new tab that simulates what the player will see upon joining.
-
-In our game state, "joinable" still says true. We can add an additional player and see that "joinable" is now set to false, as defined in our onPlayerJoin function.
-
-You can now simulate playing tic-tac-toe between the two tabs!
-
-[Here](https://github.com/turnbasedgames/urturn/tree/main/examples/tictactoe) is the finished tic-tac-toe game in production, which includes error handling, move validation, player validation, and more!

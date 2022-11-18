@@ -1,2 +1,8 @@
 build/
 node_modules/
+archive/
+.ipynb_checkpoints/
+.vscode/
+
+# rollup outputs this
+index.js

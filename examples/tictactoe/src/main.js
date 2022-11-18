@@ -1,5 +1,3 @@
-'use strict';
-
 // TicTacToe Example
 const Status = Object.freeze({
   PreGame: 'preGame',

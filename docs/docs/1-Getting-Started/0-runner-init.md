@@ -2,7 +2,7 @@
 description: Quickly generate a new UrTurn Game
 ---
 
-# Generating a new UrTurn Game
+# Generate a Game
 
 :::success
 
