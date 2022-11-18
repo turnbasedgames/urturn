@@ -82,8 +82,12 @@ async function start(options) {
   });
 }
 
-async function getProjectFiles({ destination, tutorial, commit }) {
-  const frontendPath = `${destination}/frontend`;
+function getFrontendPathFromDest(destination) {
+  return `${destination}/frontend`;
+}
+
+async function setupProjectFiles({ destination, tutorial, commit }) {
+  const frontendPath = getFrontendPathFromDest(destination);
   const commitSuffix = commit == null ? '' : `#${commit}`;
   if (tutorial) {
     const comingSoonTutorials = new Set(['semantleBattle']);
@@ -130,15 +134,12 @@ async function getProjectFiles({ destination, tutorial, commit }) {
     logger.info('Downloading frontend template...');
     await templateFrontendEmitter.clone(frontendPath);
   }
-
-  return {
-    frontendPath,
-  };
 }
 
 async function init(destination, { commit, tutorial }) {
   const fullPathDestination = path.resolve(destination);
-  const { frontendPath } = await getProjectFiles({
+  const frontendPath = getFrontendPathFromDest(destination);
+  await setupProjectFiles({
     destination,
     commit,
     tutorial,
