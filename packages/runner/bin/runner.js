@@ -74,7 +74,7 @@ async function start(options) {
         runnerFrontendProcess.kill();
       }
 
-      console.warn('exiting runner');
+      logger.warn('exiting runner');
       process.exit();
     });
   });

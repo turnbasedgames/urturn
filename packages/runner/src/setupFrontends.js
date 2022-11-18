@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import cors from 'cors';
 import runnerFrontendBuildPath from '@urturn/runner-frontend';
+import logger from './logger.js';
 
 const setupFrontendService = (
   frontendPath,
@@ -23,7 +24,7 @@ const setupFrontendService = (
 
   const server = app.listen(port);
   const url = `http://localhost:${server.address().port}`;
-  console.log(`serving ${frontendPath} at ${url}`);
+  logger.info(`serving ${frontendPath} at ${url}`);
   return () => server.close();
 };
 
