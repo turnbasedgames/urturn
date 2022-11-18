@@ -38,21 +38,19 @@ const evaluateBoard = (board, plrIdToPlrMark, players) => {
     };
   }
 
-  const getIndexesFromLineNum = (num) => [num % 3, Math.floor(num / 3)];
-  const possibleLineIndexes = [ // possible matching lines to check
+  const winningLine = [ // all possible lines to check
     // rows
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
+    [[0, 0], [0, 1], [0, 2]],
+    [[1, 0], [1, 1], [1, 2]],
+    [[2, 0], [2, 1], [2, 2]],
     // columns
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
+    [[0, 0], [1, 0], [2, 0]],
+    [[0, 1], [1, 1], [2, 1]],
+    [[0, 2], [1, 2], [2, 2]],
     // diagonals
-    [0, 4, 8],
-    [2, 4, 6],
-  ].map((line) => line.map(getIndexesFromLineNum)); // convert line numbers to actual index pairs
-  const winningLine = possibleLineIndexes.find((indexes) => {
+    [[0, 0], [1, 1], [2, 2]],
+    [[2, 0], [1, 1], [0, 2]],
+  ].find((indexes) => { // find the first line that has 3-in-a-row
     const [[firstI, firstJ]] = indexes;
     const firstMark = board[firstI][firstJ];
     const isSame = indexes.every(([i, j]) => board[i][j] === firstMark);
