@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 import { program, Option } from 'commander';
 import chalk from 'chalk';
 import open from 'open';
@@ -6,12 +7,27 @@ import { exec, execSync } from 'child_process';
 import getPort from 'get-port';
 import inquirer from 'inquirer';
 import degit from 'degit';
+import path from 'path';
+import { createRequire } from 'module';
+import logger from '../src/logger.js';
 import { isInteger, clearConsole } from '../src/util.js';
 import setupFrontends from '../src/setupFrontends.js';
 import setupServer from '../src/setupServer.js';
 
+const require = createRequire(import.meta.url);
+// avoid experimental json import warnings https://stackoverflow.com/questions/66726365/how-should-i-import-json-in-node
+const pkg = require('../package.json');
+
 const templateBackendRepo = 'turnbasedgames/urturn/templates/template-backend';
 const templateFrontendRepoPrefix = 'turnbasedgames/urturn/templates/template-';
+
+function wrapVersion(fn) {
+  return (...args) => {
+    // log version by default to help debug user related questions and bug reports
+    logger.info(`${pkg.name} v${pkg.version}`);
+    return fn(...args);
+  };
+}
 
 async function start(options) {
   // validate options
@@ -27,8 +43,8 @@ async function start(options) {
   if (options.noClear) {
     clearConsole();
   }
-  console.log(chalk.gray('Starting runner with your game...\n'));
-  console.log('running with options:', options);
+  logger.info(chalk.gray('Starting runner with your game...\n'));
+  logger.info('running with options:', options);
 
   const cleanupServerFunc = await setupServer({ apiPort: portForRunnerBackend });
 
@@ -43,7 +59,7 @@ async function start(options) {
       portForUserFrontend: options.frontendPort,
       portForRunnerBackend,
     });
-    console.log(`${chalk.green('\nYou can now view the runner in the browser at:')} \n${chalk.green.bold(runnerUrl)}`);
+    logger.info(`${chalk.green('\nYou can now view the runner in the browser at:')} \n${chalk.green.bold(runnerUrl)}`);
     open(runnerUrl);
   }
 
@@ -65,6 +81,7 @@ async function start(options) {
 }
 
 async function init(destination, { commit }) {
+  const fullPathDestination = path.resolve(destination);
   const { frontendType } = await inquirer.prompt([
     {
       type: 'list',
@@ -80,28 +97,38 @@ async function init(destination, { commit }) {
   const commitSuffix = commit == null ? '' : `#${commit}`;
   const templateFrontendPath = templateFrontendRepoPrefix + frontendType + commitSuffix;
   const templateBackendPath = templateBackendRepo + commitSuffix;
+
   const templateBackendEmitter = degit(templateBackendPath);
   const templateFrontendEmitter = degit(templateFrontendPath);
 
+  logger.info('Downloading backend template...');
   await templateBackendEmitter.clone(destination);
   const frontendPath = `${destination}/frontend`;
+  logger.info('Downloading frontend template...');
   await templateFrontendEmitter.clone(frontendPath);
   const extraBackendPackages = ['@urturn/runner'];
   const extraFrontendPackages = ['@urturn/client'];
+  logger.info('\nInstalling packages. This might take a couple of minutes.');
+  logger.info(`Installing ${[...extraBackendPackages, ...extraFrontendPackages].map(((extraPkg) => chalk.cyan(extraPkg))).join(', ')}, and more...\n`);
   execSync(`npm i ${extraBackendPackages.join(' ')} --no-audit --save --save-exact --loglevel error`, { cwd: destination, stdio: 'inherit' });
   execSync(`npm i ${extraFrontendPackages.join(' ')} --no-audit --save --save-exact --loglevel error`, { cwd: frontendPath, stdio: 'inherit' });
-  console.log('\n\nSuccessfully created template UrTurn game. Happy hacking!');
-  console.log("Don't forget to share your creations in our discord! https://discord.gg/myWacjdb5S");
-  console.log(`Try running "cd ${destination} && npm run dev".`);
+  logger.info(`\n\n${chalk.green('Successfully')} created UrTurn game at ${chalk.white.underline(fullPathDestination)}`);
+  logger.info(`\n${chalk.bold('Get Started:')}`);
+  logger.info(`\n  ${chalk.cyan('cd')} ${destination}`);
+  logger.info(`  ${chalk.cyan('npm run dev')}\n`);
+  logger.info(`Go to ${chalk.magenta.underline('https://discord.gg/myWacjdb5S')} for questions, game jams, meeting other developers, and more!`);
+  logger.info('Happy Hacking!!');
 }
 
 async function main() {
+  program.version(pkg.version, '-v, --version', 'output the current version');
+
   program
     .command('init <destination>')
     .description('initialize a new UrTurn Game')
     // hide UrTurn dev only options
     .addOption(new Option('--commit <commit>', 'custom commit or branch to run init from').hideHelp())
-    .action(init);
+    .action(wrapVersion(init));
 
   program
     .command('start', { isDefault: true })
@@ -110,11 +137,7 @@ async function main() {
     .addOption(new Option('--dev').hideHelp())
     .addOption(new Option('--no-clear', "Don't clear console when starting the runner."))
     .requiredOption('-f, --frontend-port <frontendPort>', 'Specify the port of where the frontend of your game is being hosted locally.')
-    // TODO: MAIN-86 we need to use a logger instead of console.log and add debug log outputs
-    // everywhere
-    .option('-d, --debug', 'print debug logs to stdout')
-    .action(start);
-
+    .action(wrapVersion(start));
   program.parse();
 }
 

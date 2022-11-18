@@ -1,6 +1,9 @@
 {
   "name": "@urturn/runner",
   "version": "0.1.9",
+  "os": [
+    "!win32"
+  ],
   "bin": {
     "runner": "bin/runner.js"
   },
