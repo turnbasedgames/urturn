@@ -34,7 +34,7 @@ const sidebars = {
         'Getting-Started/runner-init',
         'Getting-Started/tictactoe',
         'Getting-Started/semantle-battle',
-        'Getting-Started/Deploying-Your-Game',
+        'Getting-Started/deploying-your-game',
       ],
     },
     {
