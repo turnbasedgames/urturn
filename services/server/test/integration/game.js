@@ -121,6 +121,25 @@ test('GET /game/:id returns 404 if game does not exist', async (t) => {
   t.is(status, StatusCodes.NOT_FOUND);
 });
 
+test('POST /game fails with invalid customURL', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred(t);
+  await createUserAndAssert(t, api, userCred);
+
+  const gameRaw = {
+    name: 'first game',
+    description: 'this description',
+    commitSHA: 'published-test-app',
+    githubURL: 'https://github.com/turnbasedgames/urturn',
+    customURL: ',,,--fdsahj',
+  };
+
+  const authToken = await userCred.user.getIdToken();
+  const { response: { status } } = await t.throwsAsync(api.post('/game', gameRaw, { headers: { authorization: authToken } }));
+
+  t.is(status, StatusCodes.BAD_REQUEST);
+});
+
 test('POST /game creates a game', async (t) => {
   const { api } = t.context.app;
   const userCred = await createUserCred(t);
@@ -171,6 +190,18 @@ test('PUT /game/:id updates a game', async (t) => {
   const { data: { game: gameGetRes }, status: statusGet } = await api.get(`/game/${game.id}`);
   t.is(statusGet, StatusCodes.OK);
   t.deepEqual(gameGetRes, gamePutRes);
+});
+
+test('PUT /game/:id fails with invalid customURL', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred(t);
+  const user = await createUserAndAssert(t, api, userCred);
+
+  const game = await createGameAndAssert(t, api, userCred, user);
+  const authToken = await userCred.user.getIdToken();
+  const { response: { status } } = await t.throwsAsync(api.put(`/game/${game.id}`, { customURL: 'hello-world-' }, { headers: { authorization: authToken } }));
+
+  t.is(status, StatusCodes.BAD_REQUEST);
 });
 
 test('PUT /game/:id responds unauthorized if user does not match creator', async (t) => {

@@ -3,7 +3,7 @@ const { StatusCodes } = require('http-status-codes');
 
 const { Schema } = mongoose;
 
-const CREATOR_EDITABLE_KEYS = ['name', 'description', 'githubURL', 'commitSHA'];
+const CREATOR_EDITABLE_KEYS = ['name', 'description', 'githubURL', 'commitSHA', 'customURL'];
 const GameSchema = new Schema({
   name: {
     type: String,
@@ -41,6 +41,14 @@ const GameSchema = new Schema({
       validator: (activePlayerCount) => Number
         .isInteger(activePlayerCount) && activePlayerCount >= 0,
       message: '{VALUE} is not a non-negative integer value',
+    },
+  },
+  customURL: {
+    type: String,
+    validate: {
+      validator: (customURL) => {
+        return /^[\-0-9a-zA-Z]+$/.test(customURL) && customURL[customURL.length - 1] !== '-';
+      }
     },
   },
 }, { timestamps: true });
