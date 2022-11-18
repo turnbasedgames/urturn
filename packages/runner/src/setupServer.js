@@ -29,7 +29,7 @@ const getLatestBackendModule = async (backendPath) => {
 
     return backendModule;
   } catch (err) {
-    console.log(err);
+    logger.log(err);
     return undefined;
   }
 };
@@ -55,7 +55,7 @@ async function setupServer({ apiPort }) {
       return;
     }
     if (typeof backendModule.onRoomStart !== 'function') {
-      console.error("Unable to start game because 'onRoomStart' function is not exported!");
+      logger.error("Unable to start game because 'onRoomStart' function is not exported!");
       return;
     }
     roomState = newRoomState(logger, backendModule);
@@ -63,15 +63,17 @@ async function setupServer({ apiPort }) {
   };
 
   const restartGame = async () => {
-    console.log('Resetting game state with new backend.');
-    console.log('Closing player tabs.');
+    logger.info('Resetting game state with new backend.');
+    logger.info('Closing player tabs.');
     await startGame();
   };
 
   // setup a watch to detect when we should refresh the backend module
   watchFile(userBackend, { interval: backendHotReloadIntervalMs }, () => {
-    console.log('Triggering hot reload due to change detected in:', userBackend);
-    restartGame();
+    logger.info('Triggering hot reload due to change detected in:', userBackend);
+    restartGame().catch((error) => {
+      logger.error(error);
+    });
   });
 
   app.use(cors());
@@ -182,7 +184,7 @@ async function setupServer({ apiPort }) {
     restartGame().then(() => {
       res.sendStatus(StatusCodes.OK);
     }).catch((err) => {
-      console.error(err);
+      logger.error(err);
       res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
     });
   });
@@ -197,7 +199,7 @@ async function setupServer({ apiPort }) {
 
   const server = httpServer.listen(apiPort);
   const url = `http://localhost:${apiPort}`;
-  console.log(`api server at ${url}`);
+  logger.log(`api server at ${url}`);
 
   startGame();
   return () => server.close();
