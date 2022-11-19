@@ -5,6 +5,10 @@ authors: [sarahannali, kevo1ution, yquansah]
 tags: [semantle-battle, semantle, tournament, game]
 ---
 
+**UPDATE**
+
+Congratulations to Azzy for winning!
+
 ![](https://visitor-badge.glitch.me/badge?page_id=semantle-battle-tournament-11-5-2022)
 ### What
 
