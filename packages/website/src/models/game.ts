@@ -12,6 +12,7 @@ export interface GamesQuery {
   creator?: string
   searchText?: string
   limit?: number
+  customURL?: string
 }
 
 export const createGame = async (game: GameReqBody): Promise<Game> => {

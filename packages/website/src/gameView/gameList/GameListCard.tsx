@@ -12,6 +12,7 @@ interface GameListCardProps {
 }
 
 function GameListCard({ game }: GameListCardProps): React.ReactElement {
+  const pathToUse = game.customURL != null ? `/games/g/${game.customURL}` : `/games/${game.id}`;
   return (
     <Card
       sx={{
@@ -24,7 +25,7 @@ function GameListCard({ game }: GameListCardProps): React.ReactElement {
       }}
       key={`GameCard-${game.id}`}
     >
-      <CardActionArea component={Link} to={`/games/${game.id}`}>
+      <CardActionArea component={Link} to={pathToUse}>
         <div>
           {
             game.activePlayerCount !== 0

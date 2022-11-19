@@ -27,6 +27,7 @@ function GameEditor({
     description: '',
     githubURL: '',
     commitSHA: '',
+    customURL: '',
   };
   const [form, setForm] = useState((editingGame != null)
     ? {
@@ -34,6 +35,7 @@ function GameEditor({
       description: editingGame.description,
       githubURL: editingGame.githubURL,
       commitSHA: editingGame?.commitSHA,
+      customURL: editingGame?.customURL,
     }
     : emptyForm);
   const [errors, setErrors] = useState(new Map());
@@ -117,6 +119,13 @@ function GameEditor({
             value={form.description}
             onChange={({ target: { value } }) => {
               setField('description', value);
+            }}
+          />
+          <TextField
+            label="Custom URL (e.g. urturn-game)"
+            value={form.customURL}
+            onChange={({ target: { value } }) => {
+              setField('customURL', value);
             }}
           />
           <Stack

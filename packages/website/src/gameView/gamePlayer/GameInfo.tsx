@@ -10,7 +10,7 @@ import {
 import { useSnackbar } from 'notistack';
 import { Game } from '@urturn/types-common';
 
-import { getGame } from '../../models/game';
+import { getGame, getGames } from '../../models/game';
 import { queueUpRoom, queueUpPrivateRoom } from '../../models/room';
 import GameCardActions from '../../creatorView/GameCardActions';
 import { UserContext } from '../../models/user';
@@ -18,7 +18,7 @@ import CardMediaWithFallback from '../gameCard/CardMediaWithFallback';
 import logger from '../../logger';
 
 function GameInfo(): React.ReactElement {
-  const { gameId } = useParams();
+  const { gameId, customURL } = useParams();
   const [game, setGame] = useState<null | Game>(null);
   const [loadingPrivateRoom, setloadingPrivateRoom] = useState<boolean>(false);
   const [loadingRoom, setLoadingRoom] = useState<boolean>(false);
@@ -27,9 +27,16 @@ function GameInfo(): React.ReactElement {
   const { enqueueSnackbar } = useSnackbar();
 
   async function setupGame(): Promise<void> {
-    if (gameId == null) { return; }
-    const gameRaw = await getGame(gameId);
-    setGame(gameRaw);
+    if (gameId == null && customURL == null) { return; }
+
+    if (gameId != null) {
+      setGame(await getGame(gameId));
+    }
+
+    if (customURL != null) {
+      const games = await getGames({ customURL });
+      setGame(games[0]);
+    }
   }
   useEffect(() => {
     setupGame().catch(logger.error);

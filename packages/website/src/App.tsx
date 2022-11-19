@@ -123,6 +123,15 @@ function App(): React.ReactElement {
                     )}
                   />
                   <Route
+                    path="g/:customURL"
+                    element={(
+                      <>
+                        {NavBarMemo}
+                        <GameInfo />
+                      </>
+                    )}
+                  />
+                  <Route
                     path=":gameId/room/:roomId"
                     element={<GamePlayer />}
                   />
