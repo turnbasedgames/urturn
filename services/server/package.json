@@ -19,8 +19,8 @@
   "author": "",
   "license": "ISC",
   "engines": {
-    "node": ">=16.0.0 <17",
-    "npm": ">=9.1.1"
+    "node": ">=16",
+    "npm": ">=8"
   },
   "dependencies": {
     "@google-cloud/logging-winston": "^4.2.3",

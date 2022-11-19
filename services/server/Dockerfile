@@ -9,7 +9,6 @@ RUN turbo prune --scope=@urturn/server --docker
 # install phase where we get all the package dependencies
 FROM node:16 AS installer
 WORKDIR /app
-RUN npm i -g npm@9
 
 # install dependencies first (as they change less often)
 COPY .gitignore .gitignore
