@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_urturn_docs=self.webpackChunk_urturn_docs||[]).push([[8118],{6863:a=>{a.exports=JSON.parse('{"label":"game jam","permalink":"/blog/tags/game-jam","allTagsPath":"/blog/tags","count":2}')}}]);

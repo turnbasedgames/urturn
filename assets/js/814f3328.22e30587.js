@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunk_urturn_docs=self.webpackChunk_urturn_docs||[]).push([[2535],{5641:e=>{e.exports=JSON.parse('{"title":"Recent posts","items":[{"title":"Semantle Battle Tournament (11/5/2022)","permalink":"/blog/Semantle Battle Tournament"},{"title":"Welcome","permalink":"/blog/welcome"}]}')}}]);
