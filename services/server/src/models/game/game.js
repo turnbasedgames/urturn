@@ -46,6 +46,7 @@ const GameSchema = new Schema({
   customURL: {
     type: String,
     unique: true,
+    sparse: true,
     index: true,
     validate: {
       validator: (customURL) => /^[-0-9a-zA-Z]+$/.test(customURL) && customURL[customURL.length - 1] !== '-',
