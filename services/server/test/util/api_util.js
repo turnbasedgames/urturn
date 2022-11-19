@@ -29,14 +29,24 @@ async function createGameAndAssert(t, api, userCred, user, gameOptionalInfo = {}
     commitSHA: 'published-test-app', // check the branch for later commits: published-test-app,
     githubURL: 'https://github.com/turnbasedgames/urturn',
   };
+
+  if (gameOptionalInfo.customURL) {
+    gameRaw.customURL = gameOptionalInfo.customURL;
+  }
+
   const authToken = await userCred.user.getIdToken();
   const { data: { game }, status } = await api.post('/game', gameRaw, { headers: { authorization: authToken } });
+
   t.is(status, StatusCodes.CREATED);
   const { urbux, ...publicUser } = user;
   t.deepEqual(game.creator, publicUser);
   t.is(game.activePlayerCount, 0);
   Object.keys(gameRaw).forEach((key) => {
-    t.is(gameRaw[key], game[key]);
+    if (key === 'customURL') {
+      t.regex(game[key], /[-a-z]/);
+    } else {
+      t.is(gameRaw[key], game[key]);
+    }
   });
   return game;
 }

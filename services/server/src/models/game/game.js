@@ -46,6 +46,7 @@ const GameSchema = new Schema({
   customURL: {
     type: String,
     unique: true,
+    index: true,
     validate: {
       validator: (customURL) => /^[-0-9a-zA-Z]+$/.test(customURL) && customURL[customURL.length - 1] !== '-',
     },
@@ -73,7 +74,7 @@ GameSchema.method('updateByUser', async function updateByUser(changes) {
   await this.save();
 });
 GameSchema.method('toJSON', function toJSON() {
-  return {
+  const defaultReturn = {
     id: this.id,
     activePlayerCount: this.activePlayerCount,
     name: this.name,
@@ -82,6 +83,18 @@ GameSchema.method('toJSON', function toJSON() {
     githubURL: this.githubURL,
     commitSHA: this.commitSHA,
   };
+
+  if (this.customURL) {
+    defaultReturn.customURL = this.customURL;
+  }
+
+  return defaultReturn;
+});
+
+GameSchema.pre('save', function onSave() {
+  if (this.customURL) {
+    this.customURL = this.customURL.toLowerCase();
+  }
 });
 
 module.exports = mongoose.model('Game', GameSchema);

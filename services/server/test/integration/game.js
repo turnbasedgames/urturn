@@ -156,6 +156,16 @@ test('POST /game creates a game', async (t) => {
   await createGameAndAssert(t, api, userCred, user);
 });
 
+test('POST /game creates a game with custom url that becomes lowercase when saved', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred(t);
+  const user = await createUserAndAssert(t, api, userCred);
+
+  // The functionality of lowercased save of the customURL is tested within the createGameAndAssert
+  // function.
+  await createGameAndAssert(t, api, userCred, user, { customURL: 'Hello-World' });
+});
+
 test('POST /game responds 400 if data is missing fields', async (t) => {
   const { api } = t.context.app;
   const userCred = await createUserCred(t);
