@@ -43,6 +43,7 @@ function onPlayerMove(player, move, roomState) {
   if (result?.finished) {
     // TODO: handle different cases when game is finished, using the values calculated from
     // evaluateBoard() call
+    // hint: winner is Player type (not string)
     return {
       // TODO: include state modifications so UrTurn updates the state
       // TODO: tell UrTurn that the room is finished, which lets UrTurn display the room correctly
