@@ -85,18 +85,17 @@ Implement the `TODO` statements in `onRoomStart` in the file `src/main.js`, and 
 
 ```js title="src/main.js"
 function onRoomStart() {
-  const state = {
-    /**
-    // highlight-start
-     * TODO: define initial values for the following:
-     * - status
-     * - plrIdToPlrMark
-     * - plrMoveIndex
-     * - board
-     * - winner
-    // highlight-end
-     */
-  };
+  /**
+  // highlight-start
+    * TODO: define the fields:
+    * state.status (hint: use Status enum)
+    * state.plrIdToPlrMark
+    * state.plrMoveIndex
+    * state.board
+    * state.winner
+  // highlight-end
+  */
+  const state = {};
   return { state };
 }
 ```

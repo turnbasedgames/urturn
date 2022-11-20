@@ -1,16 +1,15 @@
 import { Status, Mark, evaluateBoard } from './util';
 
 function onRoomStart() {
-  const state = {
-    /**
-     * TODO: define initial values for the following:
-     * - status
-     * - plrIdToPlrMark
-     * - plrMoveIndex
-     * - board
-     * - winner
-     */
-  };
+  /**
+   * TODO: define the fields:
+   * state.status (hint: use Status enum)
+   * state.plrIdToPlrMark
+   * state.plrMoveIndex
+   * state.board
+   * state.winner
+   */
+  const state = {};
   return { state };
 }
 
