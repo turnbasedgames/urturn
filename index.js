@@ -71,7 +71,7 @@ function onRoomStart() {
     state: {
       status: Status.PreGame,
       plrIdToPlrMark: {}, // map from plrId to their mark (X or O)
-      plrToMoveIndex: 0, // track who's move it is
+      plrMoveIndex: 0, // track who's move it is
       board: [
         [null, null, null],
         [null, null, null],
@@ -103,14 +103,14 @@ function onPlayerJoin(player, roomState) {
 
 function onPlayerMove(player, move, roomState) {
   const { state, players } = roomState;
-  const { plrToMoveIndex, plrIdToPlrMark } = state;
+  const { plrMoveIndex, plrIdToPlrMark } = state;
   const { x, y } = move;
 
   // validate player moves
   if (state.status !== Status.InGame) {
     throw new Error("game is not in progress, can't make move!");
   }
-  if (players[plrToMoveIndex].id !== player.id) {
+  if (players[plrMoveIndex].id !== player.id) {
     throw new Error(`Its not this player's turn: ${player.username}`);
   }
   if (state.board[x][y] !== null) {
@@ -132,7 +132,7 @@ function onPlayerMove(player, move, roomState) {
   }
 
   // Set the plr to move to the next player
-  state.plrToMoveIndex = (plrToMoveIndex + 1) % 2;
+  state.plrMoveIndex = (plrMoveIndex + 1) % 2;
   return { state };
 }
 
@@ -142,7 +142,7 @@ function onPlayerQuit(player, roomState) {
   if (players.length === 1) {
     const [winner] = players;
     state.winner = winner;
-    return { state, joinable: false, finished: true };
+    return { state, finished: true };
   }
   return { joinable: false, finished: true };
 }
