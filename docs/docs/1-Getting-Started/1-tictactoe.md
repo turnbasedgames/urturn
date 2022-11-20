@@ -307,13 +307,6 @@ export const evaluateBoard = (board, plrIdToPlrMark, players) => {
   };
 
   // highlight-start
-  // check for tie
-  if (!board.some((row) => row.some((mark) => mark === null))) {
-    return {
-      finished: true,
-      tie: true,
-    };
-  }
   const winningLine = [ // all possible lines to check
     // rows
     [[0, 0], [0, 1], [0, 2]],
@@ -337,6 +330,14 @@ export const evaluateBoard = (board, plrIdToPlrMark, players) => {
     const [i, j] = winningLine[0];
     const mark = board[i][j];
     return { finished: true, winner: markToPlr[mark] };
+  }
+
+  // check for tie
+  if (!board.some((row) => row.some((mark) => mark === null))) {
+    return {
+      finished: true,
+      tie: true,
+    };
   }
 
   return { finished: false };
