@@ -19,12 +19,12 @@ jobs:
         run: |
           cd frontend
           npm ci
-      - name: build backend
-        run: npm run build
       - name: build frontend
         run: |
           cd frontend
           npm run build
+      - name: build backend
+        run: npm run build
       - name: stitch build folders together
         run: |
           mkdir -p build/frontend
