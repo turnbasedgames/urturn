@@ -1,5 +1,4 @@
-export const CREATOR_EDITABLE_FIELDS = ['joinable', 'finished', 'state'];
-export const CREATOR_VIEWABLE_FIELDS = [...CREATOR_EDITABLE_FIELDS, 'version', 'players', 'roomStartContext'];
+import { ROOM_STATE_EDITABLE_FIELDS, ROOM_STATE_VIEWABLE_FIELDS } from '@urturn/types-common';
 
 const FIELD_TYPES = {
   joinable: (x) => typeof x === 'boolean',
@@ -23,7 +22,7 @@ export function filterRoomState(state) {
   if (state == null) {
     throw new Error('state is not defined yet.');
   }
-  return CREATOR_VIEWABLE_FIELDS.reduce(
+  return ROOM_STATE_VIEWABLE_FIELDS.reduce(
     (newState, key) => ({
       ...newState,
       [key]: state[key],
@@ -36,7 +35,7 @@ export function validateRoomState(state) {
   const filteredState = filterRoomState(state);
 
   Object.keys(state).forEach((key) => {
-    if (!CREATOR_VIEWABLE_FIELDS.includes(key)) throw Error(`Invalid key: ${key} - maybe move into the 'state' field?`);
+    if (!ROOM_STATE_VIEWABLE_FIELDS.includes(key)) throw Error(`Invalid key: ${key} - maybe move into the 'state' field?`);
   });
 
   Object.keys(filteredState).forEach((key) => {
@@ -53,7 +52,7 @@ export function validateRoomState(state) {
 
 export function applyRoomStateResult(state, result) {
   return Object.keys(result).reduce((newState, key) => {
-    if (CREATOR_EDITABLE_FIELDS.includes(key)) {
+    if (ROOM_STATE_EDITABLE_FIELDS.includes(key)) {
       return { ...newState, [key]: result[key] };
     }
     throw new Error(`key "${key}" is not editable`);
