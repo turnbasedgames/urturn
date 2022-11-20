@@ -1,16 +1,15 @@
 import { Status, Mark, evaluateBoard } from './util';
 
 function onRoomStart() {
-  const state = {
-    /**
-     * TODO: define initial values for the following:
-     * - status
-     * - plrIdToPlrMark
-     * - plrToMoveIndex
-     * - board
-     * - winner
-     */
-  };
+  /**
+   * TODO: define the fields:
+   * state.status (hint: use Status enum)
+   * state.plrIdToPlrMark
+   * state.plrMoveIndex
+   * state.board
+   * state.winner
+   */
+  const state = {};
   return { state };
 }
 
@@ -30,7 +29,7 @@ function onPlayerJoin(player, roomState) {
 
 function onPlayerMove(player, move, roomState) {
   const { state, players, logger } = roomState;
-  const { plrToMoveIndex, plrIdToPlrMark } = state;
+  const { plrMoveIndex, plrIdToPlrMark } = state;
   const { x, y } = move;
 
   // TODO: validate player move and throw sensible error messages
@@ -44,13 +43,14 @@ function onPlayerMove(player, move, roomState) {
   if (result?.finished) {
     // TODO: handle different cases when game is finished, using the values calculated from
     // evaluateBoard() call
+    // hint: winner is Player type (not string)
     return {
       // TODO: include state modifications so UrTurn updates the state
       // TODO: tell UrTurn that the room is finished, which lets UrTurn display the room correctly
     };
   }
 
-  // TODO: Set the plr to move to the next player (hint: update state.plrToMoveIndex)
+  // TODO: Set the plr to move to the next player (hint: update state.plrMoveIndex)
   return { state };
 }
 
@@ -63,7 +63,7 @@ function onPlayerQuit(player, roomState) {
     // be the remaining player
     return {
       // TODO: properly tell UrTurn the room is over and no longer joinable
-      // (hint: modify finished, joinable, state fields)
+      // (hint: modify finished, state fields)
     };
   }
   return {

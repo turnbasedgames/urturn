@@ -9,8 +9,12 @@ import TabItem from '@theme/TabItem';
 
 ## What you are making
 
+![TicTacToe Final](final-tictactoe.gif)
+
 :::success
-Play the [final version](https://www.urturn.app/games/626eac7c65667f00160a6b42). Playing the game will help you envision what the underlying logic will look like. Ask yourself:
+Play the final [version](https://www.urturn.app/games/626eac7c65667f00160a6b42). Playing the game will help you envision what the underlying logic will look like.
+
+Ask yourself:
 
 - How do you define what happens when a player moves?
 - How can you tell if a player won the game?
@@ -81,24 +85,23 @@ Implement the `TODO` statements in `onRoomStart` in the file `src/main.js`, and 
 
 ```js title="src/main.js"
 function onRoomStart() {
-  const state = {
-    /**
-    // highlight-start
-     * TODO: define initial values for the following:
-     * - status
-     * - plrIdToPlrMark
-     * - plrToMoveIndex
-     * - board
-     * - winner
-    // highlight-end
-     */
-  };
+  /**
+  // highlight-start
+    * TODO: define the fields:
+    * state.status (hint: use Status enum)
+    * state.plrIdToPlrMark
+    * state.plrMoveIndex
+    * state.board
+    * state.winner
+  // highlight-end
+  */
+  const state = {};
   return { state };
 }
 ```
 
   </TabItem>
-  <TabItem value="solution" label="Solution">
+  <TabItem value="solution" label="onRoomStart Solution">
 
 ```js title="src/main.js"
 function onRoomStart() {
@@ -107,7 +110,7 @@ function onRoomStart() {
       // highlight-start
       status: Status.PreGame,
       plrIdToPlrMark: {}, // map from plrId to their mark (X or O)
-      plrToMoveIndex: 0, // track who's move it is
+      plrMoveIndex: 0, // track who's move it is
       board: [
         [null, null, null],
         [null, null, null],
@@ -162,7 +165,7 @@ function onPlayerJoin(player, roomState) {
 ```
 
   </TabItem>
-  <TabItem value="solution" label="Solution">
+  <TabItem value="solution" label="onPlayerJoin Solution">
 
 ```js title="src/main.js"
 function onPlayerJoin(player, roomState) {
@@ -220,7 +223,7 @@ function onPlayerQuit(player, roomState) {
     return {
       // highlight-start
       // TODO: properly tell UrTurn the room is over and no longer joinable
-      // (hint: modify finished, joinable, state fields)
+      // (hint: modify finished, state fields)
       // highlight-end
     };
   }
@@ -235,7 +238,7 @@ function onPlayerQuit(player, roomState) {
 ```
 
   </TabItem>
-  <TabItem value="solution" label="Solution">
+  <TabItem value="solution" label="onPlayerQuit Solution">
 
 ```js title="src/main.js"
 function onPlayerQuit(player, roomState) {
@@ -245,7 +248,8 @@ function onPlayerQuit(player, roomState) {
     // highlight-start
     const [winner] = players;
     state.winner = winner;
-    return { state, joinable: false, finished: true };
+    // don't need to set joinable: false, because if there were originally two players, onPlayerJoin already set it to false
+    return { state, finished: true };
     // highlight-end
   }
   // highlight-next-line
@@ -279,7 +283,7 @@ export const evaluateBoard = (board, plrIdToPlrMark, players) => {
   // TODO: check for tie and return correct result
 
   /**
-   * TODO: check for a winner
+   * TODO: check for a winner (hint: make sure the mark is not null)
    * - check rows
    * - check columns
    * - check diagonals
@@ -291,7 +295,7 @@ export const evaluateBoard = (board, plrIdToPlrMark, players) => {
 ```
 
   </TabItem>
-  <TabItem value="solution" label="Solution">
+  <TabItem value="solution" label="evaluateBoard Solution">
 
 ```js title="src/util.js"
 export const evaluateBoard = (board, plrIdToPlrMark, players) => {
@@ -355,7 +359,7 @@ Implement the `TODO` statements in [`onPlayerMove`](/docs/API/room-functions#onp
 ```js title="src/main.js"
 function onPlayerMove(player, move, roomState) {
   const { state, players, logger } = roomState;
-  const { plrToMoveIndex, plrIdToPlrMark } = state;
+  const { plrMoveIndex, plrIdToPlrMark } = state;
   const { x, y } = move;
   // highlight-start
   // TODO: validate player move and throw sensible error messages
@@ -371,6 +375,7 @@ function onPlayerMove(player, move, roomState) {
     // highlight-start
     // TODO: handle different cases when game is finished, using the values calculated from
     // evaluateBoard() call
+    // hint: winner is Player type (not string)
     return {
       // TODO: include state modifications so UrTurn updates the state
       // TODO: tell UrTurn that the room is finished, which lets UrTurn display the room correctly
@@ -379,18 +384,18 @@ function onPlayerMove(player, move, roomState) {
   }
 
   // highlight-next-line
-  // TODO: Set the plr to move to the next player (hint: update state.plrToMoveIndex)
+  // TODO: Set the plr to move to the next player (hint: update state.plrMoveIndex)
   return { state };
 }
 ```
 
   </TabItem>
-  <TabItem value="solution" label="Solution">
+  <TabItem value="solution" label="onPlayerMove Solution">
 
 ```js title="src/main.js"
 function onPlayerMove(player, move, roomState) {
   const { state, players } = roomState;
-  const { plrToMoveIndex, plrIdToPlrMark } = state;
+  const { plrMoveIndex, plrIdToPlrMark } = state;
   const { x, y } = move;
 
   // highlight-start
@@ -398,7 +403,7 @@ function onPlayerMove(player, move, roomState) {
   if (state.status !== Status.InGame) {
     throw new Error("game is not in progress, can't make move!");
   }
-  if (players[plrToMoveIndex].id !== player.id) {
+  if (players[plrMoveIndex].id !== player.id) {
     throw new Error(`Its not this player's turn: ${player.username}`);
   }
   if (state.board[x][y] !== null) {
@@ -426,7 +431,7 @@ function onPlayerMove(player, move, roomState) {
 
   // highlight-start
   // Set the plr to move to the next player
-  state.plrToMoveIndex = (plrToMoveIndex + 1) % 2;
+  state.plrMoveIndex = (plrMoveIndex + 1) % 2;
   return { state };
   // highlight-end
 }
@@ -441,9 +446,7 @@ That's it! Now try adding two players and play around with it.
 
 ## What's Next?
 
-:::success
-You can [**deploy your game to production**](/docs/Getting-Started/deploying-your-game) in a couple of minutes! Immediately play with random people, or create private rooms and play with close friends!
-:::
+You can [**deploy**](/docs/Getting-Started/deploying-your-game) your game to UrTurn in a couple of minutes! Immediately play with random people, or create private rooms and play with close friends!
 
 :::success
 Notice that you didn't have to worry about:

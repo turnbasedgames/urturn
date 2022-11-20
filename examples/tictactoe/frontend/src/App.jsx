@@ -60,7 +60,7 @@ function App() {
       board,
       status,
       winner,
-      plrToMoveIndex,
+      plrMoveIndex,
     } = {
       board: [
         [null, null, null],
@@ -71,7 +71,7 @@ function App() {
   } = roomState;
   const { players = [], finished } = roomState;
   const generalStatus = getStatusMsg({
-    status, winner, finished, plrToMove: status === 'inGame' ? players[plrToMoveIndex] : null, curPlr,
+    status, winner, finished, plrToMove: status === 'inGame' ? players[plrMoveIndex] : null, curPlr,
   });
 
   return (

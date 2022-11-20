@@ -24,7 +24,7 @@ export const evaluateBoard = (board, plrIdToPlrMark, players) => {
   // TODO: check for tie and return correct result
 
   /**
-   * TODO: check for a winner
+   * TODO: check for a winner (hint: make sure the mark is not null)
    * - check rows
    * - check columns
    * - check diagonals

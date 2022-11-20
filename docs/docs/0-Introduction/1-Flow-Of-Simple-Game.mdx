@@ -49,7 +49,7 @@ UrTurn calls your [room function](/docs/API/room-functions) implementation of [`
   </TabItem>
   <TabItem value="onRoomStart" label="onRoomStart code">
 
-```js title="index.js"
+```js title="src/main.js"
 function onRoomStart() {
   return {
     state: {
@@ -113,12 +113,12 @@ UrTurn calls [`onPlayerJoin`](/docs/API/room-functions#onplayerjoin-required) fu
   </TabItem>
   <TabItem value="onPlayerJoin" label="onPlayerJoin Code">
 
-```js title="index.js"
+```js title="src/main.js"
 function onPlayerJoin(player, roomState) {
   const { players, state } = roomState;
   if (players.length === 2) { // enough players to play the game
     state.status = Status.InGame;
-    state.plrToMoveIndex = 0; // keep track of who’s turn it is
+    state.plrMoveIndex = 0; // keep track of who’s turn it is
     return { // return modifications we want to make to the roomState
       state,
       joinable: false, // we should not allow new players to join the game, tictactoe only needs two players
@@ -168,7 +168,7 @@ The same function [`onPlayerJoin`](/docs/API/room-functions#onplayerjoin-require
       ]
     ],
     "winner": null,
-    "plrToMoveIndex": 0
+    "plrMoveIndex": 0
   },
   // highlight-next-line
   "version": 2,
@@ -258,7 +258,7 @@ Resulting [`roomState`](/docs/API/types#roomstate) (changes are highlighted):
     ],
     "winner": null,
     // highlight-next-line
-    "plrToMoveIndex": 1 // next move is Sarah’s
+    "plrMoveIndex": 1 // next move is Sarah’s
   },
   // highlight-next-line
   "version": 3,
@@ -276,17 +276,17 @@ Resulting [`roomState`](/docs/API/types#roomstate) (changes are highlighted):
 ```
 
   </TabItem>
-  <TabItem value="onRoomStart" label="onRoomStart code">
+  <TabItem value="onPlayerMove" label="onPlayerMove code">
 
-```js title="index.js"
+```js title="src/main.js"
 function onPlayerMove(player, move, roomState) {
   const { state, players } = roomState;
-  const { board, plrToMoveIndex } = state;
+  const { board, plrMoveIndex } = state;
   const { x, y } = move;
   if (state.status !== Status.InGame) { // must be in the game (clients may spoof and send onPlayerMove with whatever values they want!)
     throw new Error("game is not in progress, can't make move!"); // error will be propagated to the client.makeMove() call
   }
-  if (players[plrToMoveIndex].id !== player.id) { // make sure it is the player’s turn
+  if (players[plrMoveIndex].id !== player.id) { // make sure it is the player’s turn
     throw new Error(`Its not this player's turn: ${player.username}`);
   }
   if (board[x][y] !== null) {
@@ -306,7 +306,7 @@ function onPlayerMove(player, move, roomState) {
   }
 
   // alternate the current player move so next player can make a move
-  state.plrToMoveIndex = plrToMoveIndex === 0 ? 1 : 0;
+  state.plrMoveIndex = plrMoveIndex === 0 ? 1 : 0;
   return { state };
 }
 ```

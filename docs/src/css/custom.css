@@ -14,7 +14,6 @@
   --ifm-color-primary-lighter: #5297ce;
   --ifm-color-primary-lightest: #70a9d7;
   --ifm-color-typography-subtitle: var(--ifm-color-emphasis-600);
-  --ifm-navbar-background-color: opacity(100%);
   --docusaurus-highlighted-code-line-bg: rgba(66,66,66,.2)
 }
 
@@ -96,6 +95,14 @@ html[data-theme='dark'] .hero__title {
 
 .text__left-align {
   text-align: left;
+}
+
+.navbar {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+html[data-theme='dark'] .navbar {
+  background-color: rgba(36, 37, 38, 0.5);
 }
 
 .navbar__title {
