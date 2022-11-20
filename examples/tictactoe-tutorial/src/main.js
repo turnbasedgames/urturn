@@ -62,7 +62,7 @@ function onPlayerQuit(player, roomState) {
     // be the remaining player
     return {
       // TODO: properly tell UrTurn the room is over and no longer joinable
-      // (hint: modify finished, joinable, state fields)
+      // (hint: modify finished, state fields)
     };
   }
   return {

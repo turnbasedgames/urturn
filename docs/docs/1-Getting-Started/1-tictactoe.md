@@ -223,7 +223,7 @@ function onPlayerQuit(player, roomState) {
     return {
       // highlight-start
       // TODO: properly tell UrTurn the room is over and no longer joinable
-      // (hint: modify finished, joinable, state fields)
+      // (hint: modify finished, state fields)
       // highlight-end
     };
   }
@@ -248,7 +248,7 @@ function onPlayerQuit(player, roomState) {
     // highlight-start
     const [winner] = players;
     state.winner = winner;
-    return { state, joinable: false, finished: true };
+    return { state, finished: true };
     // highlight-end
   }
   // highlight-next-line
