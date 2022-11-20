@@ -90,12 +90,23 @@ jobs:
           path: .
           key: ${{ github.run_id }}-build
           restore-keys: ${{ github.run_id }}-build
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.3.0
+        with:
+          mongodb-version: 4
+          mongodb-replica-set: testrs
+      - name: Start Redis
+        uses: supercharge/redis-github-action@1.2.0
+        with:
+          redis-version: 6
       - name: run tests
         run: npx lerna run test:check-coverage
         env:
           FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
           GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
           STRIPE_KEY: ${{ secrets.STRIPE_KEY }}
+          REDIS_URL: redis://localhost:6379
+          MONGODB_CONNECTION_URL: mongodb://localhost:27017/test?replicaSet=testrs
   build-server-image:
     runs-on: ubuntu-latest
     steps:
