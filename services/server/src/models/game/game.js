@@ -49,7 +49,7 @@ const GameSchema = new Schema({
     sparse: true,
     index: true,
     validate: {
-      validator: (customURL) => /^[-0-9a-zA-Z]+$/.test(customURL) && customURL[customURL.length - 1] !== '-',
+      validator: (customURL) => /^[-0-9a-z]+$/.test(customURL) && customURL[customURL.length - 1] !== '-',
     },
   },
 }, { timestamps: true });
@@ -85,7 +85,7 @@ GameSchema.method('toJSON', function toJSON() {
     commitSHA: this.commitSHA,
   };
 
-  if (this.customURL) {
+  if (this.customURL != null) {
     defaultReturn.customURL = this.customURL;
   }
 

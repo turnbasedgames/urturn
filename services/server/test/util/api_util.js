@@ -43,7 +43,7 @@ async function createGameAndAssert(t, api, userCred, user, gameOptionalInfo = {}
   t.is(game.activePlayerCount, 0);
   Object.keys(gameRaw).forEach((key) => {
     if (key === 'customURL') {
-      t.regex(game[key], /[-a-z]/);
+      t.regex(game[key], /[-a-z0-9]/);
     } else {
       t.is(gameRaw[key], game[key]);
     }

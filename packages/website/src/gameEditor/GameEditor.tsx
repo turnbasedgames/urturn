@@ -11,6 +11,7 @@ import {
 } from '../models/game';
 
 const githubURLRegExp = /^https:\/\/(www.)?github.com\/.+\/.+\/?/;
+const customURLRegExp = /^[-0-9a-z]+$/;
 
 interface Props {
   editingGame?: Game
@@ -125,6 +126,11 @@ function GameEditor({
             label="Custom URL (e.g. urturn-game)"
             value={form.customURL}
             onChange={({ target: { value } }) => {
+              if (!customURLRegExp.test(value)) {
+                setError('customURL', 'invalid custom url format');
+              } else {
+                setError('customURL');
+              }
               setField('customURL', value);
             }}
           />
