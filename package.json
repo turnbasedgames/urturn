@@ -21,7 +21,9 @@
   ],
   "devDependencies": {
     "lerna": "^6.0.3",
+    "mongodb-memory-server": "^8.10.0",
     "nx": "^15.0.13",
+    "redis-memory-server": "^0.6.0",
     "serve": "^14.1.1",
     "turbo": "^1.6.3"
   },
