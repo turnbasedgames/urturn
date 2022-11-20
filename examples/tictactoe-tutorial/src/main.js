@@ -6,7 +6,7 @@ function onRoomStart() {
      * TODO: define initial values for the following:
      * - status
      * - plrIdToPlrMark
-     * - plrToMoveIndex
+     * - plrMoveIndex
      * - board
      * - winner
      */
@@ -30,7 +30,7 @@ function onPlayerJoin(player, roomState) {
 
 function onPlayerMove(player, move, roomState) {
   const { state, players, logger } = roomState;
-  const { plrToMoveIndex, plrIdToPlrMark } = state;
+  const { plrMoveIndex, plrIdToPlrMark } = state;
   const { x, y } = move;
 
   // TODO: validate player move and throw sensible error messages
@@ -50,7 +50,7 @@ function onPlayerMove(player, move, roomState) {
     };
   }
 
-  // TODO: Set the plr to move to the next player (hint: update state.plrToMoveIndex)
+  // TODO: Set the plr to move to the next player (hint: update state.plrMoveIndex)
   return { state };
 }
 

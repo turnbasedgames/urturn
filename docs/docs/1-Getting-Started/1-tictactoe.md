@@ -9,8 +9,12 @@ import TabItem from '@theme/TabItem';
 
 ## What you are making
 
+![TicTacToe Final](final-tictactoe.gif)
+
 :::success
-Play the [final version](https://www.urturn.app/games/626eac7c65667f00160a6b42). Playing the game will help you envision what the underlying logic will look like. Ask yourself:
+Play the final [version](https://www.urturn.app/games/626eac7c65667f00160a6b42). Playing the game will help you envision what the underlying logic will look like.
+
+Ask yourself:
 
 - How do you define what happens when a player moves?
 - How can you tell if a player won the game?
@@ -87,7 +91,7 @@ function onRoomStart() {
      * TODO: define initial values for the following:
      * - status
      * - plrIdToPlrMark
-     * - plrToMoveIndex
+     * - plrMoveIndex
      * - board
      * - winner
     // highlight-end
@@ -107,7 +111,7 @@ function onRoomStart() {
       // highlight-start
       status: Status.PreGame,
       plrIdToPlrMark: {}, // map from plrId to their mark (X or O)
-      plrToMoveIndex: 0, // track who's move it is
+      plrMoveIndex: 0, // track who's move it is
       board: [
         [null, null, null],
         [null, null, null],
@@ -355,7 +359,7 @@ Implement the `TODO` statements in [`onPlayerMove`](/docs/API/room-functions#onp
 ```js title="src/main.js"
 function onPlayerMove(player, move, roomState) {
   const { state, players, logger } = roomState;
-  const { plrToMoveIndex, plrIdToPlrMark } = state;
+  const { plrMoveIndex, plrIdToPlrMark } = state;
   const { x, y } = move;
   // highlight-start
   // TODO: validate player move and throw sensible error messages
@@ -379,7 +383,7 @@ function onPlayerMove(player, move, roomState) {
   }
 
   // highlight-next-line
-  // TODO: Set the plr to move to the next player (hint: update state.plrToMoveIndex)
+  // TODO: Set the plr to move to the next player (hint: update state.plrMoveIndex)
   return { state };
 }
 ```
@@ -390,7 +394,7 @@ function onPlayerMove(player, move, roomState) {
 ```js title="src/main.js"
 function onPlayerMove(player, move, roomState) {
   const { state, players } = roomState;
-  const { plrToMoveIndex, plrIdToPlrMark } = state;
+  const { plrMoveIndex, plrIdToPlrMark } = state;
   const { x, y } = move;
 
   // highlight-start
@@ -398,7 +402,7 @@ function onPlayerMove(player, move, roomState) {
   if (state.status !== Status.InGame) {
     throw new Error("game is not in progress, can't make move!");
   }
-  if (players[plrToMoveIndex].id !== player.id) {
+  if (players[plrMoveIndex].id !== player.id) {
     throw new Error(`Its not this player's turn: ${player.username}`);
   }
   if (state.board[x][y] !== null) {
@@ -426,7 +430,7 @@ function onPlayerMove(player, move, roomState) {
 
   // highlight-start
   // Set the plr to move to the next player
-  state.plrToMoveIndex = (plrToMoveIndex + 1) % 2;
+  state.plrMoveIndex = (plrMoveIndex + 1) % 2;
   return { state };
   // highlight-end
 }
