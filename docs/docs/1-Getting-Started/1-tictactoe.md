@@ -101,7 +101,7 @@ function onRoomStart() {
 ```
 
   </TabItem>
-  <TabItem value="solution" label="Solution">
+  <TabItem value="solution" label="onRoomStart Solution">
 
 ```js title="src/main.js"
 function onRoomStart() {
@@ -165,7 +165,7 @@ function onPlayerJoin(player, roomState) {
 ```
 
   </TabItem>
-  <TabItem value="solution" label="Solution">
+  <TabItem value="solution" label="onPlayerJoin Solution">
 
 ```js title="src/main.js"
 function onPlayerJoin(player, roomState) {
@@ -238,7 +238,7 @@ function onPlayerQuit(player, roomState) {
 ```
 
   </TabItem>
-  <TabItem value="solution" label="Solution">
+  <TabItem value="solution" label="onPlayerQuit Solution">
 
 ```js title="src/main.js"
 function onPlayerQuit(player, roomState) {
@@ -294,7 +294,7 @@ export const evaluateBoard = (board, plrIdToPlrMark, players) => {
 ```
 
   </TabItem>
-  <TabItem value="solution" label="Solution">
+  <TabItem value="solution" label="evaluateBoard Solution">
 
 ```js title="src/util.js"
 export const evaluateBoard = (board, plrIdToPlrMark, players) => {
@@ -388,7 +388,7 @@ function onPlayerMove(player, move, roomState) {
 ```
 
   </TabItem>
-  <TabItem value="solution" label="Solution">
+  <TabItem value="solution" label="onPlayerMove Solution">
 
 ```js title="src/main.js"
 function onPlayerMove(player, move, roomState) {
@@ -444,9 +444,7 @@ That's it! Now try adding two players and play around with it.
 
 ## What's Next?
 
-:::success
-You can [**deploy your game to production**](/docs/Getting-Started/deploying-your-game) in a couple of minutes! Immediately play with random people, or create private rooms and play with close friends!
-:::
+You can [**deploy**](/docs/Getting-Started/deploying-your-game) your game to UrTurn in a couple of minutes! Immediately play with random people, or create private rooms and play with close friends!
 
 :::success
 Notice that you didn't have to worry about:
