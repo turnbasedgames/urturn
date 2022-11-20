@@ -5,6 +5,7 @@ import {
 import React, { useState } from 'react';
 import { Game } from '@urturn/types-common';
 
+import { useSnackbar } from 'notistack';
 import logger from '../logger';
 import {
   createGame, GameReqBody, updateGame,
@@ -37,6 +38,8 @@ function GameEditor({
     }
     : emptyForm);
   const [errors, setErrors] = useState(new Map());
+  const { enqueueSnackbar } = useSnackbar();
+
   const titleText = (editingGame != null) ? 'Edit Game' : 'Create Game';
   const setField = (field: string, value: string): void => {
     setForm({
@@ -53,13 +56,21 @@ function GameEditor({
     setErrors(errors);
   };
   const handleSubmit = async (): Promise<void> => {
-    if (errors.size === 0) {
-      const gameObj: GameReqBody = form;
-      const game = (editingGame != null)
-        ? await updateGame(editingGame.id, gameObj)
-        : await createGame(gameObj);
-      if (onClose != null) { onClose(); }
-      if (onSubmit != null) { onSubmit(game); }
+    try {
+      if (errors.size === 0) {
+        const gameObj: GameReqBody = form;
+        const game = (editingGame != null)
+          ? await updateGame(editingGame.id, gameObj)
+          : await createGame(gameObj);
+        if (onClose != null) { onClose(); }
+        if (onSubmit != null) { onSubmit(game); }
+      }
+    } catch (e: any) {
+      logger.error(e);
+      enqueueSnackbar(`Error when ${(editingGame != null) ? 'editing' : 'creating'} game`, {
+        variant: 'error',
+        autoHideDuration: 3000,
+      });
     }
   };
 
@@ -74,8 +85,9 @@ function GameEditor({
           m={2}
           component="form"
           spacing={2}
-          noValidate
           autoComplete="off"
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
+          onSubmit={handleSubmit}
         >
           <Typography gutterBottom variant="h6">{titleText}</Typography>
           <TextField
@@ -128,11 +140,8 @@ function GameEditor({
               Cancel
             </Button>
             <Button
+              type="submit"
               variant="contained"
-              onClick={(ev) => {
-                ev.preventDefault();
-                handleSubmit().catch(logger.error);
-              }}
             >
               {(editingGame != null) ? 'Update' : 'Create'}
             </Button>
