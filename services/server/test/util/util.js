@@ -106,7 +106,9 @@ const setupMongoDB = makePersistentDependencyFn('MongoDB', 'MONGODB_CONNECTION_U
     // use MongoMemoryReplSet instead of MongoMemoryServer because the app requires transactions
     const mongod = await MongoMemoryReplSet.create({
       // binaries are in monorepo root due to "lerna bootstrap --hoist"
-      binary: `${process.cwd()}/../../node_modules/.cache/mongodb-memory-server/mongodb-binaries`,
+      binary: {
+        downloadDir: `${process.cwd()}/../../node_modules/.cache/mongodb-memory-server/mongodb-binaries`,
+      },
       replSet: { count: 4 },
     });
     const uri = mongod.getUri();
