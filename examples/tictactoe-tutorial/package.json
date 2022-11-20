@@ -5,7 +5,7 @@
   "main": "index.js",
   "private": true,
   "scripts": {
-    "build": "rm -rf build && rollup -c && mkdir -p build/frontend && cp index.js build/index.js && cp thumbnail.png build/thumbnail.png && cp -r frontend/build build/frontend/build",
+    "build": "rollup -c",
     "dev": "concurrently \"npm run dev:rollup\" \"npm run dev:runner\" \"npm run dev:frontend\"",
     "dev:runner": "runner --frontend-port 3000",
     "dev:rollup": "rollup -c -w",
