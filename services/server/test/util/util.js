@@ -104,7 +104,11 @@ function createOrUpdateSideApps(t, newApps) {
 const setupMongoDB = makePersistentDependencyFn('MongoDB', 'MONGODB_CONNECTION_URL',
   async () => {
     // use MongoMemoryReplSet instead of MongoMemoryServer because the app requires transactions
-    const mongod = await MongoMemoryReplSet.create({ replSet: { count: 4 } });
+    const mongod = await MongoMemoryReplSet.create({
+      // binaries are in monorepo root due to "lerna bootstrap --hoist"
+      binary: `${process.cwd()}/../../node_modules/.cache/mongodb-memory-server/mongodb-binaries`,
+      replSet: { count: 4 },
+    });
     const uri = mongod.getUri();
     const mongoClient = new MongoClient(uri);
     return [uri, async () => {
@@ -116,7 +120,12 @@ const setupMongoDB = makePersistentDependencyFn('MongoDB', 'MONGODB_CONNECTION_U
 
 const setupRedis = makePersistentDependencyFn('Redis', 'REDIS_URL',
   async () => {
-    const redisServer = new RedisMemoryServer();
+    const redisServer = new RedisMemoryServer({
+      // binaries are in monorepo root due to "lerna bootstrap --hoist"
+      binary: {
+        downloadDir: `${process.cwd()}/../../node_modules/.cache/redis-memory-server/redis-binaries`,
+      },
+    });
     const host = await redisServer.getHost();
     const port = await redisServer.getPort();
     const uri = `redis://${host}:${port}`;
