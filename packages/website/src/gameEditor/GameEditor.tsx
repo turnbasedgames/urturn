@@ -86,6 +86,7 @@ function GameEditor({
           component="form"
           spacing={2}
           autoComplete="off"
+          // https://github.com/typescript-eslint/typescript-eslint/issues/4619
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onSubmit={handleSubmit}
         >
