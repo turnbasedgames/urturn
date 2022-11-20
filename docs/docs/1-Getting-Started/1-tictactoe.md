@@ -364,7 +364,7 @@ function onPlayerMove(player, move, roomState) {
   const { x, y } = move;
   // highlight-start
   // TODO: validate player move and throw sensible error messages
-  // 1. what if a player tries to make a move when the player is not in game?
+  // 1. what if a player tries to make a move when the game hasn't started?
   // 2. what if a player makes a move and its not their turn?
   // 3. what if a player makes a move on the board where there was already a mark?
   // TODO: mark the board
