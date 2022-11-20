@@ -90,6 +90,8 @@ jobs:
           path: .
           key: ${{ github.run_id }}-build
           restore-keys: ${{ github.run_id }}-build
+      - name: run post install to download redis and mongodb distributions
+        run: npm ci --foreground-scripts
       - name: run tests
         run: npx lerna run test:check-coverage
         env:
