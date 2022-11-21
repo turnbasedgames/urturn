@@ -12,7 +12,7 @@ interface GameListCardProps {
 }
 
 function GameListCard({ game }: GameListCardProps): React.ReactElement {
-  const pathToUse = game.customURL != null ? `/play/${game.customURL}` : `/games/${game.id}`;
+  const pathToUse = game.customURL != null ? `/games/play/${game.customURL}` : `/games/${game.id}`;
   return (
     <Card
       sx={{

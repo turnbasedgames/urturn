@@ -114,7 +114,7 @@ function App(): React.ReactElement {
                       )}
                   />
                   <Route
-                    path=":gameId"
+                    path="play/:customURL"
                     element={(
                       <>
                         {NavBarMemo}
@@ -123,7 +123,7 @@ function App(): React.ReactElement {
                     )}
                   />
                   <Route
-                    path="g/:customURL"
+                    path=":gameId"
                     element={(
                       <>
                         {NavBarMemo}
