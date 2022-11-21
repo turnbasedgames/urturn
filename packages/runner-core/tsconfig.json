@@ -1,23 +1,20 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "lib": [
-      "es6"
-    ],
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "module": "ESNext",  
     "declaration": true,
-    "baseUrl": "../",
-    "typeRoots": [
-      "../"
-    ],
-    "types": [],
-    "noEmit": true,
-    "forceConsistentCasingInFileNames": true
+    "declarationDir": "types",
+    "sourceMap": true,
+    "outDir": "build",
+    "moduleResolution": "node",
+    "emitDeclarationOnly": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
   },
-  "files": [
-    "index.d.ts"
-  ]
+  "exclude": [
+    "build",
+    "node_modules",
+  ],
 }

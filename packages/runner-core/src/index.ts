@@ -1,3 +1,2 @@
-export default () => {
-  console.log("TODODODDO")
+export default {
 }
