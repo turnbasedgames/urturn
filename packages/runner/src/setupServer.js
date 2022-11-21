@@ -7,7 +7,7 @@ import { watchFile } from 'fs';
 import { userBackend } from '../config/paths.js';
 import {
   newRoomState, applyRoomStateResult, filterRoomState, getPlayerById, removePlayerById,
-  validateRoomState, ROOM_STATE_DEFAULTS,
+  validateRoomState,
 } from './roomState.js';
 import requireUtil from './requireUtil.cjs';
 import logger from './logger.js';
@@ -38,6 +38,7 @@ const getLatestBackendModule = async (backendPath) => {
 async function setupServer({ apiPort }) {
   const app = express();
   const httpServer = createServer(app);
+  let playerIdCounter;
   let roomState;
   let backendModule;
   const io = new Server(httpServer, {
@@ -60,6 +61,7 @@ async function setupServer({ apiPort }) {
       return;
     }
     roomState = newRoomState(logger, backendModule);
+    playerIdCounter = 0;
     io.sockets.emit('stateChanged', filterRoomState(roomState));
   };
 
@@ -93,12 +95,12 @@ async function setupServer({ apiPort }) {
       return;
     }
 
-    const username = `user_${roomState.playerIdCounter}`;
-    const id = `id_${roomState.playerIdCounter}`;
+    const username = `user_${playerIdCounter}`;
+    const id = `id_${playerIdCounter}`;
     const player = {
       id, username,
     };
-    roomStateContender.playerIdCounter += 1;
+    playerIdCounter += 1;
     roomStateContender.players.push(player);
     roomStateContender = applyRoomStateResult(
       roomStateContender,
@@ -171,7 +173,7 @@ async function setupServer({ apiPort }) {
     try {
       roomStateContender = JSON.parse(JSON.stringify(req.body));
       validateRoomState(roomStateContender);
-      roomStateContender = { ...ROOM_STATE_DEFAULTS, ...roomStateContender };
+      playerIdCounter = 0;
     } catch (err) {
       res.status(StatusCodes.BAD_REQUEST).json({ message: err.message });
       return;
