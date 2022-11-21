@@ -8,9 +8,8 @@ import SchoolIcon from '@mui/icons-material/School';
 import ClearIcon from '@mui/icons-material/Clear';
 import ReactJson from 'react-json-view';
 import Editor from '@monaco-editor/react';
-import axios from 'axios';
 import {
-  addPlayer, removePlayer, SPECTATOR_USER, useGameState,
+  addPlayer, removePlayer, SPECTATOR_USER, useGameState, handleRoomFunctionError,
 } from '../data';
 
 function GameManager() {
@@ -110,18 +109,7 @@ function GameManager() {
                   const player = await addPlayer();
                   openPlayerTab(player);
                 } catch (err) {
-                  let errorMsg = 'Unknown Error Happened';
-                  if (
-                    axios.isAxiosError(err) && (err.response != null)
-                  ) {
-                    const data = err.response?.data;
-                    if (data?.name === 'CreatorError') {
-                      errorMsg = data?.creatorError.message;
-                    } else {
-                      errorMsg = data?.message;
-                    }
-                  }
-                  setRecentErrorMsg(errorMsg);
+                  handleRoomFunctionError(err, setRecentErrorMsg);
                 }
               }}
             >
@@ -194,7 +182,11 @@ function GameManager() {
                         color="error"
                         onClick={async (e) => {
                           e.stopPropagation();
-                          await removePlayer(player);
+                          try {
+                            await removePlayer(player);
+                          } catch (err) {
+                            handleRoomFunctionError(err, setRecentErrorMsg);
+                          }
                         }}
                       >
                         <ClearIcon />

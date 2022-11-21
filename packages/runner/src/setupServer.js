@@ -11,7 +11,7 @@ import logger from './logger.js';
 import wrapSocketErrors from './middleware/wrapSocketErrors.js';
 import {
   onRoomStart, onPlayerJoin, onPlayerQuit, onPlayerMove, deepCopy,
-} from './room/wrappers';
+} from './room/wrappers.js';
 
 const backendHotReloadIntervalMs = 100;
 

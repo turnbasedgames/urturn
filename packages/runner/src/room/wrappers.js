@@ -1,4 +1,4 @@
-import { removePlayerById, filterRoomState, applyRoomStateResult } from './roomState';
+import { removePlayerById, filterRoomState, applyRoomStateResult } from './roomState.js';
 
 function guardFinished(roomState) {
   if (roomState.finished) {
@@ -32,7 +32,7 @@ export function onRoomStart(logger, innerFn) {
     state: {},
     roomStartContext: { private: false },
   };
-  const roomStateResult = innerFn.onRoomStart({ ...deepCopy(filterRoomState(roomState)), logger });
+  const roomStateResult = innerFn({ ...deepCopy(filterRoomState(roomState)), logger });
   return postRoomFunction(applyRoomStateResult(roomState, roomStateResult));
 }
 
@@ -44,7 +44,7 @@ export const onPlayerJoin = (logger, player, roomState, innerFn) => {
 
   // call the user fn
   const roomStateResult = innerFn(
-    deepCopy(filterRoomState(player)),
+    deepCopy(player),
     {
       ...deepCopy(filterRoomState(roomState)),
       logger,
@@ -59,19 +59,19 @@ export const onPlayerJoin = (logger, player, roomState, innerFn) => {
 export const onPlayerQuit = (logger, player, roomState, innerFn) => {
   // pre fn logic
   guardFinished(roomState);
-  removePlayerById(player.id, roomState);
+  let newRoomState = removePlayerById(player.id, roomState);
 
   // call the user fn
   const roomStateResult = innerFn(
-    deepCopy(filterRoomState(player)),
+    deepCopy(player),
     {
-      ...deepCopy(filterRoomState(roomState)),
+      ...deepCopy(filterRoomState(newRoomState)),
       logger,
     },
   );
 
   // post fn logic
-  const newRoomState = applyRoomStateResult(roomState, roomStateResult);
+  newRoomState = applyRoomStateResult(newRoomState, roomStateResult);
   return postRoomFunction(newRoomState);
 };
 
@@ -82,7 +82,7 @@ export const onPlayerMove = (logger, move, player, roomState, innerFn) => {
 
   // call the user fn
   const roomStateResult = innerFn(
-    deepCopy(filterRoomState(player)),
+    deepCopy(player),
     move,
     {
       ...deepCopy(filterRoomState(roomState)),

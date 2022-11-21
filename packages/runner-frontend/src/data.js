@@ -28,6 +28,21 @@ export const makeMove = async (player, move) => axios.post(`${await getBaseUrl()
 
 export const refreshState = async () => axios.put(`${await getBaseUrl()}/state/refresh`);
 
+export const handleRoomFunctionError = async (err, setRecentErrorMsg) => {
+  let errorMsg = 'Unknown Error Happened';
+  if (
+    axios.isAxiosError(err) && (err.response != null)
+  ) {
+    const data = err.response?.data;
+    if (data?.name === 'CreatorError') {
+      errorMsg = data?.creatorError.message;
+    } else {
+      errorMsg = data?.message;
+    }
+  }
+  setRecentErrorMsg(errorMsg);
+};
+
 export const SPECTATOR_USER = { id: 'spectator1', username: 'billywatchesyou' };
 
 export const removePlayer = async (player) => axios.delete(`${await getBaseUrl()}/player/${player.id}`);
