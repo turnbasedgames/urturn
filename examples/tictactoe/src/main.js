@@ -74,8 +74,11 @@ function onPlayerQuit(player, roomState) {
   const { state, players } = roomState;
   state.status = Status.EndGame;
   if (players.length === 1) {
-    const [winner] = players;
-    state.winner = winner;
+    // check if winner exists before setting the winner
+    if(state.winner == null){
+      const [winner] = players;
+      state.winner = winner;
+    }
     return { state, finished: true };
   }
   return { joinable: false, finished: true };

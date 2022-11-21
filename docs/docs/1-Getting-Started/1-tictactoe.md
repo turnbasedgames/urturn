@@ -246,8 +246,11 @@ function onPlayerQuit(player, roomState) {
   state.status = Status.EndGame;
   if (players.length === 1) {
     // highlight-start
-    const [winner] = players;
-    state.winner = winner;
+    // check if winner exists before setting the winner
+    if(state.winner == null){
+      const [winner] = players;
+      state.winner = winner;
+    }
     // don't need to set joinable: false, because if there were originally two players, onPlayerJoin already set it to false
     return { state, finished: true };
     // highlight-end
