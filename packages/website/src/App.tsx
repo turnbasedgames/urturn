@@ -102,6 +102,15 @@ function App(): React.ReactElement {
               <PageTracker />
               <Routes>
                 <Route
+                  path="play/:customURL"
+                  element={(
+                    <>
+                      {NavBarMemo}
+                      <GameInfo />
+                    </>
+                  )}
+                />
+                <Route
                   path="games/*"
                 >
                   <Route
@@ -112,15 +121,6 @@ function App(): React.ReactElement {
                         <GameList />
                       </>
                       )}
-                  />
-                  <Route
-                    path="play/:customURL"
-                    element={(
-                      <>
-                        {NavBarMemo}
-                        <GameInfo />
-                      </>
-                    )}
                   />
                   <Route
                     path=":gameId"
