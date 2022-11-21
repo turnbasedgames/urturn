@@ -5,14 +5,13 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { watchFile } from 'fs';
 import { userBackend } from '../config/paths.js';
-import {
-  newRoomState, applyRoomStateResult, filterRoomState, getPlayerById, removePlayerById,
-  validateRoomState,
-} from './room/roomState.js';
+import { filterRoomState, getPlayerById, validateRoomState } from './room/roomState.js';
 import requireUtil from './requireUtil.cjs';
 import logger from './logger.js';
 import wrapSocketErrors from './middleware/wrapSocketErrors.js';
-import { onPlayerJoin } from './room/wrappers';
+import {
+  onRoomStart, onPlayerJoin, onPlayerQuit, onPlayerMove, deepCopy,
+} from './room/wrappers';
 
 const backendHotReloadIntervalMs = 100;
 
@@ -61,7 +60,7 @@ async function setupServer({ apiPort }) {
       logger.error("Unable to start game because 'onRoomStart' function is not exported!");
       return;
     }
-    roomState = newRoomState(logger, backendModule);
+    roomState = onRoomStart(logger, backendModule.onRoomStart);
     playerIdCounter = 0;
     io.sockets.emit('stateChanged', filterRoomState(roomState));
   };
@@ -90,19 +89,12 @@ async function setupServer({ apiPort }) {
   });
 
   app.post('/player', (_, res) => {
-    let roomStateContender = JSON.parse(JSON.stringify(roomState));
-    if (!roomStateContender.joinable) {
-      res.status(StatusCodes.BAD_REQUEST).json({ message: `Cannot add player to this room because it is not joinable (roomState.joinable=${roomStateContender.joinable}).` });
-      return;
-    }
-
     const username = `user_${playerIdCounter}`;
     const id = `id_${playerIdCounter}`;
     const player = {
       id, username,
     };
-    playerIdCounter += 1;
-    roomStateContender = onPlayerJoin(
+    const roomStateContender = onPlayerJoin(
       logger,
       player,
       roomState,
@@ -110,6 +102,7 @@ async function setupServer({ apiPort }) {
     );
     io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
     roomState = roomStateContender;
+    playerIdCounter += 1;
     res.status(StatusCodes.OK).json(player);
   });
 
@@ -120,12 +113,7 @@ async function setupServer({ apiPort }) {
       res.status(StatusCodes.BAD_REQUEST).json({ message: `${id} is not in the board game` });
       return;
     }
-    let roomStateContender = JSON.parse(JSON.stringify(roomState));
-    roomStateContender = removePlayerById(id, roomStateContender);
-    roomStateContender = applyRoomStateResult(
-      roomStateContender,
-      backendModule.onPlayerQuit(player, { ...filterRoomState(roomStateContender), logger }),
-    );
+    const roomStateContender = onPlayerQuit(logger, player, roomState, backendModule.onPlayerQuit);
     io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
     roomState = roomStateContender;
     res.sendStatus(StatusCodes.OK);
@@ -133,22 +121,23 @@ async function setupServer({ apiPort }) {
 
   app.post('/player/:id/move', (req, res) => {
     const { id } = req.params;
-    let roomStateContender = JSON.parse(JSON.stringify(roomState));
-    const player = getPlayerById(id, roomStateContender);
+    const player = getPlayerById(id, roomState);
     if (player === undefined) {
       res.status(StatusCodes.BAD_REQUEST).json({ message: `${id} is not in the board game` });
       return;
     }
-    const move = req.body;
     try {
-      roomStateContender = applyRoomStateResult(
-        roomStateContender,
-        backendModule.onPlayerMove(
-          player,
-          move,
-          { ...filterRoomState(roomStateContender), logger },
-        ),
+      const move = req.body;
+      const roomStateContender = onPlayerMove(
+        logger,
+        move,
+        player,
+        roomState,
+        backendModule.onPlayerMove,
       );
+      io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
+      roomState = roomStateContender;
+      res.sendStatus(StatusCodes.OK);
     } catch (err) {
       logger.error('Error in while making move:', err);
       res.status(StatusCodes.BAD_REQUEST).json({
@@ -158,11 +147,7 @@ async function setupServer({ apiPort }) {
           message: err.message,
         },
       });
-      return;
     }
-    io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
-    roomState = roomStateContender;
-    res.sendStatus(StatusCodes.OK);
   });
 
   app.get('/state', (req, res) => {
@@ -173,7 +158,7 @@ async function setupServer({ apiPort }) {
     let roomStateContender;
 
     try {
-      roomStateContender = JSON.parse(JSON.stringify(req.body));
+      roomStateContender = deepCopy(req.body);
       validateRoomState(roomStateContender);
       playerIdCounter = 0;
     } catch (err) {

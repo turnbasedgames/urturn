@@ -54,22 +54,6 @@ export function applyRoomStateResult(roomState, roomStateResult) {
   }, { ...roomState });
 }
 
-export function newRoomState(logger, backendModule) {
-  const roomState = {
-    joinable: true,
-    finished: false,
-    players: [],
-    version: 0,
-    state: {},
-    logger,
-    roomStartContext: { private: false },
-  };
-  return applyRoomStateResult(
-    roomState,
-    backendModule.onRoomStart({ ...filterRoomState(roomState), logger }),
-  );
-}
-
 export function getPlayerById(id, roomState) {
   // Use a new object value so developers do not try to do plr === roomState.players[x]
   // Rather developers should be comparing the player ids instead

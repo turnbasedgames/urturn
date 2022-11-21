@@ -60,7 +60,7 @@ function GameManager() {
       <AppBar position="relative">
         <Toolbar variant="dense" sx={{ justifyContent: 'space-between' }}>
           <Typography color="text.primary">
-            Current Game State
+            Current Room State
           </Typography>
           <Stack spacing={1} direction="row">
             <IconButton size="small" href="https://docs.urturn.app/" target="_blank" rel="noopener">
