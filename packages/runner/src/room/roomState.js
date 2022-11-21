@@ -45,13 +45,13 @@ export function validateRoomState(state) {
   });
 }
 
-export function applyRoomStateResult(state, result) {
-  return Object.keys(result).reduce((newState, key) => {
+export function applyRoomStateResult(roomState, roomStateResult) {
+  return Object.keys(roomStateResult).reduce((newState, key) => {
     if (ROOM_STATE_EDITABLE_FIELDS.includes(key)) {
-      return { ...newState, [key]: result[key] };
+      return { ...newState, [key]: roomStateResult[key] };
     }
     throw new Error(`key "${key}" is not editable`);
-  }, { ...state, version: state.version + 1 });
+  }, { ...roomState });
 }
 
 export function newRoomState(logger, backendModule) {

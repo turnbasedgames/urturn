@@ -8,10 +8,11 @@ import { userBackend } from '../config/paths.js';
 import {
   newRoomState, applyRoomStateResult, filterRoomState, getPlayerById, removePlayerById,
   validateRoomState,
-} from './roomState.js';
+} from './room/roomState.js';
 import requireUtil from './requireUtil.cjs';
 import logger from './logger.js';
 import wrapSocketErrors from './middleware/wrapSocketErrors.js';
+import { onPlayerJoin } from './room/wrappers';
 
 const backendHotReloadIntervalMs = 100;
 
@@ -101,10 +102,11 @@ async function setupServer({ apiPort }) {
       id, username,
     };
     playerIdCounter += 1;
-    roomStateContender.players.push(player);
-    roomStateContender = applyRoomStateResult(
-      roomStateContender,
-      backendModule.onPlayerJoin(player, { ...filterRoomState(roomStateContender), logger }),
+    roomStateContender = onPlayerJoin(
+      logger,
+      player,
+      roomState,
+      backendModule.onPlayerJoin,
     );
     io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
     roomState = roomStateContender;
