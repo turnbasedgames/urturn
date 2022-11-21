@@ -19,10 +19,6 @@ const { applyCreatorResult, handlePostRoomOperation, quitRoomTransaction } = req
 const PATH = '/room';
 const router = express.Router();
 
-// TODO: what happens when a game makes a backwards incompatible change to existing rooms?
-// TODO: determine what to do is usercode errors during quitting and/or joining,
-//       moves erroring just returns to userfrontend
-// TODO: include what caused latest state change in event? e.g. onPlayerMove, or onPlayerJoin
 function setupRouter({ io }) {
   router.get('/',
     celebrate({
