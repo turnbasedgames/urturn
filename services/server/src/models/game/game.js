@@ -3,7 +3,7 @@ const { StatusCodes } = require('http-status-codes');
 
 const { Schema } = mongoose;
 
-const CREATOR_EDITABLE_KEYS = ['name', 'description', 'githubURL', 'commitSHA'];
+const CREATOR_EDITABLE_KEYS = ['name', 'description', 'githubURL', 'commitSHA', 'customURL'];
 const GameSchema = new Schema({
   name: {
     type: String,
@@ -43,6 +43,15 @@ const GameSchema = new Schema({
       message: '{VALUE} is not a non-negative integer value',
     },
   },
+  customURL: {
+    type: String,
+    unique: true,
+    sparse: true,
+    index: true,
+    validate: {
+      validator: (customURL) => /^[-0-9a-z]+$/.test(customURL) && customURL[customURL.length - 1] !== '-',
+    },
+  },
 }, { timestamps: true });
 
 GameSchema.index({ name: 'text', description: 'text' });
@@ -66,7 +75,7 @@ GameSchema.method('updateByUser', async function updateByUser(changes) {
   await this.save();
 });
 GameSchema.method('toJSON', function toJSON() {
-  return {
+  const defaultReturn = {
     id: this.id,
     activePlayerCount: this.activePlayerCount,
     name: this.name,
@@ -75,6 +84,18 @@ GameSchema.method('toJSON', function toJSON() {
     githubURL: this.githubURL,
     commitSHA: this.commitSHA,
   };
+
+  if (this.customURL != null) {
+    defaultReturn.customURL = this.customURL;
+  }
+
+  return defaultReturn;
+});
+
+GameSchema.pre('save', function onSave() {
+  if (this.customURL) {
+    this.customURL = this.customURL.toLowerCase();
+  }
 });
 
 module.exports = mongoose.model('Game', GameSchema);

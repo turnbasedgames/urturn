@@ -12,6 +12,7 @@ import {
 } from '../models/game';
 
 const githubURLRegExp = /^https:\/\/(www.)?github.com\/.+\/.+\/?/;
+const customURLRegExp = /^[-0-9a-z]+$/;
 
 interface Props {
   editingGame?: Game
@@ -28,6 +29,7 @@ function GameEditor({
     description: '',
     githubURL: '',
     commitSHA: '',
+    customURL: '',
   };
   const [form, setForm] = useState((editingGame != null)
     ? {
@@ -35,6 +37,7 @@ function GameEditor({
       description: editingGame.description,
       githubURL: editingGame.githubURL,
       commitSHA: editingGame?.commitSHA,
+      customURL: editingGame?.customURL,
     }
     : emptyForm);
   const [errors, setErrors] = useState(new Map());
@@ -130,6 +133,18 @@ function GameEditor({
             value={form.description}
             onChange={({ target: { value } }) => {
               setField('description', value);
+            }}
+          />
+          <TextField
+            label="Custom URL (e.g. urturn-game)"
+            value={form.customURL}
+            onChange={({ target: { value } }) => {
+              if (!customURLRegExp.test(value)) {
+                setError('customURL', 'invalid custom url format');
+              } else {
+                setError('customURL');
+              }
+              setField('customURL', value);
             }}
           />
           <Stack

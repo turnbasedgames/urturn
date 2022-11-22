@@ -18,6 +18,7 @@ router.get('/',
       skip: Joi.number().integer().min(0).default(0),
       creator: Joi.objectId().optional(),
       searchText: Joi.string().optional(),
+      customURL: Joi.string().optional(),
     }),
   }),
   asyncHandler(async (req, res) => {

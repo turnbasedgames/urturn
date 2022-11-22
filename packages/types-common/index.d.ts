@@ -56,6 +56,7 @@ export interface Game {
   githubURL: string
   commitSHA: string
   activePlayerCount: Number
+  customURL?: string
 }
 
 export interface WatchRoomRes {
