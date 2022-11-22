@@ -62,14 +62,14 @@ function onPlayerQuit(player, roomState) {
     // TODO: when a player quits and there is another player, we should default the winner to
     // be the remaining player
     return {
-      // TODO: properly tell UrTurn the room is over and no longer joinable
+      // TODO: properly tell UrTurn the room is over
       // (hint: modify finished, state fields)
     };
   }
   return {
     // TODO: when a player quits and there was no other player, there is no winner but we should
-    // properly tell UrTurn the room is over and no longer joinable
-    // (hint: modify finished and joinable fields)
+    // properly tell UrTurn the room is over
+    // (hint: modify finished)
   };
 }
 
