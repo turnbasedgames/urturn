@@ -13,11 +13,6 @@ const FIELD_TYPES = {
   roomStartContext: (x) => typeof x === 'object',
 };
 
-export const ROOM_STATE_DEFAULTS = {
-  // Used to generate unique user ids with a simple counter. No new user will have the same id
-  playerIdCounter: 0,
-};
-
 export function filterRoomState(state) {
   if (state == null) {
     throw new Error('state is not defined yet.');
@@ -50,30 +45,13 @@ export function validateRoomState(state) {
   });
 }
 
-export function applyRoomStateResult(state, result) {
-  return Object.keys(result).reduce((newState, key) => {
+export function applyRoomStateResult(roomState, roomStateResult) {
+  return Object.keys(roomStateResult).reduce((newState, key) => {
     if (ROOM_STATE_EDITABLE_FIELDS.includes(key)) {
-      return { ...newState, [key]: result[key] };
+      return { ...newState, [key]: roomStateResult[key] };
     }
     throw new Error(`key "${key}" is not editable`);
-  }, { ...state, version: state.version + 1 });
-}
-
-export function newRoomState(logger, backendModule) {
-  const roomState = {
-    ...ROOM_STATE_DEFAULTS,
-    joinable: true,
-    finished: false,
-    players: [],
-    version: 0,
-    state: {},
-    logger,
-    roomStartContext: { private: false },
-  };
-  return applyRoomStateResult(
-    roomState,
-    backendModule.onRoomStart({ ...filterRoomState(roomState), logger }),
-  );
+  }, { ...roomState });
 }
 
 export function getPlayerById(id, roomState) {
