@@ -59,21 +59,13 @@ function GameEditor({
     setErrors(errors);
   };
   const handleSubmit = async (): Promise<void> => {
-    try {
-      if (errors.size === 0) {
-        const gameObj: GameReqBody = form;
-        const game = (editingGame != null)
-          ? await updateGame(editingGame.id, gameObj)
-          : await createGame(gameObj);
-        if (onClose != null) { onClose(); }
-        if (onSubmit != null) { onSubmit(game); }
-      }
-    } catch (e: any) {
-      logger.error(e);
-      enqueueSnackbar(`Error when ${(editingGame != null) ? 'editing' : 'creating'} game`, {
-        variant: 'error',
-        autoHideDuration: 3000,
-      });
+    if (errors.size === 0) {
+      const gameObj: GameReqBody = form;
+      const game = (editingGame != null)
+        ? await updateGame(editingGame.id, gameObj)
+        : await createGame(gameObj);
+      if (onClose != null) { onClose(); }
+      if (onSubmit != null) { onSubmit(game); }
     }
   };
 
@@ -91,7 +83,17 @@ function GameEditor({
           autoComplete="off"
           // https://github.com/typescript-eslint/typescript-eslint/issues/4619
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onSubmit={handleSubmit}
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit().catch((error) => {
+              logger.error(error);
+              enqueueSnackbar(`Error when ${(editingGame != null) ? 'editing' : 'creating'} game`, {
+                variant: 'error',
+                autoHideDuration: 3000,
+              });
+            });
+            return false;
+          }}
         >
           <Typography gutterBottom variant="h6">{titleText}</Typography>
           <TextField
@@ -126,16 +128,6 @@ function GameEditor({
             }}
           />
           <TextField
-            required
-            multiline
-            rows={5}
-            label="Description"
-            value={form.description}
-            onChange={({ target: { value } }) => {
-              setField('description', value);
-            }}
-          />
-          <TextField
             label="Custom URL (e.g. urturn-game)"
             value={form.customURL}
             onChange={({ target: { value } }) => {
@@ -145,6 +137,16 @@ function GameEditor({
                 setError('customURL');
               }
               setField('customURL', value);
+            }}
+          />
+          <TextField
+            required
+            multiline
+            rows={5}
+            label="Description"
+            value={form.description}
+            onChange={({ target: { value } }) => {
+              setField('description', value);
             }}
           />
           <Stack
