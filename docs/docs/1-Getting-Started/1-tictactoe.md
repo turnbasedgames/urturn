@@ -7,6 +7,8 @@ import TabItem from '@theme/TabItem';
 
 # Multiplayer TicTacToe
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/fvxjN95-BgI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 ## What you are making
 
 ![TicTacToe Final](final-tictactoe.gif)
