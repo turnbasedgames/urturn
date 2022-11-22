@@ -222,7 +222,7 @@ function onPlayerQuit(player, roomState) {
     // highlight-end
     return {
       // highlight-start
-      // TODO: properly tell UrTurn the room is over and no longer joinable
+      // TODO: properly tell UrTurn the room is over
       // (hint: modify finished, state fields)
       // highlight-end
     };
@@ -230,8 +230,8 @@ function onPlayerQuit(player, roomState) {
   return {
     // highlight-start
     // TODO: when a player quits and there was no other player, there is no winner but we should
-    // properly tell UrTurn the room is over and no longer joinable
-    // (hint: modify finished and joinable fields)
+    // properly tell UrTurn the room is over
+    // (hint: modify finished)
     // highlight-end
   };
 }
@@ -248,7 +248,6 @@ function onPlayerQuit(player, roomState) {
     // highlight-start
     const [winner] = players;
     state.winner = winner;
-    // don't need to set joinable: false, because if there were originally two players, onPlayerJoin already set it to false
     return { state, finished: true };
     // highlight-end
   }
@@ -280,14 +279,14 @@ There are many ways to implement tictactoe evaluation logic, so don't be discour
 ```js title="src/util.js"
 export const evaluateBoard = (board, plrIdToPlrMark, players) => {
   // highlight-start
-  // TODO: check for tie and return correct result
-
   /**
    * TODO: check for a winner (hint: make sure the mark is not null)
    * - check rows
    * - check columns
    * - check diagonals
    */
+
+  // TODO: check for tie and return correct result
 
   // TODO: return default not finished
   // highlight-end

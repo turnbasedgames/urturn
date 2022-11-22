@@ -302,7 +302,7 @@ function onPlayerMove(player, move, roomState) {
     // transitions game to end
     state.status = Status.EndGame;
     state.winner = winner;
-    return { state, finished: true }; // game is now finished, modify the “finished” metadata so UrTurn can properly catalogue this room
+    return { state, finished: true }; // game is now finished, modify the "finished" metadata so UrTurn can properly catalogue this room
   }
 
   // alternate the current player move so next player can make a move

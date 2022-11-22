@@ -66,7 +66,7 @@ onPlayerJoin = (player: Player, roomState: RoomState) => RoomStateResult
 
 - Runs when a player joins the room, including when the room is created (i.e. the player clicks *Play* or *Create Private Room*).
 - Fails on error (when user clicks play and joins a game, it will show them an error snackbar).
-- If `roomState.joinable` or `roomState.finished` is `true` then it is **guaranteed** that no player will be added to the room and `onPlayerJoin` will never be called for a player.
+- If `roomState.joinable` is `true` then it is **guaranteed** that no player will be added to the room and `onPlayerJoin` will never be called for a player.
 - `Returns` the [RoomStateResult](/docs/API/types#roomstateresult).
 
 ## `onPlayerQuit` **Required**

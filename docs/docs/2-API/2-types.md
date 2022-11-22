@@ -12,12 +12,15 @@ Objects that are used by the [client](/docs/API/client) and [room functions](/do
 
 - `roomState.joinable`: *bool*
   - **default**: `true`
-  - If true, new users will be able to join this game instance.
-  - If false, new users can not join this game instance via a private room or matchmaking.
+  - If `true`, new users will be able to join this game instance.
+  - If `false`, new users can not join this game instance via a private room or matchmaking.
 - `roomState.finished`: *bool*
-  - **default**: `false`.
-  - If true, no new functions will be called for the room (e.g. no new players can join, players can't make moves anymore, etc.). Marking a room finished is important for UrTurn to index each room properly.
-  - If false, the game will show in the "Active Games" list for players.
+  - **default**: `false`
+  - Used by UrTurn to index each room properly for matchmaking and displaying user stats.
+  - If `true`:
+    - no new room functions will be called for the room.
+    - `roomState.joinable` is forced to be `false`.
+  - If `false`, the game will show in the "Active Games" list for players.
 - `roomState.state`: *JSON object*
   - **default**: `{}`
   - Can hold any valid JSON object, and is designed for you to put any data you want to make your game logic possible.
