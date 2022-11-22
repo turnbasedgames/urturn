@@ -1,6 +1,6 @@
 {
   "name": "@urturn/runner",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "type": "module",
   "os": [
     "!win32"
@@ -29,8 +29,8 @@
   ],
   "description": "",
   "dependencies": {
-    "@urturn/runner-frontend": "^0.1.10",
-    "@urturn/types-common": "^0.1.10",
+    "@urturn/runner-frontend": "^0.1.11",
+    "@urturn/types-common": "^0.1.11",
     "chalk": "^4.1.2",
     "commander": "^9.1.0",
     "cors": "^2.8.5",
