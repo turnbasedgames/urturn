@@ -64,6 +64,10 @@ function GameEditor({
       const game = (editingGame != null)
         ? await updateGame(editingGame.id, gameObj)
         : await createGame(gameObj);
+      enqueueSnackbar(`Successfully ${(editingGame != null) ? 'edited' : 'created'} the game`, {
+        variant: 'success',
+        autoHideDuration: 3000,
+      });
       if (onClose != null) { onClose(); }
       if (onSubmit != null) { onSubmit(game); }
     }
