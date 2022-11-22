@@ -9,7 +9,7 @@ tags: [game jam]
 
 Congratulations to the winners!!
 
-- **1st Place** - `@ReverendPazu , no name`
+- **1st Place** - `@ReverendPazu , 27`
 - **2nd Place** - `@azzy made rock paper scissors (no bugs edition)`
 - **3rd place** - `@Flakezzz1 made connect 4`
 
