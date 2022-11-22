@@ -1,6 +1,6 @@
 import {
   Button,
-  Modal, Paper, Stack, TextField, Typography,
+  Modal, Paper, Stack, TextField, Typography, InputAdornment,
 } from '@mui/material';
 import React, { useState } from 'react';
 import { Game } from '@urturn/types-common';
@@ -132,11 +132,16 @@ function GameEditor({
             }}
           />
           <TextField
+            error={errors.has('customURL')}
+            helperText={errors.get('customURL')}
             label="Custom URL (e.g. urturn-game)"
             value={form.customURL}
+            InputProps={{
+              startAdornment: <InputAdornment position="start">www.urturn.app/play/</InputAdornment>,
+            }}
             onChange={({ target: { value } }) => {
               if (!customURLRegExp.test(value)) {
-                setError('customURL', 'invalid custom url format');
+                setError('customURL', 'invalid custom url format (only alphanumeric and "-" allowed)');
               } else {
                 setError('customURL');
               }
