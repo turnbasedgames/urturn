@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
-  List, ListItem, ListItemText, Paper, Typography, Stack, ThemeProvider,
+  List, ListItem, ListItemText, Paper, Typography, Stack, ThemeProvider, useMediaQuery,
 } from '@mui/material';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
@@ -9,6 +9,7 @@ import theme from './theme';
 
 const CHESS_WIDTH_PADDING_PX = 40;
 const CHESS_WIDTH_DEFAULT_PX = 560;
+const CHESS_WIDTH_MAX_MED_PX = 450;
 const CHESS_WIDTH_MAX_PX = CHESS_WIDTH_DEFAULT_PX;
 
 const isPromotion = (chessGame, from, to) => chessGame.moves({ verbose: true })
@@ -42,21 +43,24 @@ const getStatusMessage = ({
 };
 
 function Game() {
+  const largerThanMd = useMediaQuery(theme.breakpoints.up('md'));
+
   const containerRef = useRef(null);
   const [chessBoardWidth, setChessBoardWidth] = useState(CHESS_WIDTH_DEFAULT_PX);
   useEffect(() => {
     const setChessBoardWidthWithContainerWidth = () => {
+      const maxWidth = largerThanMd ? CHESS_WIDTH_MAX_PX : CHESS_WIDTH_MAX_MED_PX;
       setChessBoardWidth(Math.min(
         (containerRef?.current?.offsetWidth ?? CHESS_WIDTH_DEFAULT_PX)
         - (CHESS_WIDTH_PADDING_PX * 2),
-        CHESS_WIDTH_MAX_PX,
+        maxWidth,
       ));
     };
     window.addEventListener('resize', () => {
       setChessBoardWidthWithContainerWidth();
     });
     setChessBoardWidthWithContainerWidth();
-  }, [containerRef.current]);
+  }, [containerRef.current, largerThanMd]);
 
   const [roomState, setRoomState] = useState(client.getRoomState() || {});
   const [chessGame, setChessGame] = useState(new Chess());
@@ -103,10 +107,9 @@ function Game() {
         alignItems="center"
         justifyContent="center"
         padding={2}
-        spacing={2}
         ref={containerRef}
       >
-        <Stack spacing={2}>
+        <Stack margin={1} spacing={2}>
           <Chessboard
             boardWidth={chessBoardWidth}
             boardOrientation={boardOrientation}
