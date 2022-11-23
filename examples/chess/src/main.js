@@ -1,7 +1,11 @@
 import { Chess } from 'chess.js';
-import { Color } from './util.js';
 
-function onRoomStart(roomState) {
+const Color = Object.freeze({
+  Black: 'black',
+  White: 'white',
+});
+
+function onRoomStart() {
   return {
     state: {
       plrIdToColor: {},
