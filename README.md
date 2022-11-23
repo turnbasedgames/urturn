@@ -26,3 +26,5 @@ Talk to us on [discord](https://discord.gg/myWacjdb5S)
 ## Misc
 
 contributor [docs](https://docs.google.com/document/d/1C5VCiNZEYpNmNItgmS53FOrZrA--SPJt-oCrYwC_kEU/edit?usp=sharing)
+
+![Alt](https://repobeats.axiom.co/api/embed/1d535cc9b3dda15020410a5fa918edab884816d5.svg)
