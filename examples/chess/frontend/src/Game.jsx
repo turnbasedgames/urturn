@@ -7,6 +7,7 @@ import { Chessboard } from 'react-chessboard';
 import client from '@urturn/client';
 import theme from './theme';
 
+const CHESS_WIDTH_PADDING_PX = 40;
 const CHESS_WIDTH_DEFAULT_PX = 560;
 const CHESS_WIDTH_MAX_PX = CHESS_WIDTH_DEFAULT_PX;
 
@@ -44,10 +45,17 @@ function Game() {
   const containerRef = useRef(null);
   const [chessBoardWidth, setChessBoardWidth] = useState(CHESS_WIDTH_DEFAULT_PX);
   useEffect(() => {
+    const setChessBoardWidthWithContainerWidth = () => {
+      setChessBoardWidth(Math.min(
+        (containerRef?.current?.offsetWidth ?? CHESS_WIDTH_DEFAULT_PX)
+        - (CHESS_WIDTH_PADDING_PX * 2),
+        CHESS_WIDTH_MAX_PX,
+      ));
+    };
     window.addEventListener('resize', () => {
-      setChessBoardWidth(Math.min(containerRef?.current?.offsetWidth, CHESS_WIDTH_MAX_PX));
+      setChessBoardWidthWithContainerWidth();
     });
-    setChessBoardWidth(Math.min(containerRef?.current?.offsetWidth, CHESS_WIDTH_MAX_PX));
+    setChessBoardWidthWithContainerWidth();
   }, [containerRef.current]);
 
   const [roomState, setRoomState] = useState(client.getRoomState() || {});
@@ -120,7 +128,7 @@ function Game() {
           }}
           id="BasicBoard"
         />
-        <Stack spacing={2}>
+        <Stack padding={2} spacing={2}>
           <Paper>
             <Stack padding={1}>
               <Typography>
