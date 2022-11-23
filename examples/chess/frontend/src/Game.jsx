@@ -106,29 +106,29 @@ function Game() {
         spacing={2}
         ref={containerRef}
       >
-        <Chessboard
-          boardWidth={chessBoardWidth}
-          boardOrientation={boardOrientation}
-          position={chessGame.fen()}
-          onPieceDrop={(sourceSquare, targetSquare) => {
-            const chessGameCopy = new Chess(chessGame.fen());
-            const move = {
-              from: sourceSquare,
-              to: targetSquare,
-            };
-            if (isPromotion(chessGameCopy, sourceSquare, targetSquare)) {
-              move.promotion = 'q';
-            }
-            const result = chessGameCopy.move(move);
-            setChessGame(chessGameCopy);
-            if (result != null) {
-              client.makeMove(move);
-            }
-            return result; // null if the move was illegal, the move object if the move was legal
-          }}
-          id="BasicBoard"
-        />
-        <Stack padding={2} spacing={2}>
+        <Stack spacing={2}>
+          <Chessboard
+            boardWidth={chessBoardWidth}
+            boardOrientation={boardOrientation}
+            position={chessGame.fen()}
+            onPieceDrop={(sourceSquare, targetSquare) => {
+              const chessGameCopy = new Chess(chessGame.fen());
+              const move = {
+                from: sourceSquare,
+                to: targetSquare,
+              };
+              if (isPromotion(chessGameCopy, sourceSquare, targetSquare)) {
+                move.promotion = 'q';
+              }
+              const result = chessGameCopy.move(move);
+              setChessGame(chessGameCopy);
+              if (result != null) {
+                client.makeMove(move);
+              }
+              return result; // null if the move was illegal, the move object if the move was legal
+            }}
+            id="BasicBoard"
+          />
           <Paper>
             <Stack padding={1}>
               <Typography>
@@ -138,19 +138,19 @@ function Game() {
               </Typography>
             </Stack>
           </Paper>
-          <Paper>
-            <Stack padding={1} sx={{ minWidth: '100px' }}>
-              <Typography color="text.primary">Players</Typography>
-              <List dense disablePadding padding={0}>
-                {players.map((player, ind) => (
-                  <ListItem dense disablePadding key={player.id}>
-                    <ListItemText primary={`${ind + 1}: ${player.username} (${plrIdToColor[player.id]})`} />
-                  </ListItem>
-                ))}
-              </List>
-            </Stack>
-          </Paper>
         </Stack>
+        <Paper>
+          <Stack padding={1} sx={{ minWidth: '100px' }}>
+            <Typography color="text.primary">Players</Typography>
+            <List dense disablePadding padding={0}>
+              {players.map((player, ind) => (
+                <ListItem dense disablePadding key={player.id}>
+                  <ListItemText primary={`${ind + 1}: ${player.username} (${plrIdToColor[player.id]})`} />
+                </ListItem>
+              ))}
+            </List>
+          </Stack>
+        </Paper>
       </Stack>
     </ThemeProvider>
   );
