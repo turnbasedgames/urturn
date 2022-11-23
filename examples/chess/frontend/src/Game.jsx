@@ -1,8 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import {
+  List, ListItem, ListItemText, Paper, Typography, Stack, ThemeProvider,
+} from '@mui/material';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import client from '@urturn/client';
-import styles from './Game.module.css';
+import theme from './theme';
+
+const CHESS_WIDTH_DEFAULT_PX = 560;
+const CHESS_WIDTH_MAX_PX = CHESS_WIDTH_DEFAULT_PX;
 
 const isPromotion = (chessGame, from, to) => chessGame.moves({ verbose: true })
   .filter((move) => move.from === from
@@ -16,10 +22,39 @@ const getBoardOrientation = (curPlr, plrIdToColor) => {
   return plrIdToColor[curPlr.id];
 };
 
+const getStatusMessage = ({
+  curPlr, winner, finished, players, chessGame,
+}) => {
+  if (finished) {
+    if (winner != null) {
+      if (winner.id === curPlr.id) {
+        return 'You Won!';
+      }
+      return 'You Lost.';
+    }
+    return 'Stalemate.';
+  }
+  if (players.length !== 2) {
+    return 'Waiting for another player...';
+  }
+  return `${chessGame.turn() === 'w' ? 'White' : 'Black'} to move...`;
+};
+
 function Game() {
+  const containerRef = useRef(null);
+  const [chessBoardWidth, setChessBoardWidth] = useState(CHESS_WIDTH_DEFAULT_PX);
+  useEffect(() => {
+    window.addEventListener('resize', () => {
+      setChessBoardWidth(Math.min(containerRef?.current?.offsetWidth, CHESS_WIDTH_MAX_PX));
+    });
+    setChessBoardWidth(Math.min(containerRef?.current?.offsetWidth, CHESS_WIDTH_MAX_PX));
+  }, [containerRef.current]);
+
   const [roomState, setRoomState] = useState(client.getRoomState() || {});
   const [chessGame, setChessGame] = useState(new Chess());
-  const { state: { fen, plrIdToColor } = {} } = roomState;
+  const {
+    players = [], state: { fen, plrIdToColor, winner } = {}, finished,
+  } = roomState;
   console.log('roomState:', roomState);
 
   useEffect(() => {
@@ -54,29 +89,62 @@ function Game() {
   const boardOrientation = getBoardOrientation(curPlr, plrIdToColor);
   console.log(boardOrientation);
   return (
-    <div className={styles.container}>
-      <Chessboard
-        boardOrientation={boardOrientation}
-        position={chessGame.fen()}
-        onPieceDrop={(sourceSquare, targetSquare) => {
-          const chessGameCopy = new Chess(chessGame.fen());
-          const move = {
-            from: sourceSquare,
-            to: targetSquare,
-          };
-          if (isPromotion(chessGameCopy, sourceSquare, targetSquare)) {
-            move.promotion = 'q';
-          }
-          const result = chessGameCopy.move(move);
-          setChessGame(chessGameCopy);
-          if (result != null) {
-            client.makeMove(move);
-          }
-          return result; // null if the move was illegal, the move object if the move was legal
-        }}
-        id="BasicBoard"
-      />
-    </div>
+    <ThemeProvider theme={theme}>
+      <Stack
+        direction={{ sm: 'column', md: 'row' }}
+        alignItems="center"
+        justifyContent="center"
+        padding={2}
+        spacing={2}
+        ref={containerRef}
+      >
+        <Chessboard
+          boardWidth={chessBoardWidth}
+          boardOrientation={boardOrientation}
+          position={chessGame.fen()}
+          onPieceDrop={(sourceSquare, targetSquare) => {
+            const chessGameCopy = new Chess(chessGame.fen());
+            const move = {
+              from: sourceSquare,
+              to: targetSquare,
+            };
+            if (isPromotion(chessGameCopy, sourceSquare, targetSquare)) {
+              move.promotion = 'q';
+            }
+            const result = chessGameCopy.move(move);
+            setChessGame(chessGameCopy);
+            if (result != null) {
+              client.makeMove(move);
+            }
+            return result; // null if the move was illegal, the move object if the move was legal
+          }}
+          id="BasicBoard"
+        />
+        <Stack spacing={2}>
+          <Paper>
+            <Stack padding={1}>
+              <Typography>
+                {getStatusMessage({
+                  curPlr, winner, finished, players, chessGame,
+                })}
+              </Typography>
+            </Stack>
+          </Paper>
+          <Paper>
+            <Stack padding={1} sx={{ minWidth: '100px' }}>
+              <Typography color="text.primary">Players</Typography>
+              <List dense disablePadding padding={0}>
+                {players.map((player, ind) => (
+                  <ListItem dense disablePadding key={player.id}>
+                    <ListItemText primary={`${ind + 1}: ${player.username} (${plrIdToColor[player.id]})`} />
+                  </ListItem>
+                ))}
+              </List>
+            </Stack>
+          </Paper>
+        </Stack>
+      </Stack>
+    </ThemeProvider>
   );
 }
 
