@@ -25,6 +25,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "lint": "eslint . --ignore-path .gitignore --ext .js,.jsx",
+    "lint:fix": "eslint . --ignore-path .gitignore --ext .js,.jsx --fix",
     "build": "react-scripts build",
     "eject": "react-scripts eject"
   },
