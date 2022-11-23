@@ -1,11 +1,13 @@
-import jsChessEngine from 'js-chess-engine';
+import { Chess } from 'chess.js';
 import { Color } from './util.js';
 
 function onRoomStart(roomState) {
   return {
     state: {
       plrIdToColor: {},
-      board: null,
+      // string representation of the board https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+      fen: null,
+      winner: null,
     },
   };
 }
@@ -13,8 +15,8 @@ function onRoomStart(roomState) {
 function onPlayerJoin(player, roomState) {
   const { players, state } = roomState;
   if (players.length === 2) {
-    const game = new jsChessEngine.Game();
-    state.board = game.exportJson();
+    const game = new Chess();
+    state.fen = game.fen();
     // default first player to white to simplify
     state.plrIdToColor[players[0].id] = Color.White;
     state.plrIdToColor[players[1].id] = Color.Black;
@@ -24,17 +26,36 @@ function onPlayerJoin(player, roomState) {
 }
 
 function onPlayerQuit(player, roomState) {
-  const { logger } = roomState;
-  logger.info('Quit called with:', { player, roomState });
-  logger.warn('TODO: implement how to change the roomState when a player quits the room');
-  return {};
+  const { state, players } = roomState;
+  if (players.length === 1) {
+    const [winner] = players;
+    state.winner = winner;
+    return { state, finished: true };
+  }
+  return { joinable: false, finished: true };
 }
 
 function onPlayerMove(player, move, roomState) {
-  const { logger } = roomState;
-  logger.info('Move called with:', { player, move, roomState });
-  logger.warn('TODO: implement how to change the roomState when any player makes a move');
-  return {};
+  const { state } = roomState;
+  const { fen } = state;
+  if (fen == null) {
+    throw new Error('FEN string is null!');
+  }
+  const game = new Chess(fen);
+  const result = game.move(move);
+  if (result == null) {
+    throw new Error('Invalid chess move!');
+  }
+  state.fen = game.fen();
+
+  if (game.isGameOver()) {
+    if (game.inCheckmate()) {
+      state.winner = player;
+    }
+    return { state, finished: true };
+  }
+
+  return { state };
 }
 
 // Export these functions so UrTurn runner can run these functions whenever the associated event

@@ -1,9 +1,8 @@
-.game-title {
-  text-align: center;
-  color: white;
-}
-
-.description {
-  text-align: center;
-  color: white;
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 800px;
+  margin: auto;
+  padding: 30px;
 }

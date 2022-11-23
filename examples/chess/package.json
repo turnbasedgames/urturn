@@ -31,6 +31,6 @@
     "rollup": "^3.2.5"
   },
   "dependencies": {
-    "js-chess-engine": "^1.0.2"
+    "chess.js": "^1.0.0-alpha.0"
   }
 }
