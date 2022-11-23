@@ -21,12 +21,13 @@ function onPlayerJoin(player, roomState) {
   if (players.length === 2) {
     const game = new Chess();
     state.fen = game.fen();
-    // default first player to white to simplify
-    state.plrIdToColor[players[0].id] = Color.White;
     state.plrIdToColor[players[1].id] = Color.Black;
     return { joinable: false, state };
   }
-  return {};
+
+  // default first player to white to simplify
+  state.plrIdToColor[players[0].id] = Color.White;
+  return { state };
 }
 
 function onPlayerQuit(player, roomState) {
