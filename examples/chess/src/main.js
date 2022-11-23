@@ -49,7 +49,7 @@ function onPlayerMove(player, move, roomState) {
   state.fen = game.fen();
 
   if (game.isGameOver()) {
-    if (game.inCheckmate()) {
+    if (game.isCheckmate()) {
       state.winner = player;
     }
     return { state, finished: true };
