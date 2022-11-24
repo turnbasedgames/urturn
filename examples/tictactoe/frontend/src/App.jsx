@@ -16,20 +16,41 @@ const getStatusMsg = ({
 }) => {
   if (finished) {
     if (winner == null) {
-      return "It's a tie!";
+      return {
+        msg: "It's a tie!",
+        clr: 'warning.light',
+      };
     } if (winner?.id === curPlr?.id) {
-      return 'You won!';
+      return {
+        msg: 'You won!',
+        clr: 'success.light',
+      };
     }
-    return 'You Lost';
+    return {
+      msg: 'You Lost',
+      clr: 'error.light',
+    };
   } if (status === 'preGame') {
-    return 'Waiting on for another player to join...';
+    return {
+      msg: 'Waiting on for another player to join...',
+      clr: 'text.primary',
+    };
   } if (status === 'inGame') {
     if (plrToMove.id === curPlr?.id) {
-      return "It's ur turn; make a move";
+      return {
+        msg: "It's ur turn; make a move",
+        clr: 'text.primary',
+      };
     }
-    return `Waiting on other player ${plrToMove.username} to make their move...`;
+    return {
+      msg: `Waiting on other player ${plrToMove.username} to make their move...`,
+      clr: 'text.primary',
+    };
   }
-  return 'Error: You should never see this. Contact developers!';
+  return {
+    msg: 'Error: You should never see this. Contact developers!',
+    clr: 'error.light',
+  };
 };
 
 function App() {
@@ -78,11 +99,11 @@ function App() {
     <ThemeProvider theme={theme}>
       <Stack spacing={1} sx={{ justifyContent: 'center' }}>
         <Typography variant="h3" textAlign="center" color="text.primary">TicTacToe</Typography>
-        <Typography textAlign="center" color="text.primary">{generalStatus}</Typography>
-        <Stack margin={2} spacing={1} direction="row" justifyContent="center">
+        <Typography textAlign="center" color={generalStatus.clr}>{generalStatus.msg}</Typography>
+        <Stack margin={2} spacing={1} direction={{ xs: 'column', sm: 'row' }} justifyContent="center">
           <Box>
             {board?.map((row, rowNum) => (
-              <Stack key={getRowKey(row, rowNum)} direction="row">
+              <Stack key={getRowKey(row, rowNum)} direction="row" justifyContent="center">
                 {row.map((val, colNum) => (
                   <Button
                     disabled={val != null}

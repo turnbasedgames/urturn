@@ -77,10 +77,10 @@ function App() {
       <Stack spacing={1} sx={{ justifyContent: 'center' }}>
         <Typography variant="h3" textAlign="center" color="text.primary">TicTacToe</Typography>
         <Typography textAlign="center" color="text.primary">{generalStatus}</Typography>
-        <Stack margin={2} spacing={1} direction="row" justifyContent="center">
+        <Stack margin={2} spacing={1} direction={{ xs: 'column', sm: 'row' }} justifyContent="center">
           <Box>
             {board?.map((row, rowNum) => (
-              <Stack key={getRowKey(row, rowNum)} direction="row">
+              <Stack key={getRowKey(row, rowNum)} direction="row" justifyContent="center">
                 {row.map((val, colNum) => (
                   <Button
                     disabled={val != null}
