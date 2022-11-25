@@ -5,4 +5,4 @@ archive/
 .vscode/
 
 # rollup outputs this
-index.js
+/index.js
