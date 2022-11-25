@@ -1,10 +1,10 @@
 import jsChessEngine from 'js-chess-engine';
-
-const game = new jsChessEngine.Game();
+import { Color } from './util.js';
 
 function onRoomStart(roomState) {
   return {
     state: {
+      plrIdToColor: {},
       board: null,
     },
   };
@@ -12,8 +12,13 @@ function onRoomStart(roomState) {
 
 function onPlayerJoin(player, roomState) {
   const { players, state } = roomState;
-  if (players === 2) {
-    return { joinable: false };
+  if (players.length === 2) {
+    const game = new jsChessEngine.Game();
+    state.board = game.exportJson();
+    // default first player to white to simplify
+    state.plrIdToColor[players[0].id] = Color.White;
+    state.plrIdToColor[players[1].id] = Color.Black;
+    return { joinable: false, state };
   }
   return {};
 }
