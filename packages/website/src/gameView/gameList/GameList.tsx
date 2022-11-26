@@ -9,7 +9,7 @@ import { getGame, getGames } from '../../models/game';
 import logger from '../../logger';
 import GameListCard from './GameListCard';
 
-const FEATURED_GAME_IDS = ['63474d0012b461000e15dc96', '62adfb1b212915000e44e7a8', '62f03a69c4b031000ea00bf0', '630ebdef9495d4000ee694cb', '630af4b26c3be1000e26aca4', '626eac7c65667f00160a6b42'];
+const FEATURED_GAME_IDS = ['63474d0012b461000e15dc96', '62adfb1b212915000e44e7a8', '6381a5849b36c000032c9849', '62f03a69c4b031000ea00bf0', '630ebdef9495d4000ee694cb', '630af4b26c3be1000e26aca4', '626eac7c65667f00160a6b42'];
 
 function GameList(): React.ReactElement {
   const { search } = useLocation();
