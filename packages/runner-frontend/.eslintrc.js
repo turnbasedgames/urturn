@@ -22,5 +22,6 @@ module.exports = {
     // disable extraneous dependencies, because when the package is deployed, only the build folder
     // is provided
     'import/no-extraneous-dependencies': 'off',
+    'linebreak-style': ['error', process.platform === 'win32' ? 'windows' : 'unix'],
   },
 };
