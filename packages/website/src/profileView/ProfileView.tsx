@@ -49,7 +49,7 @@ function ProfileView({ user, setUser }: Props): React.ReactElement {
   const displayedRooms = activeTab === ProfileTab.Active ? activeRooms : inactiveRooms;
   const displayedRoomsLoading = displayedRooms == null;
   const setupActiveRooms = async (): Promise<void> => {
-    const roomsRaw = await getRooms({ containsPlayer: user.id });
+    const roomsRaw = await getRooms({ containsPlayer: user.id, finished: false });
     setActiveRooms(roomsRaw);
   };
   const setupInactiveRooms = async (): Promise<void> => {
