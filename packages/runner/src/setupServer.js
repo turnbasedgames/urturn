@@ -4,6 +4,7 @@ import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { watchFile } from 'fs';
+import { pathToFileURL } from 'node:url';
 import { userBackend } from '../config/paths.js';
 import { filterRoomState, getPlayerById, validateRoomState } from './room/roomState.js';
 import requireUtil from './requireUtil.cjs';
@@ -17,12 +18,16 @@ const backendHotReloadIntervalMs = 100;
 
 const getLatestBackendModule = async (backendPath) => {
   try {
+    // use pathToFileURL because Windows absolute file paths need to be prepended with "file:///c:" instead of just "c:"
+    // see: https://github.com/nodejs/node/issues/31710
+    const absoluteFileUrl = pathToFileURL(backendPath).href;
+
     // Nodejs doesn't support cache busting interface yet for esm https://github.com/nodejs/help/issues/2806
     // This is a workaround to get a completely fresh backendModule, as the query
     // will be new every millisecond. When the issue gets resolved we should use the
     // interface to delete old cache entries. This workaround causes a memory leak where
     // old cached modules never cleaned up.
-    const cacheBustingModulePath = `${backendPath}?update=${Date.now()}`;
+    const cacheBustingModulePath = `${absoluteFileUrl}?update=${Date.now()}`;
     const { default: backendModule } = await import(cacheBustingModulePath);
 
     // the cacheBusting workaround for esm modules does not work for commonjs
