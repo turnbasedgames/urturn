@@ -2,9 +2,6 @@
   "name": "@urturn/runner",
   "version": "0.1.11",
   "type": "module",
-  "os": [
-    "!win32"
-  ],
   "bin": {
     "runner": "bin/runner.js"
   },

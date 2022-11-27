@@ -12,5 +12,6 @@ module.exports = {
   },
   rules: {
     'import/extensions': 'off',
+    'linebreak-style': ['error', process.platform === 'win32' ? 'windows' : 'unix'],
   },
 };
