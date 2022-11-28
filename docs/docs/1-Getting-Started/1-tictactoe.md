@@ -254,7 +254,7 @@ function onPlayerQuit(player, roomState) {
     // highlight-end
   }
   // highlight-next-line
-  return { joinable: false, finished: true };
+  return { state, joinable: false, finished: true };
 }
 ```
 
