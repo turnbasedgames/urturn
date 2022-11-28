@@ -78,7 +78,7 @@ function onPlayerQuit(player, roomState) {
     state.winner = winner;
     return { state, finished: true };
   }
-  return { joinable: false, finished: true };
+  return { state, joinable: false, finished: true };
 }
 
 export default {
