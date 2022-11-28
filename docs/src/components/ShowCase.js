@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Stack, Unstable_Grid2 as Grid2 } from '@mui/material';
 import Link from '@docusaurus/Link';
 import clsx from 'clsx';
@@ -69,6 +69,7 @@ const FeatureList = [
 ];
 
 export default function ShowCase() {
+  const [exampleGamesLoaded, setExampleGamesLoaded] = useState(false);
   return (
     <Stack justifyContent="center" maxWidth="1500px" margin="auto">
       <Stack maxWidth="90%" margin="auto" minHeight="60vh" alignItems="center" justifyContent="center">
@@ -89,11 +90,12 @@ export default function ShowCase() {
                     className={styles['img-thumbnail']}
                     src={thumbnail}
                     alt="loading preview..."
+                    onLoad={() => setExampleGamesLoaded(true)}
                   />
-                  <Stack sx={{ position: 'absolute', width: '100%', bottom: 0, background: 'rgba(21, 21, 21, 0.3)' }}>
+                  {exampleGamesLoaded && <Stack sx={{ position: 'absolute', width: '100%', bottom: 0, background: 'rgba(21, 21, 21, 0.3)' }}>
                     <h1 className={styles['card-title']}>{title}</h1>
                     <p className={styles['card-title']}>{description}</p>
-                  </Stack>
+                  </Stack>}
                 </Stack>
               </Link>
             </Grid2>
