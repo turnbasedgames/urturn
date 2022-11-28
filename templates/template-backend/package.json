@@ -2,7 +2,7 @@
   "name": "@urturn/template-backend",
   "version": "0.1.7",
   "description": "template UrTurn game with ReactJS",
-  "main": "index.js",
+  "main": "src/main.js",
   "private": true,
   "scripts": {
     "build": "rollup -c",

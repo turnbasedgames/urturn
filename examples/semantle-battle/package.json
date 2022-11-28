@@ -2,7 +2,7 @@
   "name": "@urturn/semantle-battle",
   "version": "0.1.7",
   "description": "",
-  "main": "index.js",
+  "main": "src/main.js",
   "private": true,
   "scripts": {
     "build": "rm -rf build && rollup -c && mkdir -p build/frontend && cp index.js build/index.js && cp thumbnail.png build/thumbnail.png && cp -r frontend/build build/frontend/build",

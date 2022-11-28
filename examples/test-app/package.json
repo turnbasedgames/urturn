@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.7",
   "description": "",
-  "main": "index.js",
+  "main": "src/main.js",
   "scripts": {
     "build": "rm -rf build && rollup -c && mkdir -p build/frontend && cp index.js build/index.js && cp thumbnail.png build/thumbnail.png && cp -r frontend/build build/frontend/build",
     "start": "concurrently \"npm run dev:rollup\" \"npm run start:runner\" \"npm run start:frontend\"",

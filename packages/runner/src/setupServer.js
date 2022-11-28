@@ -5,7 +5,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { watchFile } from 'fs';
 import { pathToFileURL } from 'node:url';
-import { userBackend } from '../config/paths.js';
+import { getUserBackendPath } from '../config/paths.js';
 import { filterRoomState, getPlayerById, validateRoomState } from './room/roomState.js';
 import requireUtil from './requireUtil.cjs';
 import logger from './logger.js';
@@ -57,7 +57,8 @@ async function setupServer({ apiPort }) {
   }));
 
   const startGame = async () => {
-    backendModule = await getLatestBackendModule(userBackend);
+    const userBackendPath = await getUserBackendPath();
+    backendModule = await getLatestBackendModule(userBackendPath);
     if (backendModule == null) {
       return;
     }
