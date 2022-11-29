@@ -88,11 +88,13 @@ async function watchRoom(t, app, socket, room, assert = true) {
       const { mongoClientDatabase } = app;
       const userSockets = await mongoClientDatabase.collection('usersockets').find({ socketId: socket.id }).toArray();
       t.is(userSockets.length, 1);
-      // TODO: assert serviceInstance
       t.is(userSockets[0].socketId, socket.id);
       t.is(userSockets[0].user.toString(), socket.data.socketConfig.user.id);
       t.is(userSockets[0].room.toString(), room.id);
       t.is(userSockets[0].game.toString(), room.game.id);
+      const { data: { serviceInstance }, status } = await app.api.get('/instance');
+      t.is(status, StatusCodes.OK);
+      t.is(userSockets[0].serviceInstance.toString(), serviceInstance.id);
     }
   } catch (err) {
     const errorObj = new Error('Error while watching room');

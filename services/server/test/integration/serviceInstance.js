@@ -12,15 +12,17 @@ setupTestFileLogContext(test);
 test('GET /instance returns current serviceInstance', async (t) => {
   const { api } = t.context.app;
 
-  const { data: { serviceInstance: { pingCount } }, status } = await api.get('/instance');
+  const { data: { serviceInstance }, status } = await api.get('/instance');
   t.is(status, StatusCodes.OK);
-  t.true(pingCount >= 0);
+  t.true(typeof serviceInstance.id === 'string');
+  t.true(serviceInstance.pingCount >= 0);
 
   const bufferSecs = 1;
   const pingIntervalSecs = 10;
 
   await sleep((bufferSecs + pingIntervalSecs) * 1000);
-  const { data: { serviceInstance: { pingCount: newPingCount } }, status: newStatus } = await api.get('/instance');
+  const { data: { serviceInstance: newServiceInstance }, status: newStatus } = await api.get('/instance');
   t.is(newStatus, StatusCodes.OK);
-  t.is(newPingCount, pingCount + 1);
+  t.is(newServiceInstance.id, serviceInstance.id);
+  t.is(newServiceInstance.newPingCount, serviceInstance.pingCount + 1);
 });

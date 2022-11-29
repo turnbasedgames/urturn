@@ -10,7 +10,7 @@ function setupRouter({ serviceInstanceId }) {
   router.get('/',
     asyncHandler(async (req, res) => {
       const serviceInstance = await ServiceInstance.findById(serviceInstanceId);
-      res.status(StatusCodes.OK).json({ serviceInstance });
+      res.status(StatusCodes.OK).json({ serviceInstance: serviceInstance.toJSON() });
     }));
   return router;
 }

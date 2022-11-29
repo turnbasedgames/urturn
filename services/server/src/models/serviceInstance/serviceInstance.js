@@ -17,4 +17,13 @@ const ServiceInstanceSchema = new Schema({
   },
 }, { timestamps: true });
 
+ServiceInstanceSchema.method('toJSON', function toJSON() {
+  return {
+    id: this.id,
+    pingCount: this.pingCount,
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt,
+  };
+});
+
 module.exports = mongoose.model('ServiceInstance', ServiceInstanceSchema);
