@@ -18,9 +18,9 @@ const { setupTestBeforeAfterHooks } = require('../util/app');
 const disconnectTimeoutSecs = 30;
 const disconnectAssertionBufferSecs = 10;
 const rightBeforeDisconnectTimeoutMs = (disconnectTimeoutSecs - disconnectAssertionBufferSecs)
- * 1000;
+  * 1000;
 const timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs = disconnectAssertionBufferSecs
- * 2 * 1000;
+  * 2 * 1000;
 
 const socketConfigs = [{
   name: 'http polling only',
@@ -34,10 +34,10 @@ const socketConfigs = [{
   config: {},
 }];
 
-function createSocket(t, baseURL, baseConfig) {
+function createSocket(t, app, baseConfig) {
   const socketConfig = { extraHeaders: {}, ...baseConfig };
   socketConfig.extraHeaders['x-correlation-id'] = t.context.cid;
-  const socket = io(baseURL, socketConfig);
+  const socket = io(app.baseURL, socketConfig);
   socket.data = {};
   socket.data.socketConfig = socketConfig;
   socket.on('connect', () => {
@@ -80,12 +80,12 @@ function createSocket(t, baseURL, baseConfig) {
   return socket;
 }
 
-async function watchRoom(t, socket, room, assert = true) {
+async function watchRoom(t, app, socket, room, assert = true) {
   const emitAsync = promisify(socket.emit).bind(socket);
   try {
     await emitAsync('watchRoom', { roomId: room.id });
     if (assert) {
-      const { mongoClientDatabase } = t.context.app;
+      const { mongoClientDatabase } = app;
       const userSockets = await mongoClientDatabase.collection('usersockets').find({ socketId: socket.id }).toArray();
       t.is(userSockets.length, 1);
       // TODO: assert serviceInstance
@@ -105,9 +105,9 @@ async function watchRoom(t, socket, room, assert = true) {
   }
 }
 
-async function createSocketAndWatchRoom(t, baseURL, room, socketConfig) {
-  const socket = createSocket(t, baseURL, socketConfig);
-  await watchRoom(t, socket, room);
+async function createSocketAndWatchRoom(t, app, room, socketConfig) {
+  const socket = createSocket(t, app, socketConfig);
+  await watchRoom(t, app, socket, room);
   return socket;
 }
 
@@ -198,7 +198,8 @@ setupTestFileLogContext(test);
 
 socketConfigs.forEach(({ name, config }) => {
   test(`sockets (${name}) that emit watchRoom with a room id will get events for room:latestState when the state changes`, async (t) => {
-    const { api, baseURL } = t.context.app;
+    const { app } = t.context;
+    const { api } = app;
     const userCredOne = await createUserCred(t);
     const userCredTwo = await createUserCred(t);
     const userOne = await createUserAndAssert(t, api, userCredOne);
@@ -208,7 +209,7 @@ socketConfigs.forEach(({ name, config }) => {
     const sockets = await Promise.all(
       [...Array(6).keys()].map((ind) => createSocketAndWatchRoom(
         t,
-        baseURL,
+        app,
         room,
         {
           ...config,
@@ -320,14 +321,15 @@ socketConfigs.forEach(({ name, config }) => {
   });
 
   test(`sockets (${name}) that emit watchRoom with a room id cannot watch another room`, async (t) => {
-    const { api, baseURL } = t.context.app;
+    const { app } = t.context;
+    const { api } = app;
     const userCredOne = await createUserCred(t);
     const userOne = await createUserAndAssert(t, api, userCredOne);
     const game = await createGameAndAssert(t, api, userCredOne, userOne);
     const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
     const socket = await createSocketAndWatchRoom(
       t,
-      baseURL,
+      app,
       room,
       {
         ...config,
@@ -343,15 +345,16 @@ socketConfigs.forEach(({ name, config }) => {
       },
     );
 
-    const error = await t.throwsAsync(watchRoom(t, socket, room, false));
+    const error = await t.throwsAsync(watchRoom(t, t.context.app, socket, room, false));
     t.is(error.message, `Error: Socket already connected to a room: ${room.id}`);
   });
 
   test(`sockets (${name}) that emit watchRoom with an invalid room id will get an error`, async (t) => {
-    const { api, baseURL } = t.context.app;
+    const { app } = t.context;
+    const { api } = app;
     const userCredOne = await createUserCred(t);
     await createUserAndAssert(t, api, userCredOne);
-    const socket = createSocket(t, baseURL, {
+    const socket = createSocket(t, app, {
       ...config,
       auth: (cb) => {
         userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
@@ -366,6 +369,7 @@ socketConfigs.forEach(({ name, config }) => {
     const nonExistentId = new mongoose.Types.ObjectId();
     const nonExistentError = await t.throwsAsync(watchRoom(
       t,
+      app,
       socket,
       { id: nonExistentId.toString() },
       false,
@@ -373,7 +377,9 @@ socketConfigs.forEach(({ name, config }) => {
     t.is(nonExistentError.message, 'Error: Room does not exist');
 
     const invalidId = undefined;
-    const invalidIdError = await t.throwsAsync(watchRoom(t, socket, { id: invalidId }, false));
+    const invalidIdError = await t.throwsAsync(
+      watchRoom(t, t.context.app, socket, { id: invalidId }, false),
+    );
     t.is(invalidIdError.message, 'Error: Room does not exist');
   });
 
@@ -395,25 +401,28 @@ socketConfigs.forEach(({ name, config }) => {
     } = await startTicTacToeRoom(t);
     const apps = [app, ...sideApps];
     const sockets = await Promise.all([...Array(6).keys()]
-      .map((_, index) => createSocketAndWatchRoom(
-        t,
-        apps[index % 4].baseURL,
-        room,
-        {
-          ...config,
-          auth: (cb) => {
-            const authTokenPromise = (index % 2 === 0)
-              ? userCredOne.user.getIdToken() : userCredTwo.user.getIdToken();
-            authTokenPromise.then((token) => cb({ token })).catch((error) => {
-              t.context.log({
-                message: 'unable to get auth token',
-                error,
+      .map((_, index) => {
+        const sideApp = apps[index % 4];
+        return createSocketAndWatchRoom(
+          t,
+          sideApp,
+          room,
+          {
+            ...config,
+            auth: (cb) => {
+              const authTokenPromise = (index % 2 === 0)
+                ? userCredOne.user.getIdToken() : userCredTwo.user.getIdToken();
+              authTokenPromise.then((token) => cb({ token })).catch((error) => {
+                t.context.log({
+                  message: 'unable to get auth token',
+                  error,
+                });
               });
-            });
+            },
+            user: (index % 2 === 0) ? userOne : userTwo,
           },
-          user: (index % 2 === 0) ? userOne : userTwo,
-        },
-      )));
+        );
+      }));
 
     const testMove = {
       x: 0,
@@ -476,15 +485,15 @@ socketConfigs.forEach(({ name, config }) => {
   });
 
   test(`sockets (${name}) gets connect_error if it does not provide auth tokens`, async (t) => {
-    const { baseURL } = t.context.app;
-    const socket = createSocket(t, baseURL, config);
+    const { app } = t.context;
+    const socket = createSocket(t, app, config);
     const connectError = await waitForNextConnectError(t.context.log, socket);
     t.is(connectError.message, 'First argument to verifyIdToken() must be a Firebase ID token string.');
   });
 
   test(`sockets (${name}) gets connect_error if providing invalid auth token`, async (t) => {
-    const { baseURL } = t.context.app;
-    const socket = createSocket(t, baseURL, { ...config, auth: { token: 'invalid-token' } });
+    const { app } = t.context;
+    const socket = createSocket(t, app, { ...config, auth: { token: 'invalid-token' } });
     const connectError = await waitForNextConnectError(t.context.log, socket);
     t.is(connectError.message, 'Decoding Firebase ID token failed. Make sure you passed the entire string JWT which represents an ID token. See https://firebase.google.com/docs/auth/admin/verify-id-tokens for details on how to retrieve an ID token.');
   });
@@ -495,14 +504,13 @@ socketConfigs.forEach(({ name, config }) => {
       defaultMongoEnv: app.envWithMongo,
       defaultRedisEnv: app.envWithRedis,
     });
-    const { api, baseURL } = testApp;
-    const { mongoClientDatabase } = app;
+    const { api, mongoClientDatabase } = testApp;
 
     const userCredOne = await createUserCred(t);
     const userOne = await createUserAndAssert(t, api, userCredOne);
     const socket = createSocket(
       t,
-      baseURL,
+      testApp,
       {
         ...config,
         auth: (cb) => {
@@ -527,7 +535,8 @@ socketConfigs.forEach(({ name, config }) => {
   });
 
   test(`sockets (${name}) across several rooms for the same game still get counted as 1 unique player in activePlayerCount`, async (t) => {
-    const { api, baseURL } = t.context.app;
+    const { app } = t.context;
+    const { api } = app;
     const userCredOne = await createUserCred(t);
     const userCredTwo = await createUserCred(t);
     const userCredThree = await createUserCred(t);
@@ -544,7 +553,8 @@ socketConfigs.forEach(({ name, config }) => {
       createRoomAndAssert(t, api, userCredThree, game, userThree),
     ]);
 
-    const createSocketPromise = (userCred, user, room) => createSocketAndWatchRoom(t, baseURL, room,
+    const createSocketPromise = (userCred, user, room) => createSocketAndWatchRoom(
+      t, app, room,
       {
         ...config,
         auth: (cb) => userCred.user.getIdToken().then((token) => cb({ token })).catch(((error) => {
@@ -554,7 +564,8 @@ socketConfigs.forEach(({ name, config }) => {
           });
         })),
         user,
-      });
+      },
+    );
 
     // create 6 sockets per room (6 sockets * 4 rooms = 24 total sockets)
     // testing high concurrent sockets to make sure we are free of race conditions in our
@@ -586,14 +597,15 @@ socketConfigs.forEach(({ name, config }) => {
   });
 
   test(`sockets (${name}) disconnected kicks player if they don't have a socket connection after 30 seconds`, async (t) => {
-    const { api, baseURL } = t.context.app;
+    const { app } = t.context;
+    const { api } = app;
     const userCredOne = await createUserCred(t);
     const userOne = await createUserAndAssert(t, api, userCredOne);
     const game = await createGameAndAssert(t, api, userCredOne, userOne);
     const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
     const socket = await createSocketAndWatchRoom(
       t,
-      baseURL,
+      app,
       room,
       {
         ...config,
@@ -628,13 +640,13 @@ socketConfigs.forEach(({ name, config }) => {
   });
 
   test(`sockets (${name}) with other players notifies clients of user disconnect timeout`, async (t) => {
-    const { baseURL } = t.context.app;
+    const { app } = t.context;
     const {
       room, userCredOne, userCredTwo, userOne, userTwo,
     } = await startTicTacToeRoom(t);
     const createTempSocket = (userCred, user) => createSocketAndWatchRoom(
       t,
-      baseURL,
+      app,
       room,
       {
         ...config,
@@ -695,14 +707,15 @@ socketConfigs.forEach(({ name, config }) => {
   });
 
   test(`sockets (${name}) multiple disconnections kicks player if they don't have a socket connection after 30 seconds`, async (t) => {
-    const { api, baseURL } = t.context.app;
+    const { app } = t.context;
+    const { api } = app;
     const userCredOne = await createUserCred(t);
     const userOne = await createUserAndAssert(t, api, userCredOne);
     const game = await createGameAndAssert(t, api, userCredOne, userOne);
     const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
     const sockets = await Promise.all([...Array(3).keys()].map(() => createSocketAndWatchRoom(
       t,
-      baseURL,
+      app,
       room,
       {
         ...config,
@@ -737,14 +750,15 @@ socketConfigs.forEach(({ name, config }) => {
   });
 
   test(`sockets (${name}) disconnected does not kick player if they have a socket connection after 30 seconds`, async (t) => {
-    const { api, baseURL } = t.context.app;
+    const { app } = t.context;
+    const { api } = app;
     const userCredOne = await createUserCred(t);
     const userOne = await createUserAndAssert(t, api, userCredOne);
     const game = await createGameAndAssert(t, api, userCredOne, userOne);
     const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
     const createNewSocket = () => createSocketAndWatchRoom(
       t,
-      baseURL,
+      app,
       room,
       {
         ...config,
@@ -782,14 +796,15 @@ socketConfigs.forEach(({ name, config }) => {
   });
 
   test(`sockets (${name}) disconnected does not kick player if room is private`, async (t) => {
-    const { api, baseURL } = t.context.app;
+    const { app } = t.context;
+    const { api } = app;
     const userCredOne = await createUserCred(t);
     const userOne = await createUserAndAssert(t, api, userCredOne);
     const game = await createGameAndAssert(t, api, userCredOne, userOne);
     const room = await createRoomAndAssert(t, api, userCredOne, game, userOne, true);
     const socket = await createSocketAndWatchRoom(
       t,
-      baseURL,
+      app,
       room,
       {
         ...config,
@@ -822,7 +837,8 @@ socketConfigs.forEach(({ name, config }) => {
   });
 
   test(`sockets (${name}) disconnected does not kick player if room is finished`, async (t) => {
-    const { api, baseURL } = t.context.app;
+    const { app } = t.context;
+    const { api } = app;
     const {
       userCredOne, userOne, userCredTwo, room,
     } = await startTicTacToeRoom(t);
@@ -834,7 +850,7 @@ socketConfigs.forEach(({ name, config }) => {
 
     const socket = await createSocketAndWatchRoom(
       t,
-      baseURL,
+      app,
       room,
       {
         ...config,
