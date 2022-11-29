@@ -24,6 +24,13 @@ const UserSocketSchema = new Schema({
     // querying for all the active sockets on a room
     index: true,
   },
+  serviceInstance: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: 'ServiceInstanceSchema',
+    // querying for all sockets associated with a dead service instance for clean up
+    index: true,
+  },
   socketId: {
     type: Schema.Types.String,
     required: true,

@@ -79,12 +79,12 @@ function makePersistentDependencyFn(name, envField, setupFunc) {
           () => { logFn({ log: `skipping killing local ${name} instance.` }); }];
       }
     }
-    const [uri, cleanupFunc, client] = await setupFunc();
+    const [uri, cleanupFunc] = await setupFunc();
     logFn({ log: `started local ${name} instance at URI: ${uri}` });
     return [{ [envField]: uri }, async () => {
       logFn({ log: `killing local ${name} instance...` });
       await cleanupFunc();
-    }, client];
+    }];
   };
 }
 
@@ -112,13 +112,15 @@ const setupMongoDB = makePersistentDependencyFn('MongoDB', 'MONGODB_CONNECTION_U
       replSet: { count: 4 },
     });
     const uri = mongod.getUri();
-    const mongoClient = new MongoClient(uri);
     return [uri, async () => {
-      await mongoClient.close();
       await mongod.stop();
-    },
-    mongoClient.db('test')];
+    }];
   });
+
+const setupMongoDBClient = (uri) => {
+  const mongoClient = new MongoClient(uri);
+  return mongoClient.db('test');
+};
 
 const setupRedis = makePersistentDependencyFn('Redis', 'REDIS_URL',
   async () => {
@@ -131,7 +133,9 @@ const setupRedis = makePersistentDependencyFn('Redis', 'REDIS_URL',
     const host = await redisServer.getHost();
     const port = await redisServer.getPort();
     const uri = `redis://${host}:${port}`;
-    return [uri, async () => { await redisServer.stop(); }];
+    return [uri, async () => {
+      await redisServer.stop();
+    }];
   });
 
 function setupTestFileLogContext(test) {
@@ -187,6 +191,7 @@ module.exports = {
   waitFor,
   waitForOutput,
   setupMongoDB,
+  setupMongoDBClient,
   setupRedis,
   sleep,
   setupTestFileLogContext,

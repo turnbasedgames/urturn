@@ -15,6 +15,9 @@ const roomRouter = require('./src/models/room/route');
 const errorHandler = require('./src/middleware/errorHandler');
 const setupSocketio = require('./src/setupSocketio');
 const { setupRedis } = require('./src/setupRedis');
+const ServiceInstance = require('./src/models/serviceInstance/serviceInstance');
+const serviceInstanceRouter = require('./src/models/serviceInstance/route');
+const { startServiceInstancePingChain } = require('./src/models/serviceInstance/util');
 
 const PORT = process.env.PORT || 8080;
 
@@ -22,6 +25,11 @@ const main = async () => {
   logger.info('Starting server...');
   const cleanupDB = await setupDB();
   logger.info('mongodb connection is ready');
+
+  // create a serviceInstance document to register the instance
+  const serviceInstance = new ServiceInstance();
+  await serviceInstance.save();
+  startServiceInstancePingChain(serviceInstance.id);
 
   const app = express();
   app.use(await setupExpressLoggerMiddleware());
@@ -33,7 +41,7 @@ const main = async () => {
   });
 
   const cleanupRedis = await setupRedis({ io });
-  const cleanupSocketioServer = setupSocketio(io);
+  const cleanupSocketioServer = setupSocketio(io, serviceInstance.id);
 
   app.use(cors());
   app.use((req, res, next) => {
@@ -48,6 +56,10 @@ const main = async () => {
   app.use(userRouter.PATH, userRouter.router);
   app.use(gameRouter.PATH, gameRouter.router);
   app.use(roomRouter.PATH, roomRouter.setupRouter({ io }));
+  app.use(
+    serviceInstanceRouter.PATH,
+    serviceInstanceRouter.setupRouter({ serviceInstanceId: serviceInstance.id }),
+  );
 
   app.get('/readiness', async (req, res) => {
     res.sendStatus(StatusCodes.OK);

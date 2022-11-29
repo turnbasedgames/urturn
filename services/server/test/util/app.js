@@ -4,7 +4,9 @@ const axios = require('axios');
 const getPort = require('get-port');
 const { v4: uuidv4 } = require('uuid');
 const { cleanupTestUsers } = require('./api_util');
-const { waitFor, setupMongoDB, setupRedis } = require('./util');
+const {
+  waitFor, setupMongoDB, setupMongoDBClient, setupRedis,
+} = require('./util');
 const { testStripeKey, testStripeWebhookSecret } = require('./stripe');
 
 function waitUntilRunning(logFn, api, timeout = 60000, buffer = 1000) {
@@ -89,8 +91,11 @@ async function spawnApp(t, options = {}) {
 
   // prefer custom logger over default log
   const logFn = t.context.log ?? t.log;
-  const [envWithMongo, cleanupMongoDB, mongoClientDatabase] = await setupMongoDB(
+  const [envWithMongo, cleanupMongoDB] = await setupMongoDB(
     logFn, defaultMongoEnv, forceCreatePersistentDependencies,
+  );
+  const mongoClientDatabase = setupMongoDBClient(
+    envWithMongo.MONGODB_CONNECTION_URL,
   );
   const [envWithRedis, cleanupRedis] = await setupRedis(
     logFn, defaultRedisEnv, forceCreatePersistentDependencies,
