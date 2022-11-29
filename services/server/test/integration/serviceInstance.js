@@ -24,5 +24,5 @@ test('GET /instance returns current serviceInstance', async (t) => {
   const { data: { serviceInstance: newServiceInstance }, status: newStatus } = await api.get('/instance');
   t.is(newStatus, StatusCodes.OK);
   t.is(newServiceInstance.id, serviceInstance.id);
-  t.is(newServiceInstance.newPingCount, serviceInstance.pingCount + 1);
+  t.is(newServiceInstance.pingCount, serviceInstance.pingCount + 1);
 });
