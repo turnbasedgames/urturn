@@ -15,6 +15,8 @@ const roomRouter = require('./src/models/room/route');
 const errorHandler = require('./src/middleware/errorHandler');
 const setupSocketio = require('./src/setupSocketio');
 const { setupRedis } = require('./src/setupRedis');
+const ServiceInstance = require('./src/models/serviceInstance/serviceInstance');
+const { startServiceInstancePingChain } = require('./src/models/serviceInstance/util');
 
 const PORT = process.env.PORT || 8080;
 
@@ -22,6 +24,11 @@ const main = async () => {
   logger.info('Starting server...');
   const cleanupDB = await setupDB();
   logger.info('mongodb connection is ready');
+
+  // create a serviceInstance document to register the instance
+  const serviceInstance = new ServiceInstance();
+  await serviceInstance.save();
+  startServiceInstancePingChain(serviceInstance.id);
 
   const app = express();
   app.use(await setupExpressLoggerMiddleware());

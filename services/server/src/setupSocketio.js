@@ -69,6 +69,7 @@ async function deleteUserSocket(io, socket) {
     if (existingUserGameSocketPair == null) {
       lastSocket = true;
       operationPromises.push(Game.findOneAndUpdate(
+        // this operation will not error if game no longer exists (gets deleted)
         { _id: room.game },
         { $inc: { activePlayerCount: -1 } },
       ).session(session).exec());
