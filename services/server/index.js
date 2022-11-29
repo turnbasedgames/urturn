@@ -40,7 +40,7 @@ const main = async () => {
   });
 
   const cleanupRedis = await setupRedis({ io });
-  const cleanupSocketioServer = setupSocketio(io);
+  const cleanupSocketioServer = setupSocketio(io, serviceInstance);
 
   app.use(cors());
   app.use((req, res, next) => {

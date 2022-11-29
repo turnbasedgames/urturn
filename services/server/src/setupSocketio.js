@@ -9,7 +9,7 @@ const { quitRoomTransaction, populateRoomAndNotify } = require('./models/room/ut
 
 const DEFAULT_DISCONNECT_TIMEOUT_SECS = 30;
 
-async function createUserSocket(socket, room) {
+async function createUserSocket(socket, room, serviceInstance) {
   // Don't need to query for room in transaction because the gameId does not change and thus,
   // guaranteed to be up to date
   await mongoose.connection.transaction(async (session) => {
@@ -23,6 +23,7 @@ async function createUserSocket(socket, room) {
 
     const userSocket = new UserSocket({
       socketId: socket.id,
+      serviceInstance: serviceInstance.id,
       room: room.id,
       game: room.game,
       user: socket.data.user.id,
@@ -155,7 +156,7 @@ async function handleSocketDisconnect(io, socket, reason) {
   }
 }
 
-function setupSocketio(io) {
+function setupSocketio(io, serviceInstance) {
   io.use(socketioLoggerMiddleware);
   io.use(socketioAuthMiddelware);
 
@@ -175,7 +176,7 @@ function setupSocketio(io) {
         if (room == null) {
           throw new Error('Room does not exist');
         }
-        await createUserSocket(socket, room);
+        await createUserSocket(socket, room, serviceInstance);
         await socket.join(roomId);
         cb();
         socket.logger.info('watching room', { id: socket.id, roomId });
