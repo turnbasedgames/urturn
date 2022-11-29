@@ -88,6 +88,7 @@ async function watchRoom(t, socket, room, assert = true) {
       const { mongoClientDatabase } = t.context.app;
       const userSockets = await mongoClientDatabase.collection('usersockets').find({ socketId: socket.id }).toArray();
       t.is(userSockets.length, 1);
+      // TODO: assert serviceInstance
       t.is(userSockets[0].socketId, socket.id);
       t.is(userSockets[0].user.toString(), socket.data.socketConfig.user.id);
       t.is(userSockets[0].room.toString(), room.id);
