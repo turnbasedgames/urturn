@@ -23,8 +23,11 @@ https://docs.urturn.app/
 
 Talk to us on [discord](https://discord.gg/myWacjdb5S)
 
-## Misc
-
-contributor [docs](https://docs.google.com/document/d/1C5VCiNZEYpNmNItgmS53FOrZrA--SPJt-oCrYwC_kEU/edit?usp=sharing)
+## Contributors
 
 ![Alt](https://repobeats.axiom.co/api/embed/1d535cc9b3dda15020410a5fa918edab884816d5.svg)
+
+### Contributing Instructions
+
+- Adding and modifying templates [readme](templates/README.md)
+- Internal Contributor [docs](https://docs.google.com/document/d/1C5VCiNZEYpNmNItgmS53FOrZrA--SPJt-oCrYwC_kEU/edit?usp=sharing)
