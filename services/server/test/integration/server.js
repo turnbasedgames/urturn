@@ -29,3 +29,26 @@ test('Server fails and process exits when required Stripe environment variables 
     }), 1);
   }));
 });
+
+test('Server fails and process exits when required Google Application Credentials are not provided', async (t) => {
+  const { app } = t.context;
+  const testApp = await spawnApp(
+    t,
+    {
+      overrideEnv: {
+        GOOGLE_APPLICATION_CREDENTIALS_BASE64: undefined,
+        GOOGLE_APPLICATION_CREDENTIALS: undefined,
+      },
+      defaultMongoEnv: app.envWithMongo,
+      defaultRedisEnv: app.envWithRedis,
+      noWait: true,
+    },
+  );
+  t.true(await waitForOutput(t.context.log, 'No Google Application Credential detected for service!', testApp.stderrMessages));
+  t.is(await waitFor(t.context.log, async () => {
+    if (testApp.server.exitCode == null) {
+      throw new Error('server has not terminated yet...');
+    }
+    return testApp.server.exitCode;
+  }), 1);
+});
