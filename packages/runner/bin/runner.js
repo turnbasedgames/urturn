@@ -19,9 +19,11 @@ const require = createRequire(import.meta.url);
 // avoid experimental json import warnings https://stackoverflow.com/questions/66726365/how-should-i-import-json-in-node
 const pkg = require('../package.json');
 
-const templateBackendRepo = 'turnbasedgames/urturn/templates/template-backend';
-const templateFrontendRepoPrefix = 'turnbasedgames/urturn/templates/template-';
-const tutorialBasePath = 'turnbasedgames/urturn/examples/';
+const DEFAULT_GIT_URL = 'https://github.com/turnbasedgames/urturn';
+const DEFAULT_GIT_BRANCH = 'main';
+const templateBackendPath = '/templates/template-backend';
+const templateFrontendRepoPrefix = '/templates/template-';
+const tutorialBasePath = '/examples/';
 
 function wrapVersion(fn) {
   return (...args) => {
@@ -86,7 +88,9 @@ function getFrontendPathFromDest(destination) {
   return `${destination}/frontend`;
 }
 
-async function setupProjectFiles({ destination, tutorial, commit }) {
+async function setupProjectFiles({
+  gitUrl, destination, tutorial, commit,
+}) {
   const frontendPath = getFrontendPathFromDest(destination);
   const commitSuffix = commit == null ? '' : `#${commit}`;
   if (tutorial) {
@@ -106,9 +110,10 @@ async function setupProjectFiles({ destination, tutorial, commit }) {
     if (comingSoonTutorials.has(tutorialType)) {
       throw new Error("Tutorial doesn't exist yet! It is coming soon! 🚧");
     } else {
-      const tutorialPath = tutorialBasePath + tutorialType + commitSuffix;
-      logger.info('Downloading tutorial...');
-      const tutorialEmitter = degit(tutorialPath);
+      const tutorialPath = tutorialBasePath + tutorialType;
+      const tutorialDegitUrl = gitUrl + tutorialPath + commitSuffix;
+      logger.info(`Downloading tutorial from ${gitUrl}/tree/${commit}${tutorialPath}...`);
+      const tutorialEmitter = degit(tutorialDegitUrl);
       await tutorialEmitter.clone(destination);
     }
   } else {
@@ -124,22 +129,24 @@ async function setupProjectFiles({ destination, tutorial, commit }) {
         ],
       },
     ]);
-    const templateFrontendPath = templateFrontendRepoPrefix + frontendType + commitSuffix;
-    const templateBackendPath = templateBackendRepo + commitSuffix;
-    const templateBackendEmitter = degit(templateBackendPath);
-    const templateFrontendEmitter = degit(templateFrontendPath);
+    const templateFrontendPath = templateFrontendRepoPrefix + frontendType;
+    const templateFrontendDegitUrl = gitUrl + templateFrontendPath + commitSuffix;
+    const templateBackendDegitUrl = gitUrl + templateBackendPath + commitSuffix;
+    const templateBackendEmitter = degit(templateBackendDegitUrl);
+    const templateFrontendEmitter = degit(templateFrontendDegitUrl);
 
-    logger.info('Downloading backend template...');
+    logger.info(`Downloading backend template from ${gitUrl}/tree/${commit}${templateBackendPath}...`);
     await templateBackendEmitter.clone(destination);
-    logger.info('Downloading frontend template...');
+    logger.info(`Downloading frontend template from ${gitUrl}/tree/${commit}${templateFrontendPath}...`);
     await templateFrontendEmitter.clone(frontendPath);
   }
 }
 
-async function init(destination, { commit, tutorial }) {
+async function init(destination, { commit, tutorial, gitUrl }) {
   const fullPathDestination = path.resolve(destination);
   const frontendPath = getFrontendPathFromDest(destination);
   await setupProjectFiles({
+    gitUrl,
     destination,
     commit,
     tutorial,
@@ -168,7 +175,12 @@ async function main() {
     .description('initialize a new UrTurn Game')
     .addOption(new Option('-t, --tutorial', `initialize a UrTurn tutorial game (see ${DOCS_URL}docs/category/getting-started)`))
     // hide UrTurn dev only options
-    .addOption(new Option('--commit <commit>', 'custom commit or branch to run init from').hideHelp())
+    .addOption(new Option('--commit <commit>', 'custom commit or branch to run init from')
+      .default(DEFAULT_GIT_BRANCH)
+      .hideHelp())
+    .addOption(new Option('--git-url <git-url>', 'custom forked repo to get templates or tutorials from')
+      .default(DEFAULT_GIT_URL)
+      .hideHelp())
     .action(wrapVersion(init));
 
   program
