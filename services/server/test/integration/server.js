@@ -44,7 +44,7 @@ test('Server fails and process exits when required Google Application Credential
       noWait: true,
     },
   );
-  t.true(await waitForOutput(t.context.log, 'No Google Application Credential detected for service!', testApp.stderrMessages));
+  t.true(await waitForOutput(t.context.log, 'No firebase credential detected for service!', testApp.stderrMessages));
   t.is(await waitFor(t.context.log, async () => {
     if (testApp.server.exitCode == null) {
       throw new Error('server has not terminated yet...');

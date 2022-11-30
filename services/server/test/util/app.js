@@ -8,6 +8,7 @@ const {
   waitFor, setupMongoDB, setupMongoDBClient, setupRedis,
 } = require('./util');
 const { testStripeKey, testStripeWebhookSecret } = require('./stripe');
+const { initializeFirebase } = require('./firebase');
 
 function waitUntilRunning(logFn, api, timeout = 60000, buffer = 1000) {
   return waitFor(
@@ -146,6 +147,7 @@ async function spawnApp(t, options = {}) {
 
 function setupTestBeforeAfterHooks(test) {
   test.before(async (t) => {
+    initializeFirebase();
     const app = await spawnApp(t);
     /* eslint-disable no-param-reassign */
     t.context.app = app;
