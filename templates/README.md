@@ -20,7 +20,7 @@ You will mainly be working with the `@urturn/runner` package under `packages/run
 Testing your changes with the runner:
 
 ```bash
-$ npx lerna @urturn/runner init my-game --git-url <url of your fork> --commit <your branch>
+$ npx lerna @urturn/runner init my-game --git-url <url of your fork> --commit <specific commit or branch>
 ```
 
 **Warning** - the flags `git-url` and `commit` are hidden because these are only used for testing the runner, so you won't see these if you add the help flag, `-h`, to your command
