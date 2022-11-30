@@ -5,6 +5,14 @@ authors: [kevo1ution]
 tags: [game jam]
 ---
 
+## Update
+
+Congratulations to the winners!!
+
+- **1st Place** - `@jvat` [Bananagrams](https://www.urturn.app/play/bananagrams)
+- **2nd Place** - `@azzy` [Hangman](https://www.urturn.app/play/hangman)
+- **3rd place** - `@hannahmarie` [Song Guesser](https://www.urturn.app/play/song-guesser)
+
 ## Prizes
 
 - 1st $50 Gift Card
