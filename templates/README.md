@@ -2,7 +2,7 @@
 
 ## Before you start
 
-- Discuss with maintainers and other developers who use your framework in our [Discord](https://discord.gg/myWacjdb5S)
+- Discuss with maintainers and other game developers in our [Discord](https://discord.gg/myWacjdb5S)
 - Raise a [GitHub issue](https://github.com/turnbasedgames/urturn/issues) to open up discussion (make sure one doesn't already exist); maintainers should give you the green/red light in a timely manner.
 
 ## Local Development
