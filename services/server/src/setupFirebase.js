@@ -1,11 +1,12 @@
 const admin = require('firebase-admin');
 const logger = require('./logger');
 
-const { GOOGLE_APPLICATION_CREDENTIALS, GOOGLE_APPLICATION_CREDENTIALS_BASE64 } = process.env;
+const { GOOGLE_APPLICATION_CREDENTIALS_BASE64 } = process.env;
 
-if (GOOGLE_APPLICATION_CREDENTIALS != null) {
+if (process.env.NODE_ENV === 'production') {
+  logger.info('Detected production environment, which must use application default credentials (ADC).');
   logger.info('Using default Google Application Credentials credentials');
-  admin.initializeApp({ credential: admin.credential.applicationDefault() });
+  admin.initializeApp();
 } else if (GOOGLE_APPLICATION_CREDENTIALS_BASE64 != null) {
   logger.warn('Getting Google Application Credentials as an environment variable: GOOGLE_APPLICATION_CREDENTIALS_BASE64');
   logger.warn('This should never be done in production!');
