@@ -58,7 +58,7 @@ const main = async () => {
   app.use(roomRouter.PATH, roomRouter.setupRouter({ io }));
   app.use(
     serviceInstanceRouter.PATH,
-    serviceInstanceRouter.setupRouter({ serviceInstanceId: serviceInstance.id }),
+    serviceInstanceRouter.setupRouter({ io, serviceInstanceId: serviceInstance.id }),
   );
 
   app.get('/readiness', async (req, res) => {

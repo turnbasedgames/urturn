@@ -4,7 +4,7 @@ const admin = require('firebase-admin');
 
 const User = require('../models/user/user');
 
-const rawAuthMiddleware = async (logger, token, setUser, sendUnAuthorizedError, next) => {
+const rawUserAuthMiddleware = async (logger, token, setUser, sendUnAuthorizedError, next) => {
   let decodedToken;
   try {
     decodedToken = await admin.auth().verifyIdToken(token);
@@ -26,8 +26,8 @@ module.exports = {
   // provided through next() function call. The express auth middleware sends 401 without calling
   // next()
   // https://socket.io/docs/v3/middlewares/#compatibility-with-express-middleware
-  socketioAuthMiddelware: (socket, next) => {
-    rawAuthMiddleware(
+  socketioUserAuthMiddelware: (socket, next) => {
+    rawUserAuthMiddleware(
       socket.logger,
       socket.handshake.auth.token,
       (user, decodedToken) => {
@@ -42,7 +42,7 @@ module.exports = {
     );
   },
   expressUserAuthMiddleware: asyncHandler(async (req, res, next) => {
-    await rawAuthMiddleware(
+    await rawUserAuthMiddleware(
       req.log,
       req.headers.authorization,
       (user, decodedToken) => {
