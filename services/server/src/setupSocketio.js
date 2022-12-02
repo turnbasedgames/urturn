@@ -1,6 +1,6 @@
 const Room = require('./models/room/room');
 const { socketioLoggerMiddleware } = require('./middleware/httpLogger');
-const { socketioAuthMiddelware } = require('./middleware/auth');
+const { socketioUserAuthMiddelware } = require('./middleware/auth');
 const logger = require('./logger');
 const {
   deleteUserSocket,
@@ -31,7 +31,7 @@ async function handleSocketDisconnect(io, socket, reason) {
 
 function setupSocketio(io, serviceInstanceId) {
   io.use(socketioLoggerMiddleware);
-  io.use(socketioAuthMiddelware);
+  io.use(socketioUserAuthMiddelware);
 
   // We maintain that sockets can only be associated with one room in its lifetime.
   // If a client wants to watch another room, it needs to create a new socket connection.

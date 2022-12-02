@@ -139,7 +139,14 @@ async function startTicTacToeRoom(t) {
   };
 }
 
+async function getServiceInstanceAndAssert(t, api) {
+  const { data: { serviceInstance }, status } = await api.get('/instance');
+  t.is(status, StatusCodes.OK);
+  return serviceInstance;
+}
+
 module.exports = {
+  getServiceInstanceAndAssert,
   getPublicUserFromUser,
   createGameAndAssert,
   createRoomAndAssert,
