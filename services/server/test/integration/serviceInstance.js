@@ -119,8 +119,9 @@ test('DELETE /instance/cleanup cleans up at max 10 userSockets for each serviceI
   await mongoClientDatabase.collection('games')
     .findOneAndUpdate({ _id: new Types.ObjectId(game2.id) }, { $set: { activePlayerCount: 2 } });
 
-  const { status } = await api.delete('/instance/cleanup');
+  const { status, data: { serviceInstanceCount } } = await api.delete('/instance/cleanup');
   t.is(status, StatusCodes.OK);
+  t.is(serviceInstanceCount, 5);
 
   // no service instances deleted because too many userSockets to cleanup
   const expectedServiceInstanceIdsLeft = new Set([
@@ -185,8 +186,9 @@ test('DELETE /instance/cleanup cleans up at max 10 of the most stale serviceInst
   }));
   await mongoClientDatabase.collection('serviceinstances').insertMany([
     ...stale10MinInstances, ...stale20MinInstances, ...almostStaleInstances]);
-  const { status } = await api.delete('/instance/cleanup');
+  const { status, data: { serviceInstanceCount } } = await api.delete('/instance/cleanup');
   t.is(status, StatusCodes.OK);
+  t.is(serviceInstanceCount, 10);
 
   const expectedServiceInstanceIdsLeft = new Set([
     serviceInstance,
