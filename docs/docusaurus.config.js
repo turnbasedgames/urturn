@@ -120,7 +120,16 @@ const config = {
       },
     }),
   // This is required to make the docs site searchable https://github.com/praveenn77/docusaurus-lunr-search
-  plugins: [require.resolve('docusaurus-lunr-search')]
+  plugins: [
+    require.resolve('docusaurus-lunr-search'),
+    [
+      '@docusaurus/plugin-google-gtag',
+      {
+        trackingID: 'XXX',
+        anonymizeIP: false,
+      },
+    ],
+  ]
 };
 
 module.exports = config;
