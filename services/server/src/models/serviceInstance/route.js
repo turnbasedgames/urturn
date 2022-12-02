@@ -29,8 +29,10 @@ function setupRouter({ io, serviceInstanceId }) {
       const now = new Date().getTime();
       const msPerMinute = 60 * 1000;
       const latestUpdatedAt = new Date(now - MAX_STALE_MINS * msPerMinute);
+      req.log.info('looking for stale service instances', { latestUpdatedAt });
       const staleServiceInstances = await ServiceInstance
-        .find({ updatedAt: { $lte: latestUpdatedAt } })
+        .find({ updatedAt: { $lt: latestUpdatedAt } })
+        .sort({ updatedAt: 1 }) // handle get the most stale first
         .limit(MAX_SERVICE_INSTANCES_CLEANUP)
         .exec();
       req.log.info('stale service instances to cleanup', { staleServiceInstances });
@@ -39,11 +41,12 @@ function setupRouter({ io, serviceInstanceId }) {
         const staleUserSockets = await UserSocket
           .find({ serviceInstance: staleServiceInstance.id })
           .populate('user')
+          .sort({ updatedAt: 1 }) // handle get the most stale first
           .limit(MAX_USER_SOCKETS_CLEANUP_PER_SERVICE)
           .exec();
         req.log.info('stale sockets to cleanup', { staleUserSockets });
         await Promise.all(staleUserSockets.map(async (staleUserSocket) => {
-          deleteUserSocket(
+          await deleteUserSocket(
             io,
             req.log,
             staleUserSocket.room,

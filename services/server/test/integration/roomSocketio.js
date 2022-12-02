@@ -8,7 +8,7 @@ const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
 const {
   getPublicUserFromUser, createUserAndAssert, createGameAndAssert, createRoomAndAssert,
-  startTicTacToeRoom, getRoomAndAssert,
+  startTicTacToeRoom, getRoomAndAssert, getServiceInstanceAndAssert,
 } = require('../util/api_util');
 const {
   waitFor, createOrUpdateSideApps, setupTestFileLogContext, sleep,
@@ -85,15 +85,14 @@ async function watchRoom(t, app, socket, room, assert = true) {
   try {
     await emitAsync('watchRoom', { roomId: room.id });
     if (assert) {
-      const { mongoClientDatabase } = app;
+      const { mongoClientDatabase, api } = app;
       const userSockets = await mongoClientDatabase.collection('usersockets').find({ socketId: socket.id }).toArray();
       t.is(userSockets.length, 1);
       t.is(userSockets[0].socketId, socket.id);
       t.is(userSockets[0].user.toString(), socket.data.socketConfig.user.id);
       t.is(userSockets[0].room.toString(), room.id);
       t.is(userSockets[0].game.toString(), room.game.id);
-      const { data: { serviceInstance }, status } = await app.api.get('/instance');
-      t.is(status, StatusCodes.OK);
+      const serviceInstance = await getServiceInstanceAndAssert(t, api);
       t.is(userSockets[0].serviceInstance.toString(), serviceInstance.id);
     }
   } catch (err) {
