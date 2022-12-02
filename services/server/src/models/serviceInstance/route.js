@@ -35,7 +35,10 @@ function setupRouter({ io, serviceInstanceId }) {
         .sort({ updatedAt: 1 }) // handle get the most stale first
         .limit(MAX_SERVICE_INSTANCES_CLEANUP)
         .exec();
-      req.log.info('stale service instances to cleanup', { staleServiceInstances });
+      req.log.info('stale service instances to cleanup', {
+        staleServiceInstances: staleServiceInstances
+          .map((staleServiceInstance) => staleServiceInstance.toJSON()),
+      });
 
       await Promise.all(staleServiceInstances.map(async (staleServiceInstance) => {
         const staleUserSockets = await UserSocket
@@ -44,7 +47,9 @@ function setupRouter({ io, serviceInstanceId }) {
           .sort({ updatedAt: 1 }) // handle get the most stale first
           .limit(MAX_USER_SOCKETS_CLEANUP_PER_SERVICE)
           .exec();
-        req.log.info('stale sockets to cleanup', { staleUserSockets });
+        req.log.info('stale sockets to cleanup', {
+          staleUserSockets: staleUserSockets.map((staleUserSocket) => staleUserSocket.toJSON()),
+        });
         await Promise.all(staleUserSockets.map(async (staleUserSocket) => {
           await deleteUserSocket(
             io,
@@ -55,12 +60,13 @@ function setupRouter({ io, serviceInstanceId }) {
           );
         }));
         if (staleUserSockets.length === 0) {
-          req.log.info('deleting stale service instance:', { staleServiceInstance });
+          req.log.info('deleting stale service instance:', { staleServiceInstance: staleServiceInstance.toJSON() });
           await staleServiceInstance.deleteOne();
         }
       }));
-
-      res.sendStatus(StatusCodes.OK);
+      res.status(StatusCodes.OK).json({
+        serviceInstanceCount: staleServiceInstances.length,
+      });
     }));
   return router;
 }
