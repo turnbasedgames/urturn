@@ -50,18 +50,19 @@ function setupRouter({ io, serviceInstanceId }) {
         req.log.info('stale sockets to cleanup', {
           staleUserSockets: staleUserSockets.map((staleUserSocket) => staleUserSocket.toJSON()),
         });
-        await Promise.all(staleUserSockets.map(async (staleUserSocket) => {
-          await deleteUserSocket(
-            io,
-            req.log,
-            staleUserSocket.room,
-            staleUserSocket.user,
-            staleUserSocket.socketId,
-          );
-        }));
         if (staleUserSockets.length === 0) {
           req.log.info('deleting stale service instance:', { staleServiceInstance: staleServiceInstance.toJSON() });
           await staleServiceInstance.deleteOne();
+        } else {
+          await Promise.all(staleUserSockets.map(async (staleUserSocket) => {
+            await deleteUserSocket(
+              io,
+              req.log,
+              staleUserSocket.room,
+              staleUserSocket.user,
+              staleUserSocket.socketId,
+            );
+          }));
         }
       }));
       res.status(StatusCodes.OK).json({
