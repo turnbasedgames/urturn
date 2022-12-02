@@ -91,8 +91,8 @@ test('DELETE /instance/cleanup cleans up at max 10 userSockets for each serviceI
     .map((ind) => ({
       _id: new Types.ObjectId(`d0000000000000000000000${ind}`),
       user: new Types.ObjectId(users[ind % 2].id),
-      room: new Types.ObjectId(rooms[ind % 3].id),
-      game: new Types.ObjectId(rooms[ind % 3].game.id),
+      room: new Types.ObjectId(rooms[(ind % 2) + 1].id), // only game2 rooms (room2, room3)
+      game: new Types.ObjectId(game2.id), // all game2 sockets, so activeConcurrentPlayers stays 2
       socketId: `veryStaleSocket-${ind}`,
       // eslint-disable-next-line no-underscore-dangle
       serviceInstance: stale10MinInstances[0]._id,
@@ -103,8 +103,8 @@ test('DELETE /instance/cleanup cleans up at max 10 userSockets for each serviceI
       .map((ind) => ({
         _id: new Types.ObjectId(`e000000000000000000000${instInd}${ind}`),
         user: new Types.ObjectId(users[ind % 2].id),
-        room: new Types.ObjectId(rooms[ind % 3].id),
-        game: new Types.ObjectId(rooms[ind % 3].game.id),
+        room: new Types.ObjectId(rooms[(ind % 2) + 1].id), // only game2 rooms (room2, room3)
+        game: new Types.ObjectId(game2.id), // all game2 sockets, so activeConcurrentPlayers stays 2
         socketId: `notStaleSocket-${instInd}-${ind}`,
         serviceInstance: instanceId,
         updatedAt: stale20Minutes,
@@ -112,6 +112,12 @@ test('DELETE /instance/cleanup cleans up at max 10 userSockets for each serviceI
     .flat();
   await mongoClientDatabase.collection('usersockets').insertMany([
     ...expectedStaleUserSocketsDeleted, ...staleUserSocketsNotDeleted, ...nonStaleUserSockets]);
+
+  // both games should have activePlayerCount 2, because only 2 unique users have sockets
+  await mongoClientDatabase.collection('games')
+    .findOneAndUpdate({ _id: new Types.ObjectId(game1.id) }, { $set: { activePlayerCount: 2 } });
+  await mongoClientDatabase.collection('games')
+    .findOneAndUpdate({ _id: new Types.ObjectId(game2.id) }, { $set: { activePlayerCount: 2 } });
 
   const { status } = await api.delete('/instance/cleanup');
   t.is(status, StatusCodes.OK);
@@ -131,6 +137,16 @@ test('DELETE /instance/cleanup cleans up at max 10 userSockets for each serviceI
   const expectedUserSocketIdsLeft = new Set([...staleUserSocketsNotDeleted, ...nonStaleUserSockets]
     .map(({ _id }) => _id.toString()));
   t.deepEqual(actualUserSocketIdsLeft, expectedUserSocketIdsLeft);
+
+  const { data: { game: actualGame1 }, status: getGame1Status } = await api.get(`/game/${game1.id}`);
+  t.is(getGame1Status, StatusCodes.OK);
+  // no more players in game1 because all the sockets were cleaned up
+  t.deepEqual(actualGame1, { ...game1, activePlayerCount: 0 });
+
+  const { data: { game: actualGame2 }, status: getGame2Status } = await api.get(`/game/${game2.id}`);
+  t.is(getGame2Status, StatusCodes.OK);
+  // game2 still has active sockets so activePlayerCount should not be decremented
+  t.deepEqual(actualGame2, { ...game2, activePlayerCount: 2 });
 });
 
 test('DELETE /instance/cleanup cleans up at max 10 of the most stale serviceInstances that have zero associated sockets', async (t) => {
