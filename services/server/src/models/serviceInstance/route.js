@@ -40,6 +40,28 @@ function setupRouter({ io, serviceInstanceId }) {
           .map((staleServiceInstance) => staleServiceInstance.toJSON()),
       });
 
+      // legacy: this can be deleted after all userSockets in the database have a associated
+      // serviceInstance id.
+      const legacyUserSockets = await UserSocket
+        .find({ serviceInstance: { $exists: false } })
+        .populate('user')
+        .sort({ updatedAt: 1 }) // handle get the most stale first
+        .limit(MAX_SERVICE_INSTANCES_CLEANUP)
+        .exec();
+      req.log.info('cleaning up legacy sockets:', {
+        legacyUserSockets: legacyUserSockets
+          .map((userSocket) => userSocket.toJSON()),
+      });
+      await Promise.all(legacyUserSockets.map(async (staleUserSocket) => {
+        await deleteUserSocket(
+          io,
+          req.log,
+          staleUserSocket.room,
+          staleUserSocket.user,
+          staleUserSocket.socketId,
+        );
+      }));
+
       await Promise.all(staleServiceInstances.map(async (staleServiceInstance) => {
         const staleUserSockets = await UserSocket
           .find({ serviceInstance: staleServiceInstance.id })
@@ -50,18 +72,19 @@ function setupRouter({ io, serviceInstanceId }) {
         req.log.info('stale sockets to cleanup', {
           staleUserSockets: staleUserSockets.map((staleUserSocket) => staleUserSocket.toJSON()),
         });
-        await Promise.all(staleUserSockets.map(async (staleUserSocket) => {
-          await deleteUserSocket(
-            io,
-            req.log,
-            staleUserSocket.room,
-            staleUserSocket.user,
-            staleUserSocket.socketId,
-          );
-        }));
         if (staleUserSockets.length === 0) {
           req.log.info('deleting stale service instance:', { staleServiceInstance: staleServiceInstance.toJSON() });
           await staleServiceInstance.deleteOne();
+        } else {
+          await Promise.all(staleUserSockets.map(async (staleUserSocket) => {
+            await deleteUserSocket(
+              io,
+              req.log,
+              staleUserSocket.room,
+              staleUserSocket.user,
+              staleUserSocket.socketId,
+            );
+          }));
         }
       }));
       res.status(StatusCodes.OK).json({
