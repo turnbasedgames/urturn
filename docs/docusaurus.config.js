@@ -22,6 +22,10 @@ const config = {
       'classic',
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
+        gtag: {
+          trackingID: 'G-MBBRE5FC81',
+          anonymizeIP: true,
+        },
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/turnbasedgames/urturn/tree/main/docs',
@@ -120,16 +124,7 @@ const config = {
       },
     }),
   // This is required to make the docs site searchable https://github.com/praveenn77/docusaurus-lunr-search
-  plugins: [
-    require.resolve('docusaurus-lunr-search'),
-    [
-      '@docusaurus/plugin-google-gtag',
-      {
-        trackingID: 'G-MBBRE5FC81',
-        anonymizeIP: false,
-      },
-    ],
-  ]
+  plugins: [require.resolve('docusaurus-lunr-search')]
 };
 
 module.exports = config;
