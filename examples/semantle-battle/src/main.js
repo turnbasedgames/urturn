@@ -1,6 +1,6 @@
 import { wordToVecRaw, wordToNearestRaw } from './words';
 import {
-  getSimilarityScore, getNearestIndex, getNthNearest, MAX_SIMILARITY,
+  getSimilarityScore, getNearestIndex, getNthNearest, MAX_SIMILARITY, getRandHash, botPlr,
 } from './utils';
 
 function hashWord(secret) {
@@ -41,6 +41,8 @@ function onRoomStart() {
     // UrTurn will not touch anything under 'state' field, and expects it to be a JSON
     // serializable object.
     state: {
+      // whether or not a bot is enabled
+      botEnabled: false,
       plrToSecretHash: {},
       plrToGuessToInfo: {},
       // plrToHintRequest: {[plr.id]: boolean}
@@ -74,9 +76,32 @@ function onPlayerJoin(plr, roomState) {
   return { state };
 }
 
-function onPlayerMovePreGame(plr, move, roomState) {
-  const { secret, forceEndGame } = move;
+function forceStartWithBot(plr, roomState) {
   const { state, players } = roomState;
+  if (players.length !== 1) {
+    throw new Error('Cannot force start with a bot if there is another player.');
+  }
+  if (!(plr.id in state.plrToSecretHash)) {
+    throw new Error('Cannot force start with a bot if no secret provided');
+  }
+  const botId = 'botId';
+  state.botEnabled = true;
+  state.plrToSecretHash[botId] = getRandHash(hashToNearest);
+  state.plrToGuessToInfo[botId] = {};
+  state.guessStartTime = new Date().toISOString();
+  state.status = Status.InGame;
+  return { state, joinable: false };
+}
+
+function onPlayerMovePreGame(plr, move, roomState) {
+  const { secret, forceEndGame, forceStart } = move;
+  const { state, players } = roomState;
+
+  // force start game with an AI bot
+  if (forceStart) {
+    return forceStartWithBot(plr, roomState);
+  }
+
   if (forceEndGame) {
     const timeoutMs = new Date(state.chooseSecretStartTime).getTime() + CHOOSE_SECRET_TIMEOUT_MS;
     const nowMs = Date.now();
@@ -198,16 +223,56 @@ function onInGameTimeout(roomState, plr, otherPlr) {
   };
 }
 
+function plrMakesGuess(plr, otherPlayer, guess, roomState) {
+  const { state } = roomState;
+  const { plrToSecretHash } = state;
+
+  // set the guessInfo for the provided guess
+  const guessHash = hashWord(guess);
+  const otherPlayersSecretHash = plrToSecretHash[otherPlayer.id];
+  const date = new Date();
+
+  const guessInfo = state.plrToGuessToInfo[plr.id][guess] ?? { count: 0 };
+  guessInfo.lastUpdateTime = date.toISOString();
+  guessInfo.count += 1;
+  guessInfo.similarity = getSimilarityScore(hashToVec, guessHash, otherPlayersSecretHash);
+  guessInfo.index = getNearestIndex(hashToNearest, otherPlayersSecretHash, guess);
+  state.plrToGuessToInfo[plr.id][guess] = guessInfo;
+
+  // see if winner found
+  if (otherPlayersSecretHash === guessHash) {
+    state.winner = plr;
+    state.status = Status.EndGame;
+    return {
+      state,
+      finished: true,
+    };
+  }
+
+  // no winner found, but still update other players on guesses
+  return { state };
+}
+
+function botMove(plr, roomState) {
+  const guessHash = getRandHash(hashToNearest);
+  const guess = Buffer.from(guessHash, 'base64').toString('ascii');
+  return plrMakesGuess(botPlr, plr, guess, roomState);
+}
+
 function onPlayerMoveInGame(plr, move, roomState) {
   const {
-    guess, hintRequest, acceptHint, forceEndGame,
+    guess, hintRequest, acceptHint, forceEndGame, forceBotMove,
   } = move;
   const { players, state } = roomState;
-  const { plrToSecretHash } = state;
-  const otherPlayer = players.find(({ id }) => id !== plr.id);
+  const { botEnabled } = state;
+  const otherPlayer = botEnabled ? botPlr : players.find(({ id }) => id !== plr.id);
 
   if (otherPlayer == null) {
     throw new Error('This should be impossible. Contact Developers.');
+  }
+
+  if (forceBotMove) {
+    return botMove(plr, roomState);
   }
 
   if (forceEndGame != null) {
@@ -250,30 +315,7 @@ function onPlayerMoveInGame(plr, move, roomState) {
     throw new Error('Guess is not a known word.');
   }
 
-  // set the guessInfo for the provided guess
-  const guessHash = hashWord(guess);
-  const otherPlayersSecretHash = plrToSecretHash[otherPlayer.id];
-  const date = new Date();
-
-  const guessInfo = state.plrToGuessToInfo[plr.id][guess] ?? { count: 0 };
-  guessInfo.lastUpdateTime = date.toISOString();
-  guessInfo.count += 1;
-  guessInfo.similarity = getSimilarityScore(hashToVec, guessHash, otherPlayersSecretHash);
-  guessInfo.index = getNearestIndex(hashToNearest, otherPlayersSecretHash, guess);
-  state.plrToGuessToInfo[plr.id][guess] = guessInfo;
-
-  // see if winner found
-  if (otherPlayersSecretHash === guessHash) {
-    state.winner = plr;
-    state.status = Status.EndGame;
-    return {
-      state,
-      finished: true,
-    };
-  }
-
-  // no winner found, but still update other players on guesses
-  return { state };
+  return plrMakesGuess(plr, otherPlayer, guess, roomState);
 }
 
 function onPlayerMove(plr, move, roomState) {
@@ -295,18 +337,15 @@ function onPlayerMove(plr, move, roomState) {
 function onPlayerQuit(_, roomState) {
   const { state, players } = roomState;
   const { status } = state;
-
+  state.status = Status.EndGame;
   // The only player left should be considered the winner by default if the game already started.
   if (players.length === 1 && status !== Status.PreGame) {
     const [winner] = players;
     state.winner = winner;
-    return { state, joinable: false, finished: true };
+    return { state, finished: true };
   }
 
-  // By default we should make this room closed by making it not joinable and
-  // classifying it as finished. This is important for UrTurn to understand how to
-  // handle your game properly.
-  return { joinable: false, finished: true };
+  return { state, finished: true };
 }
 
 export default {

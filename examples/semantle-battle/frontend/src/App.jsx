@@ -14,6 +14,7 @@ import Timer from './Timer';
 
 const CHOOSE_SECRET_TIMEOUT_MS = 30000; // 30 seconds
 const IN_GAME_TIMEOUT_MS = 300000; // 5 minutes
+const FORCE_BOT_TIMEOUT_MS = 10000; // 10 seconds if no other player
 
 function App() {
   const [roomState, setRoomState] = useState(client.getRoomState() || {});
@@ -40,6 +41,7 @@ function App() {
 
   const {
     state: {
+      botEnabled,
       plrToSecretHash = {},
       plrToGuessToInfo,
       plrToHintRequest,
@@ -50,9 +52,16 @@ function App() {
       chooseSecretStartTime,
       guessStartTime,
     } = {},
+    roomStartContext,
+    players = [], finished,
   } = roomState;
 
-  const { players = [], finished } = roomState;
+  if (botEnabled) {
+    players.push({
+      id: 'botId',
+      username: 'word_bot',
+    });
+  }
   const dataLoading = roomState == null || curPlr == null;
   const spectator = !players.some(({ id }) => id === curPlr?.id);
   const generalStatus = getStatusMsg({
@@ -65,6 +74,32 @@ function App() {
     return prev;
   }, new Map());
 
+  const [forceBotStartTime, setForceBotStartTime] = useState(null);
+  const curPlrSecretProvided = plrToSecretHash != null && (curPlr?.id in plrToSecretHash);
+  const botEligible = !spectator && players.length === 1 && roomStartContext?.private === false && status === 'preGame' && curPlrSecretProvided;
+  useEffect(() => {
+    if (botEligible) {
+      setForceBotStartTime(new Date());
+    } else {
+      setForceBotStartTime(null);
+    }
+  }, [botEligible]);
+
+  useEffect(() => {
+    if (botEnabled && status === 'inGame') {
+      const intervalId = setInterval(() => {
+        const shouldBotGuess = Math.random() < 0.3;
+        if (shouldBotGuess) {
+          client.makeMove({ forceBotMove: true });
+        }
+      }, 1000);
+      return () => {
+        clearInterval(intervalId);
+      };
+    }
+    return null;
+  }, [botEnabled, status]);
+
   return (
     <ThemeProvider theme={theme}>
       <Stack height="100%" spacing={1} justifyContent="flex-start">
@@ -76,6 +111,18 @@ function App() {
         )}
         <Stack direction="column" sx={{ marginTop: 1, flexGrow: 1 }} alignItems="center">
           <Typography textAlign="center" color="text.primary">{generalStatus}</Typography>
+          {botEligible && (
+          <Timer
+            startTime={forceBotStartTime}
+            timeoutBufferMs={0}
+            timeoutMs={FORCE_BOT_TIMEOUT_MS}
+            onTimeout={() => {
+              client.makeMove({ forceStart: true }).catch(console.log);
+            }}
+            prefix=""
+            suffix=" seconds waiting for another player..."
+          />
+          )}
           {status === 'preGame' && !spectator && chooseSecretStartTime != null && (
           <Timer
             startTime={chooseSecretStartTime}
@@ -84,7 +131,7 @@ function App() {
             onTimeout={() => {
               client.makeMove({ forceEndGame: true }).catch(console.log);
             }}
-            prefix={(curPlr?.id in plrToSecretHash) ? 'Opponent has ' : 'You have '}
+            prefix={curPlrSecretProvided ? 'Opponent has ' : 'You have '}
             suffix=" seconds to set a secret..."
           />
           )}
