@@ -24,4 +24,4 @@ const resolveModule = (resolveFn, filePath) => {
 };
 
 // eslint-disable-next-line import/prefer-default-export
-export const userBackend = resolveModule(resolveApp, 'index');
+export const userBackend = resolveModule(resolveApp, 'src/main');

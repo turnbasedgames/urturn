@@ -9,9 +9,18 @@ module.exports = {
   extends: [
     'airbnb-base',
   ],
+  parser: '@babel/eslint-parser',
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
+    requireConfigFile: false,
+    babelOptions: {
+      plugins: [
+        '@babel/plugin-syntax-import-assertions',
+      ],
+      babelrc: false,
+      configFile: false,
+    },
   },
   rules: {
     'no-console': 'off',

@@ -2,6 +2,7 @@
   "name": "@urturn/test-app",
   "private": true,
   "version": "0.1.7",
+  "type": "module",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -19,10 +20,12 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/core": "^7.20.5",
+    "@babel/eslint-parser": "^7.19.1",
     "@urturn/runner": "*",
     "@urturn/runner-frontend": "*",
     "concurrently": "^7.1.0",
-    "eslint": "^8.21.0",
+    "eslint": "^8.29.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
     "rollup": "^3.2.3"
