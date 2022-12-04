@@ -142,6 +142,7 @@ function GamePlayer(): React.ReactElement {
         navigate(`/games${(room.game != null) ? `/${room.game.id}` : ''}`);
       }}
       players={roomState?.players}
+      game={room.game}
     />
   );
 }

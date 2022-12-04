@@ -6,7 +6,7 @@ import {
 import { ThemeProvider } from '@mui/material/styles';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { TbLetterU } from 'react-icons/tb';
-import { RoomUser } from '@urturn/types-common';
+import { Game, RoomUser } from '@urturn/types-common';
 import PeopleIcon from '@mui/icons-material/People';
 import logger from '../../logger';
 import Theme from '../Theme';
@@ -15,9 +15,12 @@ interface PlayerMenuProps {
   quitRoom: () => Promise<void>
   players: RoomUser[]
   curPlayer: RoomUser
+  game?: Game
 }
 
-function PlayerMenu({ quitRoom, players, curPlayer }: PlayerMenuProps): React.ReactElement {
+function PlayerMenu({
+  quitRoom, players, curPlayer, game,
+}: PlayerMenuProps): React.ReactElement {
   const [playersModalOpen, setPlayersModalOpen] = useState(false);
   const spectating = players.every(({ id }) => id !== curPlayer.id);
   return (
@@ -77,6 +80,9 @@ function PlayerMenu({ quitRoom, players, curPlayer }: PlayerMenuProps): React.Re
               size="small"
               sx={{ borderRadius: 1 }}
               href="/"
+              onClick={() => logger.info(
+                `Platform link clicked from game: ${game?.id ?? 'NO ID FOUND'}`,
+              )}
               target="_blank"
               rel="noopener noreferrer"
             >
