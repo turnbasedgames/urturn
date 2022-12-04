@@ -22,6 +22,10 @@ const config = {
       'classic',
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
+        gtag: {
+          trackingID: 'G-MBBRE5FC81',
+          anonymizeIP: true,
+        },
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/turnbasedgames/urturn/tree/main/docs',
