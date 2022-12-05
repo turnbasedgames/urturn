@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import {
-  IconButton, Paper, Stack, Modal, Card, CardHeader, Typography, CardContent, CardActions, Button,
+  IconButton, Paper, Stack, Modal, Card, Typography, CardContent, CardActions, Button, CardHeader,
   Tooltip,
 } from '@mui/material';
 import { SiDiscord } from 'react-icons/si';
 import { ThemeProvider } from '@mui/material/styles';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import {
-  DISCORD_URL, DOCS_URL, Game, RoomUser,
-} from '@urturn/types-common';
+import { DISCORD_URL, DOCS_URL, RoomUser } from '@urturn/types-common';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import PeopleIcon from '@mui/icons-material/People';
@@ -19,11 +17,10 @@ interface PlayerMenuProps {
   quitRoom: () => Promise<void>
   players: RoomUser[]
   curPlayer: RoomUser
-  game?: Game
 }
 
 function PlayerMenu({
-  quitRoom, players, curPlayer, game,
+  quitRoom, players, curPlayer,
 }: PlayerMenuProps): React.ReactElement {
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [playersModalOpen, setPlayersModalOpen] = useState(false);
@@ -115,9 +112,6 @@ function PlayerMenu({
               size="small"
               sx={{ borderRadius: 1 }}
               href="/"
-              onClick={() => logger.info(
-                `Platform link clicked from game: ${game?.id ?? 'NO ID FOUND'}`,
-              )}
               target="_blank"
               rel="noopener"
             >

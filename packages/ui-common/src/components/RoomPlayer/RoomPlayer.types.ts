@@ -1,5 +1,5 @@
 import {
-  User, RoomUser, Game,
+  User, RoomUser,
 } from '@urturn/types-common';
 
 export enum Errors {
@@ -13,5 +13,4 @@ export interface RoomPlayerProps {
   setChildClient: (childClient: any) => void
   quitRoom: () => Promise<void>
   players?: RoomUser[]
-  game?: Game
 }
