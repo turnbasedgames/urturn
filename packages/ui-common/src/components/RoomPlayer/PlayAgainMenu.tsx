@@ -21,19 +21,18 @@ function PlayAgainMenu({ roomStartContext, playAgain }: PlayAgainMenuProps): Rea
       sx={{
         position: 'absolute',
         padding: 0.5,
+        paddingLeft: 1,
+        paddingRight: 1,
         left: '50%',
         transform: 'translate(-50%)',
         bottom: 0,
       }}
-      square
     >
       <Stack sx={{ opacity: 1 }} direction="column">
-        <Typography variant="subtitle2" align="center">
-          Game Finished!
+        <Typography color="text.secondary" variant="subtitle2" align="center">
+          Game Finished
         </Typography>
         <Button
-          size="small"
-          fullWidth
           variant={roomStartContext.private ? 'outlined' : 'contained'}
           disabled={loadingRoom}
           onClick={(ev) => {
