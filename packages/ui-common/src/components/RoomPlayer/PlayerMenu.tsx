@@ -119,7 +119,7 @@ function PlayerMenu({
                 `Platform link clicked from game: ${game?.id ?? 'NO ID FOUND'}`,
               )}
               target="_blank"
-              rel="noopener noreferrer"
+              rel="noopener"
             >
               <SportsEsportsIcon />
             </IconButton>
