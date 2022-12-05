@@ -35,3 +35,15 @@ export const getNthNearest = (hashToNearest, secretHash, n) => {
   const nearestWords = hashToNearest.get(secretHash);
   return nearestWords[n];
 };
+
+function getRandomItem(collection) {
+  const keys = Array.from(collection.keys());
+  return keys[Math.floor(Math.random() * keys.length)];
+}
+
+export const getRandHash = (hashToNearest) => getRandomItem(hashToNearest);
+
+export const botPlr = {
+  id: 'botId',
+  username: 'word_bot',
+};
