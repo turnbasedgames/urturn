@@ -5,8 +5,8 @@ import {
 } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import { TbLetterU } from 'react-icons/tb';
 import { Game, RoomUser } from '@urturn/types-common';
+import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import PeopleIcon from '@mui/icons-material/People';
 import logger from '../../logger';
 import Theme from '../Theme';
@@ -75,7 +75,7 @@ function PlayerMenu({
         square
       >
         <Stack direction="column">
-          <Tooltip disableFocusListener placement="right" title="About">
+          <Tooltip disableFocusListener placement="right" title="More Games">
             <IconButton
               size="small"
               sx={{ borderRadius: 1 }}
@@ -86,7 +86,7 @@ function PlayerMenu({
               target="_blank"
               rel="noopener noreferrer"
             >
-              <TbLetterU />
+              <SportsEsportsIcon />
             </IconButton>
           </Tooltip>
           <Tooltip disableFocusListener placement="right" title="Players">
