@@ -6,8 +6,9 @@ import {
 import { SiDiscord } from 'react-icons/si';
 import { ThemeProvider } from '@mui/material/styles';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import { TbLetterU } from 'react-icons/tb';
 import { DISCORD_URL, DOCS_URL, RoomUser } from '@urturn/types-common';
+import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+import ConstructionIcon from '@mui/icons-material/Construction';
 import PeopleIcon from '@mui/icons-material/People';
 import logger from '../../logger';
 import Theme from '../Theme';
@@ -18,7 +19,9 @@ interface PlayerMenuProps {
   curPlayer: RoomUser
 }
 
-function PlayerMenu({ quitRoom, players, curPlayer }: PlayerMenuProps): React.ReactElement {
+function PlayerMenu({
+  quitRoom, players, curPlayer,
+}: PlayerMenuProps): React.ReactElement {
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [playersModalOpen, setPlayersModalOpen] = useState(false);
   const spectating = players.every(({ id }) => id !== curPlayer.id);
@@ -104,15 +107,15 @@ function PlayerMenu({ quitRoom, players, curPlayer }: PlayerMenuProps): React.Re
         square
       >
         <Stack direction="column">
-          <Tooltip disableFocusListener placement="right" title="About">
+          <Tooltip disableFocusListener placement="right" title="More Games">
             <IconButton
               size="small"
               sx={{ borderRadius: 1 }}
-              onClick={() => {
-                setAboutModalOpen(!aboutModalOpen);
-              }}
+              href="/"
+              target="_blank"
+              rel="noopener"
             >
-              <TbLetterU />
+              <SportsEsportsIcon />
             </IconButton>
           </Tooltip>
           <Tooltip disableFocusListener placement="right" title="Players">
@@ -122,6 +125,17 @@ function PlayerMenu({ quitRoom, players, curPlayer }: PlayerMenuProps): React.Re
               sx={{ borderRadius: 1 }}
             >
               <PeopleIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip disableFocusListener placement="right" title="About">
+            <IconButton
+              size="small"
+              sx={{ borderRadius: 1 }}
+              onClick={() => {
+                setAboutModalOpen(!aboutModalOpen);
+              }}
+            >
+              <ConstructionIcon />
             </IconButton>
           </Tooltip>
           <Tooltip disableFocusListener placement="right" title="Quit">
