@@ -39,13 +39,17 @@ export interface Room {
   roomStartContext: any
 }
 
+export interface RoomStartContext {
+  private: boolean
+}
+
 export interface RoomState {
   players: RoomUser[]
   joinable: boolean
   finished: boolean
   state: any
   version: number
-  roomStartContext: any
+  roomStartContext: RoomStartContext
 }
 
 export interface Game {
