@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import {
-  IconButton, Paper, Stack, Modal, Card, CardHeader,
+  IconButton, Paper, Stack, Modal, Card, CardHeader, Typography, CardContent, CardActions, Button,
   Tooltip,
 } from '@mui/material';
+import { SiDiscord } from 'react-icons/si';
 import { ThemeProvider } from '@mui/material/styles';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import { Game, RoomUser } from '@urturn/types-common';
+import {
+  DISCORD_URL, DOCS_URL, Game, RoomUser,
+} from '@urturn/types-common';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+import ConstructionIcon from '@mui/icons-material/Construction';
 import PeopleIcon from '@mui/icons-material/People';
 import logger from '../../logger';
 import Theme from '../Theme';
@@ -21,10 +25,41 @@ interface PlayerMenuProps {
 function PlayerMenu({
   quitRoom, players, curPlayer, game,
 }: PlayerMenuProps): React.ReactElement {
+  const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [playersModalOpen, setPlayersModalOpen] = useState(false);
   const spectating = players.every(({ id }) => id !== curPlayer.id);
   return (
     <ThemeProvider theme={Theme}>
+      <Modal
+        open={aboutModalOpen}
+        onClose={() => setAboutModalOpen(false)}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Card sx={{ maxWidth: '400px' }}>
+          <CardHeader
+            title="UrTurn"
+            subheader="Where you make and play games"
+            action={(
+              <IconButton
+                href={DISCORD_URL}
+                target="_blank"
+              >
+                <SiDiscord />
+              </IconButton>
+            )}
+            sx={{ paddingBottom: 0.5 }}
+          />
+          <CardContent>
+            <Typography variant="body2">
+              UrTurn handles all the backend infrastructure for hosting and monetizing
+              your game so you can make games just like this one.
+            </Typography>
+          </CardContent>
+          <CardActions sx={{ justifyContent: 'flex-end' }}>
+            <Button size="small" href={DOCS_URL} target="_blank">Start Building</Button>
+          </CardActions>
+        </Card>
+      </Modal>
       <Modal
         open={playersModalOpen}
         onClose={() => setPlayersModalOpen(false)}
@@ -96,6 +131,17 @@ function PlayerMenu({
               sx={{ borderRadius: 1 }}
             >
               <PeopleIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip disableFocusListener placement="right" title="About">
+            <IconButton
+              size="small"
+              sx={{ borderRadius: 1 }}
+              onClick={() => {
+                setAboutModalOpen(!aboutModalOpen);
+              }}
+            >
+              <ConstructionIcon />
             </IconButton>
           </Tooltip>
           <Tooltip disableFocusListener placement="right" title="Quit">
