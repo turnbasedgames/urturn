@@ -6,7 +6,7 @@ description: Let's get this bread 💰
 
 Here are several use cases we support:
 
-1. Handling a user purchase in a transactional way to modify the [roomState](/docs/API/types#roomstate) or updated [persisted player data](persisting-player-data)
+1. Handling a user purchase in a transactional way to modify the [roomState](/docs/API/types#roomstate) or update [persisted player data](persisting-player-data)
 2. Request a payout to your personal bank account
 
 :::caution
