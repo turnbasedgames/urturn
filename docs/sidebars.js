@@ -62,6 +62,8 @@ const sidebars = {
         'Advanced/room-versioning',
         'Advanced/persisting-player-data',
         'Advanced/typescript-support',
+        'Advanced/timer-triggers',
+        'Advanced/monetization',
         'Advanced/self-hosting',
       ],
     },
