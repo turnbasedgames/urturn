@@ -197,6 +197,8 @@ function setupRouter({ io }) {
         joinable: true,
         game,
         finished: false,
+        // Users can only queue up in public rooms
+        private: false,
         players: {
           $ne: user.id,
         },
