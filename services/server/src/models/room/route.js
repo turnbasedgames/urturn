@@ -94,7 +94,6 @@ function setupRouter({ io }) {
 
   async function createRoomHelper(user, logger, roomBody) {
     logger.info('creating room', { userId: user.id, roomBody });
-
     const room = new Room(roomBody);
     room.players = [user];
     const player = user.getCreatorDataView();
