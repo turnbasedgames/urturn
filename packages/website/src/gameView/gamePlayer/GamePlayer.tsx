@@ -142,6 +142,11 @@ function GamePlayer(): React.ReactElement {
         navigate(`/games${(room.game != null) ? `/${room.game.id}` : ''}`);
       }}
       players={roomState?.players}
+      finished={roomState?.finished}
+      roomStartContext={roomState?.roomStartContext}
+      playAgain={async () => {
+        console.log('play again');
+      }}
     />
   );
 }
