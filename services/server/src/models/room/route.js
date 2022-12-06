@@ -93,6 +93,8 @@ function setupRouter({ io }) {
     }));
 
   async function createRoomHelper(user, logger, roomBody) {
+    logger.info('creating room', { userId: user.id, roomBody });
+
     const room = new Room(roomBody);
     room.players = [user];
     const player = user.getCreatorDataView();
@@ -131,6 +133,7 @@ function setupRouter({ io }) {
   }
 
   async function joinRoomHelper(user, logger, room) {
+    logger.info('joining user to room', { userId: user.id, roomId: room.id });
     const player = user.getCreatorDataView();
 
     let error;
@@ -174,10 +177,10 @@ function setupRouter({ io }) {
     }),
     expressUserAuthMiddleware,
     asyncHandler(async (req, res) => {
-    // The functionality of this endpoint goes in the following order:
+    // The functionality of this endpoint is to simulate queue mechanism:
     //    1. If the user is trying to create a private room, create it and exit handler.
     //    2. If there exists rooms for the user to join, join the user to the room and exit handler.
-    //    3. The first two aformentioned conditions were not true, so create public room.
+    //    3. The first two aforementioned conditions were not true, so create public room.
       const { user } = req;
       const { private: isPrivate, game } = req.body;
 
