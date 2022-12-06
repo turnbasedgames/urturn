@@ -343,13 +343,32 @@ test('PUT /room creates a room for the user if a private field is specified', as
   await createRoomAndAssert(t, api, userCred, game, user, true);
 });
 
-test('PUT /room creates a room for the user if user is not able to join any rooms', async (t) => {
+test('PUT /room creates a room for the user if user is not able to join any rooms including private rooms', async (t) => {
   const { api } = t.context.app;
-  const userCred = await createUserCred(t);
-  const user = await createUserAndAssert(t, api, userCred);
 
-  const game = await createGameAndAssert(t, api, userCred, user);
-  await createRoomAndAssert(t, api, userCred, game, user, false);
+  // user1 is a new player, looking to have some fun and joins and queues up to play
+  const user1Cred = await createUserCred(t);
+  const user1 = await createUserAndAssert(t, api, user1Cred);
+
+  // user2 represents a completely separate user minding their business and creating private rooms
+  // user2 does not know about user1
+  const user2Cred = await createUserCred(t);
+  const user2 = await createUserAndAssert(t, api, user2Cred);
+
+  const game = await createGameAndAssert(t, api, user1Cred, user1);
+  // create several private rooms first
+  await createRoomAndAssert(t, api, user2Cred, game, user2, true);
+  await createRoomAndAssert(t, api, user2Cred, game, user2, true);
+  await createRoomAndAssert(t, api, user2Cred, game, user2, true);
+
+  // user should not queue into any of those rooms
+  const room1 = await createRoomAndAssert(t, api, user1Cred, game, user1);
+
+  // user can queue up into multiple rooms
+  const room2 = await createRoomAndAssert(t, api, user1Cred, game, user1);
+
+  // rooms should be different
+  t.not(room1.id, room2.id);
 });
 
 test('PUT /room creates a private room for a user even if they have created a public room', async (t) => {
