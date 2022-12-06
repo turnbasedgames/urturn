@@ -39,8 +39,9 @@ function PlayAgainMenu({ roomStartContext, playAgain }: PlayAgainMenuProps): Rea
             ev.preventDefault();
             setLoadingRoom(true);
             playAgain().catch((error) => {
-              setLoadingRoom(false);
               logger.error(error);
+            }).finally(() => {
+              setLoadingRoom(false);
             });
           }}
         >
