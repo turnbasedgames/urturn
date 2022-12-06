@@ -80,6 +80,11 @@ function Player() {
         window.close();
       }}
       players={roomState?.players}
+      finished={roomState?.finished}
+      roomStartContext={roomState?.roomStartContext}
+      playAgain={async () => {
+        console.log('Does nothing');
+      }}
     />
   );
 }
