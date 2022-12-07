@@ -4,6 +4,7 @@ const RoomFinishedError = require('./roomFinishedError');
 const RoomNotFinishedError = require('./roomNotFinishedError');
 const UserNotInRoomError = require('./userNotInRoomError');
 const UserAlreadyInRoomError = require('./userAlreadyInRoomError');
+const RoomNotPrivateError = require('./roomNotPrivateError');
 
 module.exports = {
   CreatorError,
@@ -12,4 +13,5 @@ module.exports = {
   RoomNotFinishedError,
   RoomNotJoinableError,
   UserAlreadyInRoomError,
+  RoomNotPrivateError,
 };

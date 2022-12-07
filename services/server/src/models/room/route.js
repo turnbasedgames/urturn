@@ -253,7 +253,7 @@ function setupRouter({ io }) {
       let roomState;
       await mongoose.connection.transaction(async (session) => {
         room = await Room.findById(id).populate('latestState').session(session);
-        room.privateRoomReset();
+        room.privateRoomReset(player);
         roomState = new RoomState({
           room: room.id,
           version: room.latestState.version + 1,
