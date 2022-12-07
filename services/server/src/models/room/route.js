@@ -225,6 +225,23 @@ function setupRouter({ io }) {
       res.status(StatusCodes.CREATED).json({ room });
     }));
 
+  router.post('/:id/reset', celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+      id: Joi.objectId(),
+    }),
+  }), expressUserAuthMiddleware, asyncHandler(async (req, res) => {
+    const { user } = req;
+    const { id } = req.params;
+
+    // TODO: in transaction, reset players list, finished, and joinable
+    // validate
+    // 1. room exists
+    // 2. room is finished
+    // 3. user is in the room
+
+    await handlePostRoomOperation(res, io, room, newRoomState);
+  }));
+
   router.post('/:id/join', celebrate({
     [Segments.PARAMS]: Joi.object().keys({
       id: Joi.objectId(),
