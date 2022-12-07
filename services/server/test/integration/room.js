@@ -755,23 +755,6 @@ test('POST /room/:id/quit provides error if user is not in the room', async (t) 
   );
 });
 
-/**
-{
-  players: [ { id: '63910918bc5ce561833aa106', username: 'vitreous_stingray' } ],
-  inactivePlayers: [],
-  joinable: true,
-  finished: false,
-  latestState: {
-    id: '63910918bc5ce561833aa12a',
-    room: '63910918bc5ce561833aa110',
-    state: { message: 'vitreous_stingray joined!', last: [Object] },
-    version: 2
-  },
-  private: true,
-  roomStartContext: { private: true }
-}
- */
-
 test('POST /room/:id/quit on a finished room throws an error', async (t) => {
   await testOperationOnFinishedRoom(t, 'quit');
 });
