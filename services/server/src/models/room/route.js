@@ -231,15 +231,40 @@ function setupRouter({ io }) {
     }),
   }), expressUserAuthMiddleware, asyncHandler(async (req, res) => {
     const { user } = req;
+    const player = user.getCreatorDataView();
     const { id } = req.params;
 
-    // TODO: in transaction, reset players list, finished, and joinable
-    // validate
-    // 1. room exists
-    // 2. room is finished
-    // 3. user is in the room
+    const roomLean = await Room.findById(id, 'game').populate('game').lean().exec();
+    if (roomLean == null) {
+      const error = new Error('room must exist!');
+      error.status = StatusCodes.BAD_REQUEST;
+      throw error;
+    }
+    if (roomLean.game == null) {
+      const error = new Error('game must exist!');
+      error.status = StatusCodes.BAD_REQUEST;
+      throw error;
+    }
 
-    await handlePostRoomOperation(res, io, room, newRoomState);
+    const userCode = await fetchUserCodeFromGame(req.log, roomLean.game);
+    let room;
+    let roomState;
+    await mongoose.connection.transaction(async (session) => {
+      room = await Room.findById(id).populate('latestState').session(session);
+      room.privateRoomReset();
+      roomState = new RoomState({
+        room: room.id,
+        version: room.latestState.version + 1,
+      });
+      const creatorInitRoomState = userCode.startRoom(room, roomState);
+      roomState.applyCreatorData(creatorInitRoomState);
+      const creatorJoinRoomState = userCode.playerJoin(player, room, roomState);
+      roomState.applyCreatorData(creatorJoinRoomState);
+      room.applyCreatorRoomState(creatorJoinRoomState);
+      room.latestState = roomState.id;
+      await Promise.all([room.save({ session }), roomState.save({ session })]);
+    });
+    await handlePostRoomOperation(res, io, room, roomState);
   }));
 
   router.post('/:id/join', celebrate({
