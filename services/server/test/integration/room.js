@@ -533,7 +533,32 @@ test('POST /room/:id/reset on a room that does not contain the user provides a 4
 });
 
 test('POST /room/:id/reset resets the private room to an initial state', async (t) => {
-  t.fail();
+  const { context: { app: { api } } } = t;
+  const userCred = await createUserCred(t);
+  const user = await createUserAndAssert(t, api, userCred);
+  const game = await createGameAndAssert(t, api, userCred, user);
+  const room = await createRoomAndAssert(t, api, userCred, game, user, true);
+
+  // finish the game
+  const moveRes = await api.post(`/room/${room.id}/move`, { finished: true },
+    { headers: { authorization: await userCred.user.getIdToken() } });
+  t.is(moveRes.status, StatusCodes.OK);
+
+  const { status, data: { room: roomResult } } = await api.post(
+    `/room/${room.id}/reset`,
+    undefined,
+    { headers: { authorization: await userCred.user.getIdToken() } },
+  );
+  t.is(status, StatusCodes.OK);
+  t.is(roomResult.id, room.id);
+  t.deepEqual(roomResult.game, game);
+  t.deepEqual(roomResult.players, room.players);
+  t.is(roomResult.joinable, true);
+  t.is(roomResult.finished, false);
+  t.is(roomResult.latestState.state.message, `${user.username} joined!`);
+  t.is(roomResult.latestState.version, room.latestState.version + 2);
+  t.is(roomResult.private, true);
+  t.deepEqual(roomResult.roomStartContext, { private: true });
 });
 
 test('POST /room/:id/join joins a game', async (t) => {
@@ -729,6 +754,23 @@ test('POST /room/:id/quit provides error if user is not in the room', async (t) 
     },
   );
 });
+
+/**
+{
+  players: [ { id: '63910918bc5ce561833aa106', username: 'vitreous_stingray' } ],
+  inactivePlayers: [],
+  joinable: true,
+  finished: false,
+  latestState: {
+    id: '63910918bc5ce561833aa12a',
+    room: '63910918bc5ce561833aa110',
+    state: { message: 'vitreous_stingray joined!', last: [Object] },
+    version: 2
+  },
+  private: true,
+  roomStartContext: { private: true }
+}
+ */
 
 test('POST /room/:id/quit on a finished room throws an error', async (t) => {
   await testOperationOnFinishedRoom(t, 'quit');

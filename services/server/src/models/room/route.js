@@ -135,6 +135,7 @@ function setupRouter({ io }) {
   async function joinRoomHelper(user, logger, room) {
     logger.info('joining user to room', { userId: user.id, roomId: room.id });
     const player = user.getCreatorDataView();
+    const userCode = await fetchUserCodeFromGame(logger, room.game);
 
     let error;
     let newRoomState;
@@ -142,7 +143,6 @@ function setupRouter({ io }) {
       await mongoose.connection.transaction(async (session) => {
         room.playerJoin(user);
         const prevRoomState = room.latestState;
-        const userCode = await fetchUserCodeFromGame(logger, room.game);
         const creatorJoinRoomState = userCode.playerJoin(player, room, prevRoomState);
         newRoomState = await applyCreatorResult(
           prevRoomState,
@@ -260,6 +260,7 @@ function setupRouter({ io }) {
         });
         const creatorInitRoomState = userCode.startRoom(room, roomState);
         roomState.applyCreatorData(creatorInitRoomState);
+        room.playerJoin(user);
         const creatorJoinRoomState = userCode.playerJoin(player, room, roomState);
         roomState.applyCreatorData(creatorJoinRoomState);
         room.applyCreatorRoomState(creatorJoinRoomState);
