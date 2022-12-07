@@ -7,13 +7,18 @@ import { RoomStartContext } from '@urturn/types-common';
 import logger from '../../logger';
 
 interface PlayAgainMenuProps {
+  spectating: boolean
   roomStartContext: RoomStartContext
   playAgain: () => Promise<void>
 }
 
-function PlayAgainMenu({ roomStartContext, playAgain }: PlayAgainMenuProps): React.ReactElement {
+function PlayAgainMenu({
+  spectating,
+  roomStartContext, playAgain,
+}: PlayAgainMenuProps): React.ReactElement {
   const [loadingRoom, setLoadingRoom] = useState(false);
   const buttonMessage = roomStartContext.private ? 'Restart Private Room' : 'Play Again';
+  const disabled = loadingRoom || (roomStartContext.private && spectating);
 
   return (
     <Paper
@@ -34,7 +39,7 @@ function PlayAgainMenu({ roomStartContext, playAgain }: PlayAgainMenuProps): Rea
         </Typography>
         <Button
           variant={roomStartContext.private ? 'outlined' : 'contained'}
-          disabled={loadingRoom}
+          disabled={disabled}
           onClick={(ev) => {
             ev.preventDefault();
             setLoadingRoom(true);

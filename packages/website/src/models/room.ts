@@ -71,3 +71,8 @@ export const queueUpPrivateRoom = async (gameId: string): Promise<Room> => queue
   game: gameId,
   private: true,
 });
+
+export const resetPrivateRoom = async (roomId: string): Promise<Room> => {
+  const res = await axios.post(`room/${roomId}/reset`);
+  return res.data.room;
+};

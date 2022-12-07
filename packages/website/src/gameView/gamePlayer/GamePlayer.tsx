@@ -10,7 +10,7 @@ import {
 import { RoomPlayer } from '@urturn/ui-common';
 import { useSnackbar } from 'notistack';
 import {
-  queueUpRoom, joinRoom, getRoom, makeMove, generateRoomState, quitRoom,
+  queueUpRoom, joinRoom, getRoom, makeMove, generateRoomState, quitRoom, resetPrivateRoom,
 } from '../../models/room';
 import { UserContext } from '../../models/user';
 import logger from '../../logger';
@@ -151,25 +151,45 @@ function GamePlayer(): React.ReactElement {
           });
           return;
         }
+        if (room.game == null) {
+          enqueueSnackbar('Error, game no longer exists!', {
+            variant: 'error',
+            autoHideDuration: 3000,
+          });
+          return;
+        }
         if (roomState?.roomStartContext.private) {
           // recreate the match
-          // TODO: introduce new endpoint for restarting the same private room by a player in the
-          // room only when finished is set to true
-        } else {
-          if (room.game == null) {
-            enqueueSnackbar('Error, game no longer exists!', {
+          try {
+            const newRoom = await resetPrivateRoom(room.id);
+            logger.info('successfully created newRoom', { roomId: newRoom.id });
+
+            // force a refresh to avoid handling all the edge cases with coordinating our useSocket
+            // hook, childClient (penpal), and various useMemo/useRef hooks in RoomPlayer component
+            navigate(0);
+          } catch (error) {
+            enqueueSnackbar('Error, unable to reset private room!', {
               variant: 'error',
               autoHideDuration: 3000,
             });
-            return;
+            logger.error(error);
           }
-          // requeue player up in new room
-          const newRoom = await queueUpRoom({ game: room.game.id });
-          navigate(`/games/${room.game.id}/room/${newRoom.id}`);
+        } else {
+          try {
+            // requeue player up in new room
+            const newRoom = await queueUpRoom({ game: room.game.id });
+            navigate(`/games/${room.game.id}/room/${newRoom.id}`);
 
-          // force a refresh to avoid handling all the edge cases with coordinating our useSocket
-          // hook, childClient (penpal), and various useMemo/useRef hooks in RoomPlayer component
-          navigate(0);
+            // force a refresh to avoid handling all the edge cases with coordinating our useSocket
+            // hook, childClient (penpal), and various useMemo/useRef hooks in RoomPlayer component
+            navigate(0);
+          } catch (error) {
+            enqueueSnackbar('Error, unable to queue up!', {
+              variant: 'error',
+              autoHideDuration: 3000,
+            });
+            logger.error(error);
+          }
         }
       }}
     />
