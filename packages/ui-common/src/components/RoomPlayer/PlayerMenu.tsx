@@ -161,7 +161,11 @@ function PlayerMenu({
         </Stack>
       </Paper>
       {finished != null && roomStartContext != null && finished && (
-        <PlayAgainMenu roomStartContext={roomStartContext} playAgain={playAgain} />
+        <PlayAgainMenu
+          roomStartContext={roomStartContext}
+          playAgain={playAgain}
+          spectating={spectating}
+        />
       )}
     </ThemeProvider>
   );
