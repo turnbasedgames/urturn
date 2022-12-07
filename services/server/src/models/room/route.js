@@ -13,6 +13,7 @@ const UserCode = require('./userCode');
 const fetchUserCodeFromGame = require('./runner');
 const {
   RoomNotJoinableError, RoomFinishedError, UserNotInRoomError, CreatorError, UserAlreadyInRoomError,
+  RoomNotFinishedError, RoomNotPrivateError,
 } = require('./errors');
 const { applyCreatorResult, handlePostRoomOperation, quitRoomTransaction } = require('./util');
 
@@ -247,24 +248,35 @@ function setupRouter({ io }) {
     }
 
     const userCode = await fetchUserCodeFromGame(req.log, roomLean.game);
-    let room;
-    let roomState;
-    await mongoose.connection.transaction(async (session) => {
-      room = await Room.findById(id).populate('latestState').session(session);
-      room.privateRoomReset();
-      roomState = new RoomState({
-        room: room.id,
-        version: room.latestState.version + 1,
+    try {
+      let room;
+      let roomState;
+      await mongoose.connection.transaction(async (session) => {
+        room = await Room.findById(id).populate('latestState').session(session);
+        room.privateRoomReset();
+        roomState = new RoomState({
+          room: room.id,
+          version: room.latestState.version + 1,
+        });
+        const creatorInitRoomState = userCode.startRoom(room, roomState);
+        roomState.applyCreatorData(creatorInitRoomState);
+        const creatorJoinRoomState = userCode.playerJoin(player, room, roomState);
+        roomState.applyCreatorData(creatorJoinRoomState);
+        room.applyCreatorRoomState(creatorJoinRoomState);
+        room.latestState = roomState.id;
+        await Promise.all([room.save({ session }), roomState.save({ session })]);
       });
-      const creatorInitRoomState = userCode.startRoom(room, roomState);
-      roomState.applyCreatorData(creatorInitRoomState);
-      const creatorJoinRoomState = userCode.playerJoin(player, room, roomState);
-      roomState.applyCreatorData(creatorJoinRoomState);
-      room.applyCreatorRoomState(creatorJoinRoomState);
-      room.latestState = roomState.id;
-      await Promise.all([room.save({ session }), roomState.save({ session })]);
-    });
-    await handlePostRoomOperation(res, io, room, roomState);
+      await handlePostRoomOperation(res, io, room, roomState);
+    } catch (err) {
+      if (err instanceof RoomNotFinishedError) {
+        err.status = StatusCodes.BAD_REQUEST;
+      } else if (err instanceof RoomNotPrivateError) {
+        err.status = StatusCodes.BAD_REQUEST;
+      } else if (err instanceof UserNotInRoomError) {
+        err.status = StatusCodes.BAD_REQUEST;
+      }
+      throw err;
+    }
   }));
 
   router.post('/:id/join', celebrate({

@@ -408,6 +408,30 @@ test('PUT /room joins a user to a room if there exist a room for the user to joi
   t.is(room.players.length, 2);
 });
 
+test('POST /room/:id/reset on non-existent room provides a 400', async (t) => {
+  t.fail();
+});
+
+test('POST /room/:id/reset on a room with non-existent game provides a 400', async (t) => {
+  t.fail();
+});
+
+test('POST /room/:id/reset on a room not finished provides a 400', async (t) => {
+  t.fail();
+});
+
+test('POST /room/:id/reset on a room not private provides a 400', async (t) => {
+  t.fail();
+});
+
+test('POST /room/:id/reset on a room that does not contain the user provides a 400', async (t) => {
+  t.fail();
+});
+
+test('POST /room/:id/reset resets the private room to an initial state', async (t) => {
+  t.fail();
+});
+
 test('POST /room/:id/join joins a game', async (t) => {
   await startTicTacToeRoom(t);
 });
