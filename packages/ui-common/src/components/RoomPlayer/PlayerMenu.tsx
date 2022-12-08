@@ -17,10 +17,11 @@ interface PlayerMenuProps {
   quitRoom: () => Promise<void>
   players: RoomUser[]
   curPlayer: RoomUser
+  onOtherGamesClick?: () => void
 }
 
 function PlayerMenu({
-  quitRoom, players, curPlayer,
+  quitRoom, players, curPlayer, onOtherGamesClick,
 }: PlayerMenuProps): React.ReactElement {
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [playersModalOpen, setPlayersModalOpen] = useState(false);
@@ -114,6 +115,7 @@ function PlayerMenu({
               href="/"
               target="_blank"
               rel="noopener"
+              onClick={onOtherGamesClick}
             >
               <SportsEsportsIcon />
             </IconButton>
