@@ -9,6 +9,7 @@ import {
 } from '@urturn/types-common';
 import { RoomPlayer } from '@urturn/ui-common';
 import { useSnackbar } from 'notistack';
+import { logEvent } from 'firebase/analytics';
 import {
   queueUpRoom, joinRoom, getRoom, makeMove, generateRoomState, quitRoom, resetPrivateRoom,
 } from '../../models/room';
@@ -16,6 +17,7 @@ import { UserContext } from '../../models/user';
 import logger from '../../logger';
 import { GITHACK_BASE_URL, SOCKET_IO_REASON_IO_CLIENT_DISCONNECT } from '../../util';
 import useSocket from '../../models/useSocket';
+import { analytics } from '../../firebase/setupFirebase';
 
 const shouldJoinPrivateRoom = (user?: User, roomState?: RoomState, room?: Room): boolean => Boolean(
   (room != null)
@@ -226,6 +228,10 @@ function GamePlayer(): React.ReactElement {
           }
         }
       }}
+      onOtherGamesClick={() => logEvent(analytics, 'other_games_button_click', {
+        gameId: room.game?.id ?? '(empty)',
+        gameName: room.game?.name ?? '(empty)',
+      })}
     />
   );
 }

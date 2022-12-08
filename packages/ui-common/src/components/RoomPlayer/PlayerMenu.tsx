@@ -19,6 +19,7 @@ import PlayAgainMenu from './PlayAgainMenu';
 interface PlayerMenuProps {
   quitRoom: () => Promise<void>
   playAgain: () => Promise<void>
+  onOtherGamesClick?: () => void
   players: RoomUser[]
   curPlayer: RoomUser
   roomStartContext?: RoomStartContext
@@ -26,7 +27,7 @@ interface PlayerMenuProps {
 }
 
 function PlayerMenu({
-  quitRoom, players, curPlayer, finished, roomStartContext, playAgain,
+  quitRoom, players, curPlayer, finished, roomStartContext, playAgain, onOtherGamesClick,
 }: PlayerMenuProps): React.ReactElement {
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [playersModalOpen, setPlayersModalOpen] = useState(false);
@@ -120,6 +121,7 @@ function PlayerMenu({
               href="/"
               target="_blank"
               rel="noopener"
+              onClick={onOtherGamesClick}
             >
               <SportsEsportsIcon />
             </IconButton>

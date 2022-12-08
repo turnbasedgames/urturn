@@ -16,4 +16,5 @@ export interface RoomPlayerProps {
   players?: RoomUser[]
   roomStartContext?: RoomStartContext
   finished?: boolean
+  onOtherGamesClick?: () => void
 }
