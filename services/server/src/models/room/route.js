@@ -13,6 +13,7 @@ const UserCode = require('./userCode');
 const fetchUserCodeFromGame = require('./runner');
 const {
   RoomNotJoinableError, RoomFinishedError, UserNotInRoomError, CreatorError, UserAlreadyInRoomError,
+  RoomNotFinishedError, RoomNotPrivateError,
 } = require('./errors');
 const { applyCreatorResult, handlePostRoomOperation, quitRoomTransaction } = require('./util');
 
@@ -134,6 +135,7 @@ function setupRouter({ io }) {
   async function joinRoomHelper(user, logger, room) {
     logger.info('joining user to room', { userId: user.id, roomId: room.id });
     const player = user.getCreatorDataView();
+    const userCode = await fetchUserCodeFromGame(logger, room.game);
 
     let error;
     let newRoomState;
@@ -141,7 +143,6 @@ function setupRouter({ io }) {
       await mongoose.connection.transaction(async (session) => {
         room.playerJoin(user);
         const prevRoomState = room.latestState;
-        const userCode = await fetchUserCodeFromGame(logger, room.game);
         const creatorJoinRoomState = userCode.playerJoin(player, room, prevRoomState);
         newRoomState = await applyCreatorResult(
           prevRoomState,
@@ -224,6 +225,60 @@ function setupRouter({ io }) {
 
       res.status(StatusCodes.CREATED).json({ room });
     }));
+
+  router.post('/:id/reset', celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+      id: Joi.objectId(),
+    }),
+  }), expressUserAuthMiddleware, asyncHandler(async (req, res) => {
+    const { user } = req;
+    const player = user.getCreatorDataView();
+    const { id } = req.params;
+
+    const roomLean = await Room.findById(id, 'game').populate('game').lean().exec();
+    if (roomLean == null) {
+      const error = new Error('room must exist!');
+      error.status = StatusCodes.BAD_REQUEST;
+      throw error;
+    }
+    if (roomLean.game == null) {
+      const error = new Error('game must exist!');
+      error.status = StatusCodes.BAD_REQUEST;
+      throw error;
+    }
+
+    const userCode = await fetchUserCodeFromGame(req.log, roomLean.game);
+    try {
+      let room;
+      let roomState;
+      await mongoose.connection.transaction(async (session) => {
+        room = await Room.findById(id).populate('latestState').session(session);
+        room.privateRoomReset(player);
+        roomState = new RoomState({
+          room: room.id,
+          version: room.latestState.version + 1,
+        });
+        const creatorInitRoomState = userCode.startRoom(room, roomState);
+        roomState.applyCreatorData(creatorInitRoomState);
+        room.playerJoin(user);
+        const creatorJoinRoomState = userCode.playerJoin(player, room, roomState);
+        roomState.applyCreatorData(creatorJoinRoomState);
+        room.applyCreatorRoomState(creatorJoinRoomState);
+        room.latestState = roomState.id;
+        await Promise.all([room.save({ session }), roomState.save({ session })]);
+      });
+      await handlePostRoomOperation(res, io, room, roomState);
+    } catch (err) {
+      if (err instanceof RoomNotFinishedError) {
+        err.status = StatusCodes.BAD_REQUEST;
+      } else if (err instanceof RoomNotPrivateError) {
+        err.status = StatusCodes.BAD_REQUEST;
+      } else if (err instanceof UserNotInRoomError) {
+        err.status = StatusCodes.BAD_REQUEST;
+      }
+      throw err;
+    }
+  }));
 
   router.post('/:id/join', celebrate({
     [Segments.PARAMS]: Joi.object().keys({

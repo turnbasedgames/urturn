@@ -6,22 +6,28 @@ import {
 import { SiDiscord } from 'react-icons/si';
 import { ThemeProvider } from '@mui/material/styles';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import { DISCORD_URL, DOCS_URL, RoomUser } from '@urturn/types-common';
+import {
+  DISCORD_URL, DOCS_URL, RoomUser, RoomStartContext,
+} from '@urturn/types-common';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import PeopleIcon from '@mui/icons-material/People';
 import logger from '../../logger';
 import Theme from '../Theme';
+import PlayAgainMenu from './PlayAgainMenu';
 
 interface PlayerMenuProps {
   quitRoom: () => Promise<void>
+  playAgain: () => Promise<void>
+  onOtherGamesClick?: () => void
   players: RoomUser[]
   curPlayer: RoomUser
-  onOtherGamesClick?: () => void
+  roomStartContext?: RoomStartContext
+  finished?: boolean
 }
 
 function PlayerMenu({
-  quitRoom, players, curPlayer, onOtherGamesClick,
+  quitRoom, players, curPlayer, finished, roomStartContext, playAgain, onOtherGamesClick,
 }: PlayerMenuProps): React.ReactElement {
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [playersModalOpen, setPlayersModalOpen] = useState(false);
@@ -156,6 +162,13 @@ function PlayerMenu({
           </Tooltip>
         </Stack>
       </Paper>
+      {finished != null && roomStartContext != null && finished && (
+        <PlayAgainMenu
+          roomStartContext={roomStartContext}
+          playAgain={playAgain}
+          spectating={spectating}
+        />
+      )}
     </ThemeProvider>
   );
 }

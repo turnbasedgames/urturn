@@ -60,6 +60,8 @@ Default.args = {
     { id: defaultUser.id, username: defaultUser.username },
     { id: 'user-id-2', username: 'billy' },
   ],
+  finished: undefined,
+  roomStartContext: undefined,
 };
 
 export const ManyPlayers = Template.bind({});
@@ -72,6 +74,8 @@ ManyPlayers.args = {
   players: [
     ...Array.from(Array(10).keys()).map((index) => ({ id: `user-id-${String(index)}`, username: `billy-${String(index)}` })),
   ],
+  finished: undefined,
+  roomStartContext: undefined,
 };
 
 export const PlayersUndefined = Template.bind({});
@@ -81,6 +85,8 @@ PlayersUndefined.args = {
   setChildClient: (childClient: any) => logger.info('setting child client', { childClient }),
   makeMove: async (move: any) => logger.info('make move called', { move }),
   quitRoom: async () => logger.info('attempting to quit room'),
+  finished: undefined,
+  roomStartContext: undefined,
 };
 
 export const Spectating = Template.bind({});
@@ -93,4 +99,6 @@ Spectating.args = {
   players: [
     ...Array.from(Array(10).keys()).map((index) => index + 10).map((index) => ({ id: `user-id-${String(index)}`, username: `billy-${String(index)}` })),
   ],
+  finished: undefined,
+  roomStartContext: undefined,
 };

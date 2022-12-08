@@ -408,6 +408,159 @@ test('PUT /room joins a user to a room if there exist a room for the user to joi
   t.is(room.players.length, 2);
 });
 
+test('POST /room/:id/reset with an invalid roomId a 400', async (t) => {
+  const { context: { app: { api } } } = t;
+  const userCred = await createUserCred(t);
+  await createUserAndAssert(t, api, userCred);
+  const {
+    response: {
+      status,
+      data: { validation: { params: { message } } },
+    },
+  } = await t.throwsAsync(api.post('/room/notvalidroomid/reset', undefined, {
+    headers: { authorization: await userCred.user.getIdToken() },
+  }));
+  t.is(status, StatusCodes.BAD_REQUEST);
+  t.deepEqual(message, 'Error code "Invalid ObjectID" is not defined, your custom type is missing the correct messages definition');
+});
+
+test('POST /room/:id/reset on non-existent room provides a 400', async (t) => {
+  const { context: { app: { api } } } = t;
+  const userCred = await createUserCred(t);
+  await createUserAndAssert(t, api, userCred);
+  const nonExistentObjId = new Types.ObjectId();
+  const {
+    response: { status, data: { message } },
+  } = await t.throwsAsync(api.post(
+    `/room/${nonExistentObjId.toString()}/reset`,
+    undefined,
+    { headers: { authorization: await userCred.user.getIdToken() } },
+  ));
+  t.is(status, StatusCodes.BAD_REQUEST);
+  t.deepEqual(message, 'room must exist!');
+});
+
+test('POST /room/:id/reset on a room with non-existent game provides a 400', async (t) => {
+  const { context: { app: { api } } } = t;
+  const userCred = await createUserCred(t);
+  const user = await createUserAndAssert(t, api, userCred);
+
+  const game = await createGameAndAssert(t, api, userCred, user);
+  const room = await createRoomAndAssert(t, api, userCred, game, user, true);
+
+  // delete game
+  const { status: statusDel } = await api.delete(`/game/${game.id}`, { headers: { authorization: await userCred.user.getIdToken() } });
+  t.is(statusDel, StatusCodes.OK);
+
+  const {
+    response: { status, data: { message } },
+  } = await t.throwsAsync(api.post(
+    `/room/${room.id}/reset`,
+    undefined,
+    { headers: { authorization: await userCred.user.getIdToken() } },
+  ));
+  t.is(status, StatusCodes.BAD_REQUEST);
+  t.deepEqual(message, 'game must exist!');
+});
+
+test('POST /room/:id/reset on a room not finished provides a 400', async (t) => {
+  const { context: { app: { api } } } = t;
+  const userCred = await createUserCred(t);
+  const user = await createUserAndAssert(t, api, userCred);
+
+  const game = await createGameAndAssert(t, api, userCred, user);
+  const room = await createRoomAndAssert(t, api, userCred, game, user, true);
+
+  const {
+    response: { status, data: { message } },
+  } = await t.throwsAsync(api.post(
+    `/room/${room.id}/reset`,
+    undefined,
+    { headers: { authorization: await userCred.user.getIdToken() } },
+  ));
+  t.is(status, StatusCodes.BAD_REQUEST);
+  t.deepEqual(message, `Room ${room.id} is not finished!`);
+});
+
+test('POST /room/:id/reset on a room not private provides a 400', async (t) => {
+  const { context: { app: { api } } } = t;
+  const userCred = await createUserCred(t);
+  const user = await createUserAndAssert(t, api, userCred);
+
+  const game = await createGameAndAssert(t, api, userCred, user);
+  const room = await createRoomAndAssert(t, api, userCred, game, user, false);
+
+  // finish the game
+  const moveRes = await api.post(`/room/${room.id}/move`, { finished: true },
+    { headers: { authorization: await userCred.user.getIdToken() } });
+  t.is(moveRes.status, StatusCodes.OK);
+
+  const {
+    response: { status, data: { message } },
+  } = await t.throwsAsync(api.post(
+    `/room/${room.id}/reset`,
+    undefined,
+    { headers: { authorization: await userCred.user.getIdToken() } },
+  ));
+  t.is(status, StatusCodes.BAD_REQUEST);
+  t.deepEqual(message, `Room ${room.id} is not private!`);
+});
+
+test('POST /room/:id/reset on a room that does not contain the user provides a 400', async (t) => {
+  const { context: { app: { api } } } = t;
+  const userCred = await createUserCred(t);
+  const user = await createUserAndAssert(t, api, userCred);
+  const evilUserCred = await createUserCred(t);
+  const evilUser = await createUserAndAssert(t, api, evilUserCred);
+
+  const game = await createGameAndAssert(t, api, userCred, user);
+  const room = await createRoomAndAssert(t, api, userCred, game, user, true);
+
+  // finish the game
+  const moveRes = await api.post(`/room/${room.id}/move`, { finished: true },
+    { headers: { authorization: await userCred.user.getIdToken() } });
+  t.is(moveRes.status, StatusCodes.OK);
+
+  const {
+    response: { status, data: { message } },
+  } = await t.throwsAsync(api.post(
+    `/room/${room.id}/reset`,
+    undefined,
+    { headers: { authorization: await evilUserCred.user.getIdToken() } },
+  ));
+  t.is(status, StatusCodes.BAD_REQUEST);
+  t.deepEqual(message, `You (${evilUser.username}) are not in the room! You are spectating.`);
+});
+
+test('POST /room/:id/reset resets the private room to an initial state', async (t) => {
+  const { context: { app: { api } } } = t;
+  const userCred = await createUserCred(t);
+  const user = await createUserAndAssert(t, api, userCred);
+  const game = await createGameAndAssert(t, api, userCred, user);
+  const room = await createRoomAndAssert(t, api, userCred, game, user, true);
+
+  // finish the game
+  const moveRes = await api.post(`/room/${room.id}/move`, { finished: true },
+    { headers: { authorization: await userCred.user.getIdToken() } });
+  t.is(moveRes.status, StatusCodes.OK);
+
+  const { status, data: { room: roomResult } } = await api.post(
+    `/room/${room.id}/reset`,
+    undefined,
+    { headers: { authorization: await userCred.user.getIdToken() } },
+  );
+  t.is(status, StatusCodes.OK);
+  t.is(roomResult.id, room.id);
+  t.deepEqual(roomResult.game, game);
+  t.deepEqual(roomResult.players, room.players);
+  t.is(roomResult.joinable, true);
+  t.is(roomResult.finished, false);
+  t.is(roomResult.latestState.state.message, `${user.username} joined!`);
+  t.is(roomResult.latestState.version, room.latestState.version + 2);
+  t.is(roomResult.private, true);
+  t.deepEqual(roomResult.roomStartContext, { private: true });
+});
+
 test('POST /room/:id/join joins a game', async (t) => {
   await startTicTacToeRoom(t);
 });

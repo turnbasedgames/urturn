@@ -80,6 +80,11 @@ function Player() {
         window.close();
       }}
       players={roomState?.players}
+      finished={roomState?.finished}
+      roomStartContext={roomState?.roomStartContext}
+      // do nothing for now until we have a good behavior implementation for this button on the
+      // runner
+      playAgain={async () => {}}
     />
   );
 }

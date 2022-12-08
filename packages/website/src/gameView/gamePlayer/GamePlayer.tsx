@@ -7,12 +7,11 @@ import {
   RoomState,
   Game, Room, RoomUser, User, WatchRoomRes,
 } from '@urturn/types-common';
-
 import { RoomPlayer } from '@urturn/ui-common';
 import { useSnackbar } from 'notistack';
 import { logEvent } from 'firebase/analytics';
 import {
-  joinRoom, getRoom, makeMove, generateRoomState, quitRoom,
+  queueUpRoom, joinRoom, getRoom, makeMove, generateRoomState, quitRoom, resetPrivateRoom,
 } from '../../models/room';
 import { UserContext } from '../../models/user';
 import logger from '../../logger';
@@ -20,12 +19,15 @@ import { GITHACK_BASE_URL, SOCKET_IO_REASON_IO_CLIENT_DISCONNECT } from '../../u
 import useSocket from '../../models/useSocket';
 import { analytics } from '../../firebase/setupFirebase';
 
-const shouldJoinPrivateRoom = (user?: User, room?: Room): boolean => Boolean(
+const shouldJoinPrivateRoom = (user?: User, roomState?: RoomState, room?: Room): boolean => Boolean(
   (room != null)
+  && (roomState != null)
   && (user != null)
-  && room.joinable
   && room.private
-  && !room.players.some((p: RoomUser) => p.id === user.id),
+  // use roomState instead of room, because it is updated by websockets and will be the latest
+  // only on initial load will the room be the latest
+  && roomState.joinable
+  && !roomState.players.some((p: RoomUser) => p.id === user.id),
 );
 
 function getIframeSrc(game: Game): string {
@@ -49,21 +51,52 @@ function GamePlayer(): React.ReactElement {
       if (roomId == null) return;
       const roomRaw = await getRoom(roomId);
       setRoom(roomRaw);
-      if (shouldJoinPrivateRoom(userContext.user, roomRaw)) {
-        const joinedRoomResult = await joinRoom(roomId);
-        setRoom(joinedRoomResult);
-      } else if ((userContext.user !== undefined)
-         && !roomRaw.players.some((p: RoomUser) => p.id === userContext.user?.id)) {
+    }
+    setupRoom().catch(logger.error);
+  }, [roomId]);
+
+  useEffect(
+    () => {
+      if (room == null || roomId == null) return () => undefined;
+      if (
+        !shouldJoinPrivateRoom(userContext.user, generateRoomState(room, room.latestState), room)
+      && (userContext.user !== undefined)
+      && !room.players.some((p: RoomUser) => p.id === userContext.user?.id)
+      ) {
         enqueueSnackbar('Spectating 👀', {
           variant: 'info',
           persist: true,
         });
       }
-    }
-    setupRoom().catch(logger.error);
+      return () => closeSnackbar();
+    },
+    // Run only on initial room load to display snackbar to a user that they are a spectator.
+    // This avoids spamming the user with snackbars.
+    [userContext.user, room],
+  );
 
-    return () => closeSnackbar();
-  }, [userContext.user]);
+  useEffect(
+    () => {
+      async function handleJoinPrivateRoom(): Promise<void> {
+        if (room == null || roomState == null || roomId == null) return;
+        if (shouldJoinPrivateRoom(userContext.user, roomState, room)) {
+          const joinedRoomResult = await joinRoom(roomId);
+          setRoom(joinedRoomResult);
+        }
+      }
+      handleJoinPrivateRoom().catch((error) => {
+        logger.error(error);
+        enqueueSnackbar('Error joining private room, try refreshing!', {
+          variant: 'info',
+          persist: true,
+        });
+      });
+    },
+    // listen if roomState.joinable changes to re-evaluate if we should join the private room
+    // which mostly happens when a user "restarts private room", and all other players will be
+    // re-added to the room
+    [userContext.user, roomState?.joinable],
+  );
 
   const onSocketDisconnect = (reason: string): void => {
     // client decided to disconnect, no reason to think this was an error
@@ -144,6 +177,67 @@ function GamePlayer(): React.ReactElement {
         navigate(`/games${(room.game != null) ? `/${room.game.id}` : ''}`);
       }}
       players={roomState?.players}
+      finished={roomState?.finished}
+      roomStartContext={roomState?.roomStartContext}
+      playAgain={async () => {
+        if (room.game == null) {
+          enqueueSnackbar('Error, game no longer exists!', {
+            variant: 'error',
+            autoHideDuration: 3000,
+          });
+          return;
+        }
+        if (roomState?.roomStartContext == null) {
+          enqueueSnackbar('Error occurred as the current room state has not loaded properly, try refreshing!', {
+            variant: 'error',
+            autoHideDuration: 3000,
+          });
+          return;
+        }
+        if (roomState?.roomStartContext.private) {
+          // recreate the match
+          try {
+            const newRoom = await resetPrivateRoom(room.id);
+            logger.info('successfully created newRoom', { roomId: newRoom.id });
+
+            // force a refresh to avoid handling all the edge cases with coordinating our useSocket
+            // hook, childClient (penpal), and various useMemo/useRef hooks in RoomPlayer component
+            navigate(0);
+          } catch (error) {
+            enqueueSnackbar('Error, unable to reset private room!', {
+              variant: 'error',
+              autoHideDuration: 3000,
+            });
+            logger.error(error);
+          }
+          logEvent(analytics, 'play_again_button_click', {
+            privateRoom: true,
+            gameId: room.game.id,
+            gameName: room.game.name,
+          });
+        } else {
+          try {
+            // requeue player up in new room
+            const newRoom = await queueUpRoom({ game: room.game.id });
+            navigate(`/games/${room.game.id}/room/${newRoom.id}`);
+
+            // force a refresh to avoid handling all the edge cases with coordinating our useSocket
+            // hook, childClient (penpal), and various useMemo/useRef hooks in RoomPlayer component
+            navigate(0);
+          } catch (error) {
+            enqueueSnackbar('Error, unable to queue up!', {
+              variant: 'error',
+              autoHideDuration: 3000,
+            });
+            logger.error(error);
+          }
+          logEvent(analytics, 'play_again_button_click', {
+            privateRoom: false,
+            gameId: room.game.id,
+            gameName: room.game.name,
+          });
+        }
+      }}
       onOtherGamesClick={() => logEvent(analytics, 'other_games_button_click', {
         gameId: room.game?.id ?? '(empty)',
         gameName: room.game?.name ?? '(empty)',

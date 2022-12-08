@@ -7,7 +7,8 @@ import { RoomPlayerProps, Errors } from './RoomPlayer.types';
 import PlayerMenu from './PlayerMenu';
 
 function RoomPlayer({
-  user, src, setChildClient, makeMove, quitRoom, players, onOtherGamesClick,
+  user, src, setChildClient, makeMove, quitRoom, players, finished, roomStartContext, playAgain,
+  onOtherGamesClick,
 }: RoomPlayerProps): React.ReactElement {
   const iframeRef = useCallback((iframe: HTMLIFrameElement | null) => {
     if (iframe != null) {
@@ -58,9 +59,12 @@ function RoomPlayer({
     <>
       <PlayerMenu
         quitRoom={quitRoom}
+        playAgain={playAgain}
+        onOtherGamesClick={onOtherGamesClick}
         players={players ?? []}
         curPlayer={user}
-        onOtherGamesClick={onOtherGamesClick}
+        finished={finished}
+        roomStartContext={roomStartContext}
       />
       {iframeMemo}
     </>

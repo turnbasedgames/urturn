@@ -5,6 +5,7 @@ const { Schema } = mongoose;
 const { addKVToObjectFactoryFn, getKVToObjectFactoryFn } = require('../util');
 const {
   UserNotInRoomError, UserAlreadyInRoomError, RoomFinishedError, RoomNotJoinableError,
+  RoomNotPrivateError, RoomNotFinishedError,
 } = require('./errors');
 
 const MAX_NUM_PLAYERS = 50;
@@ -163,6 +164,25 @@ RoomSchema.method('playerMove', function playerMove(player) {
   if (!this.containsPlayer(player)) {
     throw new UserNotInRoomError(player, this);
   }
+});
+
+RoomSchema.method('privateRoomReset', function privateRoomReset(player) {
+  if (!this.finished) {
+    throw new RoomNotFinishedError(this);
+  }
+  if (!this.private) {
+    throw new RoomNotPrivateError(this);
+  }
+  if (!this.containsPlayer(player)) {
+    throw new UserNotInRoomError(player, this);
+  }
+  // reset initial values
+  this.finished = false;
+  this.markModified('finished');
+  this.joinable = true;
+  this.markModified('joinable');
+  this.players = [];
+  this.markModified('players');
 });
 
 module.exports = mongoose.model('Room', RoomSchema);
