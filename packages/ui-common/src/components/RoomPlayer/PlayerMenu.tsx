@@ -17,7 +17,7 @@ interface PlayerMenuProps {
   quitRoom: () => Promise<void>
   players: RoomUser[]
   curPlayer: RoomUser
-  onOtherGamesClick?: any
+  onOtherGamesClick?: () => void
 }
 
 function PlayerMenu({

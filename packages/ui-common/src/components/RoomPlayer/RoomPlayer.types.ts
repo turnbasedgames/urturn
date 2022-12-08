@@ -13,5 +13,5 @@ export interface RoomPlayerProps {
   setChildClient: (childClient: any) => void
   quitRoom: () => Promise<void>
   players?: RoomUser[]
-  onOtherGamesClick?: any
+  onOtherGamesClick?: () => void
 }
