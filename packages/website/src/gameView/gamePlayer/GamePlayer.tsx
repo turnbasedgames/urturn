@@ -10,6 +10,7 @@ import {
 
 import { RoomPlayer } from '@urturn/ui-common';
 import { useSnackbar } from 'notistack';
+import { logEvent } from 'firebase/analytics';
 import {
   joinRoom, getRoom, makeMove, generateRoomState, quitRoom,
 } from '../../models/room';
@@ -17,6 +18,7 @@ import { UserContext } from '../../models/user';
 import logger from '../../logger';
 import { GITHACK_BASE_URL, SOCKET_IO_REASON_IO_CLIENT_DISCONNECT } from '../../util';
 import useSocket from '../../models/useSocket';
+import { analytics } from '../../firebase/setupFirebase';
 
 const shouldJoinPrivateRoom = (user?: User, room?: Room): boolean => Boolean(
   (room != null)
@@ -77,6 +79,7 @@ function GamePlayer(): React.ReactElement {
   const [socket, socketConnected] = useSocket(userContext.user, onSocketDisconnect);
 
   const [childClient, setChildClient] = useState<any | null>();
+
   useEffect(() => {
     if (childClient == null || room == null || room.game == null || socket == null) {
       return () => {};
@@ -142,6 +145,9 @@ function GamePlayer(): React.ReactElement {
         navigate(`/games${(room.game != null) ? `/${room.game.id}` : ''}`);
       }}
       players={roomState?.players}
+      onOtherGamesClick={() => logEvent(analytics, 'other_games_button_click', {
+        name: (room.game != null) ? room.game.id : 'NO GAME ID FOUND',
+      })}
     />
   );
 }
