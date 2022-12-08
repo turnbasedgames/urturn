@@ -1,0 +1,24 @@
+[
+  {
+    "name": "test-app",
+    "description": "This application is used for testing in our dev environment and is our own custom test-app for triggering behaviors on the server.",
+    "activePlayerCount": 0,
+    "githubURL": "https://github.com/turnbasedgames/urturn",
+    "commitSHA": "522460d68d0266ffe807962d5eae6ae9bca47832",
+    "customURL": "test-app",
+    "creator": {
+      "$oid": "63911cc4135fe9e0a86f5bec"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1670454610951"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1670454610951"
+      }
+    },
+    "__v": 0
+  }
+]

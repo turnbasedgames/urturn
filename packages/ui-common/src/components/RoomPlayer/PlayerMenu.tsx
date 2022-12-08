@@ -82,7 +82,7 @@ function PlayerMenu({
           />
           <Stack spacing={1}>
             {players.map(({ username, id }, idx) => (
-              <Card variant="outlined">
+              <Card key={id} variant="outlined">
                 <CardHeader
                   title={`${idx + 1}. ${username}${id === curPlayer.id ? ' (you)' : ''}`}
                   titleTypographyProps={{ variant: 'h6' }}

@@ -1,0 +1,19 @@
+[
+  {
+    "urbux": 0,
+    "firebaseId": "BI2EhtsE7udX3wnZ69XCiJTNVDf2",
+    "signInProvider": "google.com",
+    "username": "seed_user",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1670456969823"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1670456969823"
+      }
+    },
+    "__v": 0
+  }
+]
