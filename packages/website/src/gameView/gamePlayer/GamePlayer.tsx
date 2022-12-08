@@ -79,7 +79,6 @@ function GamePlayer(): React.ReactElement {
   const [socket, socketConnected] = useSocket(userContext.user, onSocketDisconnect);
 
   const [childClient, setChildClient] = useState<any | null>();
-
   useEffect(() => {
     if (childClient == null || room == null || room.game == null || socket == null) {
       return () => {};
