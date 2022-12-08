@@ -56,18 +56,20 @@ function App() {
     players = [], finished,
   } = roomState;
 
+  const actualPlayers = [...players];
   if (botEnabled) {
-    players.push({
+    actualPlayers.push({
       id: 'botId',
       username: 'word_bot',
     });
   }
+
   const dataLoading = roomState == null || curPlr == null;
-  const spectator = !players.some(({ id }) => id === curPlr?.id);
+  const spectator = !actualPlayers.some(({ id }) => id === curPlr?.id);
   const generalStatus = getStatusMsg({
-    status, winner, finished, curPlr, players, plrToSecretHash, spectator,
+    status, winner, finished, curPlr, actualPlayers, plrToSecretHash, spectator,
   });
-  const plrToStatus = players.reduce((prev, cur) => {
+  const plrToStatus = actualPlayers.reduce((prev, cur) => {
     if (status === 'preGame' && plrToSecretHash[cur.id] != null) {
       prev.set(cur.id, { message: 'ready' });
     }
@@ -76,7 +78,7 @@ function App() {
 
   const [forceBotStartTime, setForceBotStartTime] = useState(null);
   const curPlrSecretProvided = plrToSecretHash != null && (curPlr?.id in plrToSecretHash);
-  const botEligible = !spectator && players.length === 1 && roomStartContext?.private === false && status === 'preGame' && curPlrSecretProvided;
+  const botEligible = !spectator && actualPlayers.length === 1 && roomStartContext?.private === false && status === 'preGame' && curPlrSecretProvided;
   useEffect(() => {
     if (botEligible) {
       setForceBotStartTime(new Date());
@@ -158,12 +160,12 @@ function App() {
                       setRecentErrorMsg={setRecentErrorMsg}
                     />
                     )}
-                    <PlayerList players={players} plrToStatus={plrToStatus} />
+                    <PlayerList players={actualPlayers} plrToStatus={plrToStatus} />
                   </>
                 )}
                 {status === 'inGame' && (
                 <InGame
-                  players={players}
+                  players={actualPlayers}
                   curPlr={curPlr}
                   spectator={spectator}
                   plrToSecretHash={plrToSecretHash}
@@ -174,7 +176,14 @@ function App() {
                   hintIndex={hintIndex}
                 />
                 )}
-                {status === 'endGame' && (<EndGame plrToSecretHash={plrToSecretHash} />)}
+                {status === 'endGame' && (
+                <EndGame
+                  winner={winner}
+                  players={actualPlayers}
+                  plrToSecretHash={plrToSecretHash}
+                  plrToGuessToInfo={plrToGuessToInfo}
+                />
+                )}
               </Stack>
             )}
         </Stack>
