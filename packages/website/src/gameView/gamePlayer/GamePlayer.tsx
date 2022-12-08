@@ -146,7 +146,7 @@ function GamePlayer(): React.ReactElement {
       players={roomState?.players}
       onOtherGamesClick={() => logEvent(analytics, 'other_games_button_click', {
         game: {
-          ID: room.game?.id ?? '(empty)',
+          id: room.game?.id ?? '(empty)',
           name: room.game?.name ?? '(empty)',
         },
       })}
