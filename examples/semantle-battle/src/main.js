@@ -1,6 +1,8 @@
 import { wordToVecRaw, wordToNearestRaw } from './words';
+import commonWordsRaw from './commonWords';
 import {
   getSimilarityScore, getNearestIndex, getNthNearest, MAX_SIMILARITY, getRandHash, botPlr,
+  getRandomItem,
 } from './utils';
 
 function hashWord(secret) {
@@ -12,6 +14,8 @@ wordToNearestRaw.trim().split(/\r?\n/).forEach((line) => {
   const similarWords = line.split(' ');
   hashToNearest.set(hashWord(similarWords.at(-1)), similarWords);
 });
+
+const commonWords = new Set(commonWordsRaw.trim().split(/\r?\n/));
 
 const hashToVec = new Map();
 wordToVecRaw.trim().split(/\r?\n/).forEach((line) => {
@@ -86,7 +90,7 @@ function forceStartWithBot(plr, roomState) {
   }
   const botId = 'botId';
   state.botEnabled = true;
-  state.plrToSecretHash[botId] = getRandHash(hashToNearest);
+  state.plrToSecretHash[botId] = hashWord(getRandomItem(commonWords));
   state.plrToGuessToInfo[botId] = {};
   state.guessStartTime = new Date().toISOString();
   state.status = Status.InGame;

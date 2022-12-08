@@ -36,10 +36,10 @@ export const getNthNearest = (hashToNearest, secretHash, n) => {
   return nearestWords[n];
 };
 
-function getRandomItem(collection) {
+export const getRandomItem = (collection) => {
   const keys = Array.from(collection.keys());
   return keys[Math.floor(Math.random() * keys.length)];
-}
+};
 
 export const getRandHash = (hashToNearest) => getRandomItem(hashToNearest);
 
