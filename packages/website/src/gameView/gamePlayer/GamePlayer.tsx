@@ -21,8 +21,10 @@ const shouldJoinPrivateRoom = (user?: User, roomState?: RoomState, room?: Room):
   (room != null)
   && (roomState != null)
   && (user != null)
-  && roomState.joinable
   && room.private
+  // use roomState instead of room, because it is updated by websockets and will be the latest
+  // only on initial load will the room be the latest
+  && roomState.joinable
   && !roomState.players.some((p: RoomUser) => p.id === user.id),
 );
 
@@ -51,37 +53,48 @@ function GamePlayer(): React.ReactElement {
     setupRoom().catch(logger.error);
   }, [roomId]);
 
-  useEffect(() => {
-    if (room == null || roomId == null) return () => undefined;
-    if (
-      !shouldJoinPrivateRoom(userContext.user, generateRoomState(room, room.latestState), room)
+  useEffect(
+    () => {
+      if (room == null || roomId == null) return () => undefined;
+      if (
+        !shouldJoinPrivateRoom(userContext.user, generateRoomState(room, room.latestState), room)
       && (userContext.user !== undefined)
       && !room.players.some((p: RoomUser) => p.id === userContext.user?.id)
-    ) {
-      enqueueSnackbar('Spectating 👀', {
-        variant: 'info',
-        persist: true,
-      });
-    }
-    return () => closeSnackbar();
-  }, [userContext.user, room]);
-
-  useEffect(() => {
-    async function handleJoinPrivateRoom(): Promise<void> {
-      if (room == null || roomState == null || roomId == null) return;
-      if (shouldJoinPrivateRoom(userContext.user, roomState, room)) {
-        const joinedRoomResult = await joinRoom(roomId);
-        setRoom(joinedRoomResult);
+      ) {
+        enqueueSnackbar('Spectating 👀', {
+          variant: 'info',
+          persist: true,
+        });
       }
-    }
-    handleJoinPrivateRoom().catch((error) => {
-      logger.error(error);
-      enqueueSnackbar('Error joining private room, try refreshing!', {
-        variant: 'info',
-        persist: true,
+      return () => closeSnackbar();
+    },
+    // Run only on initial room load to display snackbar to a user that they are a spectator.
+    // This avoids spamming the user with snackbars.
+    [userContext.user, room],
+  );
+
+  useEffect(
+    () => {
+      async function handleJoinPrivateRoom(): Promise<void> {
+        if (room == null || roomState == null || roomId == null) return;
+        if (shouldJoinPrivateRoom(userContext.user, roomState, room)) {
+          const joinedRoomResult = await joinRoom(roomId);
+          setRoom(joinedRoomResult);
+        }
+      }
+      handleJoinPrivateRoom().catch((error) => {
+        logger.error(error);
+        enqueueSnackbar('Error joining private room, try refreshing!', {
+          variant: 'info',
+          persist: true,
+        });
       });
-    });
-  }, [userContext.user, roomState?.joinable]);
+    },
+    // listen if roomState.joinable changes to re-evaluate if we should join the private room
+    // which mostly happens when a user "restarts private room", and all other players will be
+    // re-added to the room
+    [userContext.user, roomState?.joinable],
+  );
 
   const onSocketDisconnect = (reason: string): void => {
     // client decided to disconnect, no reason to think this was an error
