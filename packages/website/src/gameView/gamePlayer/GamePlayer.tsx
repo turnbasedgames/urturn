@@ -17,12 +17,13 @@ import logger from '../../logger';
 import { GITHACK_BASE_URL, SOCKET_IO_REASON_IO_CLIENT_DISCONNECT } from '../../util';
 import useSocket from '../../models/useSocket';
 
-const shouldJoinPrivateRoom = (user?: User, room?: Room): boolean => Boolean(
+const shouldJoinPrivateRoom = (user?: User, roomState?: RoomState, room?: Room): boolean => Boolean(
   (room != null)
+  && (roomState != null)
   && (user != null)
-  && room.joinable
+  && roomState.joinable
   && room.private
-  && !room.players.some((p: RoomUser) => p.id === user.id),
+  && !roomState.players.some((p: RoomUser) => p.id === user.id),
 );
 
 function getIframeSrc(game: Game): string {
@@ -46,21 +47,41 @@ function GamePlayer(): React.ReactElement {
       if (roomId == null) return;
       const roomRaw = await getRoom(roomId);
       setRoom(roomRaw);
-      if (shouldJoinPrivateRoom(userContext.user, roomRaw)) {
-        const joinedRoomResult = await joinRoom(roomId);
-        setRoom(joinedRoomResult);
-      } else if ((userContext.user !== undefined)
-         && !roomRaw.players.some((p: RoomUser) => p.id === userContext.user?.id)) {
-        enqueueSnackbar('Spectating 👀', {
-          variant: 'info',
-          persist: true,
-        });
-      }
     }
     setupRoom().catch(logger.error);
+  }, [roomId]);
 
+  useEffect(() => {
+    if (room == null || roomId == null) return () => undefined;
+    if (
+      !shouldJoinPrivateRoom(userContext.user, generateRoomState(room, room.latestState), room)
+      && (userContext.user !== undefined)
+      && !room.players.some((p: RoomUser) => p.id === userContext.user?.id)
+    ) {
+      enqueueSnackbar('Spectating 👀', {
+        variant: 'info',
+        persist: true,
+      });
+    }
     return () => closeSnackbar();
-  }, [userContext.user]);
+  }, [userContext.user, room]);
+
+  useEffect(() => {
+    async function handleJoinPrivateRoom(): Promise<void> {
+      if (room == null || roomState == null || roomId == null) return;
+      if (shouldJoinPrivateRoom(userContext.user, roomState, room)) {
+        const joinedRoomResult = await joinRoom(roomId);
+        setRoom(joinedRoomResult);
+      }
+    }
+    handleJoinPrivateRoom().catch((error) => {
+      logger.error(error);
+      enqueueSnackbar('Error joining private room, try refreshing!', {
+        variant: 'info',
+        persist: true,
+      });
+    });
+  }, [userContext.user, roomState?.joinable]);
 
   const onSocketDisconnect = (reason: string): void => {
     // client decided to disconnect, no reason to think this was an error
@@ -144,15 +165,15 @@ function GamePlayer(): React.ReactElement {
       finished={roomState?.finished}
       roomStartContext={roomState?.roomStartContext}
       playAgain={async () => {
-        if (roomState?.roomStartContext == null) {
-          enqueueSnackbar('Error occurred as the current room state has not loaded properly, try refreshing!', {
+        if (room.game == null) {
+          enqueueSnackbar('Error, game no longer exists!', {
             variant: 'error',
             autoHideDuration: 3000,
           });
           return;
         }
-        if (room.game == null) {
-          enqueueSnackbar('Error, game no longer exists!', {
+        if (roomState?.roomStartContext == null) {
+          enqueueSnackbar('Error occurred as the current room state has not loaded properly, try refreshing!', {
             variant: 'error',
             autoHideDuration: 3000,
           });
