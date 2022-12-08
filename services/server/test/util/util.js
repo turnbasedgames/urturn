@@ -109,7 +109,7 @@ const setupMongoDB = makePersistentDependencyFn('MongoDB', 'MONGODB_CONNECTION_U
       binary: {
         downloadDir: `${process.cwd()}/../../node_modules/.cache/mongodb-memory-server/mongodb-binaries`,
       },
-      replSet: { count: 4 },
+      replSet: { count: 2 },
     });
     const uri = mongod.getUri();
     return [uri, async () => {
