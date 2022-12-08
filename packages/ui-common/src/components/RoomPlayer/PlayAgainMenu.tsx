@@ -18,7 +18,10 @@ function PlayAgainMenu({
 }: PlayAgainMenuProps): React.ReactElement {
   const [loadingRoom, setLoadingRoom] = useState(false);
   const buttonMessage = roomStartContext.private ? 'Restart Private Room' : 'Play Again';
-  const disabled = loadingRoom || (roomStartContext.private && spectating);
+  const disabled = loadingRoom
+   // Button disabled for spectators of private rooms because they should NOT be allowed to
+   // "Restart Private Room"
+   || (roomStartContext.private && spectating);
 
   return (
     <Paper
