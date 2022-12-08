@@ -210,6 +210,11 @@ function GamePlayer(): React.ReactElement {
             });
             logger.error(error);
           }
+          logEvent(analytics, 'play_again_button_click', {
+            privateRoom: true,
+            gameId: room.game.id,
+            gameName: room.game.name,
+          });
         } else {
           try {
             // requeue player up in new room
@@ -226,6 +231,11 @@ function GamePlayer(): React.ReactElement {
             });
             logger.error(error);
           }
+          logEvent(analytics, 'play_again_button_click', {
+            privateRoom: false,
+            gameId: room.game.id,
+            gameName: room.game.name,
+          });
         }
       }}
       onOtherGamesClick={() => logEvent(analytics, 'other_games_button_click', {
