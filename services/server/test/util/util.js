@@ -109,7 +109,12 @@ const setupMongoDB = makePersistentDependencyFn('MongoDB', 'MONGODB_CONNECTION_U
       binary: {
         downloadDir: `${process.cwd()}/../../node_modules/.cache/mongodb-memory-server/mongodb-binaries`,
       },
-      replSet: { count: 2 },
+      replSet: {
+        // Start only one instance to save resources for our CI and local environment while testing.
+        // We can further optimize by reusing the same replicaSet, but connecting with different
+        // DB names.
+        count: 1,
+      },
     });
     const uri = mongod.getUri();
     return [uri, async () => {
