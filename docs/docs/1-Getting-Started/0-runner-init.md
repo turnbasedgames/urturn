@@ -18,6 +18,8 @@ cd my-game
 npm run dev # run the game locally
 ```
 
+## Frontend Templates (TODO)
+
 ## File/Folder structure
 
 ```bash
