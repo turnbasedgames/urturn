@@ -9,7 +9,7 @@ export default class Demo extends Phaser.Scene {
     this.recentErrorMsg = null;
   }
   preload() {
-    this.load.image("logo", "/assets/phaser3-logo.png");
+    this.load.image("logo", "./assets/urturnIcon.png");
   }
 
   create() {
@@ -17,7 +17,12 @@ export default class Demo extends Phaser.Scene {
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;
 
-    this.add.image(centerX, centerY, "logo");
+    const image = this.add.image(centerX - 400, centerY, "logo");
+    image.setScale(0.1, 0.1)
+    this.add.text(centerX, centerY, "TODO: Make UrTurn Game 🚀", {
+      fontSize: 50,
+      fontFamily: 'Roboto, Helvetica, Arial, sans-serif'
+    }).setOrigin();
 
     const onStateChanged = (newRoomState) => {
       this.state = newRoomState;
@@ -27,8 +32,9 @@ export default class Demo extends Phaser.Scene {
     const setupCurPlr = async () => {
       const newCurPlr = await client.getLocalPlayer();
       this.curPlr = newCurPlr;
-      this.add.text(centerX, centerY + 100, this.curPlr.username, {
-        fontSize: 50,
+      this.add.text(centerX, centerY + 100, "current user: " + this.curPlr.username, {
+        fontSize: 40,
+        fontFamily: 'Roboto, Helvetica, Arial, sans-serif'
       }).setOrigin();
     };
     setupCurPlr();
