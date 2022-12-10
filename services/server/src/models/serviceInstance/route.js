@@ -20,7 +20,7 @@ function setupRouter({ io, serviceInstanceId }) {
     }));
 
   router.get('/date', asyncHandler(async (req, res) => {
-    res.status(StatusCodes.OK).json({ date: Date.now() });
+    res.status(StatusCodes.OK).json({ date: new Date().toISOString() });
   }));
 
   // Cleans up all instances logged that are stale.

@@ -38,13 +38,14 @@ test('GET /instance/date returns current time within buffer', async (t) => {
   const { data: { date }, status } = await api.get('/instance/date');
   t.is(status, StatusCodes.OK);
 
-  const bufferMS = 500;
+  const bufferMS = 5000;
 
-  const lowerBound = requestTimestampMS;
-  const upperBound = requestTimestampMS + bufferMS;
+  const lowerBound = new Date(requestTimestampMS);
+  const upperBound = new Date(requestTimestampMS + bufferMS);
 
-  t.truthy(date >= lowerBound);
-  t.truthy(date <= upperBound);
+  const serverDate = new Date(date);
+  t.true(serverDate >= lowerBound);
+  t.true(serverDate <= upperBound);
 });
 
 test('DELETE /instance/cleanup cleans up at max 10 userSockets for each serviceInstance', async (t) => {
