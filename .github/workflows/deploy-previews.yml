@@ -11,9 +11,7 @@ jobs:
           node-version: 16
           cache: 'npm'
       - name: install and setup the monorepo dependencies
-        run: |
-          npm ci
-          npx lerna bootstrap --hoist
+        run: npm ci
       - name: build monorepo
         run: npx lerna run build
         env:

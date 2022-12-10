@@ -105,10 +105,6 @@ const setupMongoDB = makePersistentDependencyFn('MongoDB', 'MONGODB_CONNECTION_U
   async () => {
     // use MongoMemoryReplSet instead of MongoMemoryServer because the app requires transactions
     const mongod = await MongoMemoryReplSet.create({
-      // binaries are in monorepo root due to "lerna bootstrap --hoist"
-      binary: {
-        downloadDir: `${process.cwd()}/../../node_modules/.cache/mongodb-memory-server/mongodb-binaries`,
-      },
       replSet: {
         // Start only one instance to save resources for our CI and local environment while testing.
         // We can further optimize by reusing the same replicaSet, but connecting with different
@@ -129,12 +125,7 @@ const setupMongoDBClient = (uri) => {
 
 const setupRedis = makePersistentDependencyFn('Redis', 'REDIS_URL',
   async () => {
-    const redisServer = new RedisMemoryServer({
-      // binaries are in monorepo root due to "lerna bootstrap --hoist"
-      binary: {
-        downloadDir: `${process.cwd()}/../../node_modules/.cache/redis-memory-server/redis-binaries`,
-      },
-    });
+    const redisServer = new RedisMemoryServer();
     const host = await redisServer.getHost();
     const port = await redisServer.getPort();
     const uri = `redis://${host}:${port}`;
