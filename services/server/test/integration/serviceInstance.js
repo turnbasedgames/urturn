@@ -31,6 +31,25 @@ test('GET /instance returns current serviceInstance', async (t) => {
   t.is(newServiceInstance.pingCount, serviceInstance.pingCount + 1);
 });
 
+test('GET /instance/date returns current time within buffer', async (t) => {
+  const { api } = t.context.app;
+
+  const requestTimestampMS = Date.now();
+  const { data: { date }, status } = await api.get('/instance/date');
+  t.is(status, StatusCodes.OK);
+
+  const bufferMS = 5000;
+
+  const lowerBound = new Date(requestTimestampMS);
+  const upperBound = new Date(requestTimestampMS + bufferMS);
+
+  const serverDate = new Date(date);
+  t.true(serverDate >= lowerBound,
+    `serverDate: ${serverDate}, lowerBound: ${lowerBound}, upperBound: ${upperBound}`);
+  t.true(serverDate <= upperBound,
+    `serverDate: ${serverDate}, lowerBound: ${lowerBound}, upperBound: ${upperBound}`);
+});
+
 test('DELETE /instance/cleanup cleans up at max 10 userSockets for each serviceInstance', async (t) => {
   // create a app with seperate mongodb replset so serviceInstance records don't interfere with
   // eachother
