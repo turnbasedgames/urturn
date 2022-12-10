@@ -94,10 +94,9 @@ function App(): React.ReactElement {
   useEffect(() => {
     const syncServer = async (): Promise<void> => {
       const requestTimeMS = Date.now();
-      const serverTime = await getDate();
+      const serverTimeMS = (await getDate()).getMilliseconds();
       const responseTimeMS = Date.now();
 
-      const serverTimeMS = new Date(serverTime).getMilliseconds();
       const latency = (requestTimeMS - responseTimeMS) / 2;
       latencies[idx] = latency;
       offsets[idx] = serverTimeMS - average(latencies) - requestTimeMS;
