@@ -11,7 +11,6 @@ After cloning the monorepo, install dependencies, link packages, and build:
 
 ```bash
 $ npm i # install all dependencies
-$ npx lerna bootstrap --hoist # link all packages together
 $ npx lerna run build # builds all packages
 ```
 
