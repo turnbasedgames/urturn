@@ -6,6 +6,7 @@
     "npm": ">=8"
   },
   "scripts": {
+    "test": "npx lerna run test",
     "lint": "npx lerna run lint",
     "lint:fix": "npx lerna run lint:fix",
     "build": "npx lerna run build",
