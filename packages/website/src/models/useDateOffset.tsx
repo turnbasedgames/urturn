@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 import { getDate } from './instance';
 
+const DEFAULT_OFFSET = 0;
+const OFFSET_HISTORY_LENGTH = 10;
+const SYNC_INTERVAL_MS = 1000;
+
 function average(arr: number[]): number {
   return arr.reduce((a, b) => (b != null ? a + b : b), 0) / arr.filter((n) => n).length;
 }
 
-const DEFAULT_OFFSET = 0;
-const CACHED_CALCULATIONS = 10;
-const SYNC_INTERVAL_MS = 1000;
-
 const useDateOffset = (): [number] => {
   const [offset, setOffset] = useState(DEFAULT_OFFSET);
-  const offsets: number[] = new Array(CACHED_CALCULATIONS);
-  const latencies: number[] = new Array(CACHED_CALCULATIONS);
+  const offsets: number[] = new Array(OFFSET_HISTORY_LENGTH);
+  const latencies: number[] = new Array(OFFSET_HISTORY_LENGTH);
 
   let idx = 0;
   useEffect(() => {
@@ -24,7 +24,7 @@ const useDateOffset = (): [number] => {
       const latency = (requestTimeMS - responseTimeMS) / 2;
       latencies[idx] = latency;
       offsets[idx] = serverTimeMS - average(latencies) - requestTimeMS;
-      idx = (idx + 1) % CACHED_CALCULATIONS;
+      idx = (idx + 1) % OFFSET_HISTORY_LENGTH;
 
       setOffset(average(offsets));
     };
