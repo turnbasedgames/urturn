@@ -48,7 +48,7 @@ function GamePlayer(): React.ReactElement {
   const navigate = useNavigate();
   const [offset] = useDateOffset();
 
-  console.log('OFFSET: ', offset);
+  logger.info('OFFSET: ', offset);
 
   useEffect(() => {
     async function setupRoom(): Promise<void> {
