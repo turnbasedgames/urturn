@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import logger from '../logger';
 import { getDate } from './instance';
 
 const DEFAULT_OFFSET = 0;
@@ -6,32 +7,43 @@ const OFFSET_HISTORY_LENGTH = 10;
 const SYNC_INTERVAL_MS = 1000;
 
 function average(arr: number[]): number {
-  return arr.reduce((a, b) => (b != null ? a + b : b), 0) / arr.filter((n) => n).length;
+  if (arr.length === 0) return 0;
+  return arr.reduce((a, b) => a + b, 0) / arr.length;
 }
 
 const useDateOffset = (): [number] => {
   const [offset, setOffset] = useState(DEFAULT_OFFSET);
-  const offsets: number[] = new Array(OFFSET_HISTORY_LENGTH);
-  const latencies: number[] = new Array(OFFSET_HISTORY_LENGTH);
 
-  let idx = 0;
   useEffect(() => {
+    let timeout: NodeJS.Timeout;
+
+    const offsets: number[] = new Array(OFFSET_HISTORY_LENGTH);
+    const latencies: number[] = new Array(OFFSET_HISTORY_LENGTH);
+    let idx = 0;
     const syncServer = async (): Promise<void> => {
-      const requestTimeMS = new Date().getTime();
-      const serverTimeMS = (await getDate()).getTime();
-      const responseTimeMS = new Date().getTime();
+      try {
+        const requestTimeMS = new Date().getTime();
+        const serverTimeMS = (await getDate()).getTime();
+        const responseTimeMS = new Date().getTime();
 
-      const latency = (requestTimeMS - responseTimeMS) / 2;
-      latencies[idx] = latency;
-      offsets[idx] = serverTimeMS - average(latencies) - requestTimeMS;
-      idx = (idx + 1) % OFFSET_HISTORY_LENGTH;
+        const latency = (responseTimeMS - requestTimeMS) / 2;
+        latencies[idx] = latency;
+        offsets[idx] = serverTimeMS - average(latencies.filter((n) => n != null)) - requestTimeMS;
 
-      setOffset(average(offsets));
+        idx = (idx + 1) % OFFSET_HISTORY_LENGTH;
+
+        setOffset(average(offsets.filter((n) => n != null)));
+      } catch (e) {
+        logger.error(e);
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      timeout = setTimeout(async () => syncServer(), SYNC_INTERVAL_MS);
     };
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    const interval = setInterval(async () => syncServer(), SYNC_INTERVAL_MS);
 
-    return () => clearInterval(interval);
+    syncServer().catch((e) => logger.error(e));
+
+    return () => clearTimeout(timeout);
   }, []);
 
   return [offset];
