@@ -28,13 +28,8 @@ import GameList from './gameView/gameList';
 import GameInfo from './gameView/gamePlayer/GameInfo';
 import GamePlayer from './gameView/gamePlayer/GamePlayer';
 import NavBar from './navBar';
-import { getDate } from './models/instance';
 
 axios.defaults.baseURL = API_URL;
-
-function average(arr: number[]): number {
-  return arr.reduce((a, b) => (a != null ? a + b : b), 0) / arr.filter((n) => n).length;
-}
 
 function CloseSnackBarButton(snackbarProviderRef?: React.RefObject<SnackbarProvider>) {
   return function SnackBarButton(key: SnackbarKey) {
@@ -53,7 +48,6 @@ function CloseSnackBarButton(snackbarProviderRef?: React.RefObject<SnackbarProvi
 
 function App(): React.ReactElement {
   const [user, setUser] = useState<User | undefined>();
-  const [offset, setOffset] = useState(0);
 
   useEffect(() => {
     const authInterceptor = axios.interceptors.request.use(async (config) => {
@@ -86,31 +80,6 @@ function App(): React.ReactElement {
   const userProviderValue = useMemo(() => ({ user, setUser }), [user, setUser]);
   const NavBarMemo = useMemo(() => <NavBar />, [user, setUser]);
   const snackbarProviderRef = createRef<SnackbarProvider>();
-
-  const offsets: number[] = new Array(10);
-  const latencies: number[] = new Array(10);
-
-  let idx = 0;
-  useEffect(() => {
-    const syncServer = async (): Promise<void> => {
-      const requestTimeMS = Date.now();
-      const serverTimeMS = (await getDate()).getMilliseconds();
-      const responseTimeMS = Date.now();
-
-      const latency = (requestTimeMS - responseTimeMS) / 2;
-      latencies[idx] = latency;
-      offsets[idx] = serverTimeMS - average(latencies) - requestTimeMS;
-      idx = (idx + 1) % 10;
-
-      setOffset(average(offsets));
-    };
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    const interval = setInterval(async () => syncServer(), 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  console.log('OFFSET: ', offset);
 
   return (
     <ThemeProvider theme={Theme}>
