@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { getDate } from './instance';
 
 function average(arr: number[]): number {
-  return arr.reduce((a, b) => (a != null ? a + b : b), 0) / arr.filter((n) => n).length;
+  return arr.reduce((a, b) => (b != null ? a + b : b), 0) / arr.filter((n) => n).length;
 }
 
 const DEFAULT_OFFSET = 0;
