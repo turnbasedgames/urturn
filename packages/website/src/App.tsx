@@ -48,7 +48,6 @@ function CloseSnackBarButton(snackbarProviderRef?: React.RefObject<SnackbarProvi
 
 function App(): React.ReactElement {
   const [user, setUser] = useState<User | undefined>();
-
   useEffect(() => {
     const authInterceptor = axios.interceptors.request.use(async (config) => {
       const newConfig = config;
