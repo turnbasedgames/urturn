@@ -12,13 +12,14 @@ const setRoomStateWithContender = (contender) => {
   }
 };
 
+let parentSync = null;
 const connection = connectToParent({
   methods: {
     stateChanged(roomState) {
       setRoomStateWithContender(roomState);
     },
   },
-});
+}).then((v) => { parentSync = v; });
 
 function getBoardGame() {
   console.warn('client.getBoardGame() is deprecated. Use client.getRoomState() instead.');
@@ -39,9 +40,11 @@ async function makeMove(move) {
   return parent.makeMove(move);
 }
 
-async function now() {
-  const parent = await connection.promise;
-  return parent.now();
+function now() {
+  if (parentSync != null) {
+    return parentSync.now();
+  }
+  return Date.now();
 }
 
 module.exports = {
