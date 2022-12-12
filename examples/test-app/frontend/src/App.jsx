@@ -12,12 +12,14 @@ const DEFAULT_MOVE_TEXT = '// put move JSON here';
 function App() {
   const [moveObj, setMoveObj] = useState(null);
   useEffect(() => {
-    const testServerDate = async () => {
+    const testServerDate = () => {
       console.log('LOCAL DATE: ', Date.now());
-      console.log('SERVER DATE: ', await client.now());
+      console.log('SERVER DATE: ', client.now());
     };
 
-    testServerDate();
+    setInterval(() => {
+      testServerDate();
+    }, 1000);
 
     events.on('stateChanged', console.log);
     return () => {
