@@ -2,7 +2,7 @@ import React, {
   createRef, useEffect, useMemo, useState,
 } from 'react';
 import { onAuthStateChanged, signInAnonymously, User as FirebaseUser } from 'firebase/auth';
-import { setUserProperties, getAnalytics } from 'firebase/analytics';
+import { getAnalytics, setUserId } from 'firebase/analytics';
 import {
   BrowserRouter as Router,
   Route,
@@ -81,7 +81,7 @@ function App(): React.ReactElement {
   useEffect(() => {
     if (user != null) {
       const analytics = getAnalytics();
-      setUserProperties(analytics, { userId: user.id, username: user.username });
+      setUserId(analytics, user.id);
     }
   }, [user]);
   const userProviderValue = useMemo(() => ({ user, setUser }), [user, setUser]);
