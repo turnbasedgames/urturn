@@ -7,10 +7,10 @@
   "module": "build/esm/index.js",
   "types": "build/index.d.ts",
   "scripts": {
+    "dev": "start-storybook -p 6006",
     "build": "rollup -c",
     "lint": "eslint . --ignore-path .gitignore --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ignore-path .gitignore --ext .js,.jsx,.ts,.tsx --fix",
-    "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
   "author": "",
