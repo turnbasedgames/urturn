@@ -11,6 +11,8 @@ const DEFAULT_MOVE_TEXT = '// put move JSON here';
 
 function App() {
   const [moveObj, setMoveObj] = useState(null);
+  console.log('DATE: ', Date.now());
+  console.log('SERVER DATE: ', client.now());
   useEffect(() => {
     events.on('stateChanged', console.log);
     return () => {

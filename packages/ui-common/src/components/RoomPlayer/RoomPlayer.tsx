@@ -8,7 +8,7 @@ import PlayerMenu from './PlayerMenu';
 
 function RoomPlayer({
   user, src, setChildClient, makeMove, quitRoom, players, finished, roomStartContext, playAgain,
-  onOtherGamesClick,
+  onOtherGamesClick, getServerTimeMS,
 }: RoomPlayerProps): React.ReactElement {
   const iframeRef = useCallback((iframe: HTMLIFrameElement | null) => {
     if (iframe != null) {
@@ -36,6 +36,9 @@ function RoomPlayer({
               }
               return { error: err };
             }
+          },
+          now() {
+            return getServerTimeMS();
           },
         },
       });

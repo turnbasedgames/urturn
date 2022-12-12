@@ -85,6 +85,7 @@ function Player() {
       // do nothing for now until we have a good behavior implementation for this button on the
       // runner
       playAgain={async () => {}}
+      getServerTimeMS={() => Date.now()}
     />
   );
 }

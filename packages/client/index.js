@@ -39,6 +39,11 @@ async function makeMove(move) {
   return parent.makeMove(move);
 }
 
+async function now() {
+  const parent = await connection.promise;
+  return parent.now();
+}
+
 module.exports = {
-  getRoomState, getBoardGame, getLocalPlayer, makeMove, events: eventEmitter,
+  getRoomState, getBoardGame, getLocalPlayer, makeMove, now, events: eventEmitter,
 };

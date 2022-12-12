@@ -48,7 +48,7 @@ function GamePlayer(): React.ReactElement {
   const navigate = useNavigate();
   const [offset] = useDateOffset();
 
-  logger.info('OFFSET: ', offset);
+  const getServerTimeMS = (): number => Date.now() + offset;
 
   useEffect(() => {
     async function setupRoom(): Promise<void> {
@@ -246,6 +246,7 @@ function GamePlayer(): React.ReactElement {
         game_id: room.game?.id ?? '(empty)',
         game_name: room.game?.name ?? '(empty)',
       })}
+      getServerTimeMS={getServerTimeMS}
     />
   );
 }
