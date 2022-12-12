@@ -2,6 +2,7 @@ import React, {
   createRef, useEffect, useMemo, useState,
 } from 'react';
 import { onAuthStateChanged, signInAnonymously, User as FirebaseUser } from 'firebase/auth';
+import { setUserProperties, getAnalytics } from 'firebase/analytics';
 import {
   BrowserRouter as Router,
   Route,
@@ -76,6 +77,13 @@ function App(): React.ReactElement {
 
     return () => { axios.interceptors.request.eject(authInterceptor); };
   }, []);
+
+  useEffect(() => {
+    if (user != null) {
+      const analytics = getAnalytics();
+      setUserProperties(analytics, { userId: user.id, username: user.username });
+    }
+  }, [user]);
   const userProviderValue = useMemo(() => ({ user, setUser }), [user, setUser]);
   const NavBarMemo = useMemo(() => <NavBar />, [user, setUser]);
   const snackbarProviderRef = createRef<SnackbarProvider>();
