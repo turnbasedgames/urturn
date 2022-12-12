@@ -18,7 +18,7 @@
   "bugs": {
     "url": "https://github.com/turnbasedgames/urturn/issues"
   },
-  "homepage": "https://github.com/turnbasedgames/urturn/tree/main/packages/runner#readme",
+  "homepage": "https://docs.urturn.app",
   "files": [
     "bin/",
     "src/",
