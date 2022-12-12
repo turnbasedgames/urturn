@@ -32,7 +32,6 @@
     "express-async-handler": "^1.1.4",
     "firebase-admin": "^11.2.0",
     "http-status-codes": "^2.1.4",
-    "isolated-vm": "^4.4.2",
     "lru-cache": "^7.14.0",
     "mongoose": "^5.11.18",
     "mongoose-unique-validator": "^2.0.3",
