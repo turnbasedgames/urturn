@@ -9,6 +9,8 @@ import {
 } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { Game } from '@urturn/types-common';
+import { logEvent } from 'firebase/analytics';
+import { analytics } from '../../firebase/setupFirebase';
 
 import { getGame, getGames } from '../../models/game';
 import { queueUpRoom, queueUpPrivateRoom } from '../../models/room';
@@ -153,6 +155,11 @@ function GameInfo(): React.ReactElement {
                                 });
                                 logger.error(error);
                               });
+                              logEvent(analytics, 'play_button_click', {
+                                privateRoom: true,
+                                gameId: game.id ?? '(empty)',
+                                gameName: game.name ?? '(empty)',
+                              });
                             }}
                           >
                             {loadingRoom ? <CircularProgress size={24} /> : 'Play'}
@@ -170,6 +177,11 @@ function GameInfo(): React.ReactElement {
                                   autoHideDuration: 3000,
                                 });
                                 logger.error(error);
+                              });
+                              logEvent(analytics, 'play_button_click', {
+                                privateRoom: true,
+                                gameId: game.id ?? '(empty)',
+                                gameName: game.name ?? '(empty)',
                               });
                             }}
                           >
