@@ -11,14 +11,20 @@ const DEFAULT_MOVE_TEXT = '// put move JSON here';
 
 function App() {
   const [moveObj, setMoveObj] = useState(null);
-  console.log('DATE: ', Date.now());
-  console.log('SERVER DATE: ', client.now());
   useEffect(() => {
+    const testServerDate = async () => {
+      console.log('LOCAL DATE: ', Date.now());
+      console.log('SERVER DATE: ', await client.now());
+    };
+
+    testServerDate();
+
     events.on('stateChanged', console.log);
     return () => {
       events.off('stateChanged', console.log);
     };
   }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <Stack height="100vh">
