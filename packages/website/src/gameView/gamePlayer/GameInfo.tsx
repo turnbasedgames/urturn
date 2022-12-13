@@ -156,9 +156,9 @@ function GameInfo(): React.ReactElement {
                                 logger.error(error);
                               });
                               logEvent(analytics, 'play_button_click', {
-                                privateRoom: true,
-                                gameId: game.id ?? '(empty)',
-                                gameName: game.name ?? '(empty)',
+                                private_room: true,
+                                game_id: game.id ?? '(empty)',
+                                game_name: game.name ?? '(empty)',
                               });
                             }}
                           >
@@ -179,9 +179,9 @@ function GameInfo(): React.ReactElement {
                                 logger.error(error);
                               });
                               logEvent(analytics, 'play_button_click', {
-                                privateRoom: true,
-                                gameId: game.id ?? '(empty)',
-                                gameName: game.name ?? '(empty)',
+                                private_room: true,
+                                game_id: game.id ?? '(empty)',
+                                game_name: game.name ?? '(empty)',
                               });
                             }}
                           >
