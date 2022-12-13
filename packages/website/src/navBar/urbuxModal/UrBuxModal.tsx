@@ -6,6 +6,7 @@ import { GiTwoCoins } from 'react-icons/gi';
 import { logEvent } from 'firebase/analytics';
 import PaymentCard from './PaymentCard';
 import { analytics } from '../../firebase/setupFirebase';
+import { urBux1000Item } from './util';
 
 interface UrBuxProps {
   open: boolean
@@ -43,14 +44,7 @@ function UrBuxModal({ open, setOpen }: UrBuxProps): React.ReactElement {
                 startIcon={<GiTwoCoins />}
                 onClick={() => {
                   setIntent(true);
-                  logEvent(analytics, 'select_item', {
-                    currency: 'USD',
-                    item_name: '1000_urbux',
-                    item_category: 'urbux',
-                    item_list_name: 'urbux',
-                    price: 10,
-                    quantity: 1,
-                  });
+                  logEvent(analytics, 'select_item', urBux1000Item);
                 }}
               >
                 1000 UrBux for $10

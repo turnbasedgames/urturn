@@ -7,7 +7,10 @@ import {
 import {
   Box, Button, CircularProgress, Typography, Stack,
 } from '@mui/material';
+import { logEvent } from 'firebase/analytics';
 import logger from '../../logger';
+import { urBux1000Item } from './util';
+import { analytics } from '../../firebase/setupFirebase';
 
 function CheckoutForm(): React.ReactElement {
   const stripe = useStripe();
@@ -15,6 +18,16 @@ function CheckoutForm(): React.ReactElement {
 
   const [message, setMessage] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    logEvent(analytics, 'begin_checkout', {
+      currency: 'USD',
+      value: 10,
+      items: [
+        urBux1000Item,
+      ],
+    });
+  });
 
   useEffect(() => {
     if (stripe == null) {
@@ -61,11 +74,11 @@ function CheckoutForm(): React.ReactElement {
 
     setIsLoading(true);
 
-    const { error } = await stripe.confirmPayment({
+    const result = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        // Make sure to change this to your payment completion page
-        return_url: window.location.origin,
+        // go to games list after purchasing urBux
+        return_url: `${window.location.origin}/games`,
       },
     });
 
@@ -74,10 +87,13 @@ function CheckoutForm(): React.ReactElement {
     // your `return_url`. For some payment methods like iDEAL, your customer will
     // be redirected to an intermediate site first to authorize the payment, then
     // redirected to the `return_url`.
-    if (error.type === 'card_error' || error.type === 'validation_error') {
-      setMessage(error.message);
-    } else {
-      setMessage('An unexpected error occurred.');
+    if (result?.error != null) {
+      const { error } = result;
+      if (error.type === 'card_error' || error.type === 'validation_error') {
+        setMessage(error.message);
+      } else {
+        setMessage('An unexpected error occurred.');
+      }
     }
 
     setIsLoading(false);

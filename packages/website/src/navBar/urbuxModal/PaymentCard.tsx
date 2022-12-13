@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import { CircularProgress } from '@mui/material';
 import { createPaymentIntent } from '../../models/user';
 import logger from '../../logger';
 import CheckoutForm from './CheckoutForm';
+import stripePromise from '../../models/stripe';
 
 const URBUX_1000_COST_USD_CENTS = 1000;
 
-if (process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY == null) {
-  throw new Error('REACT_APP_STRIPE_PUBLISHABLE_KEY env variable not set! This is needed to integrate with stripe.');
-}
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 function PaymentCard(): React.ReactElement {
   const [clientSecret, setClientSecret] = useState<string>();
 
