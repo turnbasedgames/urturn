@@ -3,7 +3,9 @@ import {
   Button, Card, CardActions, CardHeader, Modal,
 } from '@mui/material';
 import { GiTwoCoins } from 'react-icons/gi';
+import { logEvent } from 'firebase/analytics';
 import PaymentCard from './PaymentCard';
+import { analytics } from '../../firebase/setupFirebase';
 
 interface UrBuxProps {
   open: boolean
@@ -37,7 +39,20 @@ function UrBuxModal({ open, setOpen }: UrBuxProps): React.ReactElement {
               sx={{ paddingBottom: 0.5 }}
             />
             <CardActions>
-              <Button startIcon={<GiTwoCoins />} onClick={() => setIntent(true)}>
+              <Button
+                startIcon={<GiTwoCoins />}
+                onClick={() => {
+                  setIntent(true);
+                  logEvent(analytics, 'select_item', {
+                    currency: 'USD',
+                    item_name: '1000_urbux',
+                    item_category: 'urbux',
+                    item_list_name: 'urbux',
+                    price: 10,
+                    quantity: 1,
+                  });
+                }}
+              >
                 1000 UrBux for $10
               </Button>
             </CardActions>
