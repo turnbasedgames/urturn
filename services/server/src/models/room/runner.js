@@ -15,8 +15,8 @@ const runnerCacheOptions = {
   // setting the ttl because the data can be stale. This protects us from various runner failures
   // that we may not know of: for example, the user code may have a memory leak and begins to take
   // more resources than it should.
-  // ttl is 1 hour: units here are in ms
-  ttl: 60 * 60 * 1000,
+  // ttl is 24 hour: units here are in ms
+  ttl: 24 * 60 * 60 * 1000,
   // We reset the ttl on get because this implies that users are playing the game using this code.
   updateAgeOnGet: true,
   updateAgeOnHas: false,
