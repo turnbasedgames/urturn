@@ -34,7 +34,7 @@ function HomepageHeader() {
           </a>
           <a
             className="button button--lg button--outline button--secondary"
-            href="docs/"
+            href="docs"
           >
             Learn More
           </a>
