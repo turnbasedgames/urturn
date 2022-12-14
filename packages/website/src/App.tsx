@@ -122,10 +122,13 @@ function App(): React.ReactElement {
                 />
                 <Route
                   path="games/*"
-                >
-                  {NavBarMemo}
-                  <GameList />
-                </Route>
+                  element={(
+                    <>
+                      {NavBarMemo}
+                      <GameList />
+                    </>
+                  )}
+                />
                 <Route
                   path="develop/*"
                   element={(
