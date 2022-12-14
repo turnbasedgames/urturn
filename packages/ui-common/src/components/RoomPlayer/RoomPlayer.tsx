@@ -37,7 +37,7 @@ function RoomPlayer({
               return { error: err };
             }
           },
-          now: () => getServerTimeMS(),
+          getServerTime: async () => getServerTimeMS(),
         },
       });
       connection.promise.then((child) => {
