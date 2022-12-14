@@ -17,6 +17,7 @@ const config = {
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
   themes: ['@docusaurus/theme-live-codeblock'],
+  favicon: 'img/favicon.svg',
   presets: [
     [
       'classic',
