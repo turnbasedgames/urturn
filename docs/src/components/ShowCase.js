@@ -123,8 +123,8 @@ export default function ShowCase() {
                     </ul>
                   </div>
                   {svgComponent}
-                  {learnMore && <div class="card__footer">
-                    <a href="/docs/" class="button button--secondary button--block">Learn More</a>
+                  {learnMore && <div className="card__footer">
+                    <a href="/docs/" className="button button--secondary button--block">Learn More</a>
                   </div>}
                 </div>
               </Stack>
