@@ -223,7 +223,7 @@ function GamePlayer(): React.ReactElement {
           try {
             // requeue player up in new room
             const newRoom = await queueUpRoom({ game: room.game.id });
-            navigate(`/games/${room.game.id}/room/${newRoom.id}`);
+            navigate(`/rooms/${newRoom.id}`);
 
             // force a refresh to avoid handling all the edge cases with coordinating our useSocket
             // hook, childClient (penpal), and various useMemo/useRef hooks in RoomPlayer component

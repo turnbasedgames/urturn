@@ -51,7 +51,7 @@ function GameInfo(): React.ReactElement {
     setLoadingRoom(true);
     const room = await queueUpRoom({ game: game.id });
     setLoadingRoom(false);
-    navigate(`/games/${game.id}/room/${room.id}`);
+    navigate(`/rooms/${room.id}`);
   }
 
   async function onPrivatePlay(): Promise<void> {
@@ -61,7 +61,7 @@ function GameInfo(): React.ReactElement {
     setloadingPrivateRoom(true);
     const room = await queueUpPrivateRoom(game.id);
     setloadingPrivateRoom(false);
-    navigate(`/games/${game.id}/room/${room.id}`);
+    navigate(`/rooms/${room.id}`);
     try {
       await navigator.clipboard.writeText(window.location.href);
       enqueueSnackbar('Copied URL To Clipboard!', {
