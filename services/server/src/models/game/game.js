@@ -48,6 +48,11 @@ const GameSchema = new Schema({
     unique: true,
     sparse: true,
     index: true,
+    required: true,
+    default() {
+      // eslint-disable-next-line no-underscore-dangle
+      return this._id.toString();
+    },
     validate: {
       validator: (customURL) => /^[-0-9a-z]+$/.test(customURL) && customURL[customURL.length - 1] !== '-',
     },
@@ -75,7 +80,7 @@ GameSchema.method('updateByUser', async function updateByUser(changes) {
   await this.save();
 });
 GameSchema.method('toJSON', function toJSON() {
-  const defaultReturn = {
+  return {
     id: this.id,
     activePlayerCount: this.activePlayerCount,
     name: this.name,
@@ -83,19 +88,12 @@ GameSchema.method('toJSON', function toJSON() {
     creator: this.creator,
     githubURL: this.githubURL,
     commitSHA: this.commitSHA,
+    customURL: this.customURL,
   };
-
-  if (this.customURL != null) {
-    defaultReturn.customURL = this.customURL;
-  }
-
-  return defaultReturn;
 });
 
 GameSchema.pre('save', function onSave() {
-  if (this.customURL) {
-    this.customURL = this.customURL.toLowerCase();
-  }
+  this.customURL = this.customURL.toLowerCase();
 });
 
 module.exports = mongoose.model('Game', GameSchema);

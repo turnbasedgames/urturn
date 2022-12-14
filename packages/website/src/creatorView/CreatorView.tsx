@@ -43,7 +43,7 @@ function CreatorView({ user }: Props): React.ReactElement {
       <GameEditor
         open={openCreate}
         onClose={() => setOpenCreate(false)}
-        onSubmit={(game) => { navigate(`/games/${game.id}`); }}
+        onSubmit={(game) => { navigate(`/play/${game.customURL}`); }}
       />
       <Stack
         direction="row"

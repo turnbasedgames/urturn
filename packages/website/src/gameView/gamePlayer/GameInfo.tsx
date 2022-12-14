@@ -12,7 +12,7 @@ import { Game } from '@urturn/types-common';
 import { logEvent } from 'firebase/analytics';
 import { analytics } from '../../firebase/setupFirebase';
 
-import { getGame, getGames } from '../../models/game';
+import { getGames } from '../../models/game';
 import { queueUpRoom, queueUpPrivateRoom } from '../../models/room';
 import GameCardActions from '../../creatorView/GameCardActions';
 import { UserContext } from '../../models/user';
@@ -20,7 +20,7 @@ import CardMediaWithFallback from '../gameCard/CardMediaWithFallback';
 import logger from '../../logger';
 
 function GameInfo(): React.ReactElement {
-  const { gameId, customURL } = useParams();
+  const { customURL } = useParams();
   const [game, setGame] = useState<null | Game>(null);
   const [loadingPrivateRoom, setloadingPrivateRoom] = useState<boolean>(false);
   const [loadingRoom, setLoadingRoom] = useState<boolean>(false);
@@ -29,20 +29,13 @@ function GameInfo(): React.ReactElement {
   const { enqueueSnackbar } = useSnackbar();
 
   async function setupGame(): Promise<void> {
-    if (gameId == null && customURL == null) { return; }
-
-    if (gameId != null) {
-      setGame(await getGame(gameId));
-    }
-
-    if (customURL != null) {
-      const games = await getGames({ customURL });
-      setGame(games[0]);
-    }
+    if (customURL == null) { return; }
+    const games = await getGames({ customURL });
+    setGame(games[0]);
   }
   useEffect(() => {
     setupGame().catch(logger.error);
-  }, [gameId]);
+  }, [customURL]);
 
   async function onPlay(): Promise<void> {
     if (game == null) {

@@ -122,26 +122,13 @@ function App(): React.ReactElement {
                 />
                 <Route
                   path="games/*"
-                >
-                  <Route
-                    path=""
-                    element={(
-                      <>
-                        {NavBarMemo}
-                        <GameList />
-                      </>
-                      )}
-                  />
-                  <Route
-                    path=":gameId"
-                    element={(
-                      <>
-                        {NavBarMemo}
-                        <GameInfo />
-                      </>
-                    )}
-                  />
-                </Route>
+                  element={(
+                    <>
+                      {NavBarMemo}
+                      <GameList />
+                    </>
+                  )}
+                />
                 <Route
                   path="develop/*"
                   element={(
