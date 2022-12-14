@@ -128,7 +128,7 @@ function ProfileView({ user, setUser }: Props): React.ReactElement {
                     // when game is hard deleted, we show a snackbar error because players can't
                     // play a game that has been deleted
                     if (room.game != null) {
-                      navigate(`/games/${room.game.id}/room/${room.id}`);
+                      navigate(`/rooms/${room.id}`);
                     } else {
                       enqueueSnackbar('This game was deleted', {
                         variant: 'error',

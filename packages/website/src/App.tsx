@@ -117,6 +117,10 @@ function App(): React.ReactElement {
                   )}
                 />
                 <Route
+                  path="rooms/:roomId"
+                  element={<GamePlayer />}
+                />
+                <Route
                   path="games/*"
                 >
                   <Route
@@ -136,10 +140,6 @@ function App(): React.ReactElement {
                         <GameInfo />
                       </>
                     )}
-                  />
-                  <Route
-                    path=":gameId/room/:roomId"
-                    element={<GamePlayer />}
                   />
                 </Route>
                 <Route
