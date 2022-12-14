@@ -42,12 +42,12 @@ async function createGameAndAssert(t, api, userCred, user, gameOptionalInfo = {}
   t.deepEqual(game.creator, publicUser);
   t.is(game.activePlayerCount, 0);
   Object.keys(gameRaw).forEach((key) => {
-    if (key === 'customURL') {
-      t.regex(game[key], /[-a-z0-9]/);
-    } else {
-      t.is(gameRaw[key], game[key]);
-    }
+    t.is(gameRaw[key], game[key]);
   });
+  if (gameRaw.customURL == null) {
+    // custom url defaults to the game id
+    t.is(game.customURL, game.id);
+  }
   return game;
 }
 

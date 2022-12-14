@@ -80,7 +80,7 @@ GameSchema.method('updateByUser', async function updateByUser(changes) {
   await this.save();
 });
 GameSchema.method('toJSON', function toJSON() {
-  const defaultReturn = {
+  return {
     id: this.id,
     activePlayerCount: this.activePlayerCount,
     name: this.name,
@@ -88,19 +88,12 @@ GameSchema.method('toJSON', function toJSON() {
     creator: this.creator,
     githubURL: this.githubURL,
     commitSHA: this.commitSHA,
+    customURL: this.customURL,
   };
-
-  if (this.customURL != null) {
-    defaultReturn.customURL = this.customURL;
-  }
-
-  return defaultReturn;
 });
 
 GameSchema.pre('save', function onSave() {
-  if (this.customURL) {
-    this.customURL = this.customURL.toLowerCase();
-  }
+  this.customURL = this.customURL.toLowerCase();
 });
 
 module.exports = mongoose.model('Game', GameSchema);
