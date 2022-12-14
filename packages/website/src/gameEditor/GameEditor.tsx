@@ -36,8 +36,8 @@ function GameEditor({
       name: editingGame.name,
       description: editingGame.description,
       githubURL: editingGame.githubURL,
-      commitSHA: editingGame?.commitSHA,
-      customURL: editingGame?.customURL,
+      commitSHA: editingGame.commitSHA,
+      customURL: editingGame.customURL,
     }
     : emptyForm);
   const [errors, setErrors] = useState(new Map());
@@ -132,6 +132,7 @@ function GameEditor({
             }}
           />
           <TextField
+            required
             error={errors.has('customURL')}
             helperText={errors.get('customURL')}
             label="Custom URL (e.g. urturn-game)"

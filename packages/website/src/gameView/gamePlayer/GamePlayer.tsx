@@ -178,7 +178,7 @@ function GamePlayer(): React.ReactElement {
             autoHideDuration: 3000,
           });
         }
-        navigate(`/games${(room.game != null) ? `/${room.game.id}` : ''}`);
+        navigate((room.game != null) ? `/play/${room.game.customURL}` : '/games');
       }}
       players={roomState?.players}
       finished={roomState?.finished}

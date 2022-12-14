@@ -31,7 +31,7 @@ function DevGameCard({ game, onDelete, onUpdate }: Props): React.ReactElement {
       >
         <CardContent sx={{ flex: '1 0 auto' }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Link href={`/games/${game.id}`} color="textPrimary" underline="hover" sx={{ flexGrow: 1, minWidth: 0 }}>
+            <Link href={`/play/${game.customURL}`} color="textPrimary" underline="hover" sx={{ flexGrow: 1, minWidth: 0 }}>
               <Typography noWrap variant="h5">
                 {game.name}
               </Typography>

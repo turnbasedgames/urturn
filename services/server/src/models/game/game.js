@@ -48,6 +48,11 @@ const GameSchema = new Schema({
     unique: true,
     sparse: true,
     index: true,
+    required: true,
+    default() {
+      // eslint-disable-next-line no-underscore-dangle
+      return this._id.toString();
+    },
     validate: {
       validator: (customURL) => /^[-0-9a-z]+$/.test(customURL) && customURL[customURL.length - 1] !== '-',
     },
