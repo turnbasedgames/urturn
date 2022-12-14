@@ -22,7 +22,6 @@ import { auth } from './firebase/setupFirebase';
 import { getUser, UserContext } from './models/user';
 import CreatorView from './creatorView';
 import ProfileView from './profileView';
-import PageTracker from './firebase/PageTracker';
 import { API_URL } from './models/util';
 import logger from './logger';
 import GameList from './gameView/gameList';
@@ -107,7 +106,6 @@ function App(): React.ReactElement {
         >
           <UserContext.Provider value={userProviderValue}>
             <Router>
-              <PageTracker />
               <Routes>
                 <Route
                   path="play/:customURL"
