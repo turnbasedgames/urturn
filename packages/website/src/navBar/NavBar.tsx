@@ -11,11 +11,13 @@ import { GiTwoCoins } from 'react-icons/gi';
 import { IoBuild } from 'react-icons/io5';
 import { User } from '@urturn/types-common';
 
-import { auth } from '../firebase/setupFirebase';
+import { logEvent } from 'firebase/analytics';
+import { auth, analytics } from '../firebase/setupFirebase';
 import Search from './search';
 import withUser from '../withUser';
 import logger from '../logger';
 import UrBuxModal from './urbuxModal';
+import { urBux1000Item } from './urbuxModal/util';
 
 interface Props {
   user: User | null
@@ -39,7 +41,16 @@ function NavBar({ user }: Props): React.ReactElement {
           <Button
             color="secondary"
             startIcon={<GiTwoCoins />}
-            onClick={() => { setUrBuxModalOpen(true); }}
+            onClick={() => {
+              setUrBuxModalOpen(true);
+              logEvent(analytics, 'view_item', {
+                currency: 'USD',
+                value: 10,
+                items: [
+                  urBux1000Item,
+                ],
+              });
+            }}
           >
             <Typography>
               {user.urbux}

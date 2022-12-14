@@ -4,10 +4,13 @@ import {
 } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { Game } from '@urturn/types-common';
+import { logEvent } from 'firebase/analytics';
+import { analytics } from '../../firebase/setupFirebase';
 
 import { getGame, getGames } from '../../models/game';
 import logger from '../../logger';
 import GameListCard from './GameListCard';
+import { urBux1000Item } from '../../navBar/urbuxModal/util';
 
 const FEATURED_GAME_IDS = ['63474d0012b461000e15dc96', '62adfb1b212915000e44e7a8', '6381a5849b36c000032c9849', '62f03a69c4b031000ea00bf0', '630ebdef9495d4000ee694cb', '630af4b26c3be1000e26aca4', '626eac7c65667f00160a6b42'];
 
@@ -34,6 +37,25 @@ function GameList(): React.ReactElement {
 
     setupGames().catch(logger.error);
   }, [searchText]);
+
+  // on successful purchase, stripe will redirect user to /games
+  // assume when query params are provided on this url, then it is a successful purchase and should
+  // be logged
+  const paymentIntentId = params.get('payment_intent');
+  const paymentIntentClientSecret = params.get('payment_intent_client_secret');
+  useEffect(() => {
+    if (paymentIntentId == null || paymentIntentClientSecret == null) {
+      return;
+    }
+    logEvent(analytics, 'purchase', {
+      currency: 'USD',
+      value: 10,
+      transaction_id: paymentIntentId,
+      items: [
+        urBux1000Item,
+      ],
+    });
+  }, [paymentIntentId, paymentIntentClientSecret]);
 
   const [featuredGames, setFeaturedGames] = useState<Game[]>([]);
   useEffect(() => {

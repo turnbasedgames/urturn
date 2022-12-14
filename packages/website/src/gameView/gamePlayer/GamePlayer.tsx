@@ -215,9 +215,9 @@ function GamePlayer(): React.ReactElement {
             logger.error(error);
           }
           logEvent(analytics, 'play_again_button_click', {
-            privateRoom: true,
-            gameId: room.game.id,
-            gameName: room.game.name,
+            private_room: true,
+            game_id: room.game.id,
+            game_name: room.game.name,
           });
         } else {
           try {
@@ -236,15 +236,15 @@ function GamePlayer(): React.ReactElement {
             logger.error(error);
           }
           logEvent(analytics, 'play_again_button_click', {
-            privateRoom: false,
-            gameId: room.game.id,
-            gameName: room.game.name,
+            private_room: false,
+            game_id: room.game.id,
+            game_name: room.game.name,
           });
         }
       }}
       onOtherGamesClick={() => logEvent(analytics, 'other_games_button_click', {
-        gameId: room.game?.id ?? '(empty)',
-        gameName: room.game?.name ?? '(empty)',
+        game_id: room.game?.id ?? '(empty)',
+        game_name: room.game?.name ?? '(empty)',
       })}
     />
   );
