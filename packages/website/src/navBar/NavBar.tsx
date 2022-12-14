@@ -9,8 +9,8 @@ import { Link } from 'react-router-dom';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { GiTwoCoins } from 'react-icons/gi';
 import { IoBuild } from 'react-icons/io5';
-import { User } from '@urturn/types-common';
-
+import { User, DISCORD_URL, DOCS_URL } from '@urturn/types-common';
+import { SiDiscord } from 'react-icons/si';
 import { logEvent } from 'firebase/analytics';
 import { auth, analytics } from '../firebase/setupFirebase';
 import Search from './search';
@@ -87,7 +87,11 @@ function NavBar({ user }: Props): React.ReactElement {
     userPanel = (
       <>
         <Button
-          sx={{ marginRight: 1 }}
+          sx={{
+            marginRight: 1,
+            whiteSpace: 'nowrap',
+            minWidth: 'auto',
+          }}
           onClick={onSignIn}
           variant="outlined"
         >
@@ -96,6 +100,11 @@ function NavBar({ user }: Props): React.ReactElement {
         <Button
           onClick={onSignIn}
           variant="contained"
+          sx={{
+            display: { xs: 'none', sm: 'flex' },
+            whiteSpace: 'nowrap',
+            minWidth: 'auto',
+          }}
         >
           Sign Up
         </Button>
@@ -128,8 +137,18 @@ function NavBar({ user }: Props): React.ReactElement {
                 </Typography>
               </MuiLink>
               <Tooltip disableFocusListener title="Documentation">
-                <IconButton href="https://docs.urturn.app/" target="_blank" rel="noopener">
+                <IconButton
+                  href={DOCS_URL}
+                  target="_blank"
+                  rel="noopener"
+                  sx={{ display: { xs: 'none', sm: 'flex' } }}
+                >
                   <SchoolIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip disableFocusListener title="Discord">
+                <IconButton href={DISCORD_URL} target="_blank" rel="noopener">
+                  <SiDiscord />
                 </IconButton>
               </Tooltip>
             </Stack>
