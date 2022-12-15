@@ -8,7 +8,7 @@ const OFFSET_INTERVAL_MS = 500;
 const eventEmitter = new EventEmitter();
 
 function average(arr) {
-  if (arr.length === 0) return 0;
+  if (arr.length === 0) return undefined;
   return arr.reduce((a, b) => a + b, 0) / arr.length;
 }
 
@@ -66,7 +66,8 @@ setInterval(async () => {
 // Takes the average of all the offsets calculated and adds to current date.
 // Smoothing out the last offsets will help avoid potential jitter.
 function now() {
-  const smoothOffset = average(offsets.filter((n) => n != null));
+  const realOffsets = offsets.filter((n) => n != null);
+  const smoothOffset = average(realOffsets) ?? 0;
   return Date.now() + smoothOffset;
 }
 
