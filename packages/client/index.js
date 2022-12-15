@@ -19,7 +19,6 @@ const setRoomStateWithContender = (contender) => {
   }
 };
 
-let parentSync = null;
 const connection = connectToParent({
   methods: {
     stateChanged(roomState) {
@@ -27,11 +26,6 @@ const connection = connectToParent({
     },
   },
 });
-console.log('ab');
-connection.promise.then((v) => {
-  console.log('CONNECTION.PROMISE CALLED');
-  parentSync = v;
-}).catch((e) => console.error(e));
 
 function getBoardGame() {
   console.warn('client.getBoardGame() is deprecated. Use client.getRoomState() instead.');
