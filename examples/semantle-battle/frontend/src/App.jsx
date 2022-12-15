@@ -67,7 +67,14 @@ function App() {
   const dataLoading = roomState == null || curPlr == null;
   const spectator = !actualPlayers.some(({ id }) => id === curPlr?.id);
   const generalStatus = getStatusMsg({
-    status, winner, finished, curPlr, players: actualPlayers, plrToSecretHash, spectator,
+    status,
+    winner,
+    finished,
+    curPlr,
+    players: actualPlayers,
+    plrToSecretHash,
+    spectator,
+    roomStartContext,
   });
   const plrToStatus = actualPlayers.reduce((prev, cur) => {
     if (status === 'preGame' && plrToSecretHash[cur.id] != null) {
