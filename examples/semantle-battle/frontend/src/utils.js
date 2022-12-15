@@ -2,7 +2,7 @@ const MAX_WORD_LENGTH = 6;
 const NEAREST_WORDS_COUNT = 100;
 
 export const getStatusMsg = ({
-  status, winner, finished, players, curPlr, plrToSecretHash, spectator,
+  status, winner, finished, players, curPlr, plrToSecretHash, spectator, roomStartContext,
 }) => {
   if (finished) {
     const playerWon = winner?.id === curPlr?.id;
@@ -25,7 +25,12 @@ export const getStatusMsg = ({
     if (spectator) {
       return 'Waiting on players to choose their secret...';
     }
-    if (players.length === 1) { return 'Waiting on another player to join...'; }
+    if (players.length === 1) {
+      if (roomStartContext?.private) {
+        return 'Waiting on another player to join...';
+      }
+      return 'Waiting on another player to join (or word_bot joins in 10 seconds)...';
+    }
     if (!(curPlr?.id in plrToSecretHash)) {
       return 'Choose a secret word for the other player to guess (max 6 letters)';
     }

@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Typography } from '@mui/material';
+import client from '@urturn/client';
 
 const MINIMUM_TIME_LEFT_SECS = 0;
-const CHECK_TIME_LEFT_INTERVAL_MS = 100;
+const CHECK_TIME_LEFT_INTERVAL_MS = 500;
 
 function getTimeLeftSecs(startTime, timeoutMs) {
   const timeoutDateMs = new Date(startTime).getTime() + timeoutMs;
-  const nowMs = Date.now();
+  const nowMs = client.now();
   const timeLeftSecs = (timeoutDateMs - nowMs) / 1000;
   return timeLeftSecs;
 }
@@ -25,9 +26,13 @@ function Timer({
   const [timeLeftSecs, setTimeLeftSecs] = useState(getTimeLeftSecs(startTime, timeoutMs));
 
   useEffect(() => {
+    const intervalStartMs = new Date().getTime();
     const interval = setInterval(() => {
+      const timePassedMs = Date.now() - intervalStartMs;
       const newTimeLeftSecs = getTimeLeftSecs(startTime, timeoutMs);
-      if (newTimeLeftSecs < -timeoutBufferMs / 1000) {
+      // Don't take any action within the buffer time. We do this because at startup client.now()
+      // may not have enough data for syncing
+      if (newTimeLeftSecs < 0 && timePassedMs > timeoutBufferMs) {
         onTimeout();
         clearInterval(interval);
       } else {

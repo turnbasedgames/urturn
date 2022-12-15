@@ -20,7 +20,7 @@ function EndGame({
   const rows = players.map(({ id, username }) => ({
     id,
     username,
-    secret: Buffer.from(plrToSecretHash[id], 'base64').toString('ascii'),
+    secret: plrToSecretHash[id] != null ? Buffer.from(plrToSecretHash[id], 'base64').toString('ascii') : 'N/A',
     totalGuesses: Object.keys(plrToGuessToInfo[id]).length,
     winner: winner?.id === id,
     bestGuessInfo: getBestGuess(id, plrToGuessToInfo),
