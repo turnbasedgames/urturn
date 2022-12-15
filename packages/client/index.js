@@ -3,6 +3,7 @@ const { connectToParent } = require('penpal');
 const EventEmitter = require('./src/util/eventEmitter');
 
 const OFFSET_HISTORY_LENGTH = 10;
+const OFFSET_INTERVAL_MS = 500;
 
 const eventEmitter = new EventEmitter();
 
@@ -46,34 +47,27 @@ async function makeMove(move) {
   return parent.makeMove(move);
 }
 
+// Keep track of the last OFFSET_HISTORY_LENGTH offsets calculated using Cristian's algorithm
+// https://en.wikipedia.org/wiki/Cristian%27s_algorithm
+// The offsets array acts as a bounded buffer with size OFFSET_HISTORY_LENGTH. We overwrite old
+// values incrementally to maintain the last OFFSET_HISTORY_LENGTH calculated offsets.
 const offsets = new Array(OFFSET_HISTORY_LENGTH);
-const latencies = new Array(OFFSET_HISTORY_LENGTH);
-let idx = 0;
-let serverTime = Date.now();
+let offsetIdx = 0;
 setInterval(async () => {
-  console.log('SET INTERVAL ');
   try {
     const parent = await connection.promise;
-    console.log('PARENT: ', parent);
-    const requestTimeMS = new Date().getTime();
-    const serverTimeMS = await parent.getServerTime();
-    const responseTimeMS = new Date().getTime();
-
-    const latency = (responseTimeMS - requestTimeMS) / 2;
-    latencies[idx] = latency;
-    offsets[idx] = serverTimeMS - average(latencies.filter((n) => n != null)) - requestTimeMS;
-
-    idx = (idx + 1) % OFFSET_HISTORY_LENGTH;
-
-    serverTime = average(offsets.filter((n) => n != null));
+    offsets[offsetIdx] = await parent.getServerTimeOffsetMS();
+    offsetIdx = (offsetIdx + 1) % OFFSET_HISTORY_LENGTH;
   } catch (e) {
-    console.log('ERROR: ', e);
+    console.warn('error in getting server clock offset', e);
   }
-}, 500);
+}, OFFSET_INTERVAL_MS);
 
+// Takes the average of all the offsets calculated and adds to current date.
+// Smoothing out the last offsets will help avoid potential jitter.
 function now() {
-  console.log(offsets);
-  return serverTime;
+  const smoothOffset = average(offsets.filter((n) => n != null));
+  return Date.now() + smoothOffset;
 }
 
 module.exports = {

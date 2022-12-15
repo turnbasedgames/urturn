@@ -19,9 +19,9 @@ function setupRouter({ io, serviceInstanceId }) {
       res.status(StatusCodes.OK).json({ serviceInstance: serviceInstance.toJSON() });
     }));
 
-  router.get('/date', asyncHandler(async (req, res) => {
+  router.get('/date', (req, res) => {
     res.status(StatusCodes.OK).json({ date: new Date().toISOString() });
-  }));
+  });
 
   // Cleans up all instances logged that are stale.
   // Designed to be called regularly by an external scheduled job.

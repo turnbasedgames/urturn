@@ -8,7 +8,7 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 import { RoomPlayer } from '@urturn/ui-common';
 import {
-  getPlayerInGameById, makeMove, getBaseUrl, removePlayer, SPECTATOR_USER,
+  getPlayerInGameById, makeMove, getBaseUrl, removePlayer, SPECTATOR_USER, getServerTimeMS,
 } from '../data';
 
 function Player() {
@@ -85,7 +85,8 @@ function Player() {
       // do nothing for now until we have a good behavior implementation for this button on the
       // runner
       playAgain={async () => {}}
-      getServerTimeMS={() => Date.now()}
+      // default offset is zero
+      getServerTimeMS={getServerTimeMS}
     />
   );
 }

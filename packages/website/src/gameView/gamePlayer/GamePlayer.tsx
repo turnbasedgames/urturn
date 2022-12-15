@@ -18,7 +18,7 @@ import logger from '../../logger';
 import { GITHACK_BASE_URL, SOCKET_IO_REASON_IO_CLIENT_DISCONNECT } from '../../util';
 import useSocket from '../../models/useSocket';
 import { analytics } from '../../firebase/setupFirebase';
-import { getDate } from '../../models/instance';
+import { getServerTimeMS } from '../../models/instance';
 
 const shouldJoinPrivateRoom = (user?: User, roomState?: RoomState, room?: Room): boolean => Boolean(
   (room != null)
@@ -46,8 +46,6 @@ function GamePlayer(): React.ReactElement {
   const userContext = useContext(UserContext);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const navigate = useNavigate();
-
-  const getServerTimeMS = async (): Promise<number> => (await getDate()).getTime();
 
   useEffect(() => {
     async function setupRoom(): Promise<void> {
