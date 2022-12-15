@@ -26,7 +26,7 @@ export const getStatusMsg = ({
       return 'Waiting on players to choose their secret...';
     }
     if (players.length === 1) {
-      if (roomStartContext?.private) {
+      if (roomStartContext?.private || !(curPlr?.id in plrToSecretHash)) {
         return 'Waiting on another player to join...';
       }
       return 'Waiting on another player to join (or word_bot joins in 10 seconds)...';
