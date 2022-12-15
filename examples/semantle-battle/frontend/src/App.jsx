@@ -76,15 +76,19 @@ function App() {
     return prev;
   }, new Map());
 
-  const [forceBotStartTime, setForceBotStartTime] = useState(null);
   const curPlrSecretProvided = plrToSecretHash != null && (curPlr?.id in plrToSecretHash);
+
   const botEligible = !spectator && actualPlayers.length === 1 && roomStartContext?.private === false && status === 'preGame' && curPlrSecretProvided;
   useEffect(() => {
     if (botEligible) {
-      setForceBotStartTime(new Date());
-    } else {
-      setForceBotStartTime(null);
+      const timeoutId = setTimeout(() => {
+        client.makeMove({ forceStart: true }).catch(console.log);
+      }, FORCE_BOT_TIMEOUT_MS);
+      return () => {
+        clearTimeout(timeoutId);
+      };
     }
+    return () => {};
   }, [botEligible]);
 
   useEffect(() => {
@@ -113,22 +117,10 @@ function App() {
         )}
         <Stack direction="column" sx={{ marginTop: 1, flexGrow: 1 }} alignItems="center">
           <Typography textAlign="center" color="text.primary">{generalStatus}</Typography>
-          {botEligible && (
-          <Timer
-            startTime={forceBotStartTime}
-            timeoutBufferMs={0}
-            timeoutMs={FORCE_BOT_TIMEOUT_MS}
-            onTimeout={() => {
-              client.makeMove({ forceStart: true }).catch(console.log);
-            }}
-            prefix=""
-            suffix=" seconds waiting for another player..."
-          />
-          )}
           {status === 'preGame' && !spectator && chooseSecretStartTime != null && (
           <Timer
             startTime={chooseSecretStartTime}
-            timeoutBufferMs={500}
+            timeoutBufferMs={2000}
             timeoutMs={CHOOSE_SECRET_TIMEOUT_MS}
             onTimeout={() => {
               client.makeMove({ forceEndGame: true }).catch(console.log);
@@ -140,7 +132,7 @@ function App() {
           {status === 'inGame' && !spectator && (
             <Timer
               startTime={guessStartTime}
-              timeoutBufferMs={500}
+              timeoutBufferMs={2000}
               timeoutMs={IN_GAME_TIMEOUT_MS}
               onTimeout={() => {
                 client.makeMove({ forceEndGame: true }).catch(console.log);
