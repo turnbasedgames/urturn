@@ -94,3 +94,8 @@ export const useGameState = () => {
 
   return [gameState, updateGameState, refreshGameState, loading];
 };
+
+export const getServerTimeMS = async () => {
+  const res = await axios.get(`${await getBaseUrl()}/date`);
+  return new Date(res.data.date).getTime();
+};

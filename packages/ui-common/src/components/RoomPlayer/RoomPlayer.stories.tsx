@@ -62,6 +62,7 @@ Default.args = {
   ],
   finished: undefined,
   roomStartContext: undefined,
+  getServerTimeMS: async () => Date.now(),
 };
 
 export const ManyPlayers = Template.bind({});

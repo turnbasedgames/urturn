@@ -12,11 +12,26 @@ const DEFAULT_MOVE_TEXT = '// put move JSON here';
 function App() {
   const [moveObj, setMoveObj] = useState(null);
   useEffect(() => {
+    let checkCount = 0;
+    const testServerDate = () => {
+      console.log('clock check count', checkCount);
+      console.log('raw client time', new Date().toISOString());
+      console.log('synced client time', new Date(client.now()).toISOString());
+    };
+
+    const intervalId = setInterval(() => {
+      testServerDate();
+      checkCount += 1;
+    }, 1000);
+
     events.on('stateChanged', console.log);
     return () => {
+      console.log('unmounting app');
       events.off('stateChanged', console.log);
+      clearInterval(intervalId);
     };
   }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <Stack height="100vh">

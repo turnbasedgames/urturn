@@ -18,7 +18,7 @@ import logger from '../../logger';
 import { GITHACK_BASE_URL, SOCKET_IO_REASON_IO_CLIENT_DISCONNECT } from '../../util';
 import useSocket from '../../models/useSocket';
 import { analytics } from '../../firebase/setupFirebase';
-import useDateOffset from '../../models/useDateOffset';
+import { getServerTimeMS } from '../../models/instance';
 
 const shouldJoinPrivateRoom = (user?: User, roomState?: RoomState, room?: Room): boolean => Boolean(
   (room != null)
@@ -32,6 +32,11 @@ const shouldJoinPrivateRoom = (user?: User, roomState?: RoomState, room?: Room):
 );
 
 function getIframeSrc(game: Game): string {
+  // For local development purposes ONLY to force iframe to use a certain game frontend, which is
+  // usually @urturn/test-app-frontend running locally.
+  if (process.env.REACT_APP_TEST_APP_FRONTEND_URL != null) {
+    return process.env.REACT_APP_TEST_APP_FRONTEND_URL;
+  }
   const { githubURL, commitSHA } = game;
   const parsedGithubURL = new URL(githubURL);
   const repoOwner = parsedGithubURL.pathname.split('/')[1];
@@ -46,9 +51,6 @@ function GamePlayer(): React.ReactElement {
   const userContext = useContext(UserContext);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const navigate = useNavigate();
-  const [offset] = useDateOffset();
-
-  logger.info('OFFSET: ', offset);
 
   useEffect(() => {
     async function setupRoom(): Promise<void> {
@@ -246,6 +248,7 @@ function GamePlayer(): React.ReactElement {
         game_id: room.game?.id ?? '(empty)',
         game_name: room.game?.name ?? '(empty)',
       })}
+      getServerTimeMS={getServerTimeMS}
     />
   );
 }
