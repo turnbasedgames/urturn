@@ -32,6 +32,11 @@ const shouldJoinPrivateRoom = (user?: User, roomState?: RoomState, room?: Room):
 );
 
 function getIframeSrc(game: Game): string {
+  // For local development purposes ONLY to force iframe to use a certain game frontend, which is
+  // usually @urturn/test-app-frontend running locally.
+  if (process.env.REACT_APP_TEST_APP_FRONTEND_URL != null) {
+    return process.env.REACT_APP_TEST_APP_FRONTEND_URL;
+  }
   const { githubURL, commitSHA } = game;
   const parsedGithubURL = new URL(githubURL);
   const repoOwner = parsedGithubURL.pathname.split('/')[1];
