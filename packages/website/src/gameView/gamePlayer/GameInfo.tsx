@@ -17,6 +17,7 @@ import { queueUpRoom, queueUpPrivateRoom } from '../../models/room';
 import GameCardActions from '../../creatorView/GameCardActions';
 import { UserContext } from '../../models/user';
 import CardMediaWithFallback from '../gameCard/CardMediaWithFallback';
+import ActiveUsersOverlay from '../gameCard/ActiveUsersOverlay';
 import logger from '../../logger';
 
 function GameInfo(): React.ReactElement {
@@ -97,8 +98,18 @@ function GameInfo(): React.ReactElement {
                 boxShadow: 0,
                 width: '100%',
                 display: 'flex',
+                position: 'relative',
               }}
             >
+              {
+                game.activePlayerCount !== 0
+                && (
+                <ActiveUsersOverlay
+                  activePlayerCount={game.activePlayerCount}
+                  placement="top-left"
+                />
+                )
+              }
               <CardMediaWithFallback
                 sx={{ width: '60%', aspectRatio: '1/1', flexShrink: 0 }}
                 game={game}
