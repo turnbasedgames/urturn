@@ -29,7 +29,12 @@ function GameListCard({ game }: GameListCardProps): React.ReactElement {
         <div>
           {
             game.activePlayerCount !== 0
-            && <ActiveUsersOverlay activePlayerCount={game.activePlayerCount} />
+            && (
+            <ActiveUsersOverlay
+              activePlayerCount={game.activePlayerCount}
+              placement="top-right"
+            />
+            )
           }
           <CardMediaWithFallback
             sx={{ height: '170px', width: '170px' }}
