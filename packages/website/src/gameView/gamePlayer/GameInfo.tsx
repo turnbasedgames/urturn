@@ -101,7 +101,7 @@ function GameInfo(): React.ReactElement {
                 position: 'relative',
               }}
             >
-                {
+              {
                 game.activePlayerCount !== 0
                 && (
                 <ActiveUsersOverlay
