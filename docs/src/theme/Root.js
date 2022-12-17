@@ -9,7 +9,7 @@ const tracker = new Tracker({
     // create randomly generated uuid and store in local storage
     let ephemeralUserId = localStorage.getItem('ephemeralUserId');
     if (ephemeralUserId == null) {
-      let ephemeralUserId = uuidv4();
+      ephemeralUserId = uuidv4();
       localStorage.setItem('ephemeralUserId', ephemeralUserId);
     }
 
