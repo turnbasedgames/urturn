@@ -1,15 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import clsx from 'clsx';
 import Layout from '@theme/Layout';
 import { Stack } from '@mui/material'
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import styles from './index.module.css';
 import ShowCase from '../components/ShowCase';
-import Tracker from '@openreplay/tracker/cjs';
-
-const tracker = new Tracker({
-  projectKey: "g9SNLNQNtzt4vmVLgzTs",  
-});
+import Link from '@docusaurus/Link';
 
 function HomepageHeader() {
   const { siteConfig } = useDocusaurusContext();
@@ -26,18 +22,18 @@ function HomepageHeader() {
         </h1>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
         <Stack direction="row" padding={2} spacing={2}>
-          <a
+          <Link
             className="button button--lg button--primary button--primary"
-            href="/docs/category/getting-started"
+            to="/docs/category/getting-started"
           >
             Get Started
-          </a>
-          <a
+          </Link>
+          <Link
             className="button button--lg button--outline button--secondary"
-            href="docs"
+            href="/docs"
           >
             Learn More
-          </a>
+          </Link>
         </Stack>
       </Stack>
     </header>
@@ -45,9 +41,6 @@ function HomepageHeader() {
 }
 
 export default function Home() {
-  useEffect(() => { // use componentDidMount in case of React Class Component
-    tracker.start();
-  }, []);
   const { siteConfig } = useDocusaurusContext();
   return (
     <Layout title={`${siteConfig.organizationName}`}>
