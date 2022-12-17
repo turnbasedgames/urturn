@@ -36,6 +36,14 @@ You can tell if the local player is a spectator or a regular player if they are 
 
 - returns the current [`RoomState`](/docs/API/types#roomstate)
 
+### `client.now()`
+
+- returns the milliseconds from epoch (equivalent to `Date.now()`)
+
+:::success
+`client.now()` is clocked synced with our servers. You **should** rely on this for timing mechanisms over the built in `Date.now()` because the local user clock can be off by seconds or even minutes!
+:::
+
 ## Types
 
 ### MoveResult
