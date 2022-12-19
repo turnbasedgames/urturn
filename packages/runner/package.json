@@ -5,6 +5,9 @@
   "bin": {
     "runner": "bin/runner.js"
   },
+  "engines": {
+    "node": ">=16"
+  },
   "scripts": {
     "lint": "eslint . --ignore-path .gitignore --ext .js",
     "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix"
