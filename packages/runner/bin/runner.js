@@ -10,6 +10,7 @@ import degit from 'degit';
 import path from 'path';
 import { createRequire } from 'module';
 import { DISCORD_URL, DOCS_URL } from '@urturn/types-common';
+import checkNodeVersion from 'check-node-version';
 import logger from '../src/logger.js';
 import { isInteger, clearConsole } from '../src/util.js';
 import setupFrontends from '../src/setupFrontends.js';
@@ -29,7 +30,22 @@ function wrapVersion(fn) {
   return (...args) => {
     // log version by default to help debug user related questions and bug reports
     logger.info(`${pkg.name} v${pkg.version}`);
-    return fn(...args);
+
+    checkNodeVersion(pkg.engines, (error, result) => {
+      if (error) {
+        logger.info(`${chalk.red('Unexpected Error')}: ${error}`);
+      } else if (!result.isSatisfied) {
+        Object.keys(result.versions).forEach((packageName) => {
+          if (!result.versions[packageName].isSatisfied) {
+            const curVersion = result.versions[packageName].version;
+            const wanted = result.versions[packageName].wanted?.range;
+            logger.info(`${chalk.red('Error')}: Invalid version ${chalk.yellow(`${packageName}@${curVersion}`)}, should be ${chalk.green(wanted)}.`);
+          }
+        });
+      } else {
+        fn(...args);
+      }
+    });
   };
 }
 
