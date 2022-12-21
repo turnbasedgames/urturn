@@ -9,7 +9,8 @@ const isPromotion = (clientChessGame, from, to) => clientChessGame.moves({ verbo
   .filter((move) => move.from === from
                     && move.to === to
                     && move.flags.includes('p')).length > 0;
-
+// TODO: click to move should show currently selected piece and options
+// TODO: show highlight recently moved piece
 export default function Board({
   boardWidth,
   chessGame,
