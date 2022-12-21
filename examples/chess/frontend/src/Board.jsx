@@ -22,21 +22,59 @@ export default function Board({
 
   const [rightClickedSquares, setRightClickedSquares] = useState({});
   const [optionSquares, setOptionSquares] = useState({});
+  const [moveFrom, setMoveFrom] = useState();
   const { enqueueSnackbar } = useSnackbar();
 
-  const ownsPiece = ({ sourceSquare }) => {
+  const ownsPiece = (sourceSquare) => {
     const piece = clientChessGame.get(sourceSquare);
-    if (!piece) {
+    if (piece === false) {
       return false;
     }
     return piece.color === 'w' ? boardOrientation === 'white' : boardOrientation === 'black';
   };
 
+  const getMoveOptions = (square) => {
+    if (!ownsPiece(square)) {
+    // don't show move options for other color
+      return;
+    }
+    const moves = clientChessGame.moves({
+      square,
+      verbose: true,
+    });
+    if (moves.length === 0) {
+      return;
+    }
+
+    const newSquares = {};
+    moves.map((move) => {
+      newSquares[move.to] = {
+        background:
+          clientChessGame.get(move.to)
+          && clientChessGame.get(move.to).color !== clientChessGame.get(square).color
+            ? 'radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)'
+            : 'radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)',
+        borderRadius: '50%',
+      };
+      return move;
+    });
+    newSquares[square] = {
+      background: 'rgba(255, 255, 0, 0.4)',
+    };
+    setOptionSquares(newSquares);
+  };
+
+  const resetFirstMove = (square) => {
+    setMoveFrom(square);
+    getMoveOptions(square);
+  };
   const onDrop = (sourceSquare, targetSquare) => {
     // client side validation to save time
-    if (!ownsPiece({ sourceSquare })) {
+    if (!ownsPiece(sourceSquare)) {
       return null;
     }
+    resetFirstMove(undefined);
+
     const gameCopy = new Chess(clientChessGame.fen());
     const move = {
       from: sourceSquare,
@@ -71,43 +109,24 @@ export default function Board({
     if (Object.keys(optionSquares).length !== 0) setOptionSquares({});
   };
 
-  const getMoveOptions = (square) => {
-    if (!ownsPiece({ sourceSquare: square })) {
-    // don't show move options for other color
-      return;
-    }
-    const moves = clientChessGame.moves({
-      square,
-      verbose: true,
-    });
-    if (moves.length === 0) {
-      return;
-    }
-
-    const newSquares = {};
-    moves.map((move) => {
-      newSquares[move.to] = {
-        background:
-          clientChessGame.get(move.to)
-          && clientChessGame.get(move.to).color !== clientChessGame.get(square).color
-            ? 'radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)'
-            : 'radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)',
-        borderRadius: '50%',
-      };
-      return move;
-    });
-    newSquares[square] = {
-      background: 'rgba(255, 255, 0, 0.4)',
-    };
-    setOptionSquares(newSquares);
-  };
-
   const onMouseOverSquare = (square) => {
     getMoveOptions(square);
   };
 
-  const onSquareClick = () => {
+  const onSquareClick = (square) => {
     setRightClickedSquares({});
+
+    // set piece we are about to move
+    if (moveFrom == null) {
+      if (!ownsPiece(square)) {
+        resetFirstMove(undefined);
+        return;
+      }
+      resetFirstMove(square);
+      return;
+    }
+
+    onDrop(moveFrom, square);
   };
 
   const onSquareRightClick = (square) => {
@@ -123,7 +142,7 @@ export default function Board({
 
   return (
     <Chessboard
-      isDraggablePiece={ownsPiece}
+      isDraggablePiece={({ sourceSquare }) => ownsPiece(sourceSquare)}
       boardOrientation={boardOrientation}
       animationDuration={200}
       boardWidth={boardWidth}

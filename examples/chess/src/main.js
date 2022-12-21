@@ -47,7 +47,6 @@ function onPlayerMove(player, move, roomState) {
     throw new Error('Still waiting on another player!');
   }
   const game = new Chess(fen);
-  console.log(game.turn(), state.plrIdToColor[player.id]);
   const turnColor = game.turn() === 'w' ? Color.White : Color.Black;
   if (turnColor !== state.plrIdToColor[player.id]) {
     throw new Error('It is not your turn!');
