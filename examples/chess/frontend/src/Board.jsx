@@ -1,29 +1,67 @@
-import React, { useRef, useState } from 'react';
-import Chess from 'chess.js';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Chessboard } from 'react-chessboard';
+import client from '@urturn/client';
+import { Chess } from 'chess.js';
+import { useSnackbar } from 'notistack';
 
-export default function Board({ boardWidth }) {
-  const chessboardRef = useRef();
-  const [game, setGame] = useState(new Chess());
+const isPromotion = (clientChessGame, from, to) => clientChessGame.moves({ verbose: true })
+  .filter((move) => move.from === from
+                    && move.to === to
+                    && move.flags.includes('p')).length > 0;
+
+export default function Board({
+  boardWidth,
+  chessGame,
+  boardOrientation,
+}) {
+  const [clientChessGame, setClientChessGame] = useState(chessGame);
+  useEffect(() => {
+    setClientChessGame(chessGame);
+  }, [chessGame != null && chessGame.fen()]);
 
   const [rightClickedSquares, setRightClickedSquares] = useState({});
-  const [moveSquares, setMoveSquares] = useState({});
   const [optionSquares, setOptionSquares] = useState({});
+  const { enqueueSnackbar } = useSnackbar();
+
+  const ownsPiece = ({ sourceSquare }) => {
+    const piece = clientChessGame.get(sourceSquare);
+    if (!piece) {
+      return false;
+    }
+    return piece.color === 'w' ? boardOrientation === 'white' : boardOrientation === 'black';
+  };
 
   const onDrop = (sourceSquare, targetSquare) => {
-    const gameCopy = { ...game };
-    const move = gameCopy.move({
+    // client side validation to save time
+    if (!ownsPiece({ sourceSquare })) {
+      return null;
+    }
+    const gameCopy = new Chess(clientChessGame.fen());
+    const move = {
       from: sourceSquare,
       to: targetSquare,
-      promotion: 'q', // always promote to a queen for example simplicity
-    });
-    setGame(gameCopy);
-    // illegal move
-    if (move === null) return false;
-    setMoveSquares({
-      [sourceSquare]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' },
-      [targetSquare]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' },
+    };
+    if (isPromotion(clientChessGame, sourceSquare, targetSquare)) {
+      move.promotion = 'q';
+    }
+    const result = gameCopy.move(move);
+    if (result === null) return null;
+
+    // update immediately client side as a form of client side prediction
+    setClientChessGame(gameCopy);
+
+    // If there was an error trying to make the move just display the error and reset the game
+    client.makeMove(move).then(({ error }) => {
+      if (error != null) {
+        throw new Error(error.message);
+      }
+    }).catch((error) => {
+      enqueueSnackbar(error.message, {
+        variant: 'error',
+        autoHideDuration: 3000,
+      });
+      setClientChessGame(clientChessGame);
     });
     return true;
   };
@@ -34,7 +72,11 @@ export default function Board({ boardWidth }) {
   };
 
   const getMoveOptions = (square) => {
-    const moves = game.moves({
+    if (!ownsPiece({ sourceSquare: square })) {
+    // don't show move options for other color
+      return;
+    }
+    const moves = clientChessGame.moves({
       square,
       verbose: true,
     });
@@ -46,7 +88,8 @@ export default function Board({ boardWidth }) {
     moves.map((move) => {
       newSquares[move.to] = {
         background:
-          game.get(move.to) && game.get(move.to).color !== game.get(square).color
+          clientChessGame.get(move.to)
+          && clientChessGame.get(move.to).color !== clientChessGame.get(square).color
             ? 'radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)'
             : 'radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)',
         borderRadius: '50%',
@@ -68,23 +111,23 @@ export default function Board({ boardWidth }) {
   };
 
   const onSquareRightClick = (square) => {
-    const colour = 'rgba(0, 0, 255, 0.4)';
+    const color = 'rgba(0, 0, 255, 0.4)';
     setRightClickedSquares({
       ...rightClickedSquares,
       [square]:
-        rightClickedSquares[square] && rightClickedSquares[square].backgroundColor === colour
+        rightClickedSquares[square] && rightClickedSquares[square].backgroundColor === color
           ? undefined
-          : { backgroundColor: colour },
+          : { backgroundColor: color },
     });
   };
 
   return (
     <Chessboard
-      id="SquareStyles"
-      arePremovesAllowed
+      isDraggablePiece={ownsPiece}
+      boardOrientation={boardOrientation}
       animationDuration={200}
       boardWidth={boardWidth}
-      position={game.fen()}
+      position={clientChessGame.fen()}
       onMouseOverSquare={onMouseOverSquare}
       onMouseOutSquare={onMouseOutSquare}
       onSquareClick={onSquareClick}
@@ -95,15 +138,18 @@ export default function Board({ boardWidth }) {
         boxShadow: '0 5px 15px rgba(0, 0, 0, 0.5)',
       }}
       customSquareStyles={{
-        ...moveSquares,
         ...optionSquares,
         ...rightClickedSquares,
       }}
-      ref={chessboardRef}
     />
   );
 }
 
 Board.propTypes = {
   boardWidth: PropTypes.number.isRequired,
+  chessGame: PropTypes.shape({
+    fen: PropTypes.func.isRequired,
+    get: PropTypes.func.isRequired,
+  }).isRequired,
+  boardOrientation: PropTypes.string.isRequired,
 };
