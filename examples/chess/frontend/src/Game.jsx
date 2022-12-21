@@ -3,8 +3,8 @@ import {
   List, ListItem, ListItemText, Paper, Typography, Stack, ThemeProvider, useMediaQuery,
 } from '@mui/material';
 import { Chess } from 'chess.js';
-import { Chessboard } from 'react-chessboard';
 import client from '@urturn/client';
+import Board from './Board';
 import theme from './theme';
 
 const CHESS_WIDTH_PADDING_PX = 40;
@@ -110,7 +110,7 @@ function Game() {
         ref={containerRef}
       >
         <Stack margin={1} spacing={2}>
-          <Chessboard
+          <Board
             boardWidth={chessBoardWidth}
             boardOrientation={boardOrientation}
             position={chessGame.fen()}
