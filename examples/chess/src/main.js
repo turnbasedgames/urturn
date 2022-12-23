@@ -12,6 +12,7 @@ function onRoomStart() {
       // string representation of the board https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
       fen: null,
       winner: null,
+      lastMovedSquare: null,
     },
   };
 }
@@ -56,6 +57,7 @@ function onPlayerMove(player, move, roomState) {
     throw new Error('Invalid chess move!');
   }
   state.fen = game.fen();
+  state.lastMovedSquare = move;
 
   if (game.isGameOver()) {
     if (game.isCheckmate()) {

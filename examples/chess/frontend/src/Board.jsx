@@ -9,17 +9,21 @@ const isPromotion = (clientChessGame, from, to) => clientChessGame.moves({ verbo
   .filter((move) => move.from === from
                     && move.to === to
                     && move.flags.includes('p')).length > 0;
-// TODO: click to move should show currently selected piece and options
-// TODO: show highlight recently moved piece
+
 export default function Board({
   boardWidth,
   chessGame,
   boardOrientation,
+  lastMovedSquare,
 }) {
   const [clientChessGame, setClientChessGame] = useState(chessGame);
   useEffect(() => {
     setClientChessGame(chessGame);
   }, [chessGame != null && chessGame.fen()]);
+  const lastMovedSquareStyle = {};
+  if (lastMovedSquare != null) {
+    lastMovedSquareStyle[lastMovedSquare.to] = { backgroundColor: 'rgba(255, 255, 0, 0.4)' };
+  }
 
   const [rightClickedSquares, setRightClickedSquares] = useState({});
   const [optionSquares, setOptionSquares] = useState({});
@@ -36,7 +40,8 @@ export default function Board({
 
   const getMoveOptions = (square) => {
     if (!ownsPiece(square)) {
-    // don't show move options for other color
+      // don't show move options for other color
+      setOptionSquares({});
       return;
     }
     const moves = clientChessGame.moves({
@@ -74,7 +79,6 @@ export default function Board({
     if (!ownsPiece(sourceSquare)) {
       return null;
     }
-    resetFirstMove(undefined);
 
     const gameCopy = new Chess(clientChessGame.fen());
     const move = {
@@ -85,7 +89,9 @@ export default function Board({
       move.promotion = 'q';
     }
     const result = gameCopy.move(move);
-    if (result === null) return null;
+    if (result === null) {
+      return null;
+    }
 
     // update immediately client side as a form of client side prediction
     setClientChessGame(gameCopy);
@@ -105,15 +111,6 @@ export default function Board({
     return true;
   };
 
-  // Only set squares to {} if not already set to {}
-  const onMouseOutSquare = () => {
-    if (Object.keys(optionSquares).length !== 0) setOptionSquares({});
-  };
-
-  const onMouseOverSquare = (square) => {
-    getMoveOptions(square);
-  };
-
   const onSquareClick = (square) => {
     setRightClickedSquares({});
 
@@ -127,7 +124,13 @@ export default function Board({
       return;
     }
 
-    onDrop(moveFrom, square);
+    if (onDrop(moveFrom, square) === null) {
+      if (ownsPiece(square)) {
+        resetFirstMove(square);
+        return;
+      }
+    }
+    resetFirstMove(undefined);
   };
 
   const onSquareRightClick = (square) => {
@@ -148,8 +151,6 @@ export default function Board({
       animationDuration={200}
       boardWidth={boardWidth}
       position={clientChessGame.fen()}
-      onMouseOverSquare={onMouseOverSquare}
-      onMouseOutSquare={onMouseOutSquare}
       onSquareClick={onSquareClick}
       onSquareRightClick={onSquareRightClick}
       onPieceDrop={onDrop}
@@ -160,6 +161,7 @@ export default function Board({
       customSquareStyles={{
         ...optionSquares,
         ...rightClickedSquares,
+        ...lastMovedSquareStyle,
       }}
     />
   );
@@ -170,6 +172,9 @@ Board.propTypes = {
   chessGame: PropTypes.shape({
     fen: PropTypes.func.isRequired,
     get: PropTypes.func.isRequired,
+    history: PropTypes.func.isRequired,
   }).isRequired,
   boardOrientation: PropTypes.string.isRequired,
+  // eslint-disable-next-line react/require-default-props
+  lastMovedSquare: PropTypes.string,
 };

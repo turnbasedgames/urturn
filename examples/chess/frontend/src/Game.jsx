@@ -81,7 +81,9 @@ function Game() {
   const [roomState, setRoomState] = useState(client.getRoomState() || {});
   const [chessGame, setChessGame] = useState(new Chess());
   const {
-    players = [], state: { fen, plrIdToColor, winner } = {}, finished,
+    players = [], state: {
+      fen, plrIdToColor, winner, lastMovedSquare,
+    } = {}, finished,
   } = roomState;
 
   useEffect(() => {
@@ -149,6 +151,7 @@ function Game() {
                 boardWidth={chessBoardWidth}
                 boardOrientation={boardOrientation}
                 chessGame={chessGame}
+                lastMovedSquare={lastMovedSquare}
               />
             </Box>
             <Typography color="text.primary">{curPlr?.username}</Typography>
