@@ -142,6 +142,7 @@ async function setupProjectFiles({
         choices: [
           { name: 'ReactJS', value: 'react' },
           { name: 'PhaserIO (created by Enjoy2Live)', value: 'phaser' },
+          { name: 'PixiJS', value: 'pixi' },
           { name: 'None', value: 'none' },
         ],
       },
