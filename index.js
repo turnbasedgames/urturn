@@ -1712,6 +1712,7 @@ function onRoomStart() {
       // string representation of the board https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
       fen: null,
       winner: null,
+      lastMovedSquare: null,
     },
   };
 }
@@ -1744,14 +1745,19 @@ function onPlayerMove(player, move, roomState) {
   const { state } = roomState;
   const { fen } = state;
   if (fen == null) {
-    throw new Error('FEN string is null!');
+    throw new Error('Still waiting on another player!');
   }
   const game = new chess.Chess(fen);
+  const turnColor = game.turn() === 'w' ? Color.White : Color.Black;
+  if (turnColor !== state.plrIdToColor[player.id]) {
+    throw new Error('It is not your turn!');
+  }
   const result = game.move(move);
   if (result == null) {
     throw new Error('Invalid chess move!');
   }
   state.fen = game.fen();
+  state.lastMovedSquare = move;
 
   if (game.isGameOver()) {
     if (game.isCheckmate()) {
