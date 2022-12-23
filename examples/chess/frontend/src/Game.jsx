@@ -17,8 +17,6 @@ const CHESS_WIDTH_DEFAULT_PX = 560;
 const CHESS_WIDTH_MAX_MED_PX = 450;
 const CHESS_WIDTH_MAX_PX = CHESS_WIDTH_DEFAULT_PX;
 
-const getOtherPlayer = (players, curPlr) => players.find(({ id }) => id !== curPlr.id);
-
 function CloseSnackBarButton(snackbarProviderRef) {
   return function SnackBarButton(key) {
     return (
@@ -41,10 +39,13 @@ const getBoardOrientation = (curPlr, plrIdToColor) => {
 };
 
 const getStatusMessage = ({
-  curPlr, winner, finished, players,
+  spectator, curPlr, winner, finished, players,
 }) => {
   if (finished) {
     if (winner != null) {
+      if (spectator) {
+        return `${winner.username} won!`;
+      }
       if (winner.id === curPlr.id) {
         return 'You Won!';
       }
@@ -104,6 +105,15 @@ function Game() {
   }, []);
 
   const [curPlr, setCurPlr] = useState();
+  const plrIdToUsername = players.reduce((
+    curPlrIdToUsername,
+    { id, username },
+  ) => ({ ...curPlrIdToUsername, [id]: username }), {});
+  const colorToPlrId = players.reduce((
+    curColorToPlrId,
+    { id },
+  ) => ({ ...curColorToPlrId, [plrIdToColor[id]]: id }), {});
+  const spectator = !players.some(({ id }) => id === curPlr?.id);
   console.log('curPlr:', curPlr);
   console.log('roomState:', roomState);
 
@@ -140,21 +150,25 @@ function Game() {
           <Stack spacing={1}>
             <Typography textAlign="center" color="text.primary">
               {getStatusMessage({
-                curPlr, winner, finished, players, chessGame,
+                spectator,
+                curPlr,
+                winner,
+                finished,
+                players,
+                chessGame,
               })}
             </Typography>
-            <Typography color="text.primary">
-              {players.length >= 1 && curPlr != null ? getOtherPlayer(players, curPlr)?.username : ''}
-            </Typography>
+            <Typography color="text.primary">{plrIdToUsername[colorToPlrId[boardOrientation === 'white' ? 'black' : 'white']] ?? ''}</Typography>
             <Box>
               <Board
                 boardWidth={chessBoardWidth}
                 boardOrientation={boardOrientation}
                 chessGame={chessGame}
                 lastMovedSquare={lastMovedSquare}
+                spectator={spectator}
               />
             </Box>
-            <Typography color="text.primary">{curPlr?.username}</Typography>
+            <Typography color="text.primary">{plrIdToUsername[colorToPlrId[boardOrientation]] ?? ''}</Typography>
           </Stack>
         </Stack>
       </SnackbarProvider>

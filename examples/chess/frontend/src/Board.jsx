@@ -15,6 +15,7 @@ export default function Board({
   chessGame,
   boardOrientation,
   lastMovedSquare,
+  spectator,
 }) {
   const [clientChessGame, setClientChessGame] = useState(chessGame);
   useEffect(() => {
@@ -33,6 +34,9 @@ export default function Board({
   const ownsPiece = (sourceSquare) => {
     const piece = clientChessGame.get(sourceSquare);
     if (piece === false) {
+      return false;
+    }
+    if (spectator) {
       return false;
     }
     return piece.color === 'w' ? boardOrientation === 'white' : boardOrientation === 'black';
@@ -177,4 +181,5 @@ Board.propTypes = {
   boardOrientation: PropTypes.string.isRequired,
   // eslint-disable-next-line react/require-default-props
   lastMovedSquare: PropTypes.string,
+  spectator: PropTypes.bool.isRequired,
 };
