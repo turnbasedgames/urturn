@@ -1,4 +1,4 @@
-import client from '@urturn/client';
+import * as client from "@urturn/client";
 import { Application, Sprite, Text } from 'pixi.js'
 
 const app = new Application({
