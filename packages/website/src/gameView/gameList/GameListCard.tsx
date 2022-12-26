@@ -16,7 +16,7 @@ function GameListCard({ game }: GameListCardProps): React.ReactElement {
   return (
     <Card
       sx={{
-        maxWidth: '170px',
+        maxWidth: { xs: '130px', sm: '170px' },
         flexShrink: 0,
         transition: '0.2s',
         '&:hover': {
@@ -37,7 +37,7 @@ function GameListCard({ game }: GameListCardProps): React.ReactElement {
             )
           }
           <CardMediaWithFallback
-            sx={{ height: '170px', width: '170px' }}
+            sx={{ height: { xs: '130px', sm: '170px' }, width: { xs: '130px', sm: '170px' } }}
             game={game}
           />
         </div>
