@@ -85,7 +85,7 @@ function GameList(): React.ReactElement {
       {
         !isSearch && (
           <>
-            <Typography color="text.primary">
+            <Typography color="text.primary" sx={{ typography: { sm: 'h6', xs: 'subtitle2' } }}>
               Featured Games
             </Typography>
             <Stack
@@ -109,7 +109,7 @@ function GameList(): React.ReactElement {
           </>
         )
       }
-      <Typography color="text.primary">
+      <Typography color="text.primary" sx={{ typography: { sm: 'h6', xs: 'subtitle2' } }}>
         {isSearch ? '' : 'All Games'}
       </Typography>
       <Grid
