@@ -132,7 +132,7 @@ function NavBar({ user }: Props): React.ReactElement {
               spacing={1}
             >
               <MuiLink component={Link} to="/" color="textPrimary" underline="hover">
-                <Typography sx={{ display: { xs: 'none', sm: 'flex' } }}>
+                <Typography component="h1" sx={{ display: { xs: 'none', sm: 'flex' } }}>
                   UrTurn
                 </Typography>
               </MuiLink>
