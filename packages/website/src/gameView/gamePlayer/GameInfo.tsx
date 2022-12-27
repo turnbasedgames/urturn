@@ -10,8 +10,8 @@ import {
 import { useSnackbar } from 'notistack';
 import { Game } from '@urturn/types-common';
 import { logEvent } from 'firebase/analytics';
+import { Helmet } from 'react-helmet';
 import { analytics } from '../../firebase/setupFirebase';
-
 import { getGames } from '../../models/game';
 import { queueUpRoom, queueUpPrivateRoom } from '../../models/room';
 import GameCardActions from '../../creatorView/GameCardActions';
@@ -92,6 +92,12 @@ function GameInfo(): React.ReactElement {
             padding: 1,
           }}
         >
+          {!gameLoading && (
+            <Helmet>
+              <title>{game.name}</title>
+              <meta name="description" content={game.description} />
+            </Helmet>
+          )}
           {!gameLoading && (
             <Card
               sx={{
