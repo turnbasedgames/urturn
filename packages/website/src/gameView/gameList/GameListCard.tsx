@@ -16,7 +16,7 @@ function GameListCard({ game }: GameListCardProps): React.ReactElement {
   return (
     <Card
       sx={{
-        maxWidth: '170px',
+        maxWidth: { xs: '140px', sm: '170px' },
         flexShrink: 0,
         transition: '0.2s',
         '&:hover': {
@@ -37,12 +37,12 @@ function GameListCard({ game }: GameListCardProps): React.ReactElement {
             )
           }
           <CardMediaWithFallback
-            sx={{ height: '170px', width: '170px' }}
+            sx={{ height: { xs: '140px', sm: '170px' }, width: { xs: '140px', sm: '170px' } }}
             game={game}
           />
         </div>
         <CardContent sx={{ padding: 1.5 }}>
-          <Typography variant="h6" noWrap>{game.name}</Typography>
+          <Typography sx={{ typography: { sm: 'subtitle1', xs: 'subtitle2' } }} noWrap>{game.name}</Typography>
           <Typography color="text.secondary" noWrap variant="caption">
             {`by: ${game.creator.username}`}
           </Typography>
