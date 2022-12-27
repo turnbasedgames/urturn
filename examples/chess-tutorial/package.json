@@ -1,0 +1,40 @@
+{
+  "name": "@urturn/chess-tutorial",
+  "version": "0.1.7",
+  "description": "template UrTurn game with ReactJS",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "build": "rm -rf build && rollup -c && mkdir -p build/frontend && cp index.js build/index.js && cp thumbnail.png build/thumbnail.png && cp -r frontend/build build/frontend/build",
+    "dev": "concurrently \"npm run dev:rollup\" \"npm run dev:runner\" \"npm run dev:frontend\"",
+    "dev:runner": "runner --frontend-port 3000",
+    "dev:rollup": "rollup -c -w",
+    "dev:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start",
+    "lint": "eslint . --ignore-path .gitignore --ext .js",
+    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/turnbasedgames/urturn.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/turnbasedgames/urturn/issues"
+  },
+  "homepage": "https://github.com/turnbasedgames/urturn#readme",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^23.0.2",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@urturn/runner": "*",
+    "concurrently": "^7.1.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.14.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "rollup": "^3.2.5"
+  },
+  "dependencies": {
+    "chess.js": "^1.0.0-alpha.0"
+  }
+}
