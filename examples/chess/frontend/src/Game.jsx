@@ -11,11 +11,10 @@ import { SnackbarProvider } from 'notistack';
 import CloseIcon from '@mui/icons-material/Close';
 import Board from './Board';
 import theme from './theme';
-// TODO: should display last move
-const CHESS_WIDTH_PADDING_PX = 0;
-const CHESS_WIDTH_DEFAULT_PX = 560;
-const CHESS_WIDTH_MAX_MED_PX = 450;
+
+const CHESS_WIDTH_DEFAULT_PX = 500;
 const CHESS_WIDTH_MAX_PX = CHESS_WIDTH_DEFAULT_PX;
+const CHESS_TOTAL_PADDING_PX = 10;
 
 function CloseSnackBarButton(snackbarProviderRef) {
   return function SnackBarButton(key) {
@@ -65,18 +64,16 @@ function Game() {
   const containerRef = useRef(null);
   const [chessBoardWidth, setChessBoardWidth] = useState(CHESS_WIDTH_DEFAULT_PX);
   useEffect(() => {
+    if (containerRef?.current == null) return () => {};
+
     const setChessBoardWidthWithContainerWidth = () => {
-      const maxWidth = largerThanMd ? CHESS_WIDTH_MAX_PX : CHESS_WIDTH_MAX_MED_PX;
-      setChessBoardWidth(Math.min(
-        (containerRef?.current?.offsetWidth ?? CHESS_WIDTH_DEFAULT_PX)
-        - (CHESS_WIDTH_PADDING_PX * 2),
-        maxWidth,
-      ));
+      setChessBoardWidth(
+        Math.min(CHESS_WIDTH_MAX_PX, containerRef.current.offsetWidth) - CHESS_TOTAL_PADDING_PX,
+      );
     };
-    window.addEventListener('resize', () => {
-      setChessBoardWidthWithContainerWidth();
-    });
+    window.addEventListener('resize', setChessBoardWidthWithContainerWidth);
     setChessBoardWidthWithContainerWidth();
+    return () => { window.removeEventListener('resize', setChessBoardWidthWithContainerWidth); };
   }, [containerRef.current, largerThanMd]);
 
   const [roomState, setRoomState] = useState(client.getRoomState() || {});
@@ -114,8 +111,6 @@ function Game() {
     { id },
   ) => ({ ...curColorToPlrId, [plrIdToColor[id]]: id }), {});
   const spectator = !players.some(({ id }) => id === curPlr?.id);
-  console.log('curPlr:', curPlr);
-  console.log('roomState:', roomState);
 
   // load current player, which is initially null
   useEffect(() => {
