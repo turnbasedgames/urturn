@@ -18,6 +18,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { Theme } from '@urturn/ui-common';
 import { User } from '@urturn/types-common';
+import { Helmet } from 'react-helmet';
 import { auth } from './firebase/setupFirebase';
 import { getUser, UserContext } from './models/user';
 import CreatorView from './creatorView';
@@ -89,6 +90,10 @@ function App(): React.ReactElement {
 
   return (
     <ThemeProvider theme={Theme}>
+      <Helmet>
+        <title>UrTurn - multiplayer web games at UrTurn.app</title>
+        <meta name="description" content="Play your favorite multiplayer web games for free (online board games, word games, and more)!" />
+      </Helmet>
       <SnackbarProvider
         ref={snackbarProviderRef}
         anchorOrigin={{
