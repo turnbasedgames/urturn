@@ -1,3 +1,10 @@
+import { Chess } from 'chess.js';
+
+const Color = Object.freeze({
+  Black: 'black',
+  White: 'white',
+});
+
 function onRoomStart() {
   return {
     state: {

@@ -1,11 +1,12 @@
 ---
-description: Create your first multiplayer game
+description: Create multiplayer TicTacToe to be played with anyone
+tags: [beginner, tutorial, tictactoe]
 ---
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Multiplayer TicTacToe
+# TicTacToe Tutorial
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/fvxjN95-BgI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
@@ -459,4 +460,4 @@ Notice that you didn't have to worry about:
 With Urturn you get to focus on your game logic, without worrying about **unnecessary infrastructure** problems.
 :::
 
-If you think you are up for the challenge. Try making a more advanced game, [Semantle Battle](/docs/Getting-Started/semantle-battle). Or just start making your own [game](/docs/Getting-Started/runner-init)!
+If you think you are up for the challenge. Try making a more advanced game, [Chess](/docs/Getting-Started/chess), or start making your own [game](/docs/Getting-Started/runner-init)!

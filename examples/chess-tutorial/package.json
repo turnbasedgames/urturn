@@ -9,9 +9,7 @@
     "dev": "concurrently \"npm run dev:rollup\" \"npm run dev:runner\" \"npm run dev:frontend\"",
     "dev:runner": "runner --frontend-port 3000",
     "dev:rollup": "rollup -c -w",
-    "dev:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start",
-    "lint": "eslint . --ignore-path .gitignore --ext .js",
-    "lint:fix": "eslint . --ignore-path .gitignore --ext .js --fix"
+    "dev:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start"
   },
   "repository": {
     "type": "git",
@@ -29,9 +27,6 @@
     "@urturn/runner": "*",
     "concurrently": "^7.1.0",
     "cross-env": "^7.0.3",
-    "eslint": "^8.14.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.26.0",
     "rollup": "^3.2.5"
   },
   "dependencies": {
