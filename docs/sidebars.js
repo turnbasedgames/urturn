@@ -33,7 +33,7 @@ const sidebars = {
       items: [
         'Getting-Started/runner-init',
         'Getting-Started/tictactoe',
-        'Getting-Started/semantle-battle',
+        'Getting-Started/chess',
         'Getting-Started/deploying-your-game',
       ],
     },

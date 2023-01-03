@@ -110,7 +110,7 @@ async function setupProjectFiles({
   const frontendPath = getFrontendPathFromDest(destination);
   const commitSuffix = commit == null ? '' : `#${commit}`;
   if (tutorial) {
-    const comingSoonTutorials = new Set(['semantleBattle']);
+    const comingSoonTutorials = new Set(['semantle-battle-tutorial', 'chess-timer-tutorial']);
     const { tutorialType } = await inquirer.prompt([
       {
         type: 'list',
@@ -119,6 +119,8 @@ async function setupProjectFiles({
         default: 'TicTacToe',
         choices: [
           { name: 'TicTacToe', value: 'tictactoe-tutorial' },
+          { name: 'Chess', value: 'chess-tutorial' },
+          { name: '🚧 Chess with Timer (Coming soon!)', value: 'chess-timer-tutorial' },
           { name: '🚧 Semantle Battle (Coming soon!)', value: 'semantle-battle-tutorial' },
         ],
       },

@@ -23,3 +23,11 @@ It is recommended that if you want to do chess style timers, you will have to up
 This work is planned. Join [discord](https://discord.gg/myWacjdb5S) to provide more details on your use case.
 
 :::
+
+## Workaround
+
+Current workaround recommended is to have clients use the clock synced time functions `client.now()` and make a `client.makeMove()` request whenever clients detect the match is over.
+
+Clients will race to notify the server, which is okay because you can fail all other clients that called `client.makeMove()` by adding simple validation that checks if the timeout is already handled.
+
+This is currently used in the [Semantle Battle](https://www.urturn.app/play/semantle-battle) game.
