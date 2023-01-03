@@ -9,7 +9,9 @@
     "dev": "concurrently \"npm run dev:rollup\" \"npm run dev:runner\" \"npm run dev:frontend\"",
     "dev:runner": "runner --frontend-port 3000",
     "dev:rollup": "rollup -c -w",
-    "dev:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start"
+    "dev:frontend": "cd frontend && cross-env BROWSER=none PORT=3000 npm start",
+    "lint": "echo TODO lint",
+    "lint:fix": "echo TODO lint fix"
   },
   "repository": {
     "type": "git",
