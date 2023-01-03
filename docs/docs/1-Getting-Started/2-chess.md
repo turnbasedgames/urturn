@@ -10,6 +10,8 @@ import TabItem from '@theme/TabItem';
 
 ## What you are making
 
+You can play the final version [here](https://www.urturn.app/play/chess).
+
 ![Chess Final](final-chess.gif)
 
 :::caution
@@ -164,9 +166,21 @@ function onPlayerMove(player, roomState) {
 </Tabs>
 
 :::success
-That's it! Now try adding two players and play around with it.
+That's it! Now we have a chess game that properly handles validation of player moves, and updating the state based on player moves.
 :::
 
 ## What's Next?
 
 You can [**deploy**](/docs/Getting-Started/deploying-your-game) your game to UrTurn in a couple of minutes! Immediately play with random people, or create private rooms and play with close friends!
+
+### Stretch goal
+
+Try implementing the classic chess move timers with `client.now()`. The idea is that clients initiate a `client.makeMove()` call when they detect the game to be finished and the `onPlayerMove` function validates this request.
+
+:::caution
+Read more about [server side timers](/docs/Advanced/timer-triggers), which will make this much easier.
+:::
+
+:::caution
+Tutorial with chess move timers is coming soon. Join our [Discord](https://discord.gg/myWacjdb5S) to learn more about it.
+:::
