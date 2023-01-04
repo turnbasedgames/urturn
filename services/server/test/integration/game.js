@@ -219,7 +219,7 @@ test('POST /game fails with commitSHA does not have an index.js file', async (t)
   const gameRawIndexJSDoesNotExist = {
     name: 'first game',
     description: 'this description',
-    commitSHA: 'b3e26696179571cce7c73b8821f6022a9e471f1e', // commit does not have index.js file
+    commitSHA: 'adcc68b20c76da41ba035177000175b7e5c98df3', // commit does not have index.js file but has frontend/build folder
     githubURL: 'https://github.com/turnbasedgames/urturn',
   };
 
@@ -231,6 +231,28 @@ test('POST /game fails with commitSHA does not have an index.js file', async (t)
   ));
   t.is(status, StatusCodes.BAD_REQUEST);
   t.is(message, 'Game validation failed: commitSHA: index.js file does not exist! Make sure the commit is from the "published" branch!');
+});
+
+test('POST /game fails with commitSHA does not have a frontend/build folder', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred(t);
+  await createUserAndAssert(t, api, userCred);
+
+  const gameRawIndexJSDoesNotExist = {
+    name: 'first game',
+    description: 'this description',
+    commitSHA: 'e7cd9818fb0e11fbdc21c1b3eefa9dd51e4c77c1', // commit does not have frontend/build folder but has index.js file
+    githubURL: 'https://github.com/turnbasedgames/urturn',
+  };
+
+  const authToken = await userCred.user.getIdToken();
+  const { response: { status, data: { message } } } = await t.throwsAsync(api.post(
+    '/game',
+    gameRawIndexJSDoesNotExist,
+    { headers: { authorization: authToken } },
+  ));
+  t.is(status, StatusCodes.BAD_REQUEST);
+  t.is(message, 'Game validation failed: commitSHA: frontend/build folder does not exist! Make sure your frontend is actually getting built on "published" branch!');
 });
 
 test('POST /game creates a game', async (t) => {

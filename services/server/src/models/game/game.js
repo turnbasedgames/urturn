@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { StatusCodes } = require('http-status-codes');
-const { Octokit, App } = require('octokit');
+const { Octokit } = require('octokit');
 
 const octokit = new Octokit();
 
@@ -56,42 +56,44 @@ const GameSchema = new Schema({
       validator: async function validateGitHubURL(commitSHA) {
         const githubURL = new URL(this.githubURL);
         const [owner, repo] = githubURL.pathname.match(/[^/]+/g);
-        await octokit.rest.git.getCommit({
-          owner,
-          repo,
-          commit_sha: commitSHA,
-        }).catch((error) => {
-          if (error.status === StatusCodes.NOT_FOUND) {
-            throw new Error('GitHub commit does not exist!');
-          } else {
-            throw new Error('Unexpected error while checking github commit');
-          }
-        });
-        await octokit.rest.repos.getContent({
-          owner,
-          repo,
-          path: 'index.js',
-          ref: commitSHA,
-        }).catch((error) => {
-          if (error.status === StatusCodes.NOT_FOUND) {
-            throw new Error('index.js file does not exist! Make sure the commit is from the "published" branch!');
-          } else {
-            throw new Error('Unexpected error while getting the index.js file of build artifact');
-          }
-        });
-        await octokit.rest.repos.getContent({
-          owner,
-          repo,
-          path: 'frontend/build',
-          ref: commitSHA,
-        }).catch((error) => {
-          if (error.status === StatusCodes.NOT_FOUND) {
-            throw new Error('frontend/build folder does not exist! Make sure the commit is from the "published" branch!');
-          } else {
-            throw new Error('Unexpected error while getting the frontend/build folder');
-          }
-        });
-        // no error retrieving commit (it exists)
+        await Promise.all([
+          octokit.rest.git.getCommit({
+            owner,
+            repo,
+            commit_sha: commitSHA,
+          }).catch((error) => {
+            if (error.status === StatusCodes.NOT_FOUND) {
+              throw new Error('GitHub commit does not exist!');
+            } else {
+              throw new Error('Unexpected error while checking github commit');
+            }
+          }),
+          octokit.rest.repos.getContent({
+            owner,
+            repo,
+            path: 'index.js',
+            ref: commitSHA,
+          }).catch((error) => {
+            if (error.status === StatusCodes.NOT_FOUND) {
+              throw new Error('index.js file does not exist! Make sure the commit is from the "published" branch!');
+            } else {
+              throw new Error('Unexpected error while getting the index.js file of build artifact');
+            }
+          }),
+          octokit.rest.repos.getContent({
+            owner,
+            repo,
+            path: 'frontend/build',
+            ref: commitSHA,
+          }).catch((error) => {
+            if (error.status === StatusCodes.NOT_FOUND) {
+              throw new Error('frontend/build folder does not exist! Make sure your frontend is actually getting built on "published" branch!');
+            } else {
+              throw new Error('Unexpected error while getting the frontend/build folder');
+            }
+          }),
+        ]);
+        // no errors while retrieving commit or expected build artifact items
         return true;
       },
     },
