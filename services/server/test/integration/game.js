@@ -286,7 +286,7 @@ test('POST /game fails upon duplicate custom urls', async (t) => {
     name: 'hello world',
     description: 'a basic game',
     commitSHA: 'published-test-app',
-    githubURL: 'https://github.com/turnbasedgames/hello-world',
+    githubURL: 'https://github.com/turnbasedgames/urturn',
     customURL: 'hello-world',
   };
 

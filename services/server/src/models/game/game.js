@@ -57,10 +57,10 @@ const GameSchema = new Schema({
         const githubURL = new URL(this.githubURL);
         const [owner, repo] = githubURL.pathname.match(/[^/]+/g);
         await Promise.all([
-          octokit.rest.git.getCommit({
+          octokit.rest.repos.getCommit({
             owner,
             repo,
-            commit_sha: commitSHA,
+            ref: commitSHA, // commitSHA may also be a git branch name
           }).catch((error) => {
             if (error.status === StatusCodes.NOT_FOUND) {
               throw new Error('GitHub commit does not exist!');
