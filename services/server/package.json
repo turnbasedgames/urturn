@@ -35,7 +35,6 @@
     "lru-cache": "^7.14.0",
     "mongoose": "^5.11.18",
     "mongoose-unique-validator": "^2.0.3",
-    "octokit": "^2.0.10",
     "redis": "^4.0.6",
     "socket.io": "^4.1.2",
     "stripe": "^10.11.0",

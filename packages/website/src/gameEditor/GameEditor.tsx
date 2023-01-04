@@ -4,13 +4,16 @@ import {
 } from '@mui/material';
 import React, { useState } from 'react';
 import { Game } from '@urturn/types-common';
-
+import { Octokit } from 'octokit';
+import { RequestError } from '@octokit/request-error';
 import { useSnackbar } from 'notistack';
+import { StatusCodes } from 'http-status-codes';
 import logger from '../logger';
 import {
   createGame, GameReqBody, updateGame,
 } from '../models/game';
 
+const octokit = new Octokit();
 const githubURLRegExp = /^https:\/\/(www.)?github.com\/.+\/.+\/?/;
 const customURLRegExp = /^[-0-9a-z]+$/;
 
@@ -60,6 +63,138 @@ function GameEditor({
   };
   const handleSubmit = async (): Promise<void> => {
     if (errors.size === 0) {
+      // Before trying to create a game with UrTurn API, we should do basic validation for the build
+      // artifict being used. This logic lives in the UI to avoid running into the GitHub REST API
+      // rate limits in our integration tests and in production.
+      const { commitSHA, githubURL: rawGitHubURL } = form;
+      const githubURL = new URL(rawGitHubURL);
+      const pathMatchResults = githubURL.pathname.match(/[^/]+/g);
+
+      // This should never happen because githubURL was validated before. We check this to avoid the
+      // typescript/linting errors
+      if (pathMatchResults == null) {
+        throw new Error('Unexpected error when trying to parse the GitHub owner and repo out of the github url!');
+      }
+
+      const owner = pathMatchResults[0];
+      const repo = pathMatchResults[1];
+      // make sure the github repo exists
+      try {
+        await octokit.rest.repos.get({ owner, repo });
+      } catch (error) {
+        if (error instanceof RequestError) {
+          if (error.status === StatusCodes.NOT_FOUND) {
+            enqueueSnackbar('GitHub repo does not exist! Make sure the repo is public!', {
+              variant: 'error',
+              autoHideDuration: null,
+            });
+          } else {
+            enqueueSnackbar(`Unexpected error while checking GitHub repo: ${error.message}`, {
+              variant: 'error',
+              autoHideDuration: null,
+            });
+          }
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      // make sure commitSHA or branch name exists
+      try {
+        await octokit.rest.repos.getCommit({
+          owner,
+          repo,
+          ref: commitSHA, // commitSHA may also be a git branch name
+        });
+      } catch (error) {
+        if (error instanceof RequestError) {
+          if (error.status === StatusCodes.NOT_FOUND) {
+            enqueueSnackbar('GitHub commit does not exist!', {
+              variant: 'error',
+              autoHideDuration: null,
+            });
+          } else if (error.status === StatusCodes.UNPROCESSABLE_ENTITY) {
+            enqueueSnackbar(error.message, {
+              variant: 'error',
+              autoHideDuration: null,
+            });
+          } else {
+            enqueueSnackbar(`Unexpected error while checking GitHub commit: ${error.message}`, {
+              variant: 'error',
+              autoHideDuration: null,
+            });
+          }
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      // make sure index.js file exists
+      try {
+        await octokit.rest.repos.getContent({
+          owner,
+          repo,
+          path: 'index.js',
+          ref: commitSHA,
+        });
+      } catch (error) {
+        if (error instanceof RequestError) {
+          if (error.status === StatusCodes.NOT_FOUND) {
+            enqueueSnackbar('Could not find index.js file! Are you using the published branch?', {
+              variant: 'error',
+              autoHideDuration: null,
+            });
+          } else if (error.status === StatusCodes.UNPROCESSABLE_ENTITY) {
+            enqueueSnackbar(error.message, {
+              variant: 'error',
+              autoHideDuration: null,
+            });
+          } else {
+            enqueueSnackbar(`Unexpected error when checking index.js file: ${error.message}`, {
+              variant: 'error',
+              autoHideDuration: null,
+            });
+          }
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      // make sure frontend/build/index.html file exists
+      try {
+        await octokit.rest.repos.getContent({
+          owner,
+          repo,
+          path: 'frontend/build/index.html',
+          ref: commitSHA,
+        });
+      } catch (error) {
+        if (error instanceof RequestError) {
+          if (error.status === StatusCodes.NOT_FOUND) {
+            enqueueSnackbar('Could not find frontend/build/index.html file! Are you properly building the frontend in your GitHub Actions?', {
+              variant: 'error',
+              autoHideDuration: null,
+            });
+          } else if (error.status === StatusCodes.UNPROCESSABLE_ENTITY) {
+            enqueueSnackbar(error.message, {
+              variant: 'error',
+              autoHideDuration: null,
+            });
+          } else {
+            enqueueSnackbar(`Unexpected error when checking frontend/build/index.html file: ${error.message}`, {
+              variant: 'error',
+              autoHideDuration: null,
+            });
+          }
+        } else {
+          throw error;
+        }
+        return;
+      }
+
       const gameObj: GameReqBody = form;
       const game = (editingGame != null)
         ? await updateGame(editingGame.id, gameObj)
@@ -93,7 +228,7 @@ function GameEditor({
               logger.error(error);
               enqueueSnackbar(`Error when ${(editingGame != null) ? 'editing' : 'creating'} game`, {
                 variant: 'error',
-                autoHideDuration: 3000,
+                autoHideDuration: null,
               });
             });
             return false;
