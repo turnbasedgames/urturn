@@ -1,8 +1,8 @@
 <h1 align="center">
-UrTurn Monorepo
+UrTurn
 </h1>
 
-<p align="center">UrTurn makes creating and managing your web multiplayer games easier. Implement monetization, matchmaking, and multiplayer in a few days not months.</p>
+<p align="center">We make creating and managing your web multiplayer games easier. Implement multiplayer in a few days not months using our simple room abstraction.</p>
 
 <p align="center">
   <a href="https://www.urturn.app">
@@ -16,10 +16,17 @@ UrTurn Monorepo
   </a>
 </p>
 
-## User Documentation
-https://docs.urturn.app/
+## Documentation
 
-## Have questions?
+Run to generate a new game and pick your favorite web framework:
+
+```bash
+npx @urturn/runner init my-game
+```
+
+More info [here](https://docs.urturn.app/)!
+
+## Have questions or ideas?
 
 Talk to us on [discord](https://discord.gg/myWacjdb5S)
 

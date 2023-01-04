@@ -15,3 +15,5 @@ Server console displays the current [roomState](https://docs.urturn.app/docs/API
 ## Learn More
 
 [UrTurn](https://docs.urturn.app) is an open source platform that makes building multiplayer games easier by abstracting away all infrastructure.
+
+Request features or report bugs [here](https://github.com/turnbasedgames/urturn/issues)!
