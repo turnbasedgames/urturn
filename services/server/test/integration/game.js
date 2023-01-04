@@ -144,6 +144,95 @@ test('POST /game fails with invalid customURL', async (t) => {
   });
 });
 
+test('POST /game fails with invalid githubURL format', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred(t);
+  await createUserAndAssert(t, api, userCred);
+
+  const gameRaw = {
+    name: 'first game',
+    description: 'this description',
+    commitSHA: 'published-test-app',
+  };
+
+  const BAD_GITHUB_URLS = ['very bad url', 'https://gitbob.com/bad-base-url/a', 'github.com/t/a', 'https://github.com/norepo/'];
+  const authToken = await userCred.user.getIdToken();
+  const requests = BAD_GITHUB_URLS.map((ghURL) => t.throwsAsync(api.post('/game', { ...gameRaw, githubURL: ghURL }, { headers: { authorization: authToken } })));
+
+  const promiseResult = await Promise.all(requests);
+
+  promiseResult.forEach(({ response: { status, data: { message } } }) => {
+    t.is(status, StatusCodes.BAD_REQUEST);
+    t.is(message, 'Game validation failed: githubURL: Invalid GitHub URL format');
+  });
+});
+
+test('POST /game fails with invalid githubURL where repo not found', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred(t);
+  await createUserAndAssert(t, api, userCred);
+
+  const gameRawRepoDoesNotExist = {
+    name: 'first game',
+    description: 'this description',
+    commitSHA: 'published-test-app',
+    githubURL: 'https://github.com/turnbasedgames/thisrepowillneverexist',
+  };
+
+  const authToken = await userCred.user.getIdToken();
+  const { response: { status, data: { message } } } = await t.throwsAsync(api.post(
+    '/game',
+    gameRawRepoDoesNotExist,
+    { headers: { authorization: authToken } },
+  ));
+  t.is(status, StatusCodes.BAD_REQUEST);
+  t.is(message, 'Game validation failed: githubURL: GitHub repository does not exist!');
+});
+
+test('POST /game fails with commitSHA not found', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred(t);
+  await createUserAndAssert(t, api, userCred);
+
+  const gameRawCommitDoesNotExist = {
+    name: 'first game',
+    description: 'this description',
+    commitSHA: 'commitdoesnotexist',
+    githubURL: 'https://github.com/turnbasedgames/urturn',
+  };
+
+  const authToken = await userCred.user.getIdToken();
+  const { response: { status, data: { message } } } = await t.throwsAsync(api.post(
+    '/game',
+    gameRawCommitDoesNotExist,
+    { headers: { authorization: authToken } },
+  ));
+  t.is(status, StatusCodes.BAD_REQUEST);
+  t.is(message, 'Game validation failed: commitSHA: GitHub commit does not exist!');
+});
+
+test('POST /game fails with commitSHA does not have an index.js file', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred(t);
+  await createUserAndAssert(t, api, userCred);
+
+  const gameRawIndexJSDoesNotExist = {
+    name: 'first game',
+    description: 'this description',
+    commitSHA: 'b3e26696179571cce7c73b8821f6022a9e471f1e', // commit does not have index.js file
+    githubURL: 'https://github.com/turnbasedgames/urturn',
+  };
+
+  const authToken = await userCred.user.getIdToken();
+  const { response: { status, data: { message } } } = await t.throwsAsync(api.post(
+    '/game',
+    gameRawIndexJSDoesNotExist,
+    { headers: { authorization: authToken } },
+  ));
+  t.is(status, StatusCodes.BAD_REQUEST);
+  t.is(message, 'Game validation failed: commitSHA: index.js file does not exist! Make sure the commit is from the "published" branch!');
+});
+
 test('POST /game creates a game', async (t) => {
   const { api } = t.context.app;
   const userCred = await createUserCred(t);
