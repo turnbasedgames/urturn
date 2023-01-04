@@ -144,6 +144,29 @@ test('POST /game fails with invalid customURL', async (t) => {
   });
 });
 
+test('POST /game fails with invalid githubURL format', async (t) => {
+  const { api } = t.context.app;
+  const userCred = await createUserCred(t);
+  await createUserAndAssert(t, api, userCred);
+
+  const gameRaw = {
+    name: 'first game',
+    description: 'this description',
+    commitSHA: 'published-test-app',
+  };
+
+  const BAD_GITHUB_URLS = ['very bad url', 'https://gitbob.com/bad-base-url/a', 'github.com/t/a', 'https://github.com/norepo/'];
+  const authToken = await userCred.user.getIdToken();
+  const requests = BAD_GITHUB_URLS.map((ghURL) => t.throwsAsync(api.post('/game', { ...gameRaw, githubURL: ghURL }, { headers: { authorization: authToken } })));
+
+  const promiseResult = await Promise.all(requests);
+
+  promiseResult.forEach(({ response: { status, data: { message } } }) => {
+    t.is(status, StatusCodes.BAD_REQUEST);
+    t.is(message, 'Game validation failed: githubURL: Invalid GitHub URL format');
+  });
+});
+
 test('POST /game creates a game', async (t) => {
   const { api } = t.context.app;
   const userCred = await createUserCred(t);
@@ -175,7 +198,7 @@ test('POST /game fails upon duplicate custom urls', async (t) => {
     name: 'hello world',
     description: 'a basic game',
     commitSHA: 'published-test-app',
-    githubURL: 'https://github.com/turnbasedgames/hello-world',
+    githubURL: 'https://github.com/turnbasedgames/urturn',
     customURL: 'hello-world',
   };
 
