@@ -8,13 +8,15 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 import { RoomPlayer } from '@urturn/ui-common';
 import {
-  getPlayerInGameById, makeMove, getBaseUrl, removePlayer, SPECTATOR_USER, getServerTimeMS,
+  getPlayerInGameById, makeMove, getBaseUrl, removePlayer, SPECTATOR_USER,
+  useGetServerTimeMS,
 } from '../data';
 
 function Player() {
   const { playerId } = useParams();
   const [roomState, setRoomState] = useState();
   const [player, setPlayer] = useState();
+  const [serverTime] = useGetServerTimeMS();
   useEffect(() => {
     const setupPlayer = async (id) => {
       const plr = await getPlayerInGameById(id);
@@ -86,7 +88,7 @@ function Player() {
       // runner
       playAgain={async () => {}}
       // default offset is zero
-      getServerTimeMS={getServerTimeMS}
+      getServerTimeMS={() => serverTime}
     />
   );
 }

@@ -95,7 +95,17 @@ export const useGameState = () => {
   return [gameState, updateGameState, refreshGameState, loading];
 };
 
-export const getServerTimeMS = async () => {
-  const res = await axios.get(`${await getBaseUrl()}/date`);
-  return new Date(res.data.date).getTime();
+export const useGetServerTimeMS = () => {
+  const [serverTime, setServerTime] = useState(null);
+
+  useEffect(async () => {
+    const socket = io(await getBaseUrl());
+    socket.on('ping', ({ date }) => setServerTime(date));
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  return [serverTime];
 };

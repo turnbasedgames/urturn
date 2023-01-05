@@ -160,8 +160,8 @@ async function setupServer({ apiPort }) {
   });
 
   // Duplicated from @urturn/server GET /instance/date endpoint
-  app.get('/date', (req, res) => {
-    res.status(StatusCodes.OK).json({ date: new Date().toISOString() });
+  app.get('/date', () => {
+    io.sockets.emit('ping', { date: new Date().toISOString() });
   });
 
   app.post('/state', (req, res) => {
