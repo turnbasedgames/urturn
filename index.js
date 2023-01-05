@@ -54,3 +54,4 @@ var main = {
 };
 
 module.exports = main;
+//# sourceMappingURL=index.js.map
