@@ -1,8 +1,9 @@
-build/
-node_modules/
-archive/
-.ipynb_checkpoints/
-.vscode/
+# dependencies
+/node_modules
 
-# rollup outputs this
+# UrTurn production build artifacts:
+# https://docs.urturn.app/docs/Getting-Started/deploying-your-game#build-artifact-spec
+/build
+/frontend/build
 /index.js
+/index.js.map

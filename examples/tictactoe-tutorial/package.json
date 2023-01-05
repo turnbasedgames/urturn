@@ -24,6 +24,8 @@
   },
   "homepage": "https://github.com/turnbasedgames/urturn#readme",
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^23.0.2",
+    "@rollup/plugin-node-resolve": "^15.0.1",
     "@urturn/runner": "*",
     "concurrently": "^7.1.0",
     "cross-env": "^7.0.3",

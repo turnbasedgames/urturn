@@ -1,0 +1,38 @@
+name: Build and publish game to published branch
+on:
+  push:
+    branches:
+      - main
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
+      - name: install backend dependencies
+        run: npm ci
+      - name: install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+      - name: build frontend
+        run: |
+          cd frontend
+          npm run build
+      - name: build backend
+        run: npm run build
+      - name: stitch build folders together
+        run: |
+          mkdir -p build/frontend
+          cp index.js build/index.js
+          cp thumbnail.png build/thumbnail.png
+          cp -r frontend/build build/frontend/build
+      - name: publish game 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build
+          branch: published
