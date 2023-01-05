@@ -5,6 +5,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { watchFile } from 'fs';
 import { pathToFileURL } from 'node:url';
+import sourceMapSupport from 'source-map-support';
 import { userBackend } from '../config/paths.js';
 import { filterRoomState, getPlayerById, validateRoomState } from './room/roomState.js';
 import requireUtil from './requireUtil.cjs';
@@ -13,6 +14,10 @@ import wrapSocketErrors from './middleware/wrapSocketErrors.js';
 import {
   onRoomStart, onPlayerJoin, onPlayerQuit, onPlayerMove, deepCopy,
 } from './room/wrappers.js';
+
+sourceMapSupport.install({
+  environment: 'node',
+});
 
 const backendHotReloadIntervalMs = 100;
 
@@ -32,7 +37,6 @@ const getLatestBackendModule = async (backendPath) => {
 
     // the cacheBusting workaround for esm modules does not work for commonjs
     requireUtil.cleanupCommonJSModule(backendPath);
-
     return backendModule;
   } catch (err) {
     logger.error('error while loading your room functions:', err);
@@ -123,7 +127,7 @@ async function setupServer({ apiPort }) {
     roomState = roomStateContender;
     res.sendStatus(StatusCodes.OK);
   });
-
+  // TODO: how does story book do this???
   app.post('/player/:id/move', (req, res) => {
     const { id } = req.params;
     const player = getPlayerById(id, roomState);
