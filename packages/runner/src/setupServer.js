@@ -58,6 +58,9 @@ async function setupServer({ apiPort }) {
   });
   io.on('connection', wrapSocketErrors((socket) => {
     socket.emit('stateChanged', filterRoomState(roomState));
+    socket.on('ping', (cb) => cb({
+      serverDate: new Date().toISOString(),
+    }));
   }));
 
   const startGame = async () => {
@@ -161,11 +164,6 @@ async function setupServer({ apiPort }) {
 
   app.get('/state', (req, res) => {
     res.status(StatusCodes.OK).json(filterRoomState(roomState));
-  });
-
-  // Duplicated from @urturn/server GET /instance/date endpoint
-  app.get('/date', (req, res) => {
-    res.status(StatusCodes.OK).json({ date: new Date().toISOString() });
   });
 
   app.post('/state', (req, res) => {
