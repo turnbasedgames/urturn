@@ -18,7 +18,7 @@ import logger from '../../logger';
 import { GITHACK_BASE_URL, SOCKET_IO_REASON_IO_CLIENT_DISCONNECT } from '../../util';
 import useSocket from '../../models/useSocket';
 import { analytics } from '../../firebase/setupFirebase';
-import { getServerTime } from '../../models/instance';
+import { getServerTimeMS } from '../../models/instance';
 
 const shouldJoinPrivateRoom = (user?: User, roomState?: RoomState, room?: Room): boolean => Boolean(
   (room != null)
@@ -248,7 +248,7 @@ function GamePlayer(): React.ReactElement {
         game_id: room.game?.id ?? '(empty)',
         game_name: room.game?.name ?? '(empty)',
       })}
-      getServerTime={getServerTime}
+      getServerTimeMS={getServerTimeMS}
     />
   );
 }

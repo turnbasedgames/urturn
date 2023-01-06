@@ -1,4 +1,7 @@
-// import axios from 'axios';
+import axios from 'axios';
 
 // eslint-disable-next-line import/prefer-default-export
-export const getServerTime = async (): Promise<number> => new Date().getTime();
+export const getServerTimeMS = async (): Promise<number> => {
+  const res = await axios.get('instance/date');
+  return new Date(res.data.date).getTime();
+};

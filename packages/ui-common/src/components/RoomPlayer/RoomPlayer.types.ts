@@ -17,5 +17,5 @@ export interface RoomPlayerProps {
   roomStartContext?: RoomStartContext
   finished?: boolean
   onOtherGamesClick?: () => void
-  getServerTime: (cb: Function) => void
+  getServerTimeMS: () => Promise<number>
 }

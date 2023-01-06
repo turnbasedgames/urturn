@@ -162,10 +162,9 @@ async function setupServer({ apiPort }) {
     res.status(StatusCodes.OK).json(filterRoomState(roomState));
   });
 
-  // Runner version of @urturn/server GET /instance/date endpoint
+  // Duplicated from @urturn/server GET /instance/date endpoint
   app.get('/date', (req, res) => {
-    io.sockets.emit('ping', { date: new Date().toISOString() });
-    res.sendStatus(StatusCodes.OK);
+    res.status(StatusCodes.OK).json({ date: new Date().toISOString() });
   });
 
   app.post('/state', (req, res) => {

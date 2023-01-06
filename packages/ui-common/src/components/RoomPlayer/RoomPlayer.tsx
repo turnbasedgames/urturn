@@ -8,7 +8,7 @@ import PlayerMenu from './PlayerMenu';
 
 function RoomPlayer({
   user, src, setChildClient, makeMove, quitRoom, players, finished, roomStartContext, playAgain,
-  onOtherGamesClick, getServerTime,
+  onOtherGamesClick, getServerTimeMS,
 }: RoomPlayerProps): React.ReactElement {
   const iframeRef = useCallback((iframe: HTMLIFrameElement | null) => {
     if (iframe != null) {
@@ -49,17 +49,10 @@ function RoomPlayer({
             // https://en.wikipedia.org/wiki/Cristian%27s_algorithm
             // We assume roundtrip time is symmetrical (which is not always true), but close enough.
             const requestTimeMS = new Date().getTime();
-
-            const serverTimeMs: number = await new Promise((resolve) => {
-              getServerTime(({ serverDate }: {
-                serverDate: string
-              }) => {
-                const serverTimeMS = new Date(serverDate).getTime();
-                resolve(serverTimeMS);
-              });
-            });
-            const latency = (new Date().getTime() - requestTimeMS) / 2;
-            const offset = serverTimeMs - latency - requestTimeMS;
+            const serverTimeMS = await getServerTimeMS();
+            const responseTimeMS = new Date().getTime();
+            const latency = (responseTimeMS - requestTimeMS) / 2;
+            const offset = serverTimeMS - latency - requestTimeMS;
             return offset;
           },
         },
