@@ -96,16 +96,19 @@ export const useGameState = () => {
 };
 
 export const useGetServerTimeMS = () => {
-  const [serverTime, setServerTime] = useState(null);
+  const [socket, setSocket] = useState(null);
+
+  const getServerTime = (cb) => {
+    if (socket) socket.emit('ping', cb);
+  };
 
   useEffect(async () => {
-    const socket = io(await getBaseUrl());
-    socket.on('ping', ({ date }) => setServerTime(date));
+    setSocket(io(await getBaseUrl()));
 
     return () => {
       socket.disconnect();
     };
   }, []);
 
-  return [serverTime];
+  return [getServerTime];
 };
