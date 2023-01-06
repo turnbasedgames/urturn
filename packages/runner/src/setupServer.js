@@ -162,11 +162,6 @@ async function setupServer({ apiPort }) {
     res.status(StatusCodes.OK).json(filterRoomState(roomState));
   });
 
-  // Duplicated from @urturn/server GET /instance/date endpoint
-  app.get('/date', (req, res) => {
-    res.status(StatusCodes.OK).json({ date: new Date().toISOString() });
-  });
-
   app.post('/state', (req, res) => {
     let roomStateContender;
 
