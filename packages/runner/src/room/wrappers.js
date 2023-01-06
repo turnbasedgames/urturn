@@ -94,3 +94,7 @@ export const onPlayerMove = (logger, move, player, roomState, innerFn) => {
   const newRoomState = applyRoomStateResult(roomState, roomStateResult);
   return postRoomFunction(newRoomState);
 };
+
+export function updateRoomTimer(roomState, timer) {
+  // TODO: finish
+}

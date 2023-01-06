@@ -47,6 +47,7 @@ const getLatestBackendModule = async (backendPath) => {
 async function setupServer({ apiPort }) {
   const app = express();
   const httpServer = createServer(app);
+  const timer = { timeoutId: null, triggerTimeoutAt: null };
   let playerIdCounter;
   let roomState;
   let backendModule;
