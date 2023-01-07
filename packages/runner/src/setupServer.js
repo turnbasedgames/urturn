@@ -12,7 +12,7 @@ import requireUtil from './requireUtil.cjs';
 import logger from './logger.js';
 import wrapSocketErrors from './middleware/wrapSocketErrors.js';
 import {
-  onRoomStart, onPlayerJoin, onPlayerQuit, onPlayerMove, deepCopy,
+  onRoomStart, onPlayerJoin, onPlayerQuit, onPlayerMove, deepCopy, updateRoomTimer, onTimeout,
 } from './room/wrappers.js';
 
 sourceMapSupport.install({
@@ -47,7 +47,7 @@ const getLatestBackendModule = async (backendPath) => {
 async function setupServer({ apiPort }) {
   const app = express();
   const httpServer = createServer(app);
-  const timer = { timeoutId: null, triggerTimeoutAt: null };
+  let timer = { timeoutId: null, triggerTimeoutAt: null };
   let playerIdCounter;
   let roomState;
   let backendModule;
@@ -61,6 +61,13 @@ async function setupServer({ apiPort }) {
     socket.emit('stateChanged', filterRoomState(roomState));
   }));
 
+  const onTimeoutFn = () => {
+    const roomStateContender = onTimeout(logger, roomState, backendModule.onTimeout);
+    timer = updateRoomTimer(backendModule, roomStateContender, timer, onTimeoutFn);
+    roomState = roomStateContender;
+    io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
+  };
+
   const startGame = async () => {
     backendModule = await getLatestBackendModule(userBackend);
     if (backendModule == null) {
@@ -70,7 +77,9 @@ async function setupServer({ apiPort }) {
       logger.error("Unable to start game because 'onRoomStart' function is not exported!");
       return;
     }
-    roomState = onRoomStart(logger, backendModule.onRoomStart);
+    const roomStateContender = onRoomStart(logger, backendModule.onRoomStart);
+    timer = updateRoomTimer(backendModule, roomStateContender, timer, onTimeoutFn);
+    roomState = roomStateContender;
     playerIdCounter = 0;
     io.sockets.emit('stateChanged', filterRoomState(roomState));
   };
@@ -110,9 +119,10 @@ async function setupServer({ apiPort }) {
       roomState,
       backendModule.onPlayerJoin,
     );
-    io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
+    timer = updateRoomTimer(backendModule, roomStateContender, timer, onTimeoutFn);
     roomState = roomStateContender;
     playerIdCounter += 1;
+    io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
     res.status(StatusCodes.OK).json(player);
   });
 
@@ -124,11 +134,12 @@ async function setupServer({ apiPort }) {
       return;
     }
     const roomStateContender = onPlayerQuit(logger, player, roomState, backendModule.onPlayerQuit);
-    io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
+    timer = updateRoomTimer(backendModule, roomStateContender, timer, onTimeoutFn);
     roomState = roomStateContender;
+    io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
     res.sendStatus(StatusCodes.OK);
   });
-  // TODO: how does story book do this???
+
   app.post('/player/:id/move', (req, res) => {
     const { id } = req.params;
     const player = getPlayerById(id, roomState);
@@ -145,8 +156,9 @@ async function setupServer({ apiPort }) {
         roomState,
         backendModule.onPlayerMove,
       );
-      io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
+      timer = updateRoomTimer(backendModule, roomStateContender, timer, onTimeoutFn);
       roomState = roomStateContender;
+      io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
       res.sendStatus(StatusCodes.OK);
     } catch (err) {
       logger.error('Error in while making move:', err);
@@ -180,9 +192,9 @@ async function setupServer({ apiPort }) {
       res.status(StatusCodes.BAD_REQUEST).json({ message: err.message });
       return;
     }
-
-    io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
+    timer = updateRoomTimer(backendModule, roomStateContender, timer, onTimeoutFn);
     roomState = roomStateContender;
+    io.sockets.emit('stateChanged', filterRoomState(roomStateContender));
     res.sendStatus(StatusCodes.OK);
   });
 
