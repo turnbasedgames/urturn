@@ -4,6 +4,13 @@ description: it's ur turn, but ur taking too long to move!
 
 # Server-Side Move Timers
 
+:::caution
+This is an experimental feature! To use, you will need to use a special `@urturn/runner` version:
+```bash
+npm i -S @urturn/runner@0.6.0-experiemental.0
+```
+:::
+
 Here are several use cases we support:
 
 1. Asynchronously trigger a timeout event and modify the [roomState](/docs/API/types#roomstate)
