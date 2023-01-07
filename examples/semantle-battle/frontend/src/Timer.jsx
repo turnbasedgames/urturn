@@ -21,23 +21,14 @@ function getDisplayTimeLeftSecs(timeLeftSecs) {
 }
 
 function Timer({
-  startTime, onTimeout, prefix, suffix, timeoutBufferMs, timeoutMs,
+  startTime, prefix, suffix, timeoutMs,
 }) {
   const [timeLeftSecs, setTimeLeftSecs] = useState(getTimeLeftSecs(startTime, timeoutMs));
 
   useEffect(() => {
-    const intervalStartMs = new Date().getTime();
     const interval = setInterval(() => {
-      const timePassedMs = Date.now() - intervalStartMs;
       const newTimeLeftSecs = getTimeLeftSecs(startTime, timeoutMs);
-      // Don't take any action within the buffer time. We do this because at startup client.now()
-      // may not have enough data for syncing
-      if (newTimeLeftSecs < 0 && timePassedMs > timeoutBufferMs) {
-        onTimeout();
-        clearInterval(interval);
-      } else {
-        setTimeLeftSecs(newTimeLeftSecs);
-      }
+      setTimeLeftSecs(newTimeLeftSecs);
     }, CHECK_TIME_LEFT_INTERVAL_MS);
 
     return () => {
@@ -55,14 +46,8 @@ function Timer({
 Timer.propTypes = {
   timeoutMs: PropTypes.number.isRequired,
   startTime: PropTypes.string.isRequired,
-  timeoutBufferMs: PropTypes.number,
-  onTimeout: PropTypes.func.isRequired,
   prefix: PropTypes.string.isRequired,
   suffix: PropTypes.string.isRequired,
-};
-
-Timer.defaultProps = {
-  timeoutBufferMs: 0,
 };
 
 export default Timer;
