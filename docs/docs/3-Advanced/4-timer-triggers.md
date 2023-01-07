@@ -7,27 +7,55 @@ description: it's ur turn, but ur taking too long to move!
 Here are several use cases we support:
 
 1. Asynchronously trigger a timeout event and modify the [roomState](/docs/API/types#roomstate)
-2. Cancel an existing timer trigger while handling a move
+2. Cancel an existing timeout trigger while handling a move
 
-:::caution
-Potential Limitations:
+## New `onTimeout` function
 
-1. You can only have 1 active timer at a time.
-2. Time guarantees for timers are on the order of seconds, with a minimum relative due date of 5 seconds
+This get's called any time a timeout is triggered:
 
-It is recommended that if you want to do chess style timers, you will have to update the timer as each player moves, and continue to track time when player moves.
-:::
+### Example: ending game when round timeout is triggered
 
-:::caution
+```js
+function onTimeout(roomState) {
+  const { state } = roomState;
+  state.status = 'end';
+  return { state, finished: true };
+}
+```
 
-This work is planned. Join [discord](https://discord.gg/myWacjdb5S) to provide more details on your use case.
+## How to tell UrTurn when to trigger `onTimeout`
 
-:::
+New roomState field `roomState.triggerTimeoutAt` which is an ISO-8601 string. UrTurn runner will call `onTimeout` exactly when the clock hits that `triggerTimeoutAt`.
 
-## Workaround
+### Example: configure UrTurn to call `onTimeout` 5 minutes after last player joins
 
-Current workaround recommended is to have clients use the clock synced time functions `client.now()` and make a `client.makeMove()` request whenever clients detect the match is over.
+```js
+function onPlayerJoin(player, roomState) {
+  if (roomState.players.length === 2) {
+    const roundLengthMs = 300 * 1000; // 5 minutes => 300 seconds => 300000 milliseconds
+    const triggerTimeoutAt = new Date(Date.now() + roundLengthMs).toISOString();
+    return {
+      triggerTimeoutAt // set new triggerTimeoutAt to handle match being finished
+    };
+  }
+  // don't do anything without enough players
+  return {}
+}
+```
 
-Clients will race to notify the server, which is okay because you can fail all other clients that called `client.makeMove()` by adding simple validation that checks if the timeout is already handled.
+### Example: Cancel the triggerTimeoutAt
 
-This is currently used in the [Semantle Battle](https://www.urturn.app/play/semantle-battle) game.
+Let's say a player already made their move in time. You no longer need the timeout.
+
+```js
+function onPlayerMove(player, move, roomState) { 
+  // ... insert code here for handling the move
+
+  // set the triggerTimeoutAt to null because player made their move on time!
+  return { state, triggerTimeoutAt: null }
+}
+```
+
+## Display Time Left on the Client
+
+Use `client.now()` for the server synced time. You can save the match start time in `roomState.state` and do a simple diff to get the time left: `client.now() - roomState.state.routeStartDate`
