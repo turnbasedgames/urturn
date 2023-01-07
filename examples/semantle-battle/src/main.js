@@ -128,7 +128,8 @@ function onPlayerMovePreGame(plr, move, roomState) {
   if (players.every(({ id }) => id in state.plrToSecretHash) && players.length === 2) {
     state.guessStartTime = new Date().toISOString();
     state.status = Status.InGame;
-    return { state };
+    const triggerTimeoutAt = new Date(Date.now() + IN_GAME_TIMEOUT_MS).toISOString();
+    return { state, triggerTimeoutAt };
   }
   return { state };
 }
