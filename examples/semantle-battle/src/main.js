@@ -75,7 +75,8 @@ function onPlayerJoin(plr, roomState) {
   if (players.length === 2) {
     state.chooseSecretStartTime = new Date().toISOString();
     // other players will be unable to join this room (UrTurn will handle this for us)
-    return { state, joinable: false };
+    const triggerTimeoutAt = new Date(Date.now() + CHOOSE_SECRET_TIMEOUT_MS).toISOString();
+    return { state, joinable: false, triggerTimeoutAt };
   }
   return { state };
 }
@@ -94,29 +95,17 @@ function forceStartWithBot(plr, roomState) {
   state.plrToGuessToInfo[botId] = {};
   state.guessStartTime = new Date().toISOString();
   state.status = Status.InGame;
-  return { state, joinable: false };
+  const triggerTimeoutAt = new Date(Date.now() + IN_GAME_TIMEOUT_MS).toISOString();
+  return { state, joinable: false, triggerTimeoutAt };
 }
 
 function onPlayerMovePreGame(plr, move, roomState) {
-  const { secret, forceEndGame, forceStart } = move;
+  const { secret, forceStart } = move;
   const { state, players } = roomState;
 
   // force start game with an AI bot
   if (forceStart) {
     return forceStartWithBot(plr, roomState);
-  }
-
-  if (forceEndGame) {
-    const timeoutMs = new Date(state.chooseSecretStartTime).getTime() + CHOOSE_SECRET_TIMEOUT_MS;
-    const nowMs = Date.now();
-    if (nowMs < timeoutMs) {
-      throw new Error('Player still has time left!');
-    }
-
-    const [winnerID] = Object.keys(state.plrToSecretHash);
-    state.winner = players.find((p) => p.id === winnerID);
-    state.status = Status.EndGame;
-    return { state, joinable: false, finished: true };
   }
 
   // validate that the player has not already chosen a secret
@@ -139,7 +128,8 @@ function onPlayerMovePreGame(plr, move, roomState) {
   if (players.every(({ id }) => id in state.plrToSecretHash) && players.length === 2) {
     state.guessStartTime = new Date().toISOString();
     state.status = Status.InGame;
-    return { state };
+    const triggerTimeoutAt = new Date(Date.now() + IN_GAME_TIMEOUT_MS).toISOString();
+    return { state, triggerTimeoutAt };
   }
   return { state };
 }
@@ -189,44 +179,6 @@ function getScoreCard(guessToInfo) {
     }, initialScoreCard);
 }
 
-function onInGameTimeout(roomState, plr, otherPlr) {
-  const { state } = roomState;
-  const timeoutMs = new Date(state.guessStartTime).getTime() + IN_GAME_TIMEOUT_MS;
-  const nowMs = Date.now();
-  if (nowMs < timeoutMs) {
-    throw new Error('Game still has time left!');
-  }
-
-  const plrScoreCard = getScoreCard(state.plrToGuessToInfo[plr.id]);
-  const otherPlrScoreCard = getScoreCard(state.plrToGuessToInfo[otherPlr.id]);
-
-  for (let i = 0; i < 2; i += 1) {
-    if (plrScoreCard[i] > otherPlrScoreCard[i]) {
-      state.winner = plr;
-      state.status = Status.EndGame;
-      return {
-        state,
-        finished: true,
-      };
-    }
-    if (plrScoreCard[i] < otherPlrScoreCard[i]) {
-      state.winner = otherPlr;
-      state.status = Status.EndGame;
-      return {
-        state,
-        finished: true,
-      };
-    }
-  }
-
-  // Score cards are identical, so it must be tie.
-  state.status = Status.EndGame;
-  return {
-    state,
-    finished: true,
-  };
-}
-
 function plrMakesGuess(plr, otherPlayer, guess, roomState) {
   const { state } = roomState;
   const { plrToSecretHash } = state;
@@ -265,7 +217,7 @@ function botMove(plr, roomState) {
 
 function onPlayerMoveInGame(plr, move, roomState) {
   const {
-    guess, hintRequest, acceptHint, forceEndGame, forceBotMove,
+    guess, hintRequest, acceptHint, forceBotMove,
   } = move;
   const { players, state } = roomState;
   const { botEnabled } = state;
@@ -277,10 +229,6 @@ function onPlayerMoveInGame(plr, move, roomState) {
 
   if (forceBotMove) {
     return botMove(plr, roomState);
-  }
-
-  if (forceEndGame != null) {
-    return onInGameTimeout(roomState, plr, otherPlayer);
   }
 
   if (acceptHint != null) {
@@ -338,6 +286,45 @@ function onPlayerMove(plr, move, roomState) {
   }
 }
 
+function onTimeout(roomState) {
+  const { state, players } = roomState;
+  const { status } = state;
+  switch (status) {
+    case Status.PreGame: {
+      const [winnerID] = Object.keys(state.plrToSecretHash);
+      state.winner = players.find((p) => p.id === winnerID);
+      state.status = Status.EndGame;
+      return { state, joinable: false, finished: true };
+    }
+    case Status.InGame: {
+      const plr1 = players[0];
+      const plr2 = players[1];
+      const plr1ScoreCard = getScoreCard(state.plrToGuessToInfo[plr1.id]);
+      const plr2ScoreCard = getScoreCard(state.plrToGuessToInfo[plr2.id]);
+
+      for (let i = 0; i < 2; i += 1) {
+        if (plr1ScoreCard[i] > plr2ScoreCard[i]) {
+          state.winner = plr1;
+          break;
+        }
+        if (plr1ScoreCard[i] < plr2ScoreCard[i]) {
+          state.winner = plr2;
+          break;
+        }
+      }
+
+      state.status = Status.EndGame;
+      return {
+        state,
+        finished: true,
+      };
+    }
+    default:
+      // do nothing
+      return {};
+  }
+}
+
 function onPlayerQuit(_, roomState) {
   const { state, players } = roomState;
   const { status } = state;
@@ -357,4 +344,5 @@ export default {
   onPlayerJoin,
   onPlayerMove,
   onPlayerQuit,
+  onTimeout,
 };

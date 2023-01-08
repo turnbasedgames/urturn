@@ -127,11 +127,7 @@ function App() {
           {status === 'preGame' && !spectator && chooseSecretStartTime != null && (
           <Timer
             startTime={chooseSecretStartTime}
-            timeoutBufferMs={2000}
             timeoutMs={CHOOSE_SECRET_TIMEOUT_MS}
-            onTimeout={() => {
-              client.makeMove({ forceEndGame: true }).catch(console.log);
-            }}
             prefix={curPlrSecretProvided ? 'Opponent has ' : 'You have '}
             suffix=" seconds to set a secret..."
           />
@@ -139,11 +135,7 @@ function App() {
           {status === 'inGame' && !spectator && (
             <Timer
               startTime={guessStartTime}
-              timeoutBufferMs={2000}
               timeoutMs={IN_GAME_TIMEOUT_MS}
-              onTimeout={() => {
-                client.makeMove({ forceEndGame: true }).catch(console.log);
-              }}
               prefix=""
               suffix=""
             />

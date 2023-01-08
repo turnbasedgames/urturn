@@ -11,6 +11,7 @@ const FIELD_TYPES = {
       && typeof player.username === 'string',
    ),
   roomStartContext: (x) => typeof x === 'object',
+  triggerTimeoutAt: (x) => x == null || typeof x === 'string',
 };
 
 export function filterRoomState(state) {
@@ -33,12 +34,7 @@ export function validateRoomState(state) {
     if (!ROOM_STATE_VIEWABLE_FIELDS.includes(key)) throw Error(`Invalid key: ${key} - maybe move into the 'state' field?`);
   });
 
-  Object.keys(filteredState).forEach((key) => {
-    if (state[key] === undefined) throw Error(`Missing key: ${key}`);
-  });
-
-  Object.keys(filteredState).forEach((key) => {
-    // eslint-disable-next-line valid-typeof
+  Object.keys(FIELD_TYPES).forEach((key) => {
     if (!(FIELD_TYPES[key](filteredState[key]))) {
       throw Error(`Typeof ${key} is incorrect.`);
     }
