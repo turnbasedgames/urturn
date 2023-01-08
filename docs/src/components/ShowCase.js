@@ -72,74 +72,14 @@ export default function ShowCase() {
   const [exampleGamesLoaded, setExampleGamesLoaded] = useState(false);
   return (
     <Stack justifyContent="center" maxWidth="1500px" margin="auto">
-      <Stack maxWidth="90%" margin="auto" minHeight="60vh" alignItems="center" justifyContent="center">
-        <h1 className={styles.title}>Built with UrTurn</h1>
-        <p className='hero__subtitle'>Battle tested by a rich community of developers and players.</p>
-        <Grid2 container spacing={2} margin={2}>
-          {ExampleGameList.map(({ title, description, gif, thumbnail, prodUrl }, index) => (
-            <Grid2 xs={12} sm={6} lg={4} key={index}>
-              <Link to={prodUrl}>
-                <Stack
-                  width="100%"
-                  alignItems="center"
-                  sx={{ position: 'relative', aspectRatio: '1 / 1' }}
-                >
-                  <img
-                    onMouseOver={e => (e.currentTarget.src = gif)}
-                    onMouseOut={e => (e.currentTarget.src = thumbnail)}
-                    className={styles['img-thumbnail']}
-                    src={thumbnail}
-                    alt="loading preview..."
-                    onLoad={() => setExampleGamesLoaded(true)}
-                  />
-                  {exampleGamesLoaded && <Stack sx={{ position: 'absolute', width: '100%', bottom: 0, background: 'rgba(21, 21, 21, 0.3)' }}>
-                    <h1 className={styles['card-title']}>{title}</h1>
-                    <p className={styles['card-title']}>{description}</p>
-                  </Stack>}
-                </Stack>
-              </Link>
-            </Grid2>
-          ))}
-        </Grid2>
-      </Stack>
-      <Stack maxWidth="90%" margin="auto" minHeight="60vh" alignItems="center" justifyContent="center">
-        <h1 className={styles['title-alt']}>All of Your Infrastructure Needs</h1>
-        <p className='hero__subtitle'>We are obsessed over the game developer experience. Here's what you can do with UrTurn.</p>
-        <Grid2 container spacing={2} margin={2}>
-          {FeatureList.map(({ subtitle, title, description, points, svgComponent, learnMore }, index) => (
-            <Grid2 xs={12} sm={6} lg={4} key={index}>
-              <Stack
-                width="100%"
-                alignItems="center"
-                maxHeight="500px"
-                margin={1}
-              >
-                <div className={clsx("card", styles.card)}>
-                  <div className="card__header">
-                    <h1 className={styles['card-title']}>{title} {subtitle}</h1>
-                    <p className={styles['card-title']}>{description}</p>
-                    <ul>
-                      {points.map((point, index) => <li key={index}>{point}</li>)}
-                    </ul>
-                  </div>
-                  {svgComponent}
-                  {learnMore && <div className="card__footer">
-                    <Link href="/docs" className="button button--secondary button--block">Learn More</Link>
-                  </div>}
-                </div>
-              </Stack>
-            </Grid2>
-          ))}
-        </Grid2>
-      </Stack>
       <Stack minHeight="30vh" marginBottom={5} alignItems="center">
-        <h1 className={styles['title-alt']}>Got Any Questions?</h1>
+        <h1 className={styles['title-alt']}>Have questions or need one on one support?</h1>
         <a
           href="https://discord.gg/myWacjdb5S"
           target="_blank"
           className={"button button--lg button--primary"}
         >
-          Talk with us on Discord!
+          Just Ask On Discord!
         </a>
       </Stack>
     </Stack >

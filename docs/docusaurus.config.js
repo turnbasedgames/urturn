@@ -6,9 +6,9 @@ const darkCodeTheme = require('prism-react-renderer/themes/vsDark');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Create web games faster than ever',
+  title: 'Create Turn Based Web Games Faster Than Ever',
   url: 'https://docs.urturn.app',
-  tagline: "Use your favorite game frameworks, while deploying your frontend and room functions on UrTurn's open source infrastructure for free",
+  tagline: "Use your favorite frontend technologies like ReactJS, PhaserIO, PixiJS (and more!) while leveraging our simple JSON-based room abstraction",
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',

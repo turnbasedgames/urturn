@@ -8,7 +8,7 @@
   text-align: center;
   position: relative;
   overflow: hidden;
-  min-height: 60vh;
+  min-height: 80vh;
 }
 
 @media screen and (max-width: 966px) {
