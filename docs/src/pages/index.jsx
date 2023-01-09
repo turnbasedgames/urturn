@@ -1,7 +1,7 @@
 import React from 'react';
 import Layout from '@theme/Layout';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
-import ShowCase from '../components/ShowCase/ShowCase';
+import WalkThrough from '../components/WalkThrough/WalkThrough';
 import Hero from '../components/Hero/Hero';
 
 export default function Home() {
@@ -10,7 +10,7 @@ export default function Home() {
     <Layout title={`${siteConfig.organizationName}`}>
       <Hero />
       <main>
-        <ShowCase />
+        <WalkThrough />
       </main>
     </Layout>
   );

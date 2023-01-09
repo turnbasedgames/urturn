@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Stack, Unstable_Grid2 as Grid2, Typography } from '@mui/material';
 import Link from '@docusaurus/Link';
 import clsx from 'clsx';
-import styles from './ShowCase.module.css';
+import styles from './WalkThrough.module.css';
 import semantleBattleGif from './semantleBattle.gif';
 import semantleBattleThumbnail from './semantleBattleThumbnail.png';
 import projectIncognitoGif from './projectIncognito.gif';
@@ -19,7 +19,7 @@ const ExampleGameList = [
       Semantle Battle
       {' '}
       <span className="badge badge--primary">New!</span>
-           </>,
+    </>,
     description: 'Multiplayer spin off of Semantle, built with ReactJS',
     gif: semantleBattleGif,
     thumbnail: semantleBattleThumbnail,
@@ -72,21 +72,9 @@ const FeatureList = [
   },
 ];
 
-export default function ShowCase() {
+export default function WalkThrough() {
   const [exampleGamesLoaded, setExampleGamesLoaded] = useState(false);
   return (
-    <Stack justifyContent="center" maxWidth="1500px" margin={3}>
-      <Stack minHeight="30vh" marginBottom={5} alignItems="center">
-        <h1 className={styles['title-alt']}>Have questions or need one on one support?</h1>
-        <a
-          href="https://discord.gg/myWacjdb5S"
-          target="_blank"
-          className="button button--lg button--primary"
-          rel="noreferrer"
-        >
-          Just Ask On Discord!
-        </a>
-      </Stack>
-    </Stack>
+    <div>hello</div>
   );
 }

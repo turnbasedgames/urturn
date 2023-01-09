@@ -7,7 +7,7 @@ import {
 import clsx from 'clsx';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import RunnerSvg from './runner-init.svg';
-import styles from './hero.module.css';
+import styles from './Hero.module.css';
 
 function Hero() {
   const { siteConfig } = useDocusaurusContext();
