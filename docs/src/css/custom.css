@@ -139,7 +139,7 @@ html[data-theme='dark'] .navbar {
 
   .hero__subtitle {
     color: var(--ifm-color-typography-subtitle);
-    font-size: 0.8rem;
+    font-size: 1rem;
   }
 }
 
