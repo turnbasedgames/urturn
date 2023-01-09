@@ -19,7 +19,7 @@ const ExampleGameList = [
       Semantle Battle
       {' '}
       <span className="badge badge--primary">New!</span>
-    </>,
+           </>,
     description: 'Multiplayer spin off of Semantle, built with ReactJS',
     gif: semantleBattleGif,
     thumbnail: semantleBattleThumbnail,
