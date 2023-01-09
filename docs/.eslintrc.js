@@ -21,4 +21,5 @@ module.exports = {
   rules: {
     'import/no-unresolved': [2, { ignore: ['^@theme', '^@docusaurus', '^@site'] }],
   },
+  ignorePatterns: ['src/theme/SearchBar'],
 };

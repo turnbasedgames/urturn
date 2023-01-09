@@ -20,7 +20,7 @@ const sidebars = {
       link: { type: 'doc', id: 'Introduction/Introduction' },
       items: [
         'Introduction/Flow-Of-Simple-Game',
-        'Introduction/Concepts'
+        'Introduction/Concepts',
       ],
     },
     {
@@ -55,7 +55,7 @@ const sidebars = {
       type: 'category',
       label: 'Advanced Guides',
       link: {
-        type: 'doc', id: 'Advanced/index'
+        type: 'doc', id: 'Advanced/index',
       },
       items: [
         'Advanced/custom-game-page',

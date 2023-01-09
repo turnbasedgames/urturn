@@ -12,13 +12,12 @@
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
-    "lint": "echo no good way to lint docusaurus repo, check: https://github.com/facebook/docusaurus/issues/2965",
-    "lint:fix": "echo no good way to lint docusaurus repo, check: https://github.com/facebook/docusaurus/issues/2965"
+    "lint": "eslint . --ignore-path .gitignore --ext .js,.jsx",
+    "lint:fix": "eslint . --ignore-path .gitignore --ext .js,.jsx --fix"
   },
   "dependencies": {
     "@docusaurus/core": "2.2.0",
     "@docusaurus/preset-classic": "2.2.0",
-    "@docusaurus/theme-live-codeblock": "2.2.0",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@mdx-js/react": "^1.6.21",
