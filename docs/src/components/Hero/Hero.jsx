@@ -1,38 +1,38 @@
 import React from 'react';
-import clsx from 'clsx';
-import Layout from '@theme/Layout';
-import GitHubButton from 'react-github-btn'
-import { Stack, Slide, Fade, Box } from '@mui/material'
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
-import styles from './index.module.css';
-import ShowCase from '../components/ShowCase';
 import Link from '@docusaurus/Link';
-import RunnerSvg from './runner-init.svg'
+import GitHubButton from 'react-github-btn';
+import {
+  Stack, Slide, Fade, Box,
+} from '@mui/material';
+import clsx from 'clsx';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import RunnerSvg from './runner-init.svg';
+import styles from './hero.module.css';
 
-function HomepageHeader() {
+function Hero() {
   const { siteConfig } = useDocusaurusContext();
   return (
     <header className={clsx('hero hero', styles.heroBanner)}>
       <Stack
-        width={{'sm': undefined, md: '100%'}}
+        width={{ sm: undefined, md: '100%' }}
         margin="auto"
-        direction={{ 'sm': 'column', 'md': 'row' }}
+        direction={{ sm: 'column', md: 'row' }}
         justifyContent="space-around"
       >
         <Stack
-          justifyContent='flex-start'
-          alignItems='flex-start'
+          justifyContent="flex-start"
+          alignItems="flex-start"
           sx={{ marginBottom: 5, maxWidth: '600px' }}
         >
           <Slide direction="up" in timeout={200}>
             <Stack>
               <Fade in timeout={1000}>
                 <h1 className="hero__title">
-                  <a className="hero__hard-title">
+                  <span className="hero__hard-title">
                     {siteConfig.title.split(' ').slice(0, 3).join(' ')}
-                  </a>
+                  </span>
                   <br />
-                  {' ' + siteConfig.title.split(' ').slice(3).join(' ')}
+                  {` ${siteConfig.title.split(' ').slice(3).join(' ')}`}
                 </h1>
               </Fade>
             </Stack>
@@ -42,9 +42,9 @@ function HomepageHeader() {
               <Fade in timeout={1000}>
                 <p className="hero__subtitle">{siteConfig.tagline}</p>
               </Fade>
-              <Slide direction='up' in timeout={1000}>
+              <Slide direction="up" in timeout={1000}>
                 <Stack
-                  direction='row'
+                  direction="row"
                   flexWrap="wrap"
                   spacing={0}
                   sx={{ gap: 1 }}
@@ -62,7 +62,7 @@ function HomepageHeader() {
                     Learn More
                   </Link>
                   <Box />
-                  <GitHubButton data-icon='octoicon-star' data-color-scheme='light_high_contrast' data-size='large' data-show-count href="https://github.com/turnbasedgames/urturn">
+                  <GitHubButton data-icon="octoicon-star" data-color-scheme="light_high_contrast" data-size="large" data-show-count href="https://github.com/turnbasedgames/urturn">
                     Star us on Github! ✨
                   </GitHubButton>
                 </Stack>
@@ -80,14 +80,4 @@ function HomepageHeader() {
   );
 }
 
-export default function Home() {
-  const { siteConfig } = useDocusaurusContext();
-  return (
-    <Layout title={`${siteConfig.organizationName}`}>
-      <HomepageHeader />
-      <main>
-        <ShowCase />
-      </main>
-    </Layout>
-  );
-}
+export default Hero;
