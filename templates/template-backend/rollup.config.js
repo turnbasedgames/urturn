@@ -1,18 +1,19 @@
+const resolve = require('@rollup/plugin-node-resolve');
+const commonjs = require('@rollup/plugin-commonjs');
 const pkg = require('./package.json');
 
 module.exports = [
-
-  // CommonJS (for Node) and ES module (for bundlers) build.
-  // (We could have three entries in the configuration array
-  // instead of two, but it's quicker to generate multiple
-  // builds from a single configuration where possible, using
-  // an array for the `output` option, where we can specify
-  // `file` and `format` for each target)
   {
     input: 'src/main.js',
     external: ['ms'],
-    output: [
-      { file: pkg.main, format: 'cjs' },
-    ],
+    output: {
+      file: pkg.main,
+      format: 'cjs',
+      // @urturn/runner uses the sourcemap to provide correct error traces
+      sourcemap: true,
+    },
+    // plugins that allow the src/main.js file require various npm packages
+    // WARNING: packages that access the network, disk/file system will not work.
+    plugins: [resolve(), commonjs()],
   },
 ];

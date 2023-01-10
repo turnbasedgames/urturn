@@ -19,6 +19,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^23.0.2",
+    "@rollup/plugin-node-resolve": "^15.0.1",
     "@urturn/runner": "*",
     "@urturn/runner-frontend": "*",
     "concurrently": "^7.1.0",
