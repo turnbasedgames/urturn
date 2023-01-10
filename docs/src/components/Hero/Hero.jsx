@@ -71,7 +71,7 @@ function Hero() {
           </Slide>
         </Stack>
         <Fade in timeout={1000}>
-          <Box width="100%" maxWidth="500px">
+          <Box width="100%" maxWidth="600px">
             <RunnerSvg />
           </Box>
         </Fade>
