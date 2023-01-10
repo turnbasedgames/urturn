@@ -4,7 +4,7 @@ import styles from './JoinDiscord.module.css';
 
 function JoinDiscord() {
   return (
-    <Stack justifyContent="center" maxWidth="1500px" margin={3}>
+    <Stack justifyContent="center" margin={3}>
       <Stack minHeight="30vh" marginBottom={5} alignItems="center">
         <h1 className={styles['title-alt']}>Have questions or need one on one support?</h1>
         <a
