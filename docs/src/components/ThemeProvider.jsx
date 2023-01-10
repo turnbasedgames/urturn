@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { useColorMode } from '@docusaurus/theme-common';
 import { ThemeProvider as MUIThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 
 // eslint-disable-next-line react/prop-types
 function ThemeProvider({ children }) {
@@ -17,7 +16,6 @@ function ThemeProvider({ children }) {
 
   return (
     <MUIThemeProvider theme={theme}>
-      <CssBaseline />
       {children}
     </MUIThemeProvider>
   );

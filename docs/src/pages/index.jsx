@@ -3,7 +3,7 @@ import Layout from '@theme/Layout';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import WalkThrough from '../components/WalkThrough/WalkThrough';
 import JoinDiscord from '../components/JoinDiscord/JoinDiscord';
-import ThemeProvider from './ThemeProvider';
+import ThemeProvider from '../components/ThemeProvider';
 import Hero from '../components/Hero/Hero';
 
 export default function Home() {

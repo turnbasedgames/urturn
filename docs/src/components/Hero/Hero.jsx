@@ -6,7 +6,8 @@ import {
 } from '@mui/material';
 import clsx from 'clsx';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
-import RunnerSvg from './runner-init.svg';
+// import RunnerSvg from './runner-init.svg';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import styles from './Hero.module.css';
 
 function Hero() {
@@ -72,7 +73,7 @@ function Hero() {
         </Stack>
         <Fade in timeout={1000}>
           <Box width="100%" maxWidth="600px">
-            <RunnerSvg />
+            <img src={useBaseUrl('/img/runner-init.svg')} alt="gif of terminal initializing game" />
           </Box>
         </Fade>
       </Stack>

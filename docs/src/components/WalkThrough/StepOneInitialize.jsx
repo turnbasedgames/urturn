@@ -1,7 +1,7 @@
 import React from 'react';
 import { Stack, Typography, Box } from '@mui/material';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import CodeBlock from '@theme/CodeBlock';
-import RunnerSvg from '../Hero/runner-init.svg';
 
 function StepOneInitialize() {
   return (
@@ -20,7 +20,7 @@ function StepOneInitialize() {
         Choose a frontend framework or start with vanilla HTML5:
       </Typography>
       <Box width="100%" maxWidth="600px">
-        <RunnerSvg />
+        <img src={useBaseUrl('/img/runner-init.svg')} alt="gif of terminal initializing game" />
       </Box>
     </Stack>
   );
