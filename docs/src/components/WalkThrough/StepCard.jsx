@@ -7,13 +7,38 @@ import DocusaurusLink from '@docusaurus/Link';
 import PropTypes from 'prop-types';
 
 function StepCard({
-  title, body, docsLink, selected, onClick, Icon,
+  title, body, docsLink, selected, onClick, Icon, sx,
 }) {
   return (
-    <Card elevation={0} sx={{ backgroundColor: !selected ? 'transparent' : undefined, borderWidth: '2px' }} variant={selected ? 'outlined' : undefined}>
-      <CardActionArea onClick={onClick} sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-        <Icon sx={{ fontSize: 30, marginLeft: 2, color: 'var(--ifm-color-primary-light)' }} />
-        <CardContent>
+    <Card
+      elevation={0}
+      sx={{
+        backgroundColor: !selected ? 'transparent' : undefined,
+        borderWidth: '2px',
+        ...sx,
+      }}
+      variant={selected ? 'outlined' : undefined}
+    >
+      <CardActionArea
+        onClick={onClick}
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-start',
+          alignItems: 'flex-start',
+          height: '100%',
+          width: '100%',
+        }}
+      >
+        <Icon sx={{
+          display: { xs: 'none', md: 'inline-block' },
+          fontSize: 30,
+          marginLeft: 2,
+          marginTop: 'auto',
+          marginBottom: 'auto',
+          color: 'var(--ifm-color-primary-light)',
+        }}
+        />
+        <CardContent sx={{ padding: 1 }}>
           <Typography variant="body2" fontWeight="bold" marginBottom={1}>
             {title}
           </Typography>
@@ -56,10 +81,12 @@ StepCard.propTypes = {
   selected: PropTypes.bool,
   onClick: PropTypes.func.isRequired,
   Icon: PropTypes.elementType.isRequired,
+  sx: PropTypes.shape({ height: PropTypes.number, width: PropTypes.number }),
 };
 
 StepCard.defaultProps = {
   selected: false,
+  sx: {},
 };
 
 export default StepCard;

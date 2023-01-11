@@ -68,34 +68,55 @@ export default function WalkThrough() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const { contentElement } = stepsConfig[selectedIndex];
   return (
-    <Stack backgroundColor="var(--ifm-color-emphasis-100)" direction="row" padding={4} spacing={2} justifyContent="center">
-      <Stack spacing={2} margin={2} maxWidth="550px">
+    <Stack
+      backgroundColor="var(--ifm-color-emphasis-100)"
+      direction={{ sm: 'column', md: 'row' }}
+      padding={4}
+      spacing={2}
+      justifyContent="center"
+    >
+      <Stack
+        spacing={2}
+        margin={{ xs: 0, sm: 0, md: 2 }}
+        maxWidth={{ sm: undefined, md: '380px' }}
+      >
         <Typography color="var(--ifm-color-primary)" variant="subtitle" fontWeight="bold">
           How It Works
         </Typography>
         <Typography variant="h4" fontWeight="bold">
           Supercharged development flow
-          <Box color="var(--ifm-color-primary)">every step of the way</Box>
+          <Box color="var(--ifm-color-primary)" component="span"> every step of the way</Box>
         </Typography>
         <Typography variant="body1">
           Build at an accelerated pace while still using your preferred
           IDE (e.g. VSCode), and NPM packages
         </Typography>
-        {stepsConfig.map(({
-          title, body, docsLink, iconComponent,
-        }, index) => (
-          <StepCard
-            key={title}
-            Icon={iconComponent}
-            title={title}
-            body={body}
-            docsLink={docsLink}
-            selected={selectedIndex === index}
-            onClick={() => { setSelectedIndex(index); }}
-          />
-        ))}
+        <Stack
+          direction={{ xs: 'row', sm: 'row', md: 'column' }}
+          overflow="auto"
+          sx={{
+            paddingBottom: 1,
+            gap: 1,
+            scrollbarWidth: 'thin',
+          }}
+        >
+          {stepsConfig.map(({
+            title, body, docsLink, iconComponent,
+          }, index) => (
+            <StepCard
+              sx={{ minWidth: '230px' }}
+              key={title}
+              Icon={iconComponent}
+              title={title}
+              body={body}
+              docsLink={docsLink}
+              selected={selectedIndex === index}
+              onClick={() => { setSelectedIndex(index); }}
+            />
+          ))}
+        </Stack>
       </Stack>
-      <Card variant="outlined" sx={{ backgroundColor: 'var(--ifm-color-emphasis-100)', flexGrow: 1, maxWidth: '800px' }}>
+      <Card sx={{ flexGrow: 1, maxWidth: '700px' }}>
         {contentElement}
       </Card>
     </Stack>
