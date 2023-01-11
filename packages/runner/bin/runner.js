@@ -123,7 +123,7 @@ function tryGitInit() {
     execSync('git init', { stdio: 'ignore' });
     return true;
   } catch (e) {
-    console.warn('Git repo not initialized', e);
+    logger.warn('Git repo not initialized', e);
     return false;
   }
 }
@@ -131,7 +131,7 @@ function tryGitInit() {
 function tryGitCommit() {
   try {
     execSync('git add -A', { stdio: 'ignore' });
-    execSync('git commit -m "Initialize project using @urturn/runner"', {
+    execSync('git commit -m "Initialize project using https://docs.urturn.app"', {
       stdio: 'ignore',
     });
     return true;
@@ -141,8 +141,8 @@ function tryGitCommit() {
     // In the future, we might supply our own committer
     // like Ember CLI does, but for now, let's just
     // remove the Git files to avoid a half-done state.
-    console.warn('Git commit not created', e);
-    console.warn('Removing .git directory...');
+    logger.warn('Git commit not created', e);
+    logger.warn('Removing .git directory...');
 
     return false;
   }
@@ -217,12 +217,12 @@ async function init(destination, { commit, tutorial, gitUrl }) {
   });
 
   if (tryGitInit()) {
-    console.log();
-    console.log('Initialized a git repository.');
+    logger.info();
+    logger.info('Initialized a git repository.');
 
     if (tryGitCommit()) {
-      console.log();
-      console.log('Created git commit.');
+      logger.info();
+      logger.info('Created git commit.');
     }
   }
 
