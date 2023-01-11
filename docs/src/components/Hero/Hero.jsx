@@ -42,31 +42,35 @@ function Hero() {
               <Fade in timeout={1000}>
                 <p className="hero__subtitle">{siteConfig.tagline}</p>
               </Fade>
-              <Slide direction="up" in timeout={1000}>
-                <Stack
-                  direction="row"
-                  flexWrap="wrap"
-                  spacing={0}
-                  sx={{ gap: 1 }}
-                >
-                  <Link
-                    className="button button--lg button--primary button--primary"
-                    to="/docs/category/getting-started"
-                  >
-                    Get Started
-                  </Link>
-                  <Link
-                    className="button button--lg button--outline button--secondary"
-                    href="/docs"
-                  >
-                    Learn More
-                  </Link>
-                  <Box />
-                  <GitHubButton data-icon="octoicon-star" data-color-scheme="light_high_contrast" data-size="large" data-show-count href="https://github.com/turnbasedgames/urturn">
-                    Star us on Github! ✨
-                  </GitHubButton>
+              <Fade in timeout={1000}>
+                <Stack>
+                  <Slide direction="up" in timeout={1000}>
+                    <Stack
+                      direction="row"
+                      flexWrap="wrap"
+                      spacing={0}
+                      sx={{ gap: 1 }}
+                    >
+                      <Link
+                        className="button button--lg button--primary button--primary"
+                        to="/docs/category/getting-started"
+                      >
+                        Get Started
+                      </Link>
+                      <Link
+                        className="button button--lg button--outline button--secondary"
+                        href="/docs"
+                      >
+                        Learn More
+                      </Link>
+                      <Box />
+                      <GitHubButton data-icon="octoicon-star" data-color-scheme="light_high_contrast" data-size="large" data-show-count href="https://github.com/turnbasedgames/urturn">
+                        Star us on Github! ✨
+                      </GitHubButton>
+                    </Stack>
+                  </Slide>
                 </Stack>
-              </Slide>
+              </Fade>
             </Stack>
           </Slide>
         </Stack>
