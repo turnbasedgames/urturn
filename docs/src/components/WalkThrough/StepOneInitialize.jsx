@@ -1,9 +1,10 @@
 import React from 'react';
 import {
-  Stack, Typography, Box, Paper,
+  Stack, Typography, Box,
 } from '@mui/material';
 import CodeBlock from '@theme/CodeBlock';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import BrowserView from '../BrowserView/BrowserView';
 
 function StepOneInitialize() {
   return (
@@ -32,9 +33,9 @@ npm run dev`}
         <Box color="var(--ifm-color-primary)" fontWeight="bold" component="span"> Runner </Box>
         on localhost
       </Typography>
-      <Paper elevation={2} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+      <BrowserView elevation={2} sx={{ maxWidth: '650px' }}>
         <img src={useBaseUrl('/img/runner-room-state.svg')} alt="gif of terminal initializing game" />
-      </Paper>
+      </BrowserView>
     </Stack>
   );
 }
