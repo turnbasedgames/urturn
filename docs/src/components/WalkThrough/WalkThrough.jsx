@@ -9,6 +9,8 @@ import DynamicFormIcon from '@mui/icons-material/DynamicForm';
 import StepCard from './StepCard';
 import StepOneInitialize from './StepOneInitialize';
 import StepTwoIterate from './StepTwoIterate';
+import StepThreeFunctions from './StepThreeFunctions';
+import StepFourDeploy from './StepFourDeploy';
 
 const stepsConfig = [
   {
@@ -45,9 +47,7 @@ const stepsConfig = [
     iconComponent: CodeIcon,
     contentElement:
     (
-      <Stack>
-        TODO: THis
-      </Stack>
+      <StepThreeFunctions />
     ),
   },
   {
@@ -57,9 +57,7 @@ const stepsConfig = [
     iconComponent: DynamicFormIcon,
     contentElement:
     (
-      <Stack>
-        TODO: THis
-      </Stack>
+      <StepFourDeploy />
     ),
   },
 ];
