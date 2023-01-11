@@ -1,0 +1,8 @@
+.title-alt {
+  margin-top: 3rem;
+  font-size: 3rem;
+  background-image: linear-gradient(0.25turn, var(--ifm-color-gray-600), var(--ifm-color-gray-700));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+}

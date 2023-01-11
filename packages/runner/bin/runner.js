@@ -29,7 +29,7 @@ const tutorialBasePath = '/examples/';
 function wrapVersion(fn) {
   return (...args) => {
     // log version by default to help debug user related questions and bug reports
-    logger.info(`${pkg.name} v${pkg.version}`);
+    logger.info(`${pkg.name} ${chalk.bold(`v${pkg.version}`)}`);
 
     checkNodeVersion(pkg.engines, (error, result) => {
       if (error) {
@@ -153,6 +153,7 @@ async function setupProjectFiles({
 }) {
   const frontendPath = getFrontendPathFromDest(destination);
   const commitSuffix = commit == null ? '' : `#${commit}`;
+  logger.info('');
   if (tutorial) {
     const comingSoonTutorials = new Set(['semantle-battle-tutorial', 'chess-timer-tutorial']);
     const { tutorialType } = await inquirer.prompt([
@@ -199,9 +200,10 @@ async function setupProjectFiles({
     const templateBackendEmitter = degit(templateBackendDegitUrl);
     const templateFrontendEmitter = degit(templateFrontendDegitUrl);
 
-    logger.info(`Downloading backend template from ${gitUrl}/tree/${commit}${templateBackendPath}...`);
+    logger.info(`\nCreating new UrTurn game at ${chalk.greenBright(destination)}\n`);
+    logger.info(`[1/2] 💾 Downloading ${chalk.bold('backend template')} from ${gitUrl}/tree/${commit}${templateBackendPath}`);
     await templateBackendEmitter.clone(destination);
-    logger.info(`Downloading frontend template from ${gitUrl}/tree/${commit}${templateFrontendPath}...`);
+    logger.info(`[2/2] 🎮 Downloading ${chalk.bold('frontend template')} from ${gitUrl}/tree/${commit}${templateFrontendPath}`);
     await templateFrontendEmitter.clone(frontendPath);
   }
 }

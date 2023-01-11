@@ -2,13 +2,13 @@
 // Note: type annotations allow type checking and IDEs autocompletion
 
 const lightCodeTheme = require('prism-react-renderer/themes/vsLight');
-const darkCodeTheme = require('prism-react-renderer/themes/vsDark');
+const darkCodeTheme = require('prism-react-renderer/themes/palenight');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Create web games faster than ever',
+  title: 'Create Turn Based Web Games Faster Than Ever',
   url: 'https://docs.urturn.app',
-  tagline: "Use your favorite game frameworks, while deploying your frontend and room functions on UrTurn's open source infrastructure for free",
+  tagline: 'Use your favorite frontend technologies like ReactJS, PhaserIO, PixiJS (and more!) while leveraging our simple JSON-based room abstraction',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -16,7 +16,6 @@ const config = {
   projectName: 'UrTurn',
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
-  themes: ['@docusaurus/theme-live-codeblock'],
   favicon: 'img/favicon.svg',
   presets: [
     [
@@ -67,14 +66,14 @@ const config = {
           {
             href: 'https://discord.gg/myWacjdb5S',
             position: 'right',
-            className: "header-discord-link",
-            "aria-label": "UrTurn Discord",
+            className: 'header-discord-link',
+            'aria-label': 'UrTurn Discord',
           },
           {
             href: 'https://github.com/turnbasedgames/urturn',
             position: 'right',
-            className: "header-github-link",
-            "aria-label": "GitHub repository",
+            className: 'header-github-link',
+            'aria-label': 'GitHub repository',
           },
         ],
       },
@@ -102,7 +101,7 @@ const config = {
                   </div>
                 </div>
               </div>
-            `
+            `,
           },
         ],
       },
@@ -114,18 +113,18 @@ const config = {
           {
             className: 'theme-code-block-highlighted-line',
             line: 'highlight-next-line',
-            block: {start: 'highlight-start', end: 'highlight-end'},
+            block: { start: 'highlight-start', end: 'highlight-end' },
           },
           {
             className: 'code-block-error-line',
             line: 'error-next-line',
-            block: {start: 'error-start', end: 'error-end'},
+            block: { start: 'error-start', end: 'error-end' },
           },
         ],
       },
     }),
   // This is required to make the docs site searchable https://github.com/praveenn77/docusaurus-lunr-search
-  plugins: [require.resolve('docusaurus-lunr-search')]
+  plugins: [require.resolve('docusaurus-lunr-search')],
 };
 
 module.exports = config;

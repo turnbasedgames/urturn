@@ -24,6 +24,8 @@ Run to generate a new game and pick your favorite web framework:
 npx @urturn/runner init my-game
 ```
 
+![demo of runner init command](./docs/static/img/runner-init.svg)
+
 More info [here](https://docs.urturn.app/)!
 
 ## Have questions or ideas?
