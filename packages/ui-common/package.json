@@ -16,6 +16,7 @@
     "build-storybook": "build-storybook"
   },
   "author": "",
+  "homepage": "https://docs.urturn.app",
   "license": "ISC",
   "repository": {
     "type": "git",

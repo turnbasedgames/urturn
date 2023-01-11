@@ -16,7 +16,7 @@
   "bugs": {
     "url": "https://github.com/turnbasedgames/urturn/issues"
   },
-  "homepage": "https://github.com/turnbasedgames/urturn/tree/main/packages/client#readme",
+  "homepage": "https://docs.urturn.app",
   "dependencies": {
     "penpal": "^5.3.0"
   },
