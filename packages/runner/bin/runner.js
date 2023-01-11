@@ -143,7 +143,7 @@ async function setupProjectFiles({
         message: "Which game frontend do you want to use? (don't see your frontend, add it in a PR!)",
         default: 'ReactJS',
         choices: [
-          { name: 'ReactJS', value: 'none' },
+          { name: 'ReactJS', value: 'react' },
           { name: 'PhaserIO (created by Enjoy2Live)', value: 'phaser' },
           { name: 'PixiJS', value: 'pixi' },
           { name: 'None', value: 'none' },
