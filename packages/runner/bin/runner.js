@@ -104,6 +104,50 @@ function getFrontendPathFromDest(destination) {
   return `${destination}/frontend`;
 }
 
+function isInGitRepository() {
+  try {
+    execSync('git rev-parse --is-inside-work-tree', { stdio: 'ignore' });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function tryGitInit() {
+  try {
+    execSync('git --version', { stdio: 'ignore' });
+    if (isInGitRepository()) {
+      return false;
+    }
+
+    execSync('git init', { stdio: 'ignore' });
+    return true;
+  } catch (e) {
+    logger.warn('Git repo not initialized', e);
+    return false;
+  }
+}
+
+function tryGitCommit() {
+  try {
+    execSync('git add -A', { stdio: 'ignore' });
+    execSync('git commit -m "Initialize project using https://docs.urturn.app"', {
+      stdio: 'ignore',
+    });
+    return true;
+  } catch (e) {
+    // We couldn't commit in already initialized git repo,
+    // maybe the commit author config is not set.
+    // In the future, we might supply our own committer
+    // like Ember CLI does, but for now, let's just
+    // remove the Git files to avoid a half-done state.
+    logger.warn('Git commit not created', e);
+    logger.warn('Removing .git directory...');
+
+    return false;
+  }
+}
+
 async function setupProjectFiles({
   gitUrl, destination, tutorial, commit,
 }) {
@@ -171,6 +215,16 @@ async function init(destination, { commit, tutorial, gitUrl }) {
     commit,
     tutorial,
   });
+
+  if (tryGitInit()) {
+    logger.info();
+    logger.info('Initialized a git repository.');
+
+    if (tryGitCommit()) {
+      logger.info();
+      logger.info('Created git commit.');
+    }
+  }
 
   const extraBackendPackages = ['@urturn/runner'];
   const extraFrontendPackages = ['@urturn/client'];
