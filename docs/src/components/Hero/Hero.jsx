@@ -6,7 +6,6 @@ import {
 } from '@mui/material';
 import clsx from 'clsx';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
-// import RunnerSvg from './runner-init.svg';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import styles from './Hero.module.css';
 
