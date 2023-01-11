@@ -1,6 +1,5 @@
 import React from 'react';
 import { Stack, Typography, Box } from '@mui/material';
-import useBaseUrl from '@docusaurus/useBaseUrl';
 import CodeBlock from '@theme/CodeBlock';
 
 function StepOneInitialize() {
@@ -17,11 +16,18 @@ function StepOneInitialize() {
         </CodeBlock>
       </Box>
       <Typography variant="body1">
-        Choose a frontend framework or start with vanilla HTML5:
+        Start your game:
       </Typography>
       <Box width="100%" maxWidth="600px">
-        <img src={useBaseUrl('/img/runner-init.svg')} alt="gif of terminal initializing game" />
+        <CodeBlock language="bash">
+          {`cd my-game
+npm run dev`}
+        </CodeBlock>
       </Box>
+      <Typography variant="body1">
+        This will simulates your game in multiplayer locally and start the
+        <Box color="var(--ifm-color-primary)" fontWeight="bold" component="span"> Runner</Box>
+      </Typography>
     </Stack>
   );
 }

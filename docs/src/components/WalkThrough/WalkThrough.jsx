@@ -96,7 +96,7 @@ export default function WalkThrough() {
           />
         ))}
       </Stack>
-      <Card variant="outlined" sx={{ backgroundColor: 'var(--ifm-color-emphasis-200)', flexGrow: 1, maxWidth: '800px' }}>
+      <Card variant="outlined" sx={{ backgroundColor: 'var(--ifm-color-emphasis-100)', flexGrow: 1, maxWidth: '800px' }}>
         {contentElement}
       </Card>
     </Stack>
