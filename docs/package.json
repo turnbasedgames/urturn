@@ -12,24 +12,26 @@
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
-    "lint": "echo no good way to lint docusaurus repo, check: https://github.com/facebook/docusaurus/issues/2965",
-    "lint:fix": "echo no good way to lint docusaurus repo, check: https://github.com/facebook/docusaurus/issues/2965"
+    "lint": "eslint . --ignore-path .gitignore --ext .js,.jsx",
+    "lint:fix": "eslint . --ignore-path .gitignore --ext .js,.jsx --fix"
   },
   "dependencies": {
     "@docusaurus/core": "2.2.0",
     "@docusaurus/preset-classic": "2.2.0",
-    "@docusaurus/theme-live-codeblock": "2.2.0",
+    "@docusaurus/theme-common": "^2.2.0",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@mdx-js/react": "^1.6.21",
+    "@mui/icons-material": "^5.11.0",
     "@mui/material": "^5.10.12",
-    "@openreplay/tracker": "^4.1.9",
     "clsx": "^1.1.1",
     "docusaurus-lunr-search": "^2.3.1",
     "mui": "^0.0.1",
     "prism-react-renderer": "^1.2.1",
+    "prop-types": "^15.8.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-github-btn": "^1.4.0",
     "react-router-dom": "5.3.3",
     "uuid": "^9.0.0"
   },
@@ -44,5 +46,14 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@docusaurus/eslint-plugin": "^2.2.0",
+    "eslint": "^8.31.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jsx-a11y": "^6.6.1",
+    "eslint-plugin-react": "^7.31.11",
+    "eslint-plugin-react-hooks": "^4.6.0"
   }
 }
