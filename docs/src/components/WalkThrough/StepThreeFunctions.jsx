@@ -21,11 +21,7 @@ function StepThreeFunctions() {
   const { state } = roomState;
   state.board[x][y] = plrIdToPlrMark[player.id];
   return {
-    state,
-    // finished: false
-    // joinable: true
-    // We support special boolean metadata fields that you can return to
-    // tell the UrTurn matchmaker on-the-fly if players can join the room!
+    state
   };
 }`}
       </CodeBlock>
@@ -35,16 +31,11 @@ function StepThreeFunctions() {
         language="js"
       >
         {`export default {
-  // Handle the initial state of your game with no players in it
   onRoomStart,
-  // Change state or start the game when you have enough players
   onPlayerJoin,
-  // Player Quit is triggered when players quit the room or are disconnected for 30-seconds
   onPlayerQuit,
-  // Validate moves and modify state based on them
   onPlayerMove,
-};
-`}
+};`}
       </CodeBlock>
     </Stack>
   );
