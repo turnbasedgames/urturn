@@ -133,7 +133,7 @@ function onPlayerMove() {
   <TabItem value="solution" label="onPlayerMove Solution">
 
 ```js title="src/main.js"
-function onPlayerMove(player, roomState) {
+function onPlayerMove(player, chess, roomState) {
   const { state } = roomState;
   const { fen } = state;
   if (fen == null) {
