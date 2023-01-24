@@ -19,6 +19,11 @@ async function getRoomAndAssert(t, roomId) {
   return room;
 }
 
+async function getGame(api, gameId) {
+  const { data: { game } } = await api.get(`/game/${gameId}`);
+  return game;
+}
+
 async function createGameAndAssert(t, api, userCred, user, gameOptionalInfo = {}) {
   const name = gameOptionalInfo.name ?? `integration-tests-${uuidv4()}`;
   const description = gameOptionalInfo.description ?? 'test description';
@@ -80,7 +85,12 @@ async function createRoomAndAssert(t, api, userCred, game, user, makePrivate = f
     { game: game.id, private: makePrivate },
     { headers: { authorization: authToken } });
   t.is(status, StatusCodes.CREATED);
-  t.deepEqual(room.game, game);
+  t.deepEqual(room.game, {
+    ...game,
+    // don't assert on playCount and updatedAt, as they are non deterministically modified
+    playCount: room.game.playCount,
+    updatedAt: room.game.updatedAt,
+  });
   t.is(room.joinable, true);
   t.is(room.private, makePrivate);
   t.deepEqual(room.players, [user].map(getPublicUserFromUser));
@@ -111,14 +121,18 @@ async function startTicTacToeRoom(t) {
   const userTwo = await createUserAndAssert(t, api, userCredTwo);
   const authTokenTwo = await userCredTwo.user.getIdToken();
   const game = await createGameAndAssert(t, api, userCredOne, userOne);
-  const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
+  const room = await createRoomAndAssert(t, api, userCredOne, game.id, userOne);
   const { data: { room: resRoom }, status } = await api.put('/room', { game: game.id },
     { headers: { authorization: authTokenTwo } });
   t.is(status, StatusCodes.OK);
   // a second PUT /room request should add the player to the previous joinable room that was just
   // created
   t.is(resRoom.id, room.id);
-  t.deepEqual(resRoom.game, game);
+  t.deepEqual(resRoom.game, {
+    ...game,
+    updatedAt: resRoom.game.updatedAt,
+    playCount: 2, // playCount is 2 because two players attempted to play a game
+  });
   t.is(resRoom.joinable, true);
   t.deepEqual(resRoom.players, [userOne, userTwo].map(getPublicUserFromUser));
   t.deepEqual(resRoom.latestState.state, {
@@ -154,4 +168,5 @@ module.exports = {
   startTicTacToeRoom,
   getRoomAndAssert,
   cleanupTestUsers,
+  getGame,
 };

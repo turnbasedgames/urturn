@@ -89,9 +89,9 @@ test('DELETE /instance/cleanup cleans up at max 10 userSockets for each serviceI
 
   const game1 = await createGameAndAssert(t, api, user1Cred, user1);
   const game2 = await createGameAndAssert(t, api, user2Cred, user2);
-  const room1 = await createRoomAndAssert(t, api, user1Cred, game1, user1);
-  const room2 = await createRoomAndAssert(t, api, user2Cred, game2, user2, true);
-  const room3 = await createRoomAndAssert(t, api, user2Cred, game2, user2, true);
+  const room1 = await createRoomAndAssert(t, api, user1Cred, game1.id, user1);
+  const room2 = await createRoomAndAssert(t, api, user2Cred, game2.id, user2, true);
+  const room3 = await createRoomAndAssert(t, api, user2Cred, game2.id, user2, true);
   const rooms = [room1, room2, room3];
 
   const expectedStaleUserSocketsDeleted = stale10MinInstances
@@ -161,7 +161,12 @@ test('DELETE /instance/cleanup cleans up at max 10 userSockets for each serviceI
   const { data: { game: actualGame1 }, status: getGame1Status } = await api.get(`/game/${game1.id}`);
   t.is(getGame1Status, StatusCodes.OK);
   // no more players in game1 because all the sockets were cleaned up
-  t.deepEqual(actualGame1, { ...game1, activePlayerCount: 0 });
+  t.deepEqual(actualGame1, {
+    ...game1,
+    playCount: actualGame1.playCount,
+    updatedAt: actualGame1.updatedAt,
+    activePlayerCount: 0,
+  });
 
   const { data: { game: actualGame2 }, status: getGame2Status } = await api.get(`/game/${game2.id}`);
   t.is(getGame2Status, StatusCodes.OK);

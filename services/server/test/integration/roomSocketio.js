@@ -222,27 +222,32 @@ test('sockets that emit watchRoom with a room id will get events for room:latest
   const { data: { room: resRoom }, status } = await api.post(`/room/${room.id}/join`, {},
     { headers: { authorization: await userCredTwo.user.getIdToken() } });
   t.is(status, StatusCodes.OK);
-  t.deepEqual(resRoom, {
-    id: room.id,
-    game: { ...game, activePlayerCount: 2 },
-    joinable: true,
-    finished: false,
-    latestState: {
-      id: resRoom.latestState.id,
-      version: 1,
-      room: room.id,
-      state: {
-        last: resRoom.latestState.state.last,
-        message: `${userTwo.username} joined!`,
+  t.deepEqual(resRoom,
+    {
+      id: room.id,
+      game: {
+        ...resRoom.game,
+        id: game.id,
+        activePlayerCount: 2,
       },
-    },
-    roomStartContext: {
+      joinable: true,
+      finished: false,
+      latestState: {
+        id: resRoom.latestState.id,
+        version: 1,
+        room: room.id,
+        state: {
+          last: resRoom.latestState.state.last,
+          message: `${userTwo.username} joined!`,
+        },
+      },
+      roomStartContext: {
+        private: false,
+      },
+      players: [userOne, userTwo].map(getPublicUserFromUser),
+      inactivePlayers: [],
       private: false,
-    },
-    players: [userOne, userTwo].map(getPublicUserFromUser),
-    inactivePlayers: [],
-    private: false,
-  });
+    });
   const v1State = {
     finished: false,
     joinable: true,
@@ -319,6 +324,7 @@ test('sockets that emit watchRoom with a room id cannot watch another room', asy
     app,
     room,
     {
+
       auth: (cb) => {
         userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
           t.context.log({
@@ -470,7 +476,7 @@ test('sockets can be connected to different nodejs instances and receive events 
 
 test('sockets gets connect_error if it does not provide auth tokens', async (t) => {
   const { app } = t.context;
-  const socket = createSocket(t, app, {});
+  const socket = createSocket(t, app);
   const connectError = await waitForNextConnectError(t.context.log, socket);
   t.is(connectError.message, 'First argument to verifyIdToken() must be a Firebase ID token string.');
 });
@@ -496,6 +502,7 @@ test('sockets get properly disconnected when server is terminating', async (t) =
     t,
     testApp,
     {
+
       auth: (cb) => {
         userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
           t.context.log({
@@ -609,7 +616,8 @@ test('sockets disconnected kicks player if they don\'t have a socket connection 
   await sleep(rightBeforeDisconnectTimeoutMs);
   const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
   t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
-  t.deepEqual(roomRightBeforeDisconnectTimeout, room);
+  t.is(roomRightBeforeDisconnectTimeout.latestState.version, room.latestState.version);
+  t.deepEqual(roomRightBeforeDisconnectTimeout.players, room.players);
 
   // user should no longer be in room after disconnectTimeout
   await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
@@ -650,10 +658,8 @@ test('sockets with other players notifies clients of user disconnect timeout', a
   await sleep(rightBeforeDisconnectTimeoutMs);
   const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
   t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
-  t.deepEqual(roomRightBeforeDisconnectTimeout, {
-    ...room,
-    game: { ...room.game, activePlayerCount: 1 },
-  });
+  t.is(roomRightBeforeDisconnectTimeout.latestState.version, room.latestState.version);
+  t.deepEqual(roomRightBeforeDisconnectTimeout.players, room.players);
 
   // user should no longer be in room after disconnectTimeout
   await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
@@ -717,7 +723,8 @@ test('sockets multiple disconnections kicks player if they don\'t have a socket 
   await sleep(rightBeforeDisconnectTimeoutMs);
   const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
   t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
-  t.deepEqual(roomRightBeforeDisconnectTimeout, room);
+  t.is(roomRightBeforeDisconnectTimeout.latestState.version, room.latestState.version);
+  t.deepEqual(roomRightBeforeDisconnectTimeout.players, room.players);
 
   // user should no longer be in room after disconnectTimeout
   await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
@@ -740,6 +747,7 @@ test('sockets disconnected does not kick player if they have a socket connection
     app,
     room,
     {
+
       auth: (cb) => {
         userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
           t.context.log({
@@ -761,7 +769,8 @@ test('sockets disconnected does not kick player if they have a socket connection
   await sleep(rightBeforeDisconnectTimeoutMs);
   const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
   t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
-  t.deepEqual(roomRightBeforeDisconnectTimeout, room);
+  t.is(roomRightBeforeDisconnectTimeout.latestState.version, room.latestState.version);
+  t.deepEqual(roomRightBeforeDisconnectTimeout.players, room.players);
 
   // user reconnects with new socket before timeout
   await createNewSocket();
@@ -770,7 +779,9 @@ test('sockets disconnected does not kick player if they have a socket connection
   await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
   const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
   t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
-  t.deepEqual(roomRightAfterDisconnectTimeout, roomAfterFirstSocket);
+  t.is(roomRightAfterDisconnectTimeout.latestState.version,
+    roomAfterFirstSocket.latestState.version);
+  t.deepEqual(roomRightAfterDisconnectTimeout.players, roomAfterFirstSocket.players);
 });
 
 test('sockets disconnected does not kick player if room is private', async (t) => {
@@ -804,13 +815,15 @@ test('sockets disconnected does not kick player if room is private', async (t) =
   await sleep(rightBeforeDisconnectTimeoutMs);
   const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
   t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
-  t.deepEqual(roomRightBeforeDisconnectTimeout, room);
+  t.is(roomRightBeforeDisconnectTimeout.latestState.version, room.latestState.version);
+  t.deepEqual(roomRightBeforeDisconnectTimeout.players, room.players);
 
-  // user should no longer be in room after disconnectTimeout
+  // user is still in room after waiting disconnectTimeoutMs because they are still connected
   await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
   const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
   t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
-  t.deepEqual(roomRightAfterDisconnectTimeout, room);
+  t.is(roomRightAfterDisconnectTimeout.latestState.version, room.latestState.version);
+  t.deepEqual(roomRightAfterDisconnectTimeout.players, room.players);
 });
 
 test('sockets disconnected does not kick player if room is finished', async (t) => {
@@ -848,11 +861,13 @@ test('sockets disconnected does not kick player if room is finished', async (t) 
   await sleep(rightBeforeDisconnectTimeoutMs);
   const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
   t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
-  t.deepEqual(roomRightBeforeDisconnectTimeout, roomAfterQuit);
+  t.is(roomRightBeforeDisconnectTimeout.latestState.version, roomAfterQuit.latestState.version);
+  t.deepEqual(roomRightBeforeDisconnectTimeout.players, roomAfterQuit.players);
 
-  // user should no longer be in room after disconnectTimeout
+  // user is still in room because they are not kicked if the room is already finished
   await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
   const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
   t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
-  t.deepEqual(roomRightAfterDisconnectTimeout, roomAfterQuit);
+  t.is(roomRightAfterDisconnectTimeout.latestState.version, roomAfterQuit.latestState.version);
+  t.deepEqual(roomRightAfterDisconnectTimeout.players, roomAfterQuit.players);
 });

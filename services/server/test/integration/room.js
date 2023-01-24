@@ -5,6 +5,7 @@ const { Types } = require('mongoose');
 const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
 const {
+  getGame,
   getPublicUserFromUser,
   createUserAndAssert,
   createGameAndAssert,
@@ -340,7 +341,10 @@ test('PUT /room creates a room for the user if a private field is specified', as
   const user = await createUserAndAssert(t, api, userCred);
 
   const game = await createGameAndAssert(t, api, userCred, user);
+  const gameBeforeCreateRoom = getGame(game.id);
   await createRoomAndAssert(t, api, userCred, game, user, true);
+  const gameAfterCreateRoom = getGame(game.id);
+  t.is(gameAfterCreateRoom.playCount, gameBeforeCreateRoom.playCount + 1);
 });
 
 test('PUT /room creates a room for the user if user is not able to join any rooms including private rooms', async (t) => {
@@ -551,7 +555,7 @@ test('POST /room/:id/reset resets the private room to an initial state', async (
   );
   t.is(status, StatusCodes.OK);
   t.is(roomResult.id, room.id);
-  t.deepEqual(roomResult.game, game);
+  t.is(roomResult.game.id, game.id);
   t.deepEqual(roomResult.players, room.players);
   t.is(roomResult.joinable, true);
   t.is(roomResult.finished, false);

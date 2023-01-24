@@ -12,6 +12,7 @@ import logger from '../logger';
 import {
   createGame, GameReqBody, updateGame,
 } from '../models/game';
+import { getOwnerRepoFromURL } from './util';
 
 const octokit = new Octokit();
 const githubURLRegExp = /^https:\/\/(www.)?github.com\/.+\/.+\/?/;
@@ -67,17 +68,8 @@ function GameEditor({
       // artifict being used. This logic lives in the UI to avoid running into the GitHub REST API
       // rate limits in our integration tests and in production.
       const { commitSHA, githubURL: rawGitHubURL } = form;
-      const githubURL = new URL(rawGitHubURL);
-      const pathMatchResults = githubURL.pathname.match(/[^/]+/g);
+      const { owner, repo } = getOwnerRepoFromURL(rawGitHubURL);
 
-      // This should never happen because githubURL was validated before. We check this to avoid the
-      // typescript/linting errors
-      if (pathMatchResults == null) {
-        throw new Error('Unexpected error when trying to parse the GitHub owner and repo out of the github url!');
-      }
-
-      const owner = pathMatchResults[0];
-      const repo = pathMatchResults[1];
       // make sure the github repo exists
       try {
         await octokit.rest.repos.get({ owner, repo });

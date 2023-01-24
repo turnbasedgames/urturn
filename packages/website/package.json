@@ -26,6 +26,7 @@
     "buffer": "^6.0.3",
     "firebase": "^9.8.4",
     "http-status-codes": "^2.1.4",
+    "moment": "^2.29.4",
     "notistack": "^2.0.5",
     "octokit": "^2.0.10",
     "react": "17.0.2",
