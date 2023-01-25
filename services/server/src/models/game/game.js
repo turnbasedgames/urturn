@@ -32,6 +32,7 @@ const GameSchema = new Schema({
     minLength: 1,
     required: true,
   },
+  // tracks the total current active players (number of players with a socket open to the game)
   activePlayerCount: {
     type: Number,
     required: true,
@@ -40,6 +41,18 @@ const GameSchema = new Schema({
     validate: {
       validator: (activePlayerCount) => Number
         .isInteger(activePlayerCount) && activePlayerCount >= 0,
+      message: '{VALUE} is not a non-negative integer value',
+    },
+  },
+  // count the number of times a player has played the game (started/joined)
+  playCount: {
+    type: Number,
+    required: true,
+    default: 0,
+    index: true,
+    validate: {
+      validator: (playCount) => Number
+        .isInteger(playCount) && playCount >= 0,
       message: '{VALUE} is not a non-negative integer value',
     },
   },
@@ -83,12 +96,15 @@ GameSchema.method('toJSON', function toJSON() {
   return {
     id: this.id,
     activePlayerCount: this.activePlayerCount,
+    playCount: this.playCount,
     name: this.name,
     description: this.description,
     creator: this.creator,
     githubURL: this.githubURL,
     commitSHA: this.commitSHA,
     customURL: this.customURL,
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt,
   };
 });
 

@@ -74,8 +74,6 @@ function CheckoutForm(): React.ReactElement {
 
     setIsLoading(true);
 
-    // TODO:KEVIN room links move to /room/:roomId
-
     const result = await stripe.confirmPayment({
       elements,
       confirmParams: {

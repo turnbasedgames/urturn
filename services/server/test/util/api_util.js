@@ -19,6 +19,11 @@ async function getRoomAndAssert(t, roomId) {
   return room;
 }
 
+async function getGame(api, gameId) {
+  const { data: { game } } = await api.get(`/game/${gameId}`);
+  return game;
+}
+
 async function createGameAndAssert(t, api, userCred, user, gameOptionalInfo = {}) {
   const name = gameOptionalInfo.name ?? `integration-tests-${uuidv4()}`;
   const description = gameOptionalInfo.description ?? 'test description';
@@ -80,7 +85,12 @@ async function createRoomAndAssert(t, api, userCred, game, user, makePrivate = f
     { game: game.id, private: makePrivate },
     { headers: { authorization: authToken } });
   t.is(status, StatusCodes.CREATED);
-  t.deepEqual(room.game, game);
+  t.deepEqual(room.game, {
+    ...game,
+    // don't assert on playCount and updatedAt, as they are non deterministically modified
+    playCount: room.game.playCount,
+    updatedAt: room.game.updatedAt,
+  });
   t.is(room.joinable, true);
   t.is(room.private, makePrivate);
   t.deepEqual(room.players, [user].map(getPublicUserFromUser));
@@ -118,7 +128,12 @@ async function startTestAppRoom(t) {
   // a second PUT /room request should add the player to the previous joinable room that was just
   // created
   t.is(resRoom.id, room.id);
-  t.deepEqual(resRoom.game, game);
+  t.deepEqual(resRoom.game, {
+    ...game,
+    // don't assert behaviors of playCount, other tests will assert these values
+    updatedAt: resRoom.game.updatedAt,
+    playCount: resRoom.game.playCount,
+  });
   t.is(resRoom.joinable, true);
   t.deepEqual(resRoom.players, [userOne, userTwo].map(getPublicUserFromUser));
   t.deepEqual(resRoom.latestState.state, {
@@ -154,4 +169,5 @@ module.exports = {
   startTestAppRoom,
   getRoomAndAssert,
   cleanupTestUsers,
+  getGame,
 };

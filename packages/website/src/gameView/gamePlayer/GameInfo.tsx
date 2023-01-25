@@ -1,5 +1,5 @@
 import {
-  Button, Card, CardActions, CardHeader,
+  Button, Card, CardActions, CardHeader, Box,
   CircularProgress, LinearProgress, Paper, Stack, Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
@@ -19,6 +19,7 @@ import { UserContext } from '../../models/user';
 import CardMediaWithFallback from '../gameCard/CardMediaWithFallback';
 import ActiveUsersOverlay from '../gameCard/ActiveUsersOverlay';
 import logger from '../../logger';
+import GameStats from './GameStats';
 
 function GameInfo(): React.ReactElement {
   const { customURL } = useParams();
@@ -104,6 +105,7 @@ function GameInfo(): React.ReactElement {
                 boxShadow: 0,
                 width: '100%',
                 display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
                 position: 'relative',
               }}
             >
@@ -117,7 +119,7 @@ function GameInfo(): React.ReactElement {
                 )
               }
               <CardMediaWithFallback
-                sx={{ width: '60%', aspectRatio: '1/1', flexShrink: 0 }}
+                sx={{ width: { xs: '100%', sm: '300px', md: '400px' }, aspectRatio: '1/1', flexShrink: 0 }}
                 game={game}
               />
               <Stack sx={{ overflow: 'hidden' }} flexGrow="1" direction="column" justifyContent="space-between">
@@ -206,18 +208,27 @@ function GameInfo(): React.ReactElement {
             </Card>
           )}
         </Paper>
+        {!gameLoading && (
         <Paper sx={{ padding: 1 }}>
-          <Typography gutterBottom variant="h6">Description</Typography>
-          <Typography
-            sx={{
-              whiteSpace: 'pre-wrap', // display multiline text
-            }}
-            gutterBottom
-            variant="body2"
-          >
-            {game?.description}
-          </Typography>
+          <Stack spacing={2}>
+            <GameStats game={game} />
+            <Box>
+              <Typography variant="body1" fontWeight="bold">
+                Description
+              </Typography>
+              <Typography
+                sx={{
+                  whiteSpace: 'pre-wrap', // display multiline text
+                }}
+                gutterBottom
+                variant="body1"
+              >
+                {game?.description}
+              </Typography>
+            </Box>
+          </Stack>
         </Paper>
+        )}
       </Stack>
     </>
   );

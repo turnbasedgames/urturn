@@ -129,6 +129,9 @@ function setupRouter({ io }) {
     io.to(room.id).emit('room:latestState', UserCode.getCreatorRoomState(room, roomState));
     await room.populate('latestState').execPopulate();
 
+    // operation is not necessary for this endpoint, so don't wait on updating metrics
+    Game.findByIdAndUpdate(room.game.id, { $inc: { playCount: 1 } }).catch(logger.error);
+
     return { room, error };
   }
 
@@ -151,6 +154,9 @@ function setupRouter({ io }) {
           session,
         );
       });
+
+      // operation is not necessary for this endpoint, so don't wait on updating metrics
+      Game.findByIdAndUpdate(room.game.id, { $inc: { playCount: 1 } }).catch(logger.error);
 
       return { room, newRoomState, error };
     } catch (err) {

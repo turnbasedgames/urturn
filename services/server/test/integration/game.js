@@ -241,14 +241,15 @@ test('PUT /game/:id updates a game', async (t) => {
   const user = await createUserAndAssert(t, api, userCred);
 
   const authToken = await userCred.user.getIdToken();
-  const game = await createGameAndAssert(t, api, userCred, user);
+  const { updatedAt: oldUpdatedAt, ...game } = await createGameAndAssert(t, api, userCred, user);
   const updateDoc = { name: `integration-tests-${uuidv4()}` };
-  const { data: { game: gamePutRes }, status: statusPut } = await api.put(`/game/${game.id}`, updateDoc, { headers: { authorization: authToken } });
+  const { data: { game: { updatedAt: newUpdatedAt, ...gamePutRes } }, status: statusPut } = await api.put(`/game/${game.id}`, updateDoc, { headers: { authorization: authToken } });
   t.is(statusPut, StatusCodes.OK);
+  t.true(new Date(oldUpdatedAt) < new Date(newUpdatedAt));
   t.deepEqual(gamePutRes, { ...game, ...updateDoc });
   const { data: { game: gameGetRes }, status: statusGet } = await api.get(`/game/${game.id}`);
   t.is(statusGet, StatusCodes.OK);
-  t.deepEqual(gameGetRes, gamePutRes);
+  t.deepEqual(gameGetRes, { ...gamePutRes, updatedAt: newUpdatedAt });
 });
 
 test('PUT /game/:id fails with invalid customURL', async (t) => {

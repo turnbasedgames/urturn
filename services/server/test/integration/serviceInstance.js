@@ -161,12 +161,22 @@ test('DELETE /instance/cleanup cleans up at max 10 userSockets for each serviceI
   const { data: { game: actualGame1 }, status: getGame1Status } = await api.get(`/game/${game1.id}`);
   t.is(getGame1Status, StatusCodes.OK);
   // no more players in game1 because all the sockets were cleaned up
-  t.deepEqual(actualGame1, { ...game1, activePlayerCount: 0 });
+  t.deepEqual(actualGame1, {
+    ...game1,
+    playCount: actualGame1.playCount,
+    updatedAt: actualGame1.updatedAt,
+    activePlayerCount: 0,
+  });
 
   const { data: { game: actualGame2 }, status: getGame2Status } = await api.get(`/game/${game2.id}`);
   t.is(getGame2Status, StatusCodes.OK);
   // game2 still has active sockets so activePlayerCount should not be decremented
-  t.deepEqual(actualGame2, { ...game2, activePlayerCount: 2 });
+  t.deepEqual(actualGame2, {
+    ...game2,
+    playCount: actualGame2.playCount,
+    updatedAt: actualGame2.updatedAt,
+    activePlayerCount: 2,
+  });
 });
 
 test('DELETE /instance/cleanup cleans up at max 10 of the most stale serviceInstances that have zero associated sockets', async (t) => {
