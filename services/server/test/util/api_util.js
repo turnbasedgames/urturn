@@ -121,7 +121,7 @@ async function startTicTacToeRoom(t) {
   const userTwo = await createUserAndAssert(t, api, userCredTwo);
   const authTokenTwo = await userCredTwo.user.getIdToken();
   const game = await createGameAndAssert(t, api, userCredOne, userOne);
-  const room = await createRoomAndAssert(t, api, userCredOne, game.id, userOne);
+  const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
   const { data: { room: resRoom }, status } = await api.put('/room', { game: game.id },
     { headers: { authorization: authTokenTwo } });
   t.is(status, StatusCodes.OK);
@@ -130,8 +130,9 @@ async function startTicTacToeRoom(t) {
   t.is(resRoom.id, room.id);
   t.deepEqual(resRoom.game, {
     ...game,
+    // don't assert behaviors of playCount, other tests will assert these values
     updatedAt: resRoom.game.updatedAt,
-    playCount: 2, // playCount is 2 because two players attempted to play a game
+    playCount: resRoom.game.playCount,
   });
   t.is(resRoom.joinable, true);
   t.deepEqual(resRoom.players, [userOne, userTwo].map(getPublicUserFromUser));

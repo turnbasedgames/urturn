@@ -341,9 +341,9 @@ test('PUT /room creates a room for the user if a private field is specified', as
   const user = await createUserAndAssert(t, api, userCred);
 
   const game = await createGameAndAssert(t, api, userCred, user);
-  const gameBeforeCreateRoom = getGame(game.id);
+  const gameBeforeCreateRoom = await getGame(api, game.id);
   await createRoomAndAssert(t, api, userCred, game, user, true);
-  const gameAfterCreateRoom = getGame(game.id);
+  const gameAfterCreateRoom = await getGame(api, game.id);
   t.is(gameAfterCreateRoom.playCount, gameBeforeCreateRoom.playCount + 1);
 });
 
