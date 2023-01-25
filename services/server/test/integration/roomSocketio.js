@@ -8,7 +8,7 @@ const { spawnApp } = require('../util/app');
 const { createUserCred } = require('../util/firebase');
 const {
   getPublicUserFromUser, createUserAndAssert, createGameAndAssert, createRoomAndAssert,
-  startTicTacToeRoom, getRoomAndAssert, getServiceInstanceAndAssert,
+  startTestAppRoom, getRoomAndAssert, getServiceInstanceAndAssert,
 } = require('../util/api_util');
 const {
   waitFor, createOrUpdateSideApps, setupTestFileLogContext, sleep,
@@ -383,7 +383,7 @@ test('sockets can be connected to different nodejs instances and receive events 
   const { api } = app;
   const {
     userOne, userTwo, userCredOne, userCredTwo, room,
-  } = await startTicTacToeRoom(t);
+  } = await startTestAppRoom(t);
   const apps = [app, ...sideApps];
   const sockets = await Promise.all([...Array(6).keys()]
     .map((_, index) => {
@@ -624,7 +624,7 @@ test('sockets with other players notifies clients of user disconnect timeout', a
   const { app } = t.context;
   const {
     room, userCredOne, userCredTwo, userOne, userTwo,
-  } = await startTicTacToeRoom(t);
+  } = await startTestAppRoom(t);
   const createTempSocket = (userCred, user) => createSocketAndWatchRoom(
     t,
     app,
@@ -818,7 +818,7 @@ test('sockets disconnected does not kick player if room is finished', async (t) 
   const { api } = app;
   const {
     userCredOne, userOne, userCredTwo, room,
-  } = await startTicTacToeRoom(t);
+  } = await startTestAppRoom(t);
 
   // force room to be in finished state using test-app backend implementation
   await api.post(`/room/${room.id}/move`, { finished: true },
