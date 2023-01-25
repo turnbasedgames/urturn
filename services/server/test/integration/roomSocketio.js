@@ -745,7 +745,6 @@ test('sockets disconnected does not kick player if they have a socket connection
     app,
     room,
     {
-
       auth: (cb) => {
         userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
           t.context.log({
