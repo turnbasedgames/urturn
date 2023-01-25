@@ -103,7 +103,7 @@ async function createRoomAndAssert(t, api, userCred, game, user, makePrivate = f
   return room;
 }
 
-async function startTicTacToeRoom(t) {
+async function startTestAppRoom(t) {
   const { api } = t.context.app;
   const userCredOne = await createUserCred(t);
   const userCredTwo = await createUserCred(t);
@@ -151,7 +151,7 @@ module.exports = {
   createGameAndAssert,
   createRoomAndAssert,
   createUserAndAssert,
-  startTicTacToeRoom,
+  startTestAppRoom,
   getRoomAndAssert,
   cleanupTestUsers,
 };

@@ -9,14 +9,14 @@ const {
   createUserAndAssert,
   createGameAndAssert,
   createRoomAndAssert,
-  startTicTacToeRoom,
+  startTestAppRoom,
   getRoomAndAssert,
 } = require('../util/api_util');
 const { createOrUpdateSideApps, setupTestFileLogContext } = require('../util/util');
 const { setupTestBeforeAfterHooks } = require('../util/app');
 
 async function testOperationOnFinishedRoom(t, operation) {
-  const { userCredOne, userCredTwo, room } = await startTicTacToeRoom(t);
+  const { userCredOne, userCredTwo, room } = await startTestAppRoom(t);
   const { api } = t.context.app;
   const authTokenOne = await userCredOne.user.getIdToken();
   const authTokenTwo = await userCredTwo.user.getIdToken();
@@ -89,7 +89,7 @@ test('GET /room returns private room(s) for users that are querying there own da
   const { api } = t.context.app;
   const {
     userTwo, userCredTwo, room, game,
-  } = await startTicTacToeRoom(t);
+  } = await startTestAppRoom(t);
   const authTokenTwo = await userCredTwo.user.getIdToken();
 
   // only user two attempts to quit room
@@ -227,7 +227,7 @@ test('GET /room supports query by "containsInactivePlayer"', async (t) => {
   const { api } = t.context.app;
   const {
     userTwo, userCredTwo, room, game,
-  } = await startTicTacToeRoom(t);
+  } = await startTestAppRoom(t);
   const authTokenTwo = await userCredTwo.user.getIdToken();
 
   // only user two attempts to quit room, but because this triggers a finished room
@@ -562,7 +562,7 @@ test('POST /room/:id/reset resets the private room to an initial state', async (
 });
 
 test('POST /room/:id/join joins a game', async (t) => {
-  await startTicTacToeRoom(t);
+  await startTestAppRoom(t);
 });
 
 test('POST /room/:id/join on a non joinable room provides a 400', async (t) => {
@@ -616,7 +616,7 @@ test('POST /room/:id/join on a finished room throws an error', async (t) => {
 });
 
 test('POST /room/:id/move invokes creator backend to modify the game state', async (t) => {
-  const { userCredOne, userOne, room } = await startTicTacToeRoom(t);
+  const { userCredOne, userOne, room } = await startTestAppRoom(t);
   const { api } = t.context.app;
   const authToken = await userCredOne.user.getIdToken();
 
@@ -650,7 +650,7 @@ test('POST /room/:id/move invokes creator backend to modify the game state', asy
 });
 
 test('POST /room/:id/move provides error if user code throws an error', async (t) => {
-  const { userCredTwo, room } = await startTicTacToeRoom(t);
+  const { userCredTwo, room } = await startTestAppRoom(t);
 
   const { api } = t.context.app;
 
@@ -689,7 +689,7 @@ test('POST /room/:id/move provides error if database fails', async (t) => {
   const customApp = await spawnApp(t, { forceCreatePersistentDependencies: true });
   createOrUpdateSideApps(t, [customApp]);
   const { api, cleanupMongoDB } = customApp;
-  const { userCredOne, room } = await startTicTacToeRoom({
+  const { userCredOne, room } = await startTestAppRoom({
     ...t,
     context: {
       ...t.context,
@@ -714,7 +714,7 @@ test('POST /room/:id/move on a finished room throws an error', async (t) => {
 test('POST /room/:id/quit user is no longer in the room, and is in inactivePlayers list', async (t) => {
   const {
     userOne, userTwo, userCredOne, room,
-  } = await startTicTacToeRoom(t);
+  } = await startTestAppRoom(t);
 
   const { api } = t.context.app;
   const authToken = await userCredOne.user.getIdToken();
