@@ -22,18 +22,6 @@ const rightBeforeDisconnectTimeoutMs = (disconnectTimeoutSecs - disconnectAssert
 const timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs = disconnectAssertionBufferSecs
   * 2 * 1000;
 
-const socketConfigs = [{
-  name: 'http polling only',
-  config: { transports: ['polling'] },
-}, {
-  name: 'websocket only',
-  config: { transports: ['websocket'] },
-},
-{
-  name: 'any transport',
-  config: {},
-}];
-
 function createSocket(t, app, baseConfig) {
   const socketConfig = { extraHeaders: {}, ...baseConfig };
   socketConfig.extraHeaders['x-correlation-id'] = t.context.cid;
@@ -197,166 +185,140 @@ setupTestBeforeAfterHooks(test);
 
 setupTestFileLogContext(test);
 
-socketConfigs.forEach(({ name, config }) => {
-  test(`sockets (${name}) that emit watchRoom with a room id will get events for room:latestState when the state changes`, async (t) => {
-    const { app } = t.context;
-    const { api } = app;
-    const userCredOne = await createUserCred(t);
-    const userCredTwo = await createUserCred(t);
-    const userOne = await createUserAndAssert(t, api, userCredOne);
-    const userTwo = await createUserAndAssert(t, api, userCredTwo);
-    const game = await createGameAndAssert(t, api, userCredOne, userOne);
-    const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
-    const sockets = await Promise.all(
-      [...Array(6).keys()].map((ind) => createSocketAndWatchRoom(
-        t,
-        app,
-        room,
-        {
-          ...config,
-          auth: (cb) => {
-            const authTokenPromise = (ind % 2 === 0)
-              ? userCredOne.user.getIdToken() : userCredTwo.user.getIdToken();
-            authTokenPromise.then((token) => cb({ token })).catch((error) => {
-              t.context.log({
-                message: 'unable to get auth token',
-                error,
-              });
-            });
-          },
-          user: (ind % 2 === 0) ? userOne : userTwo,
-        },
-      )),
-    );
-
-    // only 2 unique players watching room, so even though there are 6 sockets, activePlayerCount
-    // should be 2
-    await assertActivePlayerCount(t, game.id, 2);
-
-    const { data: { room: resRoom }, status } = await api.post(`/room/${room.id}/join`, {},
-      { headers: { authorization: await userCredTwo.user.getIdToken() } });
-    t.is(status, StatusCodes.OK);
-    t.deepEqual(resRoom, {
-      id: room.id,
-      game: { ...game, activePlayerCount: 2 },
-      joinable: true,
-      finished: false,
-      latestState: {
-        id: resRoom.latestState.id,
-        version: 1,
-        room: room.id,
-        state: {
-          last: resRoom.latestState.state.last,
-          message: `${userTwo.username} joined!`,
-        },
-      },
-      roomStartContext: {
-        private: false,
-      },
-      players: [userOne, userTwo].map(getPublicUserFromUser),
-      inactivePlayers: [],
-      private: false,
-    });
-    const v1State = {
-      finished: false,
-      joinable: true,
-      players: [userOne, userTwo].map(getPublicUserFromUser),
-      version: 1,
-      roomStartContext: {
-        private: false,
-      },
-      state: {
-        last: resRoom.latestState.state.last,
-        message: `${userTwo.username} joined!`,
-      },
-    };
-    await assertNextSocketLatestState(t, sockets, v1State);
-    await assertActivePlayerCount(t, game.id, 2);
-
-    const testMove = {
-      x: 0,
-      y: 0,
-      testString: 'hello world',
-      testNested: { a: 'billy' },
-      emptyObj: {},
-    };
-    const { status: statusMove1 } = await api.post(`/room/${room.id}/move`, testMove,
-      { headers: { authorization: await userCredOne.user.getIdToken() } });
-    const v2State = {
-      finished: false,
-      joinable: true,
-      players: [userOne, userTwo].map(getPublicUserFromUser),
-      version: 2,
-      roomStartContext: {
-        private: false,
-      },
-      state: {
-        last: v1State,
-        message: `${userOne.username} made move!`,
-        move: testMove,
-      },
-    };
-    t.is(statusMove1, StatusCodes.OK);
-    await assertNextSocketLatestState(t, sockets, v2State);
-    await assertActivePlayerCount(t, game.id, 2);
-
-    const finishingMove = { ...testMove, finished: true, joinable: false };
-    const { status: statusMove2 } = await api.post(`/room/${room.id}/move`, finishingMove,
-      { headers: { authorization: await userCredTwo.user.getIdToken() } });
-    const v3State = {
-      finished: true,
-      joinable: false,
-      players: [userOne, userTwo].map(getPublicUserFromUser),
-      version: 3,
-      roomStartContext: {
-        private: false,
-      },
-      state: {
-        last: v2State,
-        message: `${userTwo.username} made move!`,
-        move: finishingMove,
-      },
-    };
-    t.is(statusMove2, StatusCodes.OK);
-    await assertNextSocketLatestState(t, sockets, v3State);
-  });
-
-  test(`sockets (${name}) that emit watchRoom with a room id cannot watch another room`, async (t) => {
-    const { app } = t.context;
-    const { api } = app;
-    const userCredOne = await createUserCred(t);
-    const userOne = await createUserAndAssert(t, api, userCredOne);
-    const game = await createGameAndAssert(t, api, userCredOne, userOne);
-    const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
-    const socket = await createSocketAndWatchRoom(
+test('sockets that emit watchRoom with a room id will get events for room:latestState when the state changes', async (t) => {
+  const { app } = t.context;
+  const { api } = app;
+  const userCredOne = await createUserCred(t);
+  const userCredTwo = await createUserCred(t);
+  const userOne = await createUserAndAssert(t, api, userCredOne);
+  const userTwo = await createUserAndAssert(t, api, userCredTwo);
+  const game = await createGameAndAssert(t, api, userCredOne, userOne);
+  const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
+  const sockets = await Promise.all(
+    [...Array(6).keys()].map((ind) => createSocketAndWatchRoom(
       t,
       app,
       room,
       {
-        ...config,
         auth: (cb) => {
-          userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
+          const authTokenPromise = (ind % 2 === 0)
+            ? userCredOne.user.getIdToken() : userCredTwo.user.getIdToken();
+          authTokenPromise.then((token) => cb({ token })).catch((error) => {
             t.context.log({
               message: 'unable to get auth token',
               error,
             });
           });
         },
-        user: userOne,
+        user: (ind % 2 === 0) ? userOne : userTwo,
       },
-    );
+    )),
+  );
 
-    const error = await t.throwsAsync(watchRoom(t, t.context.app, socket, room, false));
-    t.is(error.message, `Error: Socket already connected to a room: ${room.id}`);
+  // only 2 unique players watching room, so even though there are 6 sockets, activePlayerCount
+  // should be 2
+  await assertActivePlayerCount(t, game.id, 2);
+
+  const { data: { room: resRoom }, status } = await api.post(`/room/${room.id}/join`, {},
+    { headers: { authorization: await userCredTwo.user.getIdToken() } });
+  t.is(status, StatusCodes.OK);
+  t.deepEqual(resRoom, {
+    id: room.id,
+    game: { ...game, activePlayerCount: 2 },
+    joinable: true,
+    finished: false,
+    latestState: {
+      id: resRoom.latestState.id,
+      version: 1,
+      room: room.id,
+      state: {
+        last: resRoom.latestState.state.last,
+        message: `${userTwo.username} joined!`,
+      },
+    },
+    roomStartContext: {
+      private: false,
+    },
+    players: [userOne, userTwo].map(getPublicUserFromUser),
+    inactivePlayers: [],
+    private: false,
   });
+  const v1State = {
+    finished: false,
+    joinable: true,
+    players: [userOne, userTwo].map(getPublicUserFromUser),
+    version: 1,
+    roomStartContext: {
+      private: false,
+    },
+    state: {
+      last: resRoom.latestState.state.last,
+      message: `${userTwo.username} joined!`,
+    },
+  };
+  await assertNextSocketLatestState(t, sockets, v1State);
+  await assertActivePlayerCount(t, game.id, 2);
 
-  test(`sockets (${name}) that emit watchRoom with an invalid room id will get an error`, async (t) => {
-    const { app } = t.context;
-    const { api } = app;
-    const userCredOne = await createUserCred(t);
-    await createUserAndAssert(t, api, userCredOne);
-    const socket = createSocket(t, app, {
-      ...config,
+  const testMove = {
+    x: 0,
+    y: 0,
+    testString: 'hello world',
+    testNested: { a: 'billy' },
+    emptyObj: {},
+  };
+  const { status: statusMove1 } = await api.post(`/room/${room.id}/move`, testMove,
+    { headers: { authorization: await userCredOne.user.getIdToken() } });
+  const v2State = {
+    finished: false,
+    joinable: true,
+    players: [userOne, userTwo].map(getPublicUserFromUser),
+    version: 2,
+    roomStartContext: {
+      private: false,
+    },
+    state: {
+      last: v1State,
+      message: `${userOne.username} made move!`,
+      move: testMove,
+    },
+  };
+  t.is(statusMove1, StatusCodes.OK);
+  await assertNextSocketLatestState(t, sockets, v2State);
+  await assertActivePlayerCount(t, game.id, 2);
+
+  const finishingMove = { ...testMove, finished: true, joinable: false };
+  const { status: statusMove2 } = await api.post(`/room/${room.id}/move`, finishingMove,
+    { headers: { authorization: await userCredTwo.user.getIdToken() } });
+  const v3State = {
+    finished: true,
+    joinable: false,
+    players: [userOne, userTwo].map(getPublicUserFromUser),
+    version: 3,
+    roomStartContext: {
+      private: false,
+    },
+    state: {
+      last: v2State,
+      message: `${userTwo.username} made move!`,
+      move: finishingMove,
+    },
+  };
+  t.is(statusMove2, StatusCodes.OK);
+  await assertNextSocketLatestState(t, sockets, v3State);
+});
+
+test('sockets that emit watchRoom with a room id cannot watch another room', async (t) => {
+  const { app } = t.context;
+  const { api } = app;
+  const userCredOne = await createUserCred(t);
+  const userOne = await createUserAndAssert(t, api, userCredOne);
+  const game = await createGameAndAssert(t, api, userCredOne, userOne);
+  const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
+  const socket = await createSocketAndWatchRoom(
+    t,
+    app,
+    room,
+    {
       auth: (cb) => {
         userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
           t.context.log({
@@ -365,520 +327,532 @@ socketConfigs.forEach(({ name, config }) => {
           });
         });
       },
-    });
+      user: userOne,
+    },
+  );
 
-    const nonExistentId = new mongoose.Types.ObjectId();
-    const nonExistentError = await t.throwsAsync(watchRoom(
-      t,
-      app,
-      socket,
-      { id: nonExistentId.toString() },
-      false,
-    ));
-    t.is(nonExistentError.message, 'Error: Room does not exist');
+  const error = await t.throwsAsync(watchRoom(t, t.context.app, socket, room, false));
+  t.is(error.message, `Error: Socket already connected to a room: ${room.id}`);
+});
 
-    const invalidId = undefined;
-    const invalidIdError = await t.throwsAsync(
-      watchRoom(t, t.context.app, socket, { id: invalidId }, false),
-    );
-    t.is(invalidIdError.message, 'Error: Room does not exist');
+test('sockets that emit watchRoom with an invalid room id will get an error', async (t) => {
+  const { app } = t.context;
+  const { api } = app;
+  const userCredOne = await createUserCred(t);
+  await createUserAndAssert(t, api, userCredOne);
+  const socket = createSocket(t, app, {
+    auth: (cb) => {
+      userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
+        t.context.log({
+          message: 'unable to get auth token',
+          error,
+        });
+      });
+    },
   });
 
-  test(`sockets (${name}) can be connected to different nodejs instances and receive events for room:latestState`, async (t) => {
-    const { app } = t.context;
-    const sideApps = await Promise.all([...Array(3).keys()]
-      .map(() => spawnApp(
+  const nonExistentId = new mongoose.Types.ObjectId();
+  const nonExistentError = await t.throwsAsync(watchRoom(
+    t,
+    app,
+    socket,
+    { id: nonExistentId.toString() },
+    false,
+  ));
+  t.is(nonExistentError.message, 'Error: Room does not exist');
+
+  const invalidId = undefined;
+  const invalidIdError = await t.throwsAsync(
+    watchRoom(t, t.context.app, socket, { id: invalidId }, false),
+  );
+  t.is(invalidIdError.message, 'Error: Room does not exist');
+});
+
+test('sockets can be connected to different nodejs instances and receive events for room:latestState', async (t) => {
+  const { app } = t.context;
+  const sideApps = await Promise.all([...Array(3).keys()]
+    .map(() => spawnApp(
+      t,
+      {
+        defaultMongoEnv: app.envWithMongo,
+        defaultRedisEnv: app.envWithRedis,
+      },
+    )));
+  createOrUpdateSideApps(t, sideApps);
+
+  const { api } = app;
+  const {
+    userOne, userTwo, userCredOne, userCredTwo, room,
+  } = await startTicTacToeRoom(t);
+  const apps = [app, ...sideApps];
+  const sockets = await Promise.all([...Array(6).keys()]
+    .map((_, index) => {
+      const sideApp = apps[index % 4];
+      return createSocketAndWatchRoom(
         t,
+        sideApp,
+        room,
         {
-          defaultMongoEnv: app.envWithMongo,
-          defaultRedisEnv: app.envWithRedis,
-        },
-      )));
-    createOrUpdateSideApps(t, sideApps);
-
-    const { api } = app;
-    const {
-      userOne, userTwo, userCredOne, userCredTwo, room,
-    } = await startTicTacToeRoom(t);
-    const apps = [app, ...sideApps];
-    const sockets = await Promise.all([...Array(6).keys()]
-      .map((_, index) => {
-        const sideApp = apps[index % 4];
-        return createSocketAndWatchRoom(
-          t,
-          sideApp,
-          room,
-          {
-            ...config,
-            auth: (cb) => {
-              const authTokenPromise = (index % 2 === 0)
-                ? userCredOne.user.getIdToken() : userCredTwo.user.getIdToken();
-              authTokenPromise.then((token) => cb({ token })).catch((error) => {
-                t.context.log({
-                  message: 'unable to get auth token',
-                  error,
-                });
+          auth: (cb) => {
+            const authTokenPromise = (index % 2 === 0)
+              ? userCredOne.user.getIdToken() : userCredTwo.user.getIdToken();
+            authTokenPromise.then((token) => cb({ token })).catch((error) => {
+              t.context.log({
+                message: 'unable to get auth token',
+                error,
               });
-            },
-            user: (index % 2 === 0) ? userOne : userTwo,
-          },
-        );
-      }));
-
-    const testMove = {
-      x: 0,
-      y: 0,
-      testString: 'hello world',
-      testNested: { a: 'billy' },
-      emptyObj: {},
-    };
-    const { status: statusMove1 } = await api.post(`/room/${room.id}/move`, testMove,
-      { headers: { authorization: await userCredOne.user.getIdToken() } });
-    t.is(statusMove1, StatusCodes.OK);
-    const v1State = {
-      finished: false,
-      joinable: true,
-      players: [userOne, userTwo].map(getPublicUserFromUser),
-      version: 1,
-      roomStartContext: {
-        private: false,
-      },
-      state: {
-        last: room.latestState.state.last,
-        message: `${userTwo.username} joined!`,
-      },
-    };
-    const v2State = {
-      finished: false,
-      joinable: true,
-      players: [userOne, userTwo].map(getPublicUserFromUser),
-      version: 2,
-      roomStartContext: {
-        private: false,
-      },
-      state: {
-        last: v1State,
-        message: `${userOne.username} made move!`,
-        move: testMove,
-      },
-    };
-    await assertNextSocketLatestState(t, sockets, v2State);
-
-    const finishingMove = { ...testMove, finished: true, joinable: false };
-    const { status: statusMove2 } = await api.post(`/room/${room.id}/move`, finishingMove,
-      { headers: { authorization: await userCredTwo.user.getIdToken() } });
-    const v3State = {
-      finished: true,
-      joinable: false,
-      players: [userOne, userTwo].map(getPublicUserFromUser),
-      version: 3,
-      roomStartContext: {
-        private: false,
-      },
-      state: {
-        last: v2State,
-        message: `${userTwo.username} made move!`,
-        move: finishingMove,
-      },
-    };
-    t.is(statusMove2, StatusCodes.OK);
-    await assertNextSocketLatestState(t, sockets, v3State);
-  });
-
-  test(`sockets (${name}) gets connect_error if it does not provide auth tokens`, async (t) => {
-    const { app } = t.context;
-    const socket = createSocket(t, app, config);
-    const connectError = await waitForNextConnectError(t.context.log, socket);
-    t.is(connectError.message, 'First argument to verifyIdToken() must be a Firebase ID token string.');
-  });
-
-  test(`sockets (${name}) gets connect_error if providing invalid auth token`, async (t) => {
-    const { app } = t.context;
-    const socket = createSocket(t, app, { ...config, auth: { token: 'invalid-token' } });
-    const connectError = await waitForNextConnectError(t.context.log, socket);
-    t.is(connectError.message, 'Decoding Firebase ID token failed. Make sure you passed the entire string JWT which represents an ID token. See https://firebase.google.com/docs/auth/admin/verify-id-tokens for details on how to retrieve an ID token.');
-  });
-
-  test(`sockets (${name}) get properly disconnected when server is terminating`, async (t) => {
-    const { app } = t.context;
-    const testApp = await spawnApp(t, {
-      defaultMongoEnv: app.envWithMongo,
-      defaultRedisEnv: app.envWithRedis,
-    });
-    const { api, mongoClientDatabase } = testApp;
-
-    const userCredOne = await createUserCred(t);
-    const userOne = await createUserAndAssert(t, api, userCredOne);
-    const socket = createSocket(
-      t,
-      testApp,
-      {
-        ...config,
-        auth: (cb) => {
-          userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
-            t.context.log({
-              message: 'unable to get auth token',
-              error,
             });
-          });
+          },
+          user: (index % 2 === 0) ? userOne : userTwo,
         },
-      },
-    );
+      );
+    }));
 
-    t.true(await waitForConnected(t.context.log, socket));
-    await testApp.cleanup();
-    t.true(await waitForDisconnected(t.context.log, socket));
-    t.is(socket.data.disconnectEvents.length, 1);
-    t.is(socket.data.disconnectEvents[0].reason, 'transport close');
+  const testMove = {
+    x: 0,
+    y: 0,
+    testString: 'hello world',
+    testNested: { a: 'billy' },
+    emptyObj: {},
+  };
+  const { status: statusMove1 } = await api.post(`/room/${room.id}/move`, testMove,
+    { headers: { authorization: await userCredOne.user.getIdToken() } });
+  t.is(statusMove1, StatusCodes.OK);
+  const v1State = {
+    finished: false,
+    joinable: true,
+    players: [userOne, userTwo].map(getPublicUserFromUser),
+    version: 1,
+    roomStartContext: {
+      private: false,
+    },
+    state: {
+      last: room.latestState.state.last,
+      message: `${userTwo.username} joined!`,
+    },
+  };
+  const v2State = {
+    finished: false,
+    joinable: true,
+    players: [userOne, userTwo].map(getPublicUserFromUser),
+    version: 2,
+    roomStartContext: {
+      private: false,
+    },
+    state: {
+      last: v1State,
+      message: `${userOne.username} made move!`,
+      move: testMove,
+    },
+  };
+  await assertNextSocketLatestState(t, sockets, v2State);
 
-    const userSockets = await mongoClientDatabase.collection('usersockets').find({ user: userOne.id }).toArray();
-    t.is(userSockets.length, 0);
+  const finishingMove = { ...testMove, finished: true, joinable: false };
+  const { status: statusMove2 } = await api.post(`/room/${room.id}/move`, finishingMove,
+    { headers: { authorization: await userCredTwo.user.getIdToken() } });
+  const v3State = {
+    finished: true,
+    joinable: false,
+    players: [userOne, userTwo].map(getPublicUserFromUser),
+    version: 3,
+    roomStartContext: {
+      private: false,
+    },
+    state: {
+      last: v2State,
+      message: `${userTwo.username} made move!`,
+      move: finishingMove,
+    },
+  };
+  t.is(statusMove2, StatusCodes.OK);
+  await assertNextSocketLatestState(t, sockets, v3State);
+});
+
+test('sockets gets connect_error if it does not provide auth tokens', async (t) => {
+  const { app } = t.context;
+  const socket = createSocket(t, app, {});
+  const connectError = await waitForNextConnectError(t.context.log, socket);
+  t.is(connectError.message, 'First argument to verifyIdToken() must be a Firebase ID token string.');
+});
+
+test('sockets gets connect_error if providing invalid auth token', async (t) => {
+  const { app } = t.context;
+  const socket = createSocket(t, app, { auth: { token: 'invalid-token' } });
+  const connectError = await waitForNextConnectError(t.context.log, socket);
+  t.is(connectError.message, 'Decoding Firebase ID token failed. Make sure you passed the entire string JWT which represents an ID token. See https://firebase.google.com/docs/auth/admin/verify-id-tokens for details on how to retrieve an ID token.');
+});
+
+test('sockets get properly disconnected when server is terminating', async (t) => {
+  const { app } = t.context;
+  const testApp = await spawnApp(t, {
+    defaultMongoEnv: app.envWithMongo,
+    defaultRedisEnv: app.envWithRedis,
   });
+  const { api, mongoClientDatabase } = testApp;
 
-  test(`sockets (${name}) across several rooms for the same game still get counted as 1 unique player in activePlayerCount`, async (t) => {
-    const { app } = t.context;
-    const { api } = app;
-    const userCredOne = await createUserCred(t);
-    const userCredTwo = await createUserCred(t);
-    const userCredThree = await createUserCred(t);
-    const userOne = await createUserAndAssert(t, api, userCredOne);
-    const userTwo = await createUserAndAssert(t, api, userCredTwo);
-    const userThree = await createUserAndAssert(t, api, userCredThree);
-    const game = await createGameAndAssert(t, api, userCredOne, userOne);
-
-    // three rooms, two created by userOne, and the last created by userTwo
-    const rooms = await Promise.all([
-      createRoomAndAssert(t, api, userCredOne, game, userOne),
-      createRoomAndAssert(t, api, userCredOne, game, userOne),
-      createRoomAndAssert(t, api, userCredTwo, game, userTwo),
-      createRoomAndAssert(t, api, userCredThree, game, userThree),
-    ]);
-
-    const createSocketPromise = (userCred, user, room) => createSocketAndWatchRoom(
-      t, app, room,
-      {
-        ...config,
-        auth: (cb) => userCred.user.getIdToken().then((token) => cb({ token })).catch(((error) => {
+  const userCredOne = await createUserCred(t);
+  const userOne = await createUserAndAssert(t, api, userCredOne);
+  const socket = createSocket(
+    t,
+    testApp,
+    {
+      auth: (cb) => {
+        userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
           t.context.log({
             message: 'unable to get auth token',
             error,
           });
-        })),
-        user,
+        });
       },
-    );
+    },
+  );
 
-    // create 6 sockets per room (6 sockets * 4 rooms = 24 total sockets)
-    // testing high concurrent sockets to make sure we are free of race conditions in our
-    // transaction handling
-    const sockets = await Promise.all(rooms
-      .reduce((curSocketPromises, room) => [
-        ...curSocketPromises,
-        createSocketPromise(userCredOne, userOne, room),
-        createSocketPromise(userCredOne, userOne, room),
-        createSocketPromise(userCredOne, userOne, room),
-        createSocketPromise(userCredTwo, userTwo, room),
-        createSocketPromise(userCredTwo, userTwo, room),
-        createSocketPromise(userCredThree, userThree, room),
-      ], []));
+  t.true(await waitForConnected(t.context.log, socket));
+  await testApp.cleanup();
+  t.true(await waitForDisconnected(t.context.log, socket));
+  t.is(socket.data.disconnectEvents.length, 1);
+  t.is(socket.data.disconnectEvents[0].reason, 'transport close');
 
-    await assertActivePlayerCount(t, game.id, 3);
-    sockets.forEach((socket) => socket.disconnect());
-    await waitFor(t, async () => {
-      const count = await getActivePlayerCountAndAssert(t, game.id);
-      if (count === 0) {
-        return true;
-      }
-      t.context.log({ gameId: game.id, count });
-      throw new Error('Active player count never went to 0');
-    });
-    const { mongoClientDatabase } = t.context.app;
-    const userSockets = await mongoClientDatabase.collection('usersockets').find({ game: game.id }).toArray();
-    t.is(userSockets.length, 0);
+  const userSockets = await mongoClientDatabase.collection('usersockets').find({ user: userOne.id }).toArray();
+  t.is(userSockets.length, 0);
+});
+
+test('sockets across several rooms for the same game still get counted as 1 unique player in activePlayerCount', async (t) => {
+  const { app } = t.context;
+  const { api } = app;
+  const userCredOne = await createUserCred(t);
+  const userCredTwo = await createUserCred(t);
+  const userCredThree = await createUserCred(t);
+  const userOne = await createUserAndAssert(t, api, userCredOne);
+  const userTwo = await createUserAndAssert(t, api, userCredTwo);
+  const userThree = await createUserAndAssert(t, api, userCredThree);
+  const game = await createGameAndAssert(t, api, userCredOne, userOne);
+
+  // three rooms, two created by userOne, and the last created by userTwo
+  const rooms = await Promise.all([
+    createRoomAndAssert(t, api, userCredOne, game, userOne),
+    createRoomAndAssert(t, api, userCredOne, game, userOne),
+    createRoomAndAssert(t, api, userCredTwo, game, userTwo),
+    createRoomAndAssert(t, api, userCredThree, game, userThree),
+  ]);
+
+  const createSocketPromise = (userCred, user, room) => createSocketAndWatchRoom(
+    t, app, room,
+    {
+      auth: (cb) => userCred.user.getIdToken().then((token) => cb({ token })).catch(((error) => {
+        t.context.log({
+          message: 'unable to get auth token',
+          error,
+        });
+      })),
+      user,
+    },
+  );
+
+  // create 6 sockets per room (6 sockets * 4 rooms = 24 total sockets)
+  // testing high concurrent sockets to make sure we are free of race conditions in our
+  // transaction handling
+  const sockets = await Promise.all(rooms
+    .reduce((curSocketPromises, room) => [
+      ...curSocketPromises,
+      createSocketPromise(userCredOne, userOne, room),
+      createSocketPromise(userCredOne, userOne, room),
+      createSocketPromise(userCredOne, userOne, room),
+      createSocketPromise(userCredTwo, userTwo, room),
+      createSocketPromise(userCredTwo, userTwo, room),
+      createSocketPromise(userCredThree, userThree, room),
+    ], []));
+
+  await assertActivePlayerCount(t, game.id, 3);
+  sockets.forEach((socket) => socket.disconnect());
+  await waitFor(t, async () => {
+    const count = await getActivePlayerCountAndAssert(t, game.id);
+    if (count === 0) {
+      return true;
+    }
+    t.context.log({ gameId: game.id, count });
+    throw new Error('Active player count never went to 0');
   });
+  const { mongoClientDatabase } = t.context.app;
+  const userSockets = await mongoClientDatabase.collection('usersockets').find({ game: game.id }).toArray();
+  t.is(userSockets.length, 0);
+});
 
-  test(`sockets (${name}) disconnected kicks player if they don't have a socket connection after 30 seconds`, async (t) => {
-    const { app } = t.context;
-    const { api } = app;
-    const userCredOne = await createUserCred(t);
-    const userOne = await createUserAndAssert(t, api, userCredOne);
-    const game = await createGameAndAssert(t, api, userCredOne, userOne);
-    const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
-    const socket = await createSocketAndWatchRoom(
-      t,
-      app,
-      room,
-      {
-        ...config,
-        auth: (cb) => {
-          userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
-            t.context.log({
-              message: 'unable to get auth token',
-              error,
-            });
+test('sockets disconnected kicks player if they don\'t have a socket connection after 30 seconds', async (t) => {
+  const { app } = t.context;
+  const { api } = app;
+  const userCredOne = await createUserCred(t);
+  const userOne = await createUserAndAssert(t, api, userCredOne);
+  const game = await createGameAndAssert(t, api, userCredOne, userOne);
+  const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
+  const socket = await createSocketAndWatchRoom(
+    t,
+    app,
+    room,
+    {
+      auth: (cb) => {
+        userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
+          t.context.log({
+            message: 'unable to get auth token',
+            error,
           });
-        },
-        user: userOne,
+        });
       },
-    );
+      user: userOne,
+    },
+  );
 
-    t.context.log(`disconnected socket at: ${new Date().toISOString()}`);
-    socket.disconnect();
+  t.context.log(`disconnected socket at: ${new Date().toISOString()}`);
+  socket.disconnect();
 
-    // user should still be in room right before the disconnectTimeout
-    await sleep(rightBeforeDisconnectTimeoutMs);
-    const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
-    t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
-    t.deepEqual(roomRightBeforeDisconnectTimeout, room);
+  // user should still be in room right before the disconnectTimeout
+  await sleep(rightBeforeDisconnectTimeoutMs);
+  const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
+  t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
+  t.deepEqual(roomRightBeforeDisconnectTimeout, room);
 
-    // user should no longer be in room after disconnectTimeout
-    await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
-    const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
-    t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
-    t.is(roomRightAfterDisconnectTimeout.id, room.id);
-    t.is(roomRightAfterDisconnectTimeout.latestState.version, room.latestState.version + 1);
-    t.is(roomRightAfterDisconnectTimeout.players.length, 0);
-  });
+  // user should no longer be in room after disconnectTimeout
+  await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
+  const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
+  t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
+  t.is(roomRightAfterDisconnectTimeout.id, room.id);
+  t.is(roomRightAfterDisconnectTimeout.latestState.version, room.latestState.version + 1);
+  t.is(roomRightAfterDisconnectTimeout.players.length, 0);
+});
 
-  test(`sockets (${name}) with other players notifies clients of user disconnect timeout`, async (t) => {
-    const { app } = t.context;
-    const {
-      room, userCredOne, userCredTwo, userOne, userTwo,
-    } = await startTicTacToeRoom(t);
-    const createTempSocket = (userCred, user) => createSocketAndWatchRoom(
-      t,
-      app,
-      room,
-      {
-        ...config,
-        auth: (cb) => {
-          userCred.user.getIdToken().then((token) => cb({ token })).catch((error) => {
-            t.context.log({
-              message: 'unable to get auth token',
-              error,
-            });
+test('sockets with other players notifies clients of user disconnect timeout', async (t) => {
+  const { app } = t.context;
+  const {
+    room, userCredOne, userCredTwo, userOne, userTwo,
+  } = await startTicTacToeRoom(t);
+  const createTempSocket = (userCred, user) => createSocketAndWatchRoom(
+    t,
+    app,
+    room,
+    {
+      auth: (cb) => {
+        userCred.user.getIdToken().then((token) => cb({ token })).catch((error) => {
+          t.context.log({
+            message: 'unable to get auth token',
+            error,
           });
-        },
-        user,
+        });
       },
-    );
-    const userOneSocket = await createTempSocket(userCredOne, userOne);
-    const userTwoSocket = await createTempSocket(userCredTwo, userTwo);
-    t.context.log(`disconnected socket at: ${new Date().toISOString()}`);
-    userOneSocket.disconnect();
+      user,
+    },
+  );
+  const userOneSocket = await createTempSocket(userCredOne, userOne);
+  const userTwoSocket = await createTempSocket(userCredTwo, userTwo);
+  t.context.log(`disconnected socket at: ${new Date().toISOString()}`);
+  userOneSocket.disconnect();
 
-    // user should still be in room right before the disconnectTimeout
-    await sleep(rightBeforeDisconnectTimeoutMs);
-    const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
-    t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
-    t.deepEqual(roomRightBeforeDisconnectTimeout, {
-      ...room,
-      game: { ...room.game, activePlayerCount: 1 },
-    });
-
-    // user should no longer be in room after disconnectTimeout
-    await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
-    const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
-    t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
-    t.is(roomRightAfterDisconnectTimeout.id, room.id);
-    t.is(roomRightAfterDisconnectTimeout.latestState.version, room.latestState.version + 1);
-    t.is(roomRightAfterDisconnectTimeout.players.length, 1);
-    await assertNextLatestState(t, userTwoSocket, {
-      finished: false,
-      joinable: true,
-      players: room.players.filter(({ id }) => userOne.id !== id),
-      version: room.latestState.version + 1,
-      roomStartContext: {
-        private: false,
-      },
-      state: {
-        last: {
-          finished: false,
-          joinable: true,
-          players: room.players.filter(({ id }) => userOne.id !== id),
-          roomStartContext: {
-            private: false,
-          },
-          state: room.latestState.state,
-          version: room.latestState.version,
-        },
-        message: `${userOne.username} left!`,
-      },
-    });
+  // user should still be in room right before the disconnectTimeout
+  await sleep(rightBeforeDisconnectTimeoutMs);
+  const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
+  t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
+  t.deepEqual(roomRightBeforeDisconnectTimeout, {
+    ...room,
+    game: { ...room.game, activePlayerCount: 1 },
   });
 
-  test(`sockets (${name}) multiple disconnections kicks player if they don't have a socket connection after 30 seconds`, async (t) => {
-    const { app } = t.context;
-    const { api } = app;
-    const userCredOne = await createUserCred(t);
-    const userOne = await createUserAndAssert(t, api, userCredOne);
-    const game = await createGameAndAssert(t, api, userCredOne, userOne);
-    const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
-    const sockets = await Promise.all([...Array(3).keys()].map(() => createSocketAndWatchRoom(
-      t,
-      app,
-      room,
-      {
-        ...config,
-        auth: (cb) => {
-          userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
-            t.context.log({
-              message: 'unable to get auth token',
-              error,
-            });
+  // user should no longer be in room after disconnectTimeout
+  await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
+  const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
+  t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
+  t.is(roomRightAfterDisconnectTimeout.id, room.id);
+  t.is(roomRightAfterDisconnectTimeout.latestState.version, room.latestState.version + 1);
+  t.is(roomRightAfterDisconnectTimeout.players.length, 1);
+  await assertNextLatestState(t, userTwoSocket, {
+    finished: false,
+    joinable: true,
+    players: room.players.filter(({ id }) => userOne.id !== id),
+    version: room.latestState.version + 1,
+    roomStartContext: {
+      private: false,
+    },
+    state: {
+      last: {
+        finished: false,
+        joinable: true,
+        players: room.players.filter(({ id }) => userOne.id !== id),
+        roomStartContext: {
+          private: false,
+        },
+        state: room.latestState.state,
+        version: room.latestState.version,
+      },
+      message: `${userOne.username} left!`,
+    },
+  });
+});
+
+test('sockets multiple disconnections kicks player if they don\'t have a socket connection after 30 seconds', async (t) => {
+  const { app } = t.context;
+  const { api } = app;
+  const userCredOne = await createUserCred(t);
+  const userOne = await createUserAndAssert(t, api, userCredOne);
+  const game = await createGameAndAssert(t, api, userCredOne, userOne);
+  const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
+  const sockets = await Promise.all([...Array(3).keys()].map(() => createSocketAndWatchRoom(
+    t,
+    app,
+    room,
+    {
+      auth: (cb) => {
+        userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
+          t.context.log({
+            message: 'unable to get auth token',
+            error,
           });
-        },
-        user: userOne,
+        });
       },
-    )));
+      user: userOne,
+    },
+  )));
 
-    t.context.log(`disconnecting sockets at: ${new Date().toISOString()}`);
-    sockets.forEach((socket) => socket.disconnect());
+  t.context.log(`disconnecting sockets at: ${new Date().toISOString()}`);
+  sockets.forEach((socket) => socket.disconnect());
 
-    // user should still be in room right before the disconnectTimeout
-    await sleep(rightBeforeDisconnectTimeoutMs);
-    const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
-    t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
-    t.deepEqual(roomRightBeforeDisconnectTimeout, room);
+  // user should still be in room right before the disconnectTimeout
+  await sleep(rightBeforeDisconnectTimeoutMs);
+  const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
+  t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
+  t.deepEqual(roomRightBeforeDisconnectTimeout, room);
 
-    // user should no longer be in room after disconnectTimeout
-    await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
-    const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
-    t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
-    t.is(roomRightAfterDisconnectTimeout.id, room.id);
-    t.is(roomRightAfterDisconnectTimeout.latestState.version, room.latestState.version + 1);
-    t.is(roomRightAfterDisconnectTimeout.players.length, 0);
-  });
+  // user should no longer be in room after disconnectTimeout
+  await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
+  const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
+  t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
+  t.is(roomRightAfterDisconnectTimeout.id, room.id);
+  t.is(roomRightAfterDisconnectTimeout.latestState.version, room.latestState.version + 1);
+  t.is(roomRightAfterDisconnectTimeout.players.length, 0);
+});
 
-  test(`sockets (${name}) disconnected does not kick player if they have a socket connection after 30 seconds`, async (t) => {
-    const { app } = t.context;
-    const { api } = app;
-    const userCredOne = await createUserCred(t);
-    const userOne = await createUserAndAssert(t, api, userCredOne);
-    const game = await createGameAndAssert(t, api, userCredOne, userOne);
-    const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
-    const createNewSocket = () => createSocketAndWatchRoom(
-      t,
-      app,
-      room,
-      {
-        ...config,
-        auth: (cb) => {
-          userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
-            t.context.log({
-              message: 'unable to get auth token',
-              error,
-            });
+test('sockets disconnected does not kick player if they have a socket connection after 30 seconds', async (t) => {
+  const { app } = t.context;
+  const { api } = app;
+  const userCredOne = await createUserCred(t);
+  const userOne = await createUserAndAssert(t, api, userCredOne);
+  const game = await createGameAndAssert(t, api, userCredOne, userOne);
+  const room = await createRoomAndAssert(t, api, userCredOne, game, userOne);
+  const createNewSocket = () => createSocketAndWatchRoom(
+    t,
+    app,
+    room,
+    {
+      auth: (cb) => {
+        userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
+          t.context.log({
+            message: 'unable to get auth token',
+            error,
           });
-        },
-        user: userOne,
+        });
       },
-    );
-    const socket = await createNewSocket();
-    const roomAfterFirstSocket = await getRoomAndAssert(t, room.id);
+      user: userOne,
+    },
+  );
+  const socket = await createNewSocket();
+  const roomAfterFirstSocket = await getRoomAndAssert(t, room.id);
 
-    t.context.log(`disconnected socket at: ${new Date().toISOString()}`);
-    socket.disconnect();
+  t.context.log(`disconnected socket at: ${new Date().toISOString()}`);
+  socket.disconnect();
 
-    // user should still be in room right before the disconnectTimeout
-    await sleep(rightBeforeDisconnectTimeoutMs);
-    const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
-    t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
-    t.deepEqual(roomRightBeforeDisconnectTimeout, room);
+  // user should still be in room right before the disconnectTimeout
+  await sleep(rightBeforeDisconnectTimeoutMs);
+  const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
+  t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
+  t.deepEqual(roomRightBeforeDisconnectTimeout, room);
 
-    // user reconnects with new socket before timeout
-    await createNewSocket();
+  // user reconnects with new socket before timeout
+  await createNewSocket();
 
-    // user should still in room after disconnectTimeout because we just connected a new socket
-    await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
-    const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
-    t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
-    t.deepEqual(roomRightAfterDisconnectTimeout, roomAfterFirstSocket);
-  });
+  // user should still in room after disconnectTimeout because we just connected a new socket
+  await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
+  const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
+  t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
+  t.deepEqual(roomRightAfterDisconnectTimeout, roomAfterFirstSocket);
+});
 
-  test(`sockets (${name}) disconnected does not kick player if room is private`, async (t) => {
-    const { app } = t.context;
-    const { api } = app;
-    const userCredOne = await createUserCred(t);
-    const userOne = await createUserAndAssert(t, api, userCredOne);
-    const game = await createGameAndAssert(t, api, userCredOne, userOne);
-    const room = await createRoomAndAssert(t, api, userCredOne, game, userOne, true);
-    const socket = await createSocketAndWatchRoom(
-      t,
-      app,
-      room,
-      {
-        ...config,
-        auth: (cb) => {
-          userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
-            t.context.log({
-              message: 'unable to get auth token',
-              error,
-            });
+test('sockets disconnected does not kick player if room is private', async (t) => {
+  const { app } = t.context;
+  const { api } = app;
+  const userCredOne = await createUserCred(t);
+  const userOne = await createUserAndAssert(t, api, userCredOne);
+  const game = await createGameAndAssert(t, api, userCredOne, userOne);
+  const room = await createRoomAndAssert(t, api, userCredOne, game, userOne, true);
+  const socket = await createSocketAndWatchRoom(
+    t,
+    app,
+    room,
+    {
+      auth: (cb) => {
+        userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
+          t.context.log({
+            message: 'unable to get auth token',
+            error,
           });
-        },
-        user: userOne,
+        });
       },
-    );
+      user: userOne,
+    },
+  );
 
-    t.context.log(`disconnected socket at: ${new Date().toISOString()}`);
-    socket.disconnect();
+  t.context.log(`disconnected socket at: ${new Date().toISOString()}`);
+  socket.disconnect();
 
-    // user should still be in room right before the disconnectTimeout
-    await sleep(rightBeforeDisconnectTimeoutMs);
-    const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
-    t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
-    t.deepEqual(roomRightBeforeDisconnectTimeout, room);
+  // user should still be in room right before the disconnectTimeout
+  await sleep(rightBeforeDisconnectTimeoutMs);
+  const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
+  t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
+  t.deepEqual(roomRightBeforeDisconnectTimeout, room);
 
-    // user should no longer be in room after disconnectTimeout
-    await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
-    const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
-    t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
-    t.deepEqual(roomRightAfterDisconnectTimeout, room);
-  });
+  // user should no longer be in room after disconnectTimeout
+  await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
+  const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
+  t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
+  t.deepEqual(roomRightAfterDisconnectTimeout, room);
+});
 
-  test(`sockets (${name}) disconnected does not kick player if room is finished`, async (t) => {
-    const { app } = t.context;
-    const { api } = app;
-    const {
-      userCredOne, userOne, userCredTwo, room,
-    } = await startTicTacToeRoom(t);
+test('sockets disconnected does not kick player if room is finished', async (t) => {
+  const { app } = t.context;
+  const { api } = app;
+  const {
+    userCredOne, userOne, userCredTwo, room,
+  } = await startTicTacToeRoom(t);
 
-    // force room to be in finished state using test-app backend implementation
-    await api.post(`/room/${room.id}/move`, { finished: true },
-      { headers: { authorization: await userCredTwo.user.getIdToken() } });
-    const roomAfterQuit = await getRoomAndAssert(t, room.id);
+  // force room to be in finished state using test-app backend implementation
+  await api.post(`/room/${room.id}/move`, { finished: true },
+    { headers: { authorization: await userCredTwo.user.getIdToken() } });
+  const roomAfterQuit = await getRoomAndAssert(t, room.id);
 
-    const socket = await createSocketAndWatchRoom(
-      t,
-      app,
-      room,
-      {
-        ...config,
-        auth: (cb) => {
-          userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
-            t.context.log({
-              message: 'unable to get auth token',
-              error,
-            });
+  const socket = await createSocketAndWatchRoom(
+    t,
+    app,
+    room,
+    {
+      auth: (cb) => {
+        userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
+          t.context.log({
+            message: 'unable to get auth token',
+            error,
           });
-        },
-        user: userOne,
+        });
       },
-    );
-    t.context.log(`disconnected socket at: ${new Date().toISOString()}`);
-    socket.disconnect();
+      user: userOne,
+    },
+  );
+  t.context.log(`disconnected socket at: ${new Date().toISOString()}`);
+  socket.disconnect();
 
-    // user should still be in room right before the disconnectTimeout
-    await sleep(rightBeforeDisconnectTimeoutMs);
-    const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
-    t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
-    t.deepEqual(roomRightBeforeDisconnectTimeout, roomAfterQuit);
+  // user should still be in room right before the disconnectTimeout
+  await sleep(rightBeforeDisconnectTimeoutMs);
+  const roomRightBeforeDisconnectTimeout = await getRoomAndAssert(t, room.id);
+  t.context.log(`checking room right before disconnect timeout: ${new Date().toISOString()}`, roomRightBeforeDisconnectTimeout);
+  t.deepEqual(roomRightBeforeDisconnectTimeout, roomAfterQuit);
 
-    // user should no longer be in room after disconnectTimeout
-    await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
-    const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
-    t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
-    t.deepEqual(roomRightAfterDisconnectTimeout, roomAfterQuit);
-  });
+  // user should no longer be in room after disconnectTimeout
+  await sleep(timeBetweenRightBeforeAndRightAfterDisconnectTimeoutMs);
+  const roomRightAfterDisconnectTimeout = await getRoomAndAssert(t, room.id);
+  t.context.log(`checking room right after disconnect timeout: ${new Date().toISOString()}`, roomRightAfterDisconnectTimeout);
+  t.deepEqual(roomRightAfterDisconnectTimeout, roomAfterQuit);
 });
