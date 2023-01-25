@@ -324,7 +324,6 @@ test('sockets that emit watchRoom with a room id cannot watch another room', asy
     app,
     room,
     {
-
       auth: (cb) => {
         userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
           t.context.log({
@@ -502,7 +501,6 @@ test('sockets get properly disconnected when server is terminating', async (t) =
     t,
     testApp,
     {
-
       auth: (cb) => {
         userCredOne.user.getIdToken().then((token) => cb({ token })).catch((error) => {
           t.context.log({
