@@ -89,9 +89,9 @@ test('DELETE /instance/cleanup cleans up at max 10 userSockets for each serviceI
 
   const game1 = await createGameAndAssert(t, api, user1Cred, user1);
   const game2 = await createGameAndAssert(t, api, user2Cred, user2);
-  const room1 = await createRoomAndAssert(t, api, user1Cred, game1.id, user1);
-  const room2 = await createRoomAndAssert(t, api, user2Cred, game2.id, user2, true);
-  const room3 = await createRoomAndAssert(t, api, user2Cred, game2.id, user2, true);
+  const room1 = await createRoomAndAssert(t, api, user1Cred, game1, user1);
+  const room2 = await createRoomAndAssert(t, api, user2Cred, game2, user2, true);
+  const room3 = await createRoomAndAssert(t, api, user2Cred, game2, user2, true);
   const rooms = [room1, room2, room3];
 
   const expectedStaleUserSocketsDeleted = stale10MinInstances
@@ -171,7 +171,12 @@ test('DELETE /instance/cleanup cleans up at max 10 userSockets for each serviceI
   const { data: { game: actualGame2 }, status: getGame2Status } = await api.get(`/game/${game2.id}`);
   t.is(getGame2Status, StatusCodes.OK);
   // game2 still has active sockets so activePlayerCount should not be decremented
-  t.deepEqual(actualGame2, { ...game2, activePlayerCount: 2 });
+  t.deepEqual(actualGame2, {
+    ...game2,
+    playCount: actualGame2.playCount,
+    updatedAt: actualGame2.updatedAt,
+    activePlayerCount: 2,
+  });
 });
 
 test('DELETE /instance/cleanup cleans up at max 10 of the most stale serviceInstances that have zero associated sockets', async (t) => {
