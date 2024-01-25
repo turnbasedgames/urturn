@@ -37,7 +37,8 @@ module.exports = {
         socket.data.decodedToken = decodedToken;
         /* eslint-enable no-param-reassign */
       },
-      next, // directly pass the error as socketio will not allow the connection when this happens
+      // directly pass the error as socketio will not allow the connection when this happens
+      next,
       next,
     );
   },
